@@ -1,0 +1,305 @@
+{
+    "admin": {
+        "dashboard": "Bảng điều khiển",
+        "overview": "Tổng quan",
+        "management": "Quản lý",
+        "sidebar": {
+            "analytics": "Phân tích",
+            "booking": "Đặt lịch",
+            "products": "Sản phẩm",
+            "blogs": "Bài viết",
+            "roles": "Nhóm quyền",
+            "coupons": "Mã giảm giá",
+            "list": "Danh sách",
+            "create": "Tạo mới",
+            "brand": "Thương hiệu",
+            "category": "Danh mục",
+            "attribute": "Thuộc tính",
+            "tags": "Tags",
+            "age-ranges": "Độ tuổi",
+            "product_create": "Tạo sản phẩm",
+            "product_edit": "Sửa sản phẩm",
+            "category_create": "Tạo danh mục",
+            "brand_create": "Tạo thương hiệu",
+            "blog_create": "Tạo bài viết",
+            "blog_list": "Danh sách bài viết",
+            "blog_category": "Danh mục bài viết",
+            "blog_category_create": "Tạo danh mục bài viết",
+            "role_create": "Tạo nhóm quyền",
+            "role_list": "Danh sách nhóm quyền",
+            "coupon_create": "Tạo mã giảm giá",
+            "coupon_list": "Danh sách mã giảm giá"
+        },
+        "common": {
+            "add": "Thêm",
+            "create": "Tạo mới",
+            "update": "Cập nhật",
+            "edit": "Chỉnh sửa",
+            "delete": "Xóa",
+            "cancel": "Hủy",
+            "save": "Lưu",
+            "apply": "Áp dụng",
+            "search": "Tìm kiếm...",
+            "filter": "Bộ lọc",
+            "status": "Trạng thái",
+            "action": "Hành động",
+            "success": "Thành công",
+            "error": "Có lỗi xảy ra",
+            "confirm_delete": "Bạn có chắc chắn muốn xóa mục này?",
+            "confirm_delete_item": "Bạn có chắc chắn muốn xóa {{item}} này?",
+            "no_data": "Chưa có dữ liệu",
+            "loading": "Đang tải...",
+            "processing": "Đang xử lý...",
+            "close": "Đóng",
+            "details": "Chi tiết",
+            "attributes": "Thuộc tính",
+            "title": "Tiêu đề",
+            "description": "Mô tả",
+            "image": "Hình ảnh",
+            "name": "Tên",
+            "upload_image": "Tải ảnh lên",
+            "select": "Chọn",
+            "position": "Vị trí",
+            "views": "Lượt xem",
+            "created_at": "Ngày tạo",
+            "list": "Danh sách",
+            "actions": "Hành động",
+            "columns": "Cột",
+            "filters": "Bộ lọc",
+            "export": "Xuất file",
+            "settings": "Cài đặt",
+            "sort_by": "Sắp xếp theo:",
+            "sort_options": {
+                "latest": "Mới nhất",
+                "oldest": "Cũ nhất",
+                "popular": "Phổ biến"
+            },
+            "tabs": {
+                "all": "Tất cả",
+                "published": "Xuất bản",
+                "draft": "Bản nháp",
+                "archived": "Đã lưu trữ"
+            }
+        },
+        "datagrid": {
+            "noRowsLabel": "Không có dữ liệu",
+            "noResultsOverlayLabel": "Không tìm thấy kết quả.",
+            "errorOverlayDefaultLabel": "Có lỗi xảy ra.",
+            "toolbarDensity": "Độ giãn",
+            "toolbarDensityLabel": "Độ giãn",
+            "toolbarDensityCompact": "Trung bình",
+            "toolbarDensityStandard": "Tiêu chuẩn",
+            "toolbarDensityComfortable": "Rộng",
+            "toolbarColumns": "Cột",
+            "toolbarFilters": "Bộ lọc",
+            "toolbarExport": "Xuất",
+            "toolbarExportLabel": "Xuất",
+            "toolbarExportCSV": "Tải xuống CSV",
+            "toolbarExportPrint": "In",
+            "columnsPanelTextFieldLabel": "Tìm kiếm cột",
+            "columnsPanelTextFieldPlaceholder": "Tiêu đề cột",
+            "columnsPanelDragIconLabel": "Sắp xếp lại cột",
+            "columnsPanelShowAllButton": "Hiện tất cả",
+            "columnsPanelHideAllButton": "Ẩn tất cả",
+            "filterPanelAddFilter": "Thêm bộ lọc",
+            "filterPanelDeleteIconLabel": "Xóa",
+            "filterPanelLinkOperator": "Toán tử logic",
+            "filterPanelOperators": "Toán tử",
+            "filterPanelOperatorAnd": "Và",
+            "filterPanelOperatorOr": "Hoặc",
+            "filterPanelColumns": "Cột",
+            "filterPanelInputLabel": "Giá trị",
+            "filterPanelInputPlaceholder": "Nhập giá trị",
+            "filterOperatorContains": "chứa",
+            "filterOperatorEquals": "bằng",
+            "filterOperatorStartsWith": "bắt đầu bằng",
+            "filterOperatorEndsWith": "kết thúc bằng",
+            "filterOperatorIsEmpty": "rỗng",
+            "filterOperatorIsNotEmpty": "không rỗng",
+            "filterOperatorIsAnyOf": "là một trong",
+            "columnMenuLabel": "Menu",
+            "columnMenuShowColumns": "Hiện cột",
+            "columnMenuFilter": "Lọc",
+            "columnMenuHideColumn": "Ẩn",
+            "columnMenuUnsort": "Bỏ sắp xếp",
+            "columnMenuSortAsc": "Sắp xếp tăng dần",
+            "columnMenuSortDesc": "Sắp xếp giảm dần",
+            "columnHeaderSortIconLabel": "Sắp xếp",
+            "footerRowSelected": "{{count}} hàng đã chọn",
+            "footerTotalRows": "Tổng số hàng:",
+            "footerTotalVisibleRows": "{{from}}-{{to}} của {{count}}",
+            "paginationRowsPerPage": "Số hàng mỗi trang:",
+            "paginationDisplayedRows": "của"
+        },
+        "upload": {
+            "title": "Hình ảnh",
+            "drag_drop": "Kéo thả hoặc chọn tệp",
+            "drag_text": "Kéo tệp vào đây, hoặc",
+            "select_file": "chọn tệp",
+            "browse_computer": "từ thiết bị của bạn",
+            "remove_all": "Xóa tất cả",
+            "upload": "Tải lên",
+            "uploading": "Đang tải...",
+            "success": "Tải ảnh lên thành công!",
+            "error": "Tải ảnh lên thất bại!",
+            "validation_min_1": "Vui lòng chọn ít nhất một hình ảnh!",
+            "validation_min_2": "Vui lòng chọn tối thiểu 2 hình ảnh!"
+        },
+        "validation": {
+            "required": "Trường này là bắt buộc",
+            "select_image": "Vui lòng chọn hình ảnh",
+            "category_name_required": "Tên danh mục không được để trống",
+            "create_success": "Tạo mới thành công",
+            "create_failed": "Tạo mới thất bại",
+            "update_success": "Cập nhật thành công",
+            "update_failed": "Cập nhật thất bại"
+        },
+        "product_category": {
+            "title": {
+                "list": "Danh mục sản phẩm",
+                "create": "Tạo mới danh mục sản phẩm",
+                "edit": "Chỉnh sửa danh mục sản phẩm"
+            },
+            "fields": {
+                "name": "Tên danh mục",
+                "parent": "Danh mục cha",
+                "description_placeholder": "Tiêu đề, mô tả, hình ảnh..."
+            }
+        },
+        "tiptap": {
+            "content_label": "Nội dung",
+            "placeholder": "Hãy viết điều gì đó tuyệt vời...",
+            "heading": {
+                "paragraph": "Đoạn văn",
+                "h1": "Tiêu đề 1",
+                "h2": "Tiêu đề 2",
+                "h3": "Tiêu đề 3",
+                "h4": "Tiêu đề 4",
+                "h5": "Tiêu đề 5",
+                "h6": "Tiêu đề 6"
+            },
+            "toolbar": {
+                "bold": "In đậm (Ctrl + B)",
+                "italic": "In nghiêng (Ctrl + I)",
+                "underline": "Gạch chân (Ctrl + U)",
+                "strike": "Gạch ngang",
+                "align_left": "Căn trái",
+                "align_center": "Căn giữa",
+                "align_right": "Căn phải",
+                "align_justify": "Căn đều",
+                "insert_link": "Chèn liên kết",
+                "remove_link": "Gỡ liên kết",
+                "insert_image": "Chèn hình ảnh",
+                "hard_break": "Xuống dòng cứng (Shift + Enter)",
+                "clear_format": "Xoá định dạng",
+                "fullscreen": "Toàn màn hình",
+                "exit_fullscreen": "Thoát toàn màn hình (Esc)"
+            },
+            "link_dialog": {
+                "title": "Đường dẫn",
+                "placeholder": "Nhập đường dẫn"
+            },
+            "image_dialog": {
+                "title": "Thêm hình ảnh",
+                "url_placeholder": "Đường dẫn ảnh",
+                "alt_placeholder": "Mô tả"
+            }
+        },
+        "product": {
+            "title": {
+                "list": "Danh sách sản phẩm",
+                "create": "Tạo mới sản phẩm",
+                "edit": "Chỉnh sửa sản phẩm"
+            },
+            "fields": {
+                "name": "Tên sản phẩm",
+                "short_desc": "Mô tả ngắn",
+                "sku": "Mã sản phẩm (SKU)",
+                "status": "Trạng thái",
+                "position": "Vị trí",
+                "category": "Danh mục",
+                "brand": "Thương hiệu",
+                "price": "Giá",
+                "stock": "Tồn kho",
+                "sale_price": "Giá khuyến mãi",
+                "tags": "Thẻ",
+                "tags_placeholder": "+ Thẻ",
+                "select_category": "Chọn danh mục",
+                "name_placeholder": "Nhập tên sản phẩm...",
+                "short_desc_placeholder": "Nhập mô tả ngắn...",
+                "title_seo": "Tiêu đề SEO",
+                "desc_seo": "Mô tả SEO",
+                "keyword_seo": "Từ khóa SEO"
+            },
+            "toolbar": {
+                "status": "Trạng thái",
+                "stock": "Tình trạng kho"
+            },
+            "stock_status": {
+                "out_of_stock": "Hết hàng",
+                "low_stock": "Sắp hết hàng",
+                "in_stock": "Còn hàng"
+            },
+            "status": {
+                "draft": "Bản nháp",
+                "active": "Hoạt động",
+                "inactive": "Tạm dừng"
+            },
+            "tags": {
+                "title": "Quản lý tags sản phẩm",
+                "add_placeholder": "Nhập tên tag...",
+                "no_tags": "Chưa có thẻ tag nào",
+                "create_success": "Tạo thẻ tag thành công",
+                "create_error": "Tạo tag thất bại",
+                "delete_success": "Xóa tag thành công",
+                "delete_error": "Xóa tag thất bại",
+                "delete_confirm": "Bạn có chắc chắn muốn xóa tag này?"
+            },
+            "age_range": {
+                "title": "Quản lý độ tuổi",
+                "add_new": "Thêm độ tuổi",
+                "create_title": "Thêm độ tuổi mới",
+                "edit_title": "Cập nhật độ tuổi",
+                "fields": {
+                    "name_label": "Tên độ tuổi (VD: 6 tháng)",
+                    "desc_label": "Mô tả"
+                },
+                "no_data": "Chưa có dữ liệu độ tuổi",
+                "create_success": "Tạo mới thành công",
+                "update_success": "Cập nhật thành công",
+                "delete_success": "Xóa thành công"
+            }
+        },
+        "blog": {
+            "title": {
+                "list": "Danh sách bài viết",
+                "create": "Tạo mới bài viết",
+                "edit": "Chỉnh sửa bài viết",
+                "category_list": "Danh mục bài viết",
+                "category_create": "Tạo danh mục bài viết",
+                "category_edit": "Chỉnh sửa danh mục bài viết"
+            },
+            "fields": {
+                "title": "Tiêu đề bài viết",
+                "excerpt": "Mô tả ngắn",
+                "content": "Nội dung",
+                "category": "Danh mục bài viết",
+                "select_category": "Chọn danh mục",
+                "status": "Trạng thái",
+                "meta_title": "Tiêu đề SEO",
+                "meta_desc": "Mô tả SEO",
+                "tags": "Tags",
+                "tags_placeholder": "+ Tags"
+            },
+            "status": {
+                "draft": "Bản nháp",
+                "published": "Xuất bản",
+                "archived": "Đã lưu trữ"
+            },
+            "tags": {
+                "title": "Quản lý tags bài viết",
+                "no_tags": "Chưa có thẻ tag nào"
+            }
+        }
+    }
+}
