@@ -79,18 +79,18 @@ export const MainHeader = () => {
                                                     className="absolute left-[-7px] top-[-7px] text-[1.2rem] bg-[#10293726] text-client-secondary hover:bg-client-primary hover:text-white transition-default w-[20px] h-[20px] rounded-full flex items-center justify-center">
                                                     x
                                                 </div>
-                                                <Link to={`/product/detail/${item.detail.slug}`} className="inline-block w-[80px] h-[80px] mr-[20px]">
-                                                    <img src={item.detail.images[0]} width={80} height={80} alt="" className="w-full h-full object-cover rounded-[10px]" />
+                                                <Link to={`/product/detail/${item.detail?.slug || "#"}`} className="inline-block w-[80px] h-[80px] mr-[20px]">
+                                                    <img src={item.detail?.images?.[0] || ""} width={80} height={80} alt="" className="w-full h-full object-cover rounded-[10px]" />
                                                 </Link>
                                                 <div>
-                                                    <h3 className="text-client-secondary hover:text-client-text transition-default font-secondary text-[1.8rem] mb-[3px] line-clamp-1">{item.detail.name}</h3>
+                                                    <h3 className="text-client-secondary hover:text-client-text transition-default font-secondary text-[1.8rem] mb-[3px] line-clamp-1">{item.detail?.name || "Sản phẩm không xác định"}</h3>
                                                     {item.variant && item.variant.length > 0 && (
                                                         <div className="text-client-text text-[1.4rem] font-[400] mb-[5px]">
                                                             <span className="text-client-secondary font-secondary mr-[2px]">Phân loại:</span>
                                                             {item.variant.map(v => v.label).join(", ")}
                                                         </div>
                                                     )}
-                                                    <div className="text-client-text text-[1.4rem]">{item.quantity} x {item.detail.priceNew.toLocaleString()}đ</div>
+                                                    <div className="text-client-text text-[1.4rem]">{item.quantity} x {(item.detail?.priceNew || 0).toLocaleString()}đ</div>
                                                 </div>
                                             </li>
                                         ))}

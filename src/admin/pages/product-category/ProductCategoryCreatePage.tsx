@@ -7,7 +7,6 @@ import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
 import { useCreateProductCategory, useNestedProductCategories } from "./hooks/useProductCategory";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
-import { createCategorySchema, CreateCategoryFormValues } from "../../schemas/product-category.schema";
 import { SwitchButton } from "../../components/ui/SwitchButton";
 import { getProductCategoryTheme } from "./configs/theme";
 import { prefixAdmin } from "../../constants/routes";
@@ -42,7 +41,7 @@ export const ProductCategoryCreatePage = () => {
         control,
         handleSubmit,
         reset
-    } = useForm<CreateCategoryFormValues>({
+    } = useForm<any>({
         resolver: zodResolver(createCategorySchema),
         defaultValues: {
             name: "",
@@ -61,7 +60,7 @@ export const ProductCategoryCreatePage = () => {
     // Tạo
     const { mutate: create, isPending } = useCreateProductCategory();
 
-    const onSubmit = (data: CreateCategoryFormValues) => {
+    const onSubmit = (data: any) => {
         create(data, {
             onSuccess: (response) => {
                 if (response.success) {

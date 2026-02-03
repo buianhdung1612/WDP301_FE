@@ -15,6 +15,7 @@ interface Option {
 interface SelectMultiProps {
     label: string;
     options: Option[];
+    sx?: any;
 }
 
 // CSS
@@ -67,7 +68,7 @@ const CHECKBOX_STYLE = {
     marginRight: "4px",
 }
 
-export const SelectMulti = memo(({ label, options }: SelectMultiProps) => {
+export const SelectMulti = memo(({ label, options, sx }: SelectMultiProps) => {
     const { t } = useTranslation();
     const [selectedValues, setSelectedValues] = useState<string[]>([]);
 
@@ -93,7 +94,7 @@ export const SelectMulti = memo(({ label, options }: SelectMultiProps) => {
 
     return (
         <FormControl
-            sx={FORM_CONTROL_STYLE}
+            sx={{ ...FORM_CONTROL_STYLE, ...sx }}
         >
             <InputLabel
                 id="demo-simple-select-label"

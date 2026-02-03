@@ -211,13 +211,13 @@ export const useCartStore = create<CartState>()(
                     },
 
                     totalAmount: () =>
-                        get().items.reduce((sum, item) => {
-                            if (!item.checked) return sum;
+                        (get().items || []).reduce((sum, item) => {
+                            if (!item || !item.checked || !item.detail) return sum;
                             return sum + (item.detail.priceNew || 0) * item.quantity;
                         }, 0),
 
                     totalItems: () =>
-                        get().items.reduce((sum, item) => sum + item.quantity, 0),
+                        (get().items || []).reduce((sum, item) => sum + (item?.quantity || 0), 0),
 
                     set: set
                 }),

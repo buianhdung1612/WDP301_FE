@@ -3,8 +3,10 @@ import DataExplorationIcon from '@mui/icons-material/DataExploration';
 import ScheduleSendIcon from '@mui/icons-material/ScheduleSend';
 import ExtensionIcon from '@mui/icons-material/Extension';
 import ArticleIcon from '@mui/icons-material/Article';
-import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import DiscountIcon from '@mui/icons-material/Discount';
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import PeopleIcon from '@mui/icons-material/People';
+import SecurityIcon from '@mui/icons-material/Security';
 
 export const menuOverviewData = [
     {
@@ -41,6 +43,16 @@ export const menuManagementData = [
         ]
     },
     {
+        id: "services",
+        label: "Dịch vụ",
+        Icon: MedicalServicesIcon,
+        children: [
+            { id: "create", label: "Tạo dịch vụ", path: `/${prefixAdmin}/service/create` },
+            { id: "list", label: "Danh sách dịch vụ", path: `/${prefixAdmin}/service/list` },
+            { id: "category", label: "Danh mục dịch vụ", path: `/${prefixAdmin}/service/categories` },
+        ]
+    },
+    {
         id: "blogs",
         label: "Bài viết",
         tKey: "admin.sidebar.blogs",
@@ -57,10 +69,20 @@ export const menuManagementData = [
         id: "roles",
         label: "Nhóm quyền",
         tKey: "admin.sidebar.roles",
-        Icon: ManageAccountsIcon,
+        Icon: SecurityIcon,
         children: [
-            { id: "create", label: "Tạo nhóm quyền", tKey: "admin.sidebar.role_create", path: `/${prefixAdmin}/role/create` },
-            { id: "list", label: "Danh sách nhóm quyền", tKey: "admin.sidebar.role_list", path: `/${prefixAdmin}/role/list` },
+            { id: "list", label: "Danh sách", tKey: "admin.sidebar.role_list", path: `/${prefixAdmin}/role/list` },
+            { id: "create", label: "Tạo mới", tKey: "admin.sidebar.role_create", path: `/${prefixAdmin}/role/create` },
+        ]
+    },
+    {
+        id: "accounts",
+        label: "Tài khoản admin",
+        tKey: "admin.sidebar.accounts",
+        Icon: PeopleIcon,
+        children: [
+            { id: "list", label: "Danh sách", tKey: "admin.sidebar.account_list", path: `/${prefixAdmin}/account-admin/list` },
+            { id: "create", label: "Tạo mới", tKey: "admin.sidebar.account_create", path: `/${prefixAdmin}/account-admin/create` },
         ]
     },
     {

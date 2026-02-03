@@ -1,49 +1,64 @@
 import { FooterSub } from "../../components/layouts/FooterSub";
 import EditLocationAltIcon from "@mui/icons-material/EditLocationAlt";
 import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import PhoneEnabledOutlinedIcon from '@mui/icons-material/PhoneEnabledOutlined';
 import MailOutlineOutlinedIcon from '@mui/icons-material/MailOutlineOutlined';
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { motion } from "framer-motion";
+import { Check, Clock, Scissors, Bath, Sparkles, Info, Calendar } from "lucide-react";
+import dayjs from "dayjs";
+import { toast } from "react-toastify";
+import { useServices } from "../../hooks/useService";
+
+// Icon mapping based on service name or category
+const getServiceIcon = (name: string) => {
+    const n = name.toLowerCase();
+    if (n.includes("tắm")) return <Bath className="w-5 h-5" />;
+    if (n.includes("tỉa") || n.includes("grooming")) return <Scissors className="w-5 h-5" />;
+    return <Sparkles className="w-5 h-5" />;
+};
+
+// Color mapping for variety
+const COLORS = ["#afe2e5", "#cfecbc", "#ffbaa0", "#d0bfff", "#fff4b3", "#ffd1dc"];
+
+const TIME_SLOTS = [
+    "08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"
+];
 
 export const BookingPage = () => {
-    const [isOpenTime, setIsOpenTime] = useState(false);
-    const [isOpenService, setIsOpenService] = useState(false);
-    const [selectedTime, setSelectedTime] = useState("8:00");
-    const [selectedService, setSelectedService] = useState("Chọn dịch vụ");
+    const { data: allServices = [], isLoading } = useServices();
 
-    const times = [
-        "8:00",
-        "9:00",
-        "10:00",
-        "11:00",
-        "12:00",
-        "13:00",
-        "14:00",
-        "15:00",
-        "16:00",
-        "17:00",
-    ];
+    // Filter for individual services (STANDALONE or BOTH)
+    const services = useMemo(() => {
+        return allServices.filter((s: any) => {
+            const bookingType = s.categoryId?.bookingTypes;
+            // If category is missing, we still might want to show it as standalone by default
+            return !bookingType || bookingType === "STANDALONE" || bookingType === "BOTH";
+        }).map((s: any, index: number) => ({
+            id: s._id,
+            name: s.name,
+            price: s.basePrice || (s.priceList && s.priceList[0]?.value) || 0,
+            icon: getServiceIcon(s.name),
+            color: COLORS[index % COLORS.length]
+        }));
+    }, [allServices]);
 
-    const services = [
-        "Khách sạn cho chó",
-        "Khách sạn cho mèo",
-        "Spa & Chăm sóc thú cưng",
-    ];
+    const [selectedService, setSelectedService] = useState<string | null>(null);
+    const [selectedTime, setSelectedTime] = useState<string | null>(null);
+    const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
 
-    const handleSelectTime = (time: string) => {
-        setSelectedTime(time);
-        setIsOpenTime(false);
-    };
-
-    const handleSelectService = (service: string) => {
-        setSelectedService(service);
-        setIsOpenService(false);
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedService || !selectedTime) {
+            toast.error("Vui lòng chọn đầy đủ dịch vụ và thời gian!");
+            return;
+        }
+        toast.success("Yêu cầu đặt lịch của bạn đã được nhận! Chúng tôi sẽ gọi xác nhận sớm.");
     };
 
     return (
-        <>
+        <div className="bg-[#fcfcfc]">
+            {/* --- HERO SECTION (Restored to Original) --- */}
             <div className="relative">
                 <div className="app-container flex py-[100px] bg-white">
                     <div className="px-[20px] w-[42%] z-[10]">
@@ -62,229 +77,232 @@ export const BookingPage = () => {
                 <img
                     className="absolute right-[0%] max-w-[58%] top-[-20%] 2xl:top-[-17%]"
                     src="https://pawsitive.bold-themes.com/coco/wp-content/uploads/sites/3/2019/08/hero_image_13-1.png"
-                    alt=""
+                    alt="Pawsitive Mascot"
                 />
             </div>
 
-            <div className="app-container flex py-[100px]">
-                <div className="w-[50%] px-[30px]">
-                    <h2 className="text-[4.7rem] font-third text-[#181818] mb-[64px]">
+            {/* --- BOOKING & CONTACT SECTION --- */}
+            <div className="app-container flex py-[80px] flex-col lg:flex-row gap-[40px]">
+                {/* Left Side: Contact Info (Original Style) */}
+                <div className="w-full lg:w-[45%] px-[20px]">
+                    <h2 className="text-[4rem] font-third text-[#181818] mb-[50px]">
                         Liên hệ chúng tôi
                     </h2>
 
-                    <div className="flex gap-[16px] mb-[32px] group">
-                        <div className="w-[45px] h-[45px] text-[#181818] flex items-center justify-center shadow-[0_0_72px_#afe2e5_inset] group-hover:shadow-[0_0_4px_#afe2e5_inset] transition-all duration-200 ease rounded-full">
-                            <EditLocationAltIcon style={{ fontSize: "2.8rem" }} />
-                        </div>
-                        <div>
-                            <div className="text-[2rem] font-[700] mb-[10px] group-hover:text-[#ffbaa0] cursor-pointer transition-default">
-                                Địa điểm
+                    <div className="space-y-[40px]">
+                        <div className="flex gap-[16px] group">
+                            <div className="w-[50px] h-[50px] text-[#181818] flex items-center justify-center shadow-[0_0_72px_#afe2e5_inset] rounded-full shrink-0 group-hover:scale-110 transition-transform">
+                                <EditLocationAltIcon style={{ fontSize: "2.4rem" }} />
                             </div>
-                            <p>64 Ung Văn Khiêm, Pleiku, Gia Lai</p>
+                            <div>
+                                <div className="text-[2rem] font-[700] mb-[5px] group-hover:text-client-secondary transition-colors">Địa điểm</div>
+                                <p className="text-[1.6rem] text-[#505050]">64 Ung Văn Khiêm, Pleiku, Gia Lai</p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-[16px] group">
+                            <div className="w-[50px] h-[50px] text-[#181818] flex items-center justify-center shadow-[0_0_72px_#cfecbc_inset] rounded-full shrink-0 group-hover:scale-110 transition-transform">
+                                <EditLocationAltIcon style={{ fontSize: "2.4rem" }} />
+                            </div>
+                            <div>
+                                <div className="text-[2rem] font-[700] mb-[5px] group-hover:text-client-secondary transition-colors">Thời gian</div>
+                                <p className="text-[1.6rem] text-[#505050]">7:00 AM - 6:00 PM (Thứ 2 - Chủ Nhật)</p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-[16px] group">
+                            <div className="w-[50px] h-[50px] text-[#181818] flex items-center justify-center shadow-[0_0_72px_#ffbaa0_inset] rounded-full shrink-0 group-hover:scale-110 transition-transform">
+                                <RocketLaunchIcon style={{ fontSize: "2.4rem" }} />
+                            </div>
+                            <div>
+                                <div className="text-[2rem] font-[700] mb-[5px] group-hover:text-client-secondary transition-colors">Dịch vụ Spa</div>
+                                <p className="text-[1.6rem] text-[#505050]">Cắt tỉa, tắm rửa và làm đẹp theo phong cách quốc tế.</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex gap-[16px] mb-[32px] group">
-                        <div className="w-[45px] h-[45px] text-[#181818] flex items-center justify-center shadow-[0_0_72px_#cfecbc_inset] group-hover:shadow-[0_0_4px_#cfecbc_inset] transition-all duration-200 ease rounded-full">
-                            <EditLocationAltIcon style={{ fontSize: "2.8rem" }} />
-                        </div>
-                        <div>
-                            <div className="text-[2rem] font-[700] mb-[10px] group-hover:text-[#ffbaa0] cursor-pointer transition-default">
-                                Thời gian
-                            </div>
-                            <p>Thứ 2 - Thứ 7: 7:00 sáng - 4:00 chiều</p>
-                        </div>
-                    </div>
-
-                    <div className="flex gap-[16px] mb-[32px] group">
-                        <div className="w-[45px] h-[45px] text-[#181818] flex items-center justify-center shadow-[0_0_72px_#ffbaa0_inset] group-hover:shadow-[0_0_4px_#ffbaa0_inset] transition-all duration-300 ease rounded-full">
-                            <RocketLaunchIcon style={{ fontSize: "2.8rem" }} />
-                        </div>
-                        <div>
-                            <div className="text-[2rem] font-[700] mb-[10px] group-hover:text-[#ffbaa0] cursor-pointer transition-default">
-                                Chăm sóc di động
-                            </div>
-                            <p>
-                                Bạn có thể theo dõi thú cưng của mình qua camera ngay trên điện
-                                thoại.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="w-[335px] h-[190px]">
-                        <img src="https://pawsitive.bold-themes.com/coco/wp-content/uploads/sites/3/2019/07/text_04.png" alt="" width={335} height={190} className="image-phone-booking cursor-pointer" />
+                    <div className="mt-[60px] hidden md:block">
+                        <img src="https://pawsitive.bold-themes.com/coco/wp-content/uploads/sites/3/2019/07/text_04.png" alt="" width={330} />
                     </div>
                 </div>
 
-                <div className="w-[50%] px-[30px] py-[50px]">
-                    <form className="p-[40px] bg-[#e67e2026] rounded-[50px] w-[580px]">
-                        <input
-                            type="text"
-                            placeholder="Họ và tên"
-                            name="fullname"
-                            className="w-full mb-[30px] py-[16px] text-[#181818] outline-none px-[24px] border border-[#181818] focus:border-[#ffbaa0] transition-colors duration-500 rounded-[50px]"
-                        />
+                {/* Right Side: Enhanced Booking Form (Same Frame) */}
+                <div className="w-full lg:w-[55%] px-[20px]">
+                    <form onSubmit={handleSubmit} className="p-[35px] md:p-[45px] bg-[#e67e2015] border border-[#e67e2030] rounded-[50px] shadow-sm">
+                        <h3 className="text-[3rem] font-third text-[#181818] mb-[35px] text-center">Đặt lịch ngay</h3>
 
-                        <div className="flex justify-between">
+                        <div className="space-y-[25px]">
+                            {/* Personal Info */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[15px]">
+                                <input
+                                    type="text"
+                                    placeholder="Họ và tên"
+                                    required
+                                    className="w-full py-[14px] px-[24px] border border-[#18181820] rounded-[50px] outline-none focus:border-client-secondary bg-white text-[1.5rem]"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Số điện thoại"
+                                    required
+                                    className="w-full py-[14px] px-[24px] border border-[#18181820] rounded-[50px] outline-none focus:border-client-secondary bg-white text-[1.5rem]"
+                                />
+                            </div>
+
                             <input
                                 type="email"
-                                placeholder="Email"
-                                name="email"
-                                className="w-[230px] mb-[30px] py-[16px] text-[#181818] outline-none px-[24px] border border-[#181818] focus:border-[#ffbaa0] transition-colors duration-500 rounded-[50px]"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Số điện thoại"
-                                name="phone"
-                                className="w-[230px] mb-[30px] py-[16px] text-[#181818] outline-none px-[24px] border border-[#181818] focus:border-[#ffbaa0] transition-colors duration-500 rounded-[50px]"
-                            />
-                        </div>
-
-                        <input
-                            type="text"
-                            placeholder="Địa chỉ"
-                            name="address"
-                            className="w-full mb-[30px] py-[16px] text-[#181818] outline-none px-[24px] border border-[#181818] focus:border-[#ffbaa0] transition-colors duration-500 rounded-[50px]"
-                        />
-
-                        {/* Select thời gian */}
-                        <div className="flex justify-between relative mb-[30px]">
-                            <input
-                                type="date"
-                                name="date"
-                                className="w-[234px] py-[16px] text-[#181818] outline-none px-[24px] border border-[#181818] focus:border-[#ffbaa0] transition-colors duration-500 rounded-[50px]"
+                                placeholder="Email (Tùy chọn)"
+                                className="w-full py-[14px] px-[24px] border border-[#18181820] rounded-[50px] outline-none focus:border-client-secondary bg-white text-[1.5rem]"
                             />
 
-                            <div className="relative w-[250px]">
-                                <div
-                                    onClick={() => {
-                                        setIsOpenTime(!isOpenTime);
-                                        setIsOpenService(false);
-                                    }}
-                                    className="w-full rounded-[50px] py-[16px] text-[#828282] cursor-pointer outline-none px-[24px] border border-[#181818] focus:border-[#ffbaa0] transition-colors duration-500 flex justify-between items-center"
-                                >
-                                    <span>{selectedTime}</span>
-                                    {isOpenTime ? (
-                                        <KeyboardArrowUpIcon
-                                            className="text-[#828282]"
-                                            style={{ fontSize: "3rem" }}
-                                        />
-                                    ) : (
-                                        <KeyboardArrowDownIcon
-                                            className="text-[#828282]"
-                                            style={{ fontSize: "3rem" }}
-                                        />
+                            {/* Service Selection - Grid based instead of dropdown */}
+                            <div>
+                                <label className="block text-[1.6rem] font-bold text-[#181818] mb-[15px] ml-[10px]">
+                                    1. Chọn dịch vụ Grooming & Spa:
+                                </label>
+                                <div className="grid grid-cols-2 gap-[10px] relative min-h-[100px]">
+                                    {isLoading && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-client-secondary"></div>
+                                        </div>
                                     )}
+                                    {!isLoading && services.length === 0 && (
+                                        <div className="col-span-2 py-[20px] text-center text-[1.4rem] text-[#637381]">
+                                            Hiện chưa có dịch vụ lẻ nào khả dụng.
+                                        </div>
+                                    )}
+                                    {services.map((s: any) => (
+                                        <motion.div
+                                            key={s.id}
+                                            whileTap={{ scale: 0.98 }}
+                                            onClick={() => setSelectedService(s.id)}
+                                            className={`relative p-[15px] rounded-[25px] border-2 cursor-pointer bg-white transition-all flex items-center gap-[12px] ${selectedService === s.id
+                                                ? "border-client-secondary shadow-md"
+                                                : "border-transparent hover:border-[#18181810]"
+                                                }`}
+                                        >
+                                            <div
+                                                className="w-[36px] h-[36px] rounded-full flex items-center justify-center shrink-0"
+                                                style={{ backgroundColor: `${s.color}40`, color: "#181818" }}
+                                            >
+                                                {s.icon}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-[1.4rem] font-bold leading-tight">{s.name}</span>
+                                                <span className="text-client-secondary font-bold text-[1.3rem]">{s.price.toLocaleString()}đ</span>
+                                            </div>
+                                            {selectedService === s.id && (
+                                                <motion.div layoutId="check" className="absolute top-2 right-2">
+                                                    <Check className="w-4 h-4 text-client-secondary" />
+                                                </motion.div>
+                                            )}
+                                        </motion.div>
+                                    ))}
                                 </div>
+                            </div>
 
-                                {isOpenTime && (
-                                    <ul className="absolute right-0 top-[70px] w-full max-h-[320px] overflow-y-auto border border-[#00000012] text-[#181818] bg-white rounded-[20px] shadow-lg z-10">
-                                        {times.map((time) => (
-                                            <li
+                            {/* DateTime Selection */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[25px]">
+                                <div>
+                                    <label className="flex items-center gap-2 text-[1.5rem] font-bold text-[#181818] mb-[10px] ml-[10px]">
+                                        <Calendar className="w-4 h-4 text-client-secondary" />
+                                        2. Chọn ngày:
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={selectedDate}
+                                        onChange={(e) => setSelectedDate(e.target.value)}
+                                        min={dayjs().format("YYYY-MM-DD")}
+                                        className="w-full py-[12px] px-[20px] border border-[#18181820] rounded-[50px] outline-none focus:border-client-secondary bg-white text-[1.4rem]"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="flex items-center gap-2 text-[1.5rem] font-bold text-[#181818] mb-[10px] ml-[10px]">
+                                        <Clock className="w-4 h-4 text-client-secondary" />
+                                        3. Chọn giờ:
+                                    </label>
+                                    <div className="grid grid-cols-4 gap-[6px]">
+                                        {TIME_SLOTS.map((time) => (
+                                            <button
+                                                type="button"
                                                 key={time}
-                                                onClick={() => handleSelectTime(time)}
-                                                className="py-[8px] px-[16px] hover:text-[#ffbaa0] transition-colors duration-150 cursor-pointer"
+                                                onClick={() => setSelectedTime(time)}
+                                                className={`py-[8px] rounded-[15px] text-[1.2rem] font-bold border transition-all ${selectedTime === time
+                                                    ? "bg-client-secondary text-white border-client-secondary shadow-sm"
+                                                    : "bg-white border-[#18181815] text-[#181818] hover:border-client-secondary"
+                                                    }`}
                                             >
                                                 {time}
-                                            </li>
+                                            </button>
                                         ))}
-                                    </ul>
-                                )}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Select dịch vụ */}
-                        <div className="relative w-full mb-[30px]">
-                            <div
-                                onClick={() => {
-                                    setIsOpenService(!isOpenService);
-                                    setIsOpenTime(false);
-                                }}
-                                className="w-full rounded-[50px] py-[16px] text-[#828282] cursor-pointer outline-none px-[24px] border border-[#181818] focus:border-[#ffbaa0] transition-colors duration-500 flex justify-between items-center"
+                            <textarea
+                                placeholder="Ghi chú thêm về bé cưng của bạn..."
+                                rows={2}
+                                className="w-full py-[14px] px-[24px] border border-[#18181820] rounded-[20px] outline-none focus:border-client-secondary bg-white text-[1.5rem] resize-none"
+                            ></textarea>
+
+                            <div className="flex items-start gap-[10px] p-[15px] bg-white/50 rounded-[20px] border border-dashed border-client-secondary/40">
+                                <Info className="w-5 h-5 text-client-secondary shrink-0 mt-[2px]" />
+                                <p className="text-[1.3rem] text-[#505050] font-[500]">
+                                    Quý khách vui lòng đến đúng giờ đã hẹn. Nếu trễ quá 15 phút, TeddyPet xin phép dời lịch để đảm bảo chất lượng phục vụ.
+                                </p>
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="w-full py-[16px] rounded-[50px] bg-client-secondary text-[#181818] font-bold text-[1.8rem] shadow-sm hover:bg-orange-400 active:scale-[0.98] transition-all"
                             >
-                                <span>{selectedService}</span>
-                                {isOpenService ? (
-                                    <KeyboardArrowUpIcon
-                                        className="text-[#828282]"
-                                        style={{ fontSize: "3rem" }}
-                                    />
-                                ) : (
-                                    <KeyboardArrowDownIcon
-                                        className="text-[#828282]"
-                                        style={{ fontSize: "3rem" }}
-                                    />
-                                )}
-                            </div>
-
-                            {isOpenService && (
-                                <ul className="absolute right-0 top-[70px] w-full max-h-[320px] overflow-y-auto border border-[#00000012] text-[#181818] bg-white rounded-[20px] shadow-lg z-10">
-                                    {services.map((service) => (
-                                        <li
-                                            key={service}
-                                            onClick={() => handleSelectService(service)}
-                                            className="py-[8px] px-[16px] hover:text-[#ffbaa0] transition-colors duration-150 cursor-pointer"
-                                        >
-                                            {service}
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
+                                Xác nhận đặt lịch
+                            </button>
                         </div>
-
-                        <textarea name="message" maxLength={2000} placeholder="Lời nhắn" rows={10} className="mb-[40px] w-full h-[110px] text-[#181818] py-[16px] px-[24px] outline-none border border-[#181818] focus:border-[#ffbaa0] transition-colors duration-500 rounded-[20px]"></textarea>
-                        <button type="submit" className="text-[#181818] rounded-[50px] shadow-[0_0_0_72px_#ffbaa0_inset] hover:shadow-[0_0_0_2px_#ffbaa0_inset] w-[120px] h-[41px] font-[500] cursor-pointer transition-all duration-300">Gửi</button>
                     </form>
                 </div>
             </div>
 
-            <div className="app-container flex gap-[30px] pb-[100px]">
-                <div className="w-[413px] px-[20px]">
-                    <div className="w-full h-[206px]">
-                        <img src="https://pawsitive.bold-themes.com/coco/wp-content/uploads/sites/3/2019/08/inner_image_maps_02.png" alt="" width={413} height={206} className="w-full h-full object-cover rounded-t-[50px]" />
+            {/* --- MAP SECTION (Original Layout) --- */}
+            <div className="app-container flex gap-[30px] pb-[100px] flex-col md:flex-row">
+                <div className="w-full md:w-[413px]">
+                    <div className="w-full h-[200px]">
+                        <img src="https://pawsitive.bold-themes.com/coco/wp-content/uploads/sites/3/2019/08/inner_image_maps_02.png" alt="" className="w-full h-full object-cover rounded-t-[50px]" />
                     </div>
-                    <div className="bg-[#e67e2026] px-[30px] pt-[32px] pb-[40px] rounded-b-[50px]">
-                        <div className="flex mb-[32px]">
-                            <div className="w-[45px] h-[45px] text-[#ffbaa0]">
-                                <EditLocationAltIcon style={{
-                                    fontSize: "4rem"
-                                }} />
+                    <div className="bg-[#e67e2015] p-[35px] rounded-b-[50px] border-x border-b border-[#e67e2030]">
+                        <div className="space-y-[30px]">
+                            <div className="flex gap-[15px]">
+                                <EditLocationAltIcon className="text-client-secondary" style={{ fontSize: "3.5rem" }} />
+                                <div>
+                                    <div className="text-[2rem] font-bold text-[#181818]">Địa chỉ</div>
+                                    <p className="text-[1.5rem] text-[#505050]">64 Ung Văn Khiêm, Pleiku, Gia Lai</p>
+                                </div>
                             </div>
-                            <div className="pl-[20px]">
-                                <div className="text-[2.2rem] font-[800] text-[#181818] mb-[12px]">Địa chỉ</div>
-                                <p className="text-[#181818]">64 Ung Văn Khiêm, Pleiku, Gia Lai</p>
+                            <div className="flex gap-[15px]">
+                                <PhoneEnabledOutlinedIcon className="text-client-secondary" style={{ fontSize: "3.5rem" }} />
+                                <div>
+                                    <div className="text-[2rem] font-bold text-[#181818]">Điện thoại</div>
+                                    <p className="text-[1.5rem] text-[#505050]">+84 346 587 796</p>
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex mb-[32px]">
-                            <div className="w-[45px] h-[45px] text-[#ffbaa0]">
-                                <PhoneEnabledOutlinedIcon style={{
-                                    fontSize: "4rem"
-                                }} />
-                            </div>
-                            <div className="pl-[20px]">
-                                <div className="text-[2.2rem] font-[800] text-[#181818] mb-[12px]">Số điện thoại</div>
-                                <p className="text-[#181818]">+84346587796</p>
-                                <p className="text-[#181818]">+84346587796</p>
-                            </div>
-                        </div>
-                        <div className="flex mb-[32px]">
-                            <div className="w-[45px] h-[45px] text-[#ffbaa0]">
-                                <MailOutlineOutlinedIcon style={{
-                                    fontSize: "4rem"
-                                }} />
-                            </div>
-                            <div className="pl-[20px]">
-                                <div className="text-[2.2rem] font-[800] text-[#181818] mb-[12px]">E-mail</div>
-                                <p className="text-[#181818]">teddypet@gmail.com</p>
+                            <div className="flex gap-[15px]">
+                                <MailOutlineOutlinedIcon className="text-client-secondary" style={{ fontSize: "3.5rem" }} />
+                                <div>
+                                    <div className="text-[2rem] font-bold text-[#181818]">Email</div>
+                                    <p className="text-[1.5rem] text-[#505050]">teddypet@gmail.com</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className="flex-1">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.610010397031!2d106.809883!3d10.841127599999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752731176b07b1%3A0xb752b24b379bae5e!2sFPT%20University%20HCMC!5e0!3m2!1sen!2s!4v1761230475278!5m2!1sen!2s" width="100%" height="100%" loading="lazy"></iframe>
+                <div className="flex-1 min-h-[400px] rounded-[50px] overflow-hidden border border-[#eee]">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3434.9814421447605!2d106.809883!3d10.8411276!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752731176b07b1%3A0xb752b24b379bae5e!2sFPT%20University%20HCMC!5e0!3m2!1sen!2s!4v1761230475278!5m2!1sen!2s"
+                        width="100%" height="100%" loading="lazy" style={{ border: 0 }}
+                    ></iframe>
                 </div>
             </div>
 
             <FooterSub />
-        </>
+        </div>
     );
 };

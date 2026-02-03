@@ -22,6 +22,19 @@ import { CouponEditPage } from "../pages/coupon/CouponEditPage";
 import { ProductAttributeListPage } from "../pages/product-attribute/ProductAttributeListPage";
 import { ProductAttributeCreatePage } from "../pages/product-attribute/ProductAttributeCreatePage";
 import { ProductAttributeEditPage } from "../pages/product-attribute/ProductAttributeEditPage";
+import { ServiceListPage } from "../pages/service/ServiceListPage";
+import { ServiceCreatePage } from "../pages/service/ServiceCreatePage";
+import { ServiceEditPage } from "../pages/service/ServiceEditPage";
+import { ServiceCategoryListPage } from "../pages/service-category/ServiceCategoryListPage";
+import { ServiceCategoryCreatePage } from "../pages/service-category/ServiceCategoryCreatePage";
+import { ServiceCategoryEditPage } from "../pages/service-category/ServiceCategoryEditPage";
+import { RoleListPage } from "../pages/role/RoleListPage";
+import { RoleCreatePage } from "../pages/role/RoleCreatePage";
+import { RoleEditPage } from "../pages/role/RoleEditPage";
+import { AccountAdminListPage } from "../pages/account-admin/AccountAdminListPage";
+import { AccountAdminCreatePage } from "../pages/account-admin/AccountAdminCreatePage";
+import { AccountAdminEditPage } from "../pages/account-admin/AccountAdminEditPage";
+import { ChangePasswordPage } from "../pages/account-admin/ChangePasswordPage";
 
 export const AdminRoutes = [
     { path: "dashboard", element: <DashboardPage /> },
@@ -36,6 +49,12 @@ export const AdminRoutes = [
     { path: "brand/create", element: <BrandCreatePage /> },
     { path: "brand/edit/:id", element: <BrandEditPage /> },
     { path: "brand/detail/:id", element: <BrandEditPage /> },
+    { path: "service/list", element: <ServiceListPage /> },
+    { path: "service/create", element: <ServiceCreatePage /> },
+    { path: "service/edit/:id", element: <ServiceEditPage /> },
+    { path: "service/categories", element: <ServiceCategoryListPage /> },
+    { path: "service/categories/create", element: <ServiceCategoryCreatePage /> },
+    { path: "service/categories/edit/:id", element: <ServiceCategoryEditPage /> },
     { path: "blog/list", element: <BlogListPage /> },
     { path: "blog/create", element: <BlogCreatePage /> },
     { path: "blog/edit/:id", element: <BlogEditPage /> },
@@ -50,6 +69,13 @@ export const AdminRoutes = [
     { path: "product/attribute/list", element: <ProductAttributeListPage /> },
     { path: "product/attribute/create", element: <ProductAttributeCreatePage /> },
     { path: "product/attribute/edit/:id", element: <ProductAttributeEditPage /> },
+    { path: "role/list", element: <RoleListPage /> },
+    { path: "role/create", element: <RoleCreatePage /> },
+    { path: "role/edit/:id", element: <RoleEditPage /> },
+    { path: "account-admin/list", element: <AccountAdminListPage /> },
+    { path: "account-admin/create", element: <AccountAdminCreatePage /> },
+    { path: "account-admin/edit/:id", element: <AccountAdminEditPage /> },
+    { path: "account-admin/change-password/:id", element: <ChangePasswordPage /> },
 ];
 
 export const AdminAuthRoutes = [

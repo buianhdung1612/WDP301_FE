@@ -14,7 +14,8 @@ import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { Controller, Control } from "react-hook-form";
 
 export interface CategoryNode {
-    id: string; // Changed from categoryId: number to id: string
+    id?: string;
+    _id?: string;
     name: string;
     children: CategoryNode[];
 }
@@ -23,9 +24,11 @@ interface Props {
     control: Control<any>;
     categories: CategoryNode[];
     excludedId?: string;
+    name?: string;
+    label?: string;
 }
 
-export const CategoryParentSelect = ({ control, categories, excludedId }: Props) => {
+export const CategoryParentSelect = ({ control, categories, excludedId, name = "parent", label = "Danh mục cha" }: Props) => {
     // Hàm render đệ quy các MenuItem và ép kiểu value về string
     const renderMenuItems = (
         nodes: CategoryNode[],
@@ -33,8 +36,8 @@ export const CategoryParentSelect = ({ control, categories, excludedId }: Props)
         level = 0
     ): React.ReactNode[] => {
         return nodes.reduce((acc: React.ReactNode[], node) => {
-            // ID is already string
-            const stringId = node.id;
+            // ID can be id or _id
+            const stringId = (node.id || node._id || "").toString();
 
             // Skip excluded category
             if (excludedId && stringId === excludedId) {
@@ -45,7 +48,7 @@ export const CategoryParentSelect = ({ control, categories, excludedId }: Props)
 
             const item = (
                 <MenuItem
-                    key={node.id}
+                    key={stringId}
                     value={stringId}
                     sx={{
                         pl: 2 + level * 3,
@@ -104,7 +107,8 @@ export const CategoryParentSelect = ({ control, categories, excludedId }: Props)
 
     const findCategoryName = (nodes: CategoryNode[], id: string): string | undefined => {
         for (const node of nodes) {
-            if (node.id === id) return node.name;
+            const nodeId = (node.id || node._id || "").toString();
+            if (nodeId === id) return node.name;
             if (node.children?.length) {
                 const found = findCategoryName(node.children, id);
                 if (found) return found;
@@ -115,20 +119,20 @@ export const CategoryParentSelect = ({ control, categories, excludedId }: Props)
 
     return (
         <Controller
-            name="parent"
+            name={name}
             control={control}
             render={({ field, fieldState }) => (
                 <FormControl fullWidth error={!!fieldState.error}>
-                    <InputLabel shrink>Danh mục cha</InputLabel>
+                    <InputLabel shrink>{label}</InputLabel>
                     <Select
                         {...field}
                         displayEmpty
                         // Đảm bảo value luôn là string để khớp với Zod Schema
                         value={field.value?.toString() ?? ""}
-                        input={<OutlinedInput label="Danh mục cha" notched />}
+                        input={<OutlinedInput label={label} notched />}
                         renderValue={(selected) => {
                             if (!selected || selected === "") {
-                                return <Box sx={{ color: "#919EAB" }}>Chọn danh mục cha</Box>;
+                                return <Box sx={{ color: "#919EAB" }}>Chọn {label.toLowerCase()}</Box>;
                             }
                             const name = findCategoryName(categories, selected.toString());
                             return name ?? "Danh mục không tồn tại";
