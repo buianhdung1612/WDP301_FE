@@ -6,6 +6,7 @@ import { ClientRoutes } from './client/routes/index';
 import { AdminRoutes, AdminAuthRoutes } from './admin/routes/index';
 import { useScrollToTop } from './client/hooks/useScrollToTop';
 import { LoginPage } from './client/pages/auth/Login';
+import { ToastContainer } from 'react-toastify';
 
 const ScrollToTopWrapper = ({ children }: { children: React.ReactNode }) => {
   useScrollToTop();
@@ -41,6 +42,14 @@ function App() {
             ))}
           </Route>
         </Routes>
+           <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          pauseOnHover
+        />
       </ScrollToTopWrapper>
     </BrowserRouter>
   )

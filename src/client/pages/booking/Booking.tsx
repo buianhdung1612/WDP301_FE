@@ -9,7 +9,11 @@ import { Check, Clock, Scissors, Bath, Sparkles, Info, Calendar } from "lucide-r
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import { useServices } from "../../hooks/useService";
-
+import { useCreateBooking, useTimeSlots } from "../../hooks/useBooking";
+import { useAuthStore } from "../../../stores/useAuthStore";
+import { Link } from "react-router-dom";
+import { useMyPets } from "../../hooks/usePet";
+import { Cat, Dog } from "lucide-react";
 // Icon mapping based on service name or category
 const getServiceIcon = (name: string) => {
     const n = name.toLowerCase();
@@ -21,9 +25,9 @@ const getServiceIcon = (name: string) => {
 // Color mapping for variety
 const COLORS = ["#afe2e5", "#cfecbc", "#ffbaa0", "#d0bfff", "#fff4b3", "#ffd1dc"];
 
-const TIME_SLOTS = [
-    "08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"
-];
+// const TIME_SLOTS = [
+//     "08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00"
+// ];
 
 export const BookingPage = () => {
     const { data: allServices = [], isLoading } = useServices();
@@ -46,16 +50,57 @@ export const BookingPage = () => {
     const [selectedService, setSelectedService] = useState<string | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
+    const [customerName, setCustomerName] = useState("");
+    const [customerPhone, setCustomerPhone] = useState("");
+    const [customerEmail, setCustomerEmail] = useState("");
+    const [notes, setNotes] = useState("");
+    const { mutateAsync: createBookingMutation } = useCreateBooking();
+    const { data: timeSlots = [], isLoading: isLoadingSlots } = useTimeSlots(selectedDate, selectedService || "");
+    const { user } = useAuthStore();
+    const { data: myPets = [], isLoading: isLoadingPets } = useMyPets();
+    const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
         if (!selectedService || !selectedTime) {
             toast.error("Vui lòng chọn đầy đủ dịch vụ và thời gian!");
             return;
         }
-        toast.success("Yêu cầu đặt lịch của bạn đã được nhận! Chúng tôi sẽ gọi xác nhận sớm.");
-    };
 
+        if (user && !selectedPetId) {
+            toast.error("Vui lòng chọn thú cưng để đặt lịch!");
+            return;
+        }
+
+        try {
+            await createBookingMutation({
+                serviceId: selectedService,
+                slotId: `${selectedDate} ${selectedTime}`, // hoặc slotId thật nếu có
+                customerName,
+                customerPhone,
+                customerEmail,
+                notes,
+                petIds: selectedPetId ? [selectedPetId] : []
+            });
+
+            toast.success("🎉 Đặt lịch thành công! Chúng tôi sẽ liên hệ sớm.");
+
+            // reset form (optional)
+            setCustomerName("");
+            setCustomerPhone("");
+            setCustomerEmail("");
+            setNotes("");
+            setSelectedService(null);
+            setSelectedTime(null);
+            setSelectedPetId(null);
+
+        } catch (err: any) {
+            toast.error(
+                err?.response?.data?.message || "Đặt lịch thất bại, vui lòng thử lại!"
+            );
+        }
+    };
     return (
         <div className="bg-[#fcfcfc]">
             {/* --- HERO SECTION (Restored to Original) --- */}
@@ -127,8 +172,8 @@ export const BookingPage = () => {
                 </div>
 
                 {/* Right Side: Enhanced Booking Form (Same Frame) */}
-                <div className="w-full lg:w-[55%] px-[20px]">
-                    <form onSubmit={handleSubmit} className="p-[35px] md:p-[45px] bg-[#e67e2015] border border-[#e67e2030] rounded-[50px] shadow-sm">
+                <div className="w-full lg:w-[55%] px-[20px] py-[20px]">
+                    <form onSubmit={handleSubmit} className="p-[35px] md:p-[45px] bg-[#e67e2015] border border-[#e67e2030] rounded-[50px] shadow-sm py-[20px]">
                         <h3 className="text-[3rem] font-third text-[#181818] mb-[35px] text-center">Đặt lịch ngay</h3>
 
                         <div className="space-y-[25px]">
@@ -138,12 +183,16 @@ export const BookingPage = () => {
                                     type="text"
                                     placeholder="Họ và tên"
                                     required
+                                    value={customerName}
+                                    onChange={(e) => setCustomerName(e.target.value)}
                                     className="w-full py-[14px] px-[24px] border border-[#18181820] rounded-[50px] outline-none focus:border-client-secondary bg-white text-[1.5rem]"
                                 />
                                 <input
                                     type="text"
                                     placeholder="Số điện thoại"
                                     required
+                                    value={customerPhone}
+                                    onChange={(e) => setCustomerPhone(e.target.value)}
                                     className="w-full py-[14px] px-[24px] border border-[#18181820] rounded-[50px] outline-none focus:border-client-secondary bg-white text-[1.5rem]"
                                 />
                             </div>
@@ -151,8 +200,57 @@ export const BookingPage = () => {
                             <input
                                 type="email"
                                 placeholder="Email (Tùy chọn)"
+                                value={customerEmail}
+                                onChange={(e) => setCustomerEmail(e.target.value)}
                                 className="w-full py-[14px] px-[24px] border border-[#18181820] rounded-[50px] outline-none focus:border-client-secondary bg-white text-[1.5rem]"
                             />
+
+                            {/* Pet Selection (Only if Logged In) */}
+                            {user && (
+                                <div>
+                                    <label className="block text-[1.6rem] font-bold text-[#181818] mb-[15px] ml-[10px]">
+                                        Chọn thú cưng:
+                                    </label>
+                                    <div className="grid grid-cols-2 gap-[10px] relative min-h-[50px]">
+                                        {isLoadingPets && <div className="text-center py-4 w-full col-span-2">Đang tải thú cưng...</div>}
+                                        {!isLoadingPets && myPets.length === 0 && (
+                                            <div className="col-span-2 text-center text-[1.4rem] text-[#637381] py-4 bg-white rounded-[25px] border border-dashed border-gray-300">
+                                                Bạn chưa có thú cưng nào.
+                                                <Link to="/ca-nhan/thu-cung" className="text-client-secondary font-bold ml-1 hover:underline">
+                                                    Thêm mới ngay
+                                                </Link>
+                                            </div>
+                                        )}
+                                        {myPets.map((pet: any) => (
+                                            <div
+                                                key={pet._id}
+                                                onClick={() => setSelectedPetId(pet._id)}
+                                                className={`p-[15px] rounded-[25px] border-2 cursor-pointer bg-white flex items-center gap-[12px] transition-all ${selectedPetId === pet._id
+                                                    ? "border-client-secondary shadow-md bg-orange-50"
+                                                    : "border-transparent hover:border-[#18181810]"
+                                                    }`}
+                                            >
+                                                <div className="w-[40px] h-[40px] rounded-full bg-gray-100 flex items-center justify-center shrink-0 overflow-hidden">
+                                                    {pet.avatar ? (
+                                                        <img src={pet.avatar} alt={pet.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        pet.type === "Mèo" ? <Cat size={20} /> : <Dog size={20} />
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-[1.4rem] font-bold text-[#181818]">{pet.name}</span>
+                                                    <span className="text-[1.2rem] text-[#637381]">{pet.breed || "Không rõ giống"}</span>
+                                                </div>
+                                                {selectedPetId === pet._id && (
+                                                    <div className="ml-auto">
+                                                        <Check className="w-5 h-5 text-client-secondary" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Service Selection - Grid based instead of dropdown */}
                             <div>
@@ -221,43 +319,89 @@ export const BookingPage = () => {
                                         3. Chọn giờ:
                                     </label>
                                     <div className="grid grid-cols-4 gap-[6px]">
-                                        {TIME_SLOTS.map((time) => (
+                                        {isLoadingSlots && <div className="col-span-4 text-center text-sm py-4">Đang tải...</div>}
+                                        {!isLoadingSlots && timeSlots.map((slot: any) => (
                                             <button
                                                 type="button"
-                                                key={time}
-                                                onClick={() => setSelectedTime(time)}
-                                                className={`py-[8px] rounded-[15px] text-[1.2rem] font-bold border transition-all ${selectedTime === time
+                                                key={slot.time}
+                                                disabled={slot.status !== "available"}
+                                                onClick={() => setSelectedTime(slot.time)}
+                                                className={`py-[8px] rounded-[15px] text-[1.2rem] font-bold border transition-all ${selectedTime === slot.time
                                                     ? "bg-client-secondary text-white border-client-secondary shadow-sm"
-                                                    : "bg-white border-[#18181815] text-[#181818] hover:border-client-secondary"
+                                                    : slot.status !== "available"
+                                                        ? "bg-gray-100 text-gray-400 border-transparent cursor-not-allowed"
+                                                        : "bg-white border-[#18181815] text-[#181818] hover:border-client-secondary"
                                                     }`}
                                             >
-                                                {time}
+                                                {slot.time}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <textarea
-                                placeholder="Ghi chú thêm về bé cưng của bạn..."
-                                rows={2}
-                                className="w-full py-[14px] px-[24px] border border-[#18181820] rounded-[20px] outline-none focus:border-client-secondary bg-white text-[1.5rem] resize-none"
-                            ></textarea>
+                        <textarea
+                            placeholder="Ghi chú thêm về bé cưng của bạn..."
+                            rows={3}
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            className="
+    w-full
+    mt-[20px]
+    py-[14px]
+    px-[24px]
+    border
+    border-[#18181820]
+    rounded-[20px]
+    outline-none
+    focus:border-client-secondary
+    bg-white
+    text-[1.5rem]
+    resize-none
+  "
+                        ></textarea>
 
-                            <div className="flex items-start gap-[10px] p-[15px] bg-white/50 rounded-[20px] border border-dashed border-client-secondary/40">
-                                <Info className="w-5 h-5 text-client-secondary shrink-0 mt-[2px]" />
-                                <p className="text-[1.3rem] text-[#505050] font-[500]">
-                                    Quý khách vui lòng đến đúng giờ đã hẹn. Nếu trễ quá 15 phút, TeddyPet xin phép dời lịch để đảm bảo chất lượng phục vụ.
-                                </p>
-                            </div>
 
+                        <div className="flex items-start gap-[10px] p-[15px] bg-white/50 rounded-[20px] border border-dashed border-client-secondary/40">
+                            <Info className="w-5 h-5 text-client-secondary shrink-0 mt-[2px]" />
+                            <p className="text-[1.3rem] text-[#505050] font-[500]">
+                                Quý khách vui lòng đến đúng giờ đã hẹn. Nếu trễ quá 15 phút, TeddyPet xin phép dời lịch để đảm bảo chất lượng phục vụ.
+                            </p>
+                        </div>
+
+                        {user ? (
                             <button
                                 type="submit"
-                                className="w-full py-[16px] rounded-[50px] bg-client-secondary text-[#181818] font-bold text-[1.8rem] shadow-sm hover:bg-orange-400 active:scale-[0.98] transition-all"
-                            >
+                                className="
+    w-full
+    mt-[20px]
+    py-[14px]
+    px-[24px]
+    border
+    border-[#18181820]
+    rounded-[20px]
+    outline-none
+    focus:border-client-secondary
+    bg-client-secondary
+    hover:bg-orange-400
+    active:scale-[0.98]
+    transition-all
+    text-white
+    font-bold
+    cursor-pointer
+    resize-none
+  "                            >
                                 Xác nhận đặt lịch
                             </button>
-                        </div>
+                        ) : (
+                            <Link
+                                to="/auth/login"
+                                className="block w-full text-center py-[16px] rounded-[50px] bg-gray-200 text-[#181818] font-bold text-[1.8rem] shadow-sm hover:bg-gray-300 transition-all"
+                            >
+                                Vui lòng đăng nhập để đặt lịch
+                            </Link>
+                        )}
                     </form>
                 </div>
             </div>
