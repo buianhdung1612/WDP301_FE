@@ -1,4 +1,4 @@
-import axios from "axios";
+import { apiApp } from "../../api";
 
 export interface Pet {
     _id: string;
@@ -15,5 +15,5 @@ export interface Pet {
 }
 
 export const getMyPets = () => {
-    return axios.get("/api/v1/client/pet/my-pets");
+    return apiApp.get("/api/v1/client/pet/my-pets");
 };

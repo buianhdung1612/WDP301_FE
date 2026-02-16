@@ -100,3 +100,21 @@ export const getOrderDetail = async (id: string) => {
         throw error;
     }
 }
+
+export const getBoardingBookingList = async () => {
+    try {
+        const response = await apiApp.get("/api/v1/client/boarding/boarding-bookings");
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getBoardingBookingDetail = async (id: string) => {
+    try {
+        const response = await apiApp.get(`/api/v1/client/boarding/boarding-bookings/${id}`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

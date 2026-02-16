@@ -9,6 +9,8 @@ import { ForgotPasswordPage } from "../pages/auth/ForgotPassword";
 import { OTPPasswordPage } from "../pages/auth/OTPPassword";
 import { ResetPasswordPage } from "../pages/auth/ResetPassword";
 import { BookingPage } from "../pages/booking/Booking";
+import { BoardingBookingPage } from "../pages/boarding/BoardingBooking";
+import { BoardingCageDetailPage } from "../pages/boarding/BoardingCageDetail";
 import { ServicePage } from "../pages/service/Service";
 import { CartPage } from "../pages/cart/Cart";
 import { CheckoutPage } from "../pages/checkout/Checkout";
@@ -25,6 +27,8 @@ import { ReviewPage } from "../pages/dashboard/Review";
 import { OrderDetailPage } from "../pages/dashboard/OrderDetail";
 import { OrderHistoryPage } from "../pages/dashboard/OrderHistory";
 import { OrderInvoicePage } from "../pages/dashboard/OrderInvoice";
+import { BoardingBookingHistoryPage } from "../pages/dashboard/BoardingBookingHistory";
+import { BoardingBookingDetailPage } from "../pages/dashboard/BoardingBookingDetail";
 import { AuthGuard } from "../components/guards/AuthGuard";
 
 export const ClientRoutes: RouteObject[] = [
@@ -33,6 +37,8 @@ export const ClientRoutes: RouteObject[] = [
     { path: "/shop", element: <ProductListPage /> },
     { path: "/bai-viet", element: <BlogListPage /> },
     { path: "/dat-lich", element: <BookingPage /> },
+    { path: "/khach-san", element: <BoardingBookingPage /> },
+    { path: "/khach-san/:id", element: <BoardingCageDetailPage /> },
     { path: "/cart", element: <CartPage /> },
     { path: "/checkout", element: <CheckoutPage /> },
     { path: "/order/success", element: <CheckSuccessPage /> },
@@ -58,6 +64,8 @@ export const ClientRoutes: RouteObject[] = [
             { path: "order/invoice/:id", element: <OrderInvoicePage /> },
             { path: "order/detail/:id", element: <OrderDetailPage /> },
             { path: "orders", element: <OrderHistoryPage /> },
+            { path: "boarding-bookings", element: <BoardingBookingHistoryPage /> },
+            { path: "boarding-bookings/:id", element: <BoardingBookingDetailPage /> },
         ]
     },
 ];

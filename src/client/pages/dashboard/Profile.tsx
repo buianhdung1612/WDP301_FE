@@ -69,6 +69,14 @@ export const ProfilePage = () => {
                                 </li>
                             </ul>
                         </div>
+                        <div className="mt-[20px] flex gap-[12px]">
+                            <Link
+                                to="/dashboard/boarding-bookings"
+                                className="inline-flex items-center rounded-[8px] px-[20px] py-[12px] text-[1.4rem] font-[500] bg-[#fff0f0] text-client-primary hover:bg-client-primary hover:text-white transition-all"
+                            >
+                                Quản lý lịch khách sạn
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -33,14 +33,10 @@ export const Sidebar = () => {
                 const urls = await uploadImagesToCloudinary(Array.from(files));
                 if (urls && urls.length > 0) {
                     const newAvatar = urls[0];
-
-                    // Cập nhật giao diện ngay lập tức
                     set({ user: { ...user, avatar: newAvatar } as any });
                     setUploading(false);
 
-                    // Gọi API backend cập nhật ngầm
                     const res = await changeAvatar({ avatar: newAvatar });
-
                     if (res.success) {
                         toast.success("Cập nhật ảnh đại diện thành công!");
                     } else {
@@ -84,7 +80,7 @@ export const Sidebar = () => {
                         <h3 className="text-[2.2rem] mt-[22px] mb-[5px] font-[600] text-client-secondary uppercase leading-tight">{user.fullName}</h3>
                         <p className="text-[#7d7b7b] font-[500]">{user.email}</p>
                     </div>
-                    <ul className="">
+                    <ul>
                         <li className="bg-[#FFF0F0] text-[1.4rem] my-[10px] font-[500] py-[12px] px-[25px] uppercase text-client-primary border-y border-dashed border-[#dddddd]">Tổng quan</li>
                         <li>
                             <Link to={"/dashboard/overview"} className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/overview" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
@@ -98,6 +94,13 @@ export const Sidebar = () => {
                                 Đơn hàng
                             </Link>
                         </li>
+                        <li>
+                            <Link to={"/dashboard/boarding-bookings"} className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/boarding-bookings" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <ShoppingBag className="w-[2rem] h-[2rem]" />
+                                Lịch khách sạn
+                            </Link>
+                        </li>
+
                         <li className="bg-[#FFF0F0] text-[1.4rem] my-[10px] font-[500] py-[12px] px-[25px] uppercase text-client-primary border-y border-dashed border-[#dddddd]">Cài đặt tài khoản</li>
                         <li>
                             <Link to={"/dashboard/profile"} className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/profile" || pathname === "/dashboard/profile/edit" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>

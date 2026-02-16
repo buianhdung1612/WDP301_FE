@@ -56,8 +56,8 @@ export const BookingPage = () => {
     const [notes, setNotes] = useState("");
     const { mutateAsync: createBookingMutation } = useCreateBooking();
     const { data: timeSlots = [], isLoading: isLoadingSlots } = useTimeSlots(selectedDate, selectedService || "");
-    const { user } = useAuthStore();
-    const { data: myPets = [], isLoading: isLoadingPets } = useMyPets();
+        const { user } = useAuthStore();
+    const { data: myPets = [], isLoading: isLoadingPets } = useMyPets(!!user);
     const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
