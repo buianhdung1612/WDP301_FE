@@ -232,7 +232,7 @@ export const AddressEditPage = () => {
     ];
 
     if (loading) {
-        return <div className="min-h-screen flex items-center justify-center text-[2rem]">Đang tải...</div>
+        return <div className="min-h-screen flex items-center justify-center text-[20px]">Đang tải...</div>
     }
 
     return (
@@ -244,15 +244,15 @@ export const AddressEditPage = () => {
                 className="bg-top"
             />
 
-            <div className="mt-[-150px] mb-[100px] w-[1600px] mx-auto flex items-stretch">
+            <div className="mt-[-150px] mb-[100px] app-container flex items-stretch">
                 <div className="w-[25%] px-[12px] flex">
                     <Sidebar />
                 </div>
                 <div className="w-[75%] px-[12px]">
                     <div className="mt-[100px] p-[35px] bg-white shadow-[0px_8px_24px_#959da533] rounded-[12px]">
-                        <h3 className="text-[2.4rem] font-[600] text-client-secondary mb-[25px] flex items-center justify-between">
+                        <h3 className="text-[24px] font-[600] text-client-secondary mb-[25px] flex items-center justify-between">
                             Chỉnh sửa địa chỉ
-                            <Link className="relative overflow-hidden group bg-[#ffa500] rounded-[8px] px-[25px] py-[12px] font-[500] text-[1.4rem] text-white" to={"/dashboard/address"}>
+                            <Link className="relative overflow-hidden group bg-[#ffa500] rounded-[8px] px-[25px] py-[12px] font-[500] text-[14px] text-white" to={"/dashboard/address"}>
                                 <span className="relative z-10">Hủy</span>
                                 <div className="absolute top-0 left-0 w-full h-full bg-[#cc8400] transition-transform duration-500 ease-in-out transform scale-x-0 origin-left group-hover:scale-x-100"></div>
                             </Link>
@@ -261,33 +261,33 @@ export const AddressEditPage = () => {
                             <form className="space-y-[20px]" onSubmit={handleSubmit(onSubmit)}>
                                 <div className="grid grid-cols-2 gap-[25px]">
                                     <div className="flex flex-col gap-[10px]">
-                                        <label className="text-[1.5rem] font-[600] text-client-secondary">Họ tên người nhận</label>
+                                        <label className="text-[15px] font-[600] text-client-secondary">Họ tên người nhận</label>
                                         <input
                                             type="text"
                                             {...register("fullName")}
-                                            className={`border rounded-[10px] px-[20px] py-[15px] text-[1.5rem] focus:outline-none focus:border-client-primary transition-all bg-[#fcfcfc] hover:bg-white ${errors.fullName ? "border-red-500" : "border-[#eee]"}`}
+                                            className={`border rounded-[10px] px-[20px] py-[15px] text-[15px] focus:outline-none focus:border-client-primary transition-all bg-[#fcfcfc] hover:bg-white ${errors.fullName ? "border-red-500" : "border-[#eee]"}`}
                                             placeholder="Nhập họ tên"
                                         />
-                                        {errors.fullName && <span className="text-red-500 text-[1.3rem]">{errors.fullName.message}</span>}
+                                        {errors.fullName && <span className="text-red-500 text-[13px]">{errors.fullName.message}</span>}
                                     </div>
                                     <div className="flex flex-col gap-[10px]">
-                                        <label className="text-[1.5rem] font-[600] text-client-secondary">Số điện thoại</label>
+                                        <label className="text-[15px] font-[600] text-client-secondary">Số điện thoại</label>
                                         <input
                                             type="text"
                                             {...register("phone")}
-                                            className={`border rounded-[10px] px-[20px] py-[15px] text-[1.5rem] focus:outline-none focus:border-client-primary transition-all bg-[#fcfcfc] hover:bg-white ${errors.phone ? "border-red-500" : "border-[#eee]"}`}
+                                            className={`border rounded-[10px] px-[20px] py-[15px] text-[15px] focus:outline-none focus:border-client-primary transition-all bg-[#fcfcfc] hover:bg-white ${errors.phone ? "border-red-500" : "border-[#eee]"}`}
                                             placeholder="Nhập số điện thoại"
                                         />
-                                        {errors.phone && <span className="text-red-500 text-[1.3rem]">{errors.phone.message}</span>}
+                                        {errors.phone && <span className="text-red-500 text-[13px]">{errors.phone.message}</span>}
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-[10px]">
-                                    <label className="text-[1.5rem] font-[600] text-client-secondary">Địa chỉ chi tiết</label>
+                                    <label className="text-[15px] font-[600] text-client-secondary">Địa chỉ chi tiết</label>
                                     <div className="relative group">
                                         <textarea
                                             {...register("address")}
                                             rows={2}
-                                            className={`w-full border rounded-[10px] px-[20px] py-[15px] text-[1.5rem] focus:outline-none focus:border-client-primary transition-all bg-[#fcfcfc] group-hover:bg-white resize-none outline-none ${errors.address ? "border-red-500" : "border-[#eee]"}`}
+                                            className={`w-full border rounded-[10px] px-[20px] py-[15px] text-[15px] focus:outline-none focus:border-client-primary transition-all bg-[#fcfcfc] group-hover:bg-white resize-none outline-none ${errors.address ? "border-red-500" : "border-[#eee]"}`}
                                             placeholder="Gõ địa chỉ hoặc chọn trên bản đồ..."
                                             onChange={(e) => {
                                                 isManualChange.current = true;
@@ -296,13 +296,13 @@ export const AddressEditPage = () => {
                                             }}
                                         />
                                         <div className="absolute right-[12px] top-[12px]">
-                                            <MapPin className="w-[1.8rem] h-[1.8rem] text-client-primary" />
+                                            <MapPin className="w-[18px] h-[18px] text-client-primary" />
                                         </div>
                                     </div>
-                                    {errors.address && <span className="text-red-500 text-[1.3rem]">{errors.address.message}</span>}
+                                    {errors.address && <span className="text-red-500 text-[13px]">{errors.address.message}</span>}
                                     {isNotFound && (
-                                        <p className="text-[1.3rem] text-red-500 font-[500] mt-[10px] flex items-center gap-[6px]">
-                                            <span className="text-[1.6rem]">⚠️</span>
+                                        <p className="text-[13px] text-red-500 font-[500] mt-[10px] flex items-center gap-[6px]">
+                                            <span className="text-[16px]">⚠️</span>
                                             Không tìm thấy vị trí này trên bản đồ. Vui lòng kiểm tra lại địa chỉ hoặc chọn trực tiếp từ bản đồ bên dưới.
                                         </p>
                                     )}
@@ -312,11 +312,11 @@ export const AddressEditPage = () => {
                                     <div className="absolute top-[20px] left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-[500px]">
                                         <div className="relative flex items-center bg-white/90 backdrop-blur-md shadow-[0px_10px_30px_rgba(0,0,0,0.1)] rounded-[8px] border border-white/50 p-[5px]">
                                             <div className="pl-[15px]">
-                                                <Search className="w-[1.8rem] h-[1.8rem] text-gray-400" />
+                                                <Search className="w-[18px] h-[18px] text-gray-400" />
                                             </div>
                                             <input
                                                 type="text"
-                                                className="flex-1 border-none bg-transparent rounded-[8px] px-[12px] py-[10px] text-[1.4rem] focus:outline-none placeholder:text-gray-400"
+                                                className="flex-1 border-none bg-transparent rounded-[8px] px-[12px] py-[10px] text-[14px] focus:outline-none placeholder:text-gray-400"
                                                 placeholder="Tìm kiếm địa điểm..."
                                                 value={searchKeyword}
                                                 onChange={(e) => setSearchKeyword(e.target.value)}
@@ -327,7 +327,7 @@ export const AddressEditPage = () => {
                                                     e.preventDefault();
                                                     geocodeFromAddress(searchKeyword, true);
                                                 }}
-                                                className="bg-client-secondary text-white px-[18px] py-[8px] rounded-[8px] text-[1.4rem] font-[500] hover:bg-client-primary transition-all active:scale-95"
+                                                className="bg-client-secondary text-white px-[18px] py-[8px] rounded-[8px] text-[14px] font-[500] hover:bg-client-primary transition-all active:scale-95"
                                             >
                                                 Tìm kiếm
                                             </button>
@@ -341,10 +341,10 @@ export const AddressEditPage = () => {
                                                         onClick={() => handleSelectSuggestion(item)}
                                                         className="px-[20px] py-[15px] hover:bg-client-primary/5 cursor-pointer border-b border-[#f5f5f5] last:border-none flex items-start gap-[12px] transition-colors"
                                                     >
-                                                        <MapPin className="w-[1.6rem] h-[1.6rem] text-client-secondary shrink-0 mt-[2px]" />
+                                                        <MapPin className="w-[16px] h-[16px] text-client-secondary shrink-0 mt-[2px]" />
                                                         <div className="flex flex-col gap-[2px]">
-                                                            <span className="text-[1.4rem] font-[500] text-[#333] line-clamp-1">{item.display_name.split(',')[0]}</span>
-                                                            <span className="text-[1.2rem] text-gray-500 line-clamp-1">{item.display_name}</span>
+                                                            <span className="text-[14px] font-[500] text-[#333] line-clamp-1">{item.display_name.split(',')[0]}</span>
+                                                            <span className="text-[12px] text-gray-500 line-clamp-1">{item.display_name}</span>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -376,7 +376,7 @@ export const AddressEditPage = () => {
                                         hidden
                                         {...register("isDefault")}
                                     />
-                                    <label htmlFor="default_address_checkbox" className="text-[1.4rem] font-[500] text-[#555] cursor-pointer select-none">
+                                    <label htmlFor="default_address_checkbox" className="text-[14px] font-[500] text-[#555] cursor-pointer select-none">
                                         Đặt làm địa chỉ mặc định
                                     </label>
                                 </div>
@@ -385,10 +385,10 @@ export const AddressEditPage = () => {
                                     <button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className="relative overflow-hidden group bg-client-primary rounded-[8px] px-[30px] py-[12px] font-[500] text-[1.4rem] text-white cursor-pointer flex items-center gap-[8px] disabled:opacity-50"
+                                        className="relative overflow-hidden group bg-client-primary rounded-[8px] px-[30px] py-[12px] font-[500] text-[14px] text-white cursor-pointer flex items-center gap-[8px] disabled:opacity-50"
                                     >
                                         <span className="relative z-10">{isSubmitting ? "Đang xử lý..." : "Lưu thay đổi"}</span>
-                                        {!isSubmitting && <ArrowRight className="relative z-10 w-[1.8rem] h-[1.8rem] transition-transform duration-300 rotate-[-45deg] group-hover:rotate-0" />}
+                                        {!isSubmitting && <ArrowRight className="relative z-10 w-[18px] h-[18px] transition-transform duration-300 rotate-[-45deg] group-hover:rotate-0" />}
                                         <div className="absolute top-0 left-0 w-full h-full bg-client-secondary transition-transform duration-500 ease-in-out transform scale-x-0 origin-left group-hover:scale-x-100"></div>
                                     </button>
                                 </div>

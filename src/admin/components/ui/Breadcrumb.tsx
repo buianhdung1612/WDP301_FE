@@ -31,14 +31,14 @@ export const Breadcrumb = ({ items }: BreadcrumbProps) => {
                     <Link
                         key={index}
                         to={item.to}
-                        className="text-[1.4rem] text-[#1C252E] hover:underline"
+                        className="text-[0.875rem] text-[#1C252E] hover:underline"
                     >
                         {item.label}
                     </Link>
                 ) : (
                     <span
                         key={index}
-                        className="text-[1.4rem] text-[#637381] cursor-default"
+                        className="text-[0.875rem] text-[#637381] cursor-default"
                     >
                         {item.label}
                     </span>

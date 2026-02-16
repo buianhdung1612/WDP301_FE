@@ -18,11 +18,11 @@ export const getBlogCategoryTheme = (outerTheme: Theme) => createTheme(outerThem
             styleOverrides: {
                 root: {
                     color: "#919EAB",
-                    fontSize: "1.5rem",
+                    fontSize: "0.9375rem",
                     '&.Mui-focused': {
                         color: "#1C252E",
                         fontWeight: "600",
-                        fontSize: "1.5rem"
+                        fontSize: "0.9375rem"
                     }
                 }
             }
@@ -32,7 +32,7 @@ export const getBlogCategoryTheme = (outerTheme: Theme) => createTheme(outerThem
                 root: {
                     color: "#1C252E",
                     borderRadius: "8px",
-                    fontSize: "1.5rem",
+                    fontSize: "0.9375rem",
                     '& .MuiOutlinedInput-notchedOutline': {
                         borderColor: "#919eab33",
                         transition: 'border-color 0.2s',
@@ -57,7 +57,7 @@ export const getBlogCategoryTheme = (outerTheme: Theme) => createTheme(outerThem
                     padding: 0,
                 },
                 option: {
-                    fontSize: '1.4rem',
+                    fontSize: '0.875rem',
                     padding: '6px',
                     marginBottom: '4px',
                     borderRadius: '6px',

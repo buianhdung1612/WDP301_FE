@@ -43,7 +43,7 @@ export const CheckSuccessPage = () => {
     }, [orderCode, phone, navigate]);
 
     if (loading) {
-        return <div className="min-h-screen flex items-center justify-center text-[2rem]">Đang tải...</div>;
+        return <div className="min-h-screen flex items-center justify-center text-[20px]">Đang tải...</div>;
     }
 
     if (!order) return null;
@@ -61,19 +61,19 @@ export const CheckSuccessPage = () => {
                     Cảm ơn bạn. Đơn hàng của bạn đã được nhận.
                 </div>
                 <div className="mb-[48px] grid grid-cols-4 border border-[#10293726] p-[25px]">
-                    <div className="text-[1.4rem] text-client-text text-center border-r border-dashed border-[#cfc8d8] px-[12px] my-[10px]">
+                    <div className="text-[14px] text-client-text text-center border-r border-dashed border-[#cfc8d8] px-[12px] my-[10px]">
                         <div className="">Số đơn hàng:</div>
                         <div className="mt-[8px] font-bold">{order.code}</div>
                     </div>
-                    <div className="text-[1.4rem] text-client-text text-center border-r border-dashed border-[#cfc8d8] px-[12px] my-[10px]">
+                    <div className="text-[14px] text-client-text text-center border-r border-dashed border-[#cfc8d8] px-[12px] my-[10px]">
                         <div className="">Ngày:</div>
                         <div className="mt-[8px] font-bold">{dayjs(order.createdAt).format("DD/MM/YYYY")}</div>
                     </div>
-                    <div className="text-[1.4rem] text-client-text text-center border-r border-dashed border-[#cfc8d8] px-[12px] my-[10px]">
+                    <div className="text-[14px] text-client-text text-center border-r border-dashed border-[#cfc8d8] px-[12px] my-[10px]">
                         <div className="">Tổng cộng:</div>
                         <div className="mt-[8px] font-bold">{order.total.toLocaleString()}đ</div>
                     </div>
-                    <div className="text-[1.4rem] text-client-text text-center px-[12px] my-[10px]">
+                    <div className="text-[14px] text-client-text text-center px-[12px] my-[10px]">
                         <div className="">Phương thức thanh toán:</div>
                         <div className="mt-[8px] font-bold">
                             {order.paymentMethod === "money" ? "Thanh toán khi nhận hàng" : order.paymentMethod.toUpperCase()}
@@ -85,7 +85,7 @@ export const CheckSuccessPage = () => {
                         {order.paymentMethod === "money" ? "Thanh toán bằng tiền mặt khi nhận hàng." : "Thanh toán qua ví điện tử."}
                     </p>
                     <section className="border-[2px] border-[#10293726] mb-[50px] p-[60px]">
-                        <h2 className="text-[1.8rem] text-client-secondary font-secondary mb-[20px]">Chi tiết đơn hàng</h2>
+                        <h2 className="text-[18px] text-client-secondary font-secondary mb-[20px]">Chi tiết đơn hàng</h2>
                         <table className="w-full">
                             <thead className="w-full">
                                 <tr>
@@ -122,7 +122,7 @@ export const CheckSuccessPage = () => {
                                 </tr>
                                 <tr>
                                     <td className="w-[66%] text-left py-[20px] border-b border-[#d7d7d7] font-[600]">Tổng cộng:</td>
-                                    <td className="w-[34%] text-right py-[20px] border-b border-[#d7d7d7] text-client-primary font-bold text-[1.8rem]">{order.total.toLocaleString()}đ</td>
+                                    <td className="w-[34%] text-right py-[20px] border-b border-[#d7d7d7] text-client-primary font-bold text-[18px]">{order.total.toLocaleString()}đ</td>
                                 </tr>
                                 <tr>
                                     <td className="w-[66%] text-left py-[20px] font-[600]">Phương thức thanh toán:</td>
@@ -134,7 +134,7 @@ export const CheckSuccessPage = () => {
                         </table>
                     </section>
                     <section className="border-[2px] border-dashed border-[#10293726] p-[20px]">
-                        <h2 className="text-[1.8rem] font-secondary mb-[20px]">Thông tin nhận hàng</h2>
+                        <h2 className="text-[18px] font-secondary mb-[20px]">Thông tin nhận hàng</h2>
                         <div className="text-client-text flex flex-col gap-[10px]">
                             <div className="flex items-center">
                                 <span className="font-bold min-w-[120px]">Họ tên:</span>

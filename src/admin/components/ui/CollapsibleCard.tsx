@@ -28,9 +28,9 @@ export const CollapsibleCard = ({
                 title={title}
                 subheader={subheader}
                 slotProps={{
-                    title: { sx: { fontWeight: 600, fontSize: "1.8rem" } },
+                    title: { sx: { fontWeight: 600, fontSize: "1.125rem" } },
                     subheader: {
-                        sx: { color: "#637381", fontSize: "1.4rem", mt: 0.5 },
+                        sx: { color: "#637381", fontSize: "0.875rem", mt: 0.5 },
                     },
                 }}
                 action={

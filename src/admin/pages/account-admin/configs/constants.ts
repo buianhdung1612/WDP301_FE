@@ -14,7 +14,7 @@ export const COLORS = {
 };
 
 export const STATUS_OPTIONS = [
+    { value: 'all', label: 'Tất cả' },
     { value: 'active', label: 'Hoạt động' },
     { value: 'inactive', label: 'Tạm dừng' },
-    { value: 'initial', label: 'Khởi tạo' },
 ];

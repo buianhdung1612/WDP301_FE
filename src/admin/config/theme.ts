@@ -47,7 +47,7 @@ export const adminTheme = createTheme({
         MuiMenuItem: {
             styleOverrides: {
                 root: {
-                    fontSize: '1.4rem',
+                    fontSize: '0.875rem',
                     color: '#1C252E',
                     marginBottom: '4px',
                     padding: '6px 8px',
@@ -62,11 +62,15 @@ export const adminTheme = createTheme({
             styleOverrides: {
                 root: {
                     color: "#919EAB",
-                    fontSize: "1.5rem",
+                    fontSize: "0.875rem",
+                    fontWeight: "500",
+                    '&.MuiInputLabel-shrink': {
+                        fontWeight: "600",
+                    },
                     '&.Mui-focused': {
                         color: "#1C252E",
                         fontWeight: "600",
-                        fontSize: "1.5rem"
+                        fontSize: "0.875rem"
                     },
                     '&.Mui-error': {
                         color: '#FF5630 !important'
@@ -78,8 +82,9 @@ export const adminTheme = createTheme({
             styleOverrides: {
                 root: {
                     color: "#1C252E",
+                    backgroundColor: "white !important",
                     borderRadius: "8px",
-                    fontSize: "1.5rem",
+                    fontSize: "0.875rem",
                     '& .MuiOutlinedInput-notchedOutline': {
                         borderColor: "#919eab33",
                         transition: 'border-color 0.2s',
@@ -99,6 +104,12 @@ export const adminTheme = createTheme({
                 },
                 input: {
                     padding: "16px 14px",
+                    backgroundColor: "white !important",
+                    borderRadius: "8px",
+                    "&:-webkit-autofill": {
+                        "WebkitBoxShadow": "0 0 0 100px white inset !important",
+                        "WebkitTextFillColor": "#1C252E !important",
+                    },
                 },
                 inputMultiline: {
                     padding: 0,
@@ -112,7 +123,14 @@ export const adminTheme = createTheme({
         },
         MuiInputBase: {
             styleOverrides: {
-                root: { '&.Mui-error': { color: '#FF5630' } },
+                root: {
+                    backgroundColor: "white !important",
+                    '&.Mui-error': { color: '#FF5630' },
+                    "& input:-webkit-autofill": {
+                        "WebkitBoxShadow": "0 0 0 100px white inset !important",
+                        "WebkitTextFillColor": "#1C252E !important",
+                    },
+                },
             },
         },
         MuiCheckbox: {
@@ -127,18 +145,66 @@ export const adminTheme = createTheme({
                     padding: '4px',
                     color: '#637381',
                     '&.Mui-checked, &.Mui-checkbox-indeterminate': { color: '#00A76F' },
-                    '& .MuiSvgIcon-root': { fontSize: '2rem' },
+                    '& .MuiSvgIcon-root': { fontSize: '1.25rem' },
                 },
             },
         },
         MuiPaper: {
             styleOverrides: {
                 root: {
-                    ...backgroundPopup,
                     padding: "4px",
                     '& .MuiList-root': { padding: 0 },
+                    '&.background-popup': {
+                        ...backgroundPopup,
+                    }
                 },
             }
+        },
+        MuiMenu: {
+            defaultProps: {
+                PaperProps: {
+                    className: 'background-popup'
+                }
+            }
+        },
+        MuiPopover: {
+            defaultProps: {
+                PaperProps: {
+                    className: 'background-popup'
+                }
+            }
+        },
+        MuiSelect: {
+            defaultProps: {
+                MenuProps: {
+                    PaperProps: {
+                        className: 'background-popup'
+                    }
+                }
+            },
+            styleOverrides: {
+                root: {
+                    backgroundColor: "white !important",
+                    borderRadius: "8px",
+                    '&.Mui-error .MuiSelect-icon': { color: '#FF5630 !important' }
+                },
+                icon: {
+                    width: 18, height: 18, color: "#637381", backgroundColor: "currentColor",
+                    mask: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 16a1 1 0 0 1-.64-.23l-6-5a1 1 0 1 1 1.28-1.54L12 13.71l5.36-4.32a1 1 0 0 1 1.41.15a1 1 0 0 1-.14 1.46l-6 4.83A1 1 0 0 1 12 16'/%3E%3C/svg%3E\") center / contain no-repeat",
+                    WebkitMask: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 16a1 1 0 0 1-.64-.23l-6-5a1 1 0 1 1 1.28-1.54L12 13.71l5.36-4.32a1 1 0 0 1 1.41.15a1 1 0 0 1-.14 1.46l-6 4.83A1 1 0 0 1 12 16'/%3E%3C/svg%3E\") center / contain no-repeat",
+                    "&.MuiSelect-iconOpen": { transform: "rotate(180deg)" },
+                    "& path": { display: "none" }
+                }
+            }
+        },
+        MuiAutocomplete: {
+            defaultProps: {
+                slotProps: {
+                    paper: {
+                        className: 'background-popup'
+                    }
+                }
+            } as any
         },
         MuiDataGrid: {
             styleOverrides: {
@@ -154,22 +220,10 @@ export const adminTheme = createTheme({
                 }
             }
         },
-        MuiSelect: {
-            styleOverrides: {
-                root: { '&.Mui-error .MuiSelect-icon': { color: '#FF5630 !important' } },
-                icon: {
-                    width: 18, height: 18, color: "#637381", backgroundColor: "currentColor",
-                    mask: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 16a1 1 0 0 1-.64-.23l-6-5a1 1 0 1 1 1.28-1.54L12 13.71l5.36-4.32a1 1 0 0 1 1.41.15a1 1 0 0 1-.14 1.46l-6 4.83A1 1 0 0 1 12 16'/%3E%3C/svg%3E\") center / contain no-repeat",
-                    WebkitMask: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 16a1 1 0 0 1-.64-.23l-6-5a1 1 0 1 1 1.28-1.54L12 13.71l5.36-4.32a1 1 0 0 1 1.41.15a1 1 0 0 1-.14 1.46l-6 4.83A1 1 0 0 1 12 16'/%3E%3C/svg%3E\") center / contain no-repeat",
-                    "&.MuiSelect-iconOpen": { transform: "rotate(180deg)" },
-                    "& path": { display: "none" }
-                }
-            }
-        },
         MuiFormHelperText: {
             styleOverrides: {
                 root: {
-                    fontSize: '1.2rem', fontWeight: '500', marginTop: '6px',
+                    fontSize: '0.75rem', fontWeight: '500', marginTop: '6px',
                     marginLeft: '12px', marginRight: '12px',
                     '&.Mui-error': { color: '#FF5630 !important' }
                 }
@@ -185,7 +239,7 @@ export const adminTheme = createTheme({
         MuiTooltip: {
             styleOverrides: {
                 tooltip: {
-                    fontSize: "1.1rem",
+                    fontSize: "0.6875rem",
                     backgroundColor: "#1C252E",
                     borderRadius: "6px",
 

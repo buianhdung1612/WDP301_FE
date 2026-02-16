@@ -17,6 +17,11 @@ export const getAccounts = async (params?: any) => {
     return response.data;
 };
 
+export const getStaffByService = async (serviceId: string) => {
+    const response = await apiApp.get(`${BASE_URL}/staff-by-service`, { ...withAuth(), params: { serviceId } });
+    return response.data;
+};
+
 export const getAccountById = async (id: string) => {
     const response = await apiApp.get(`${BASE_URL}/detail/${id}`, withAuth());
     return response.data;

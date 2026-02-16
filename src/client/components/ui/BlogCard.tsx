@@ -21,7 +21,7 @@ export const BlogCard = ({ product }: { product: Product }) => {
                         alt={product.title}
                     />
                     {product.isSale && (
-                        <div className="px-[10px] absolute right-[20px] top-[20px] inline-flex text-[1.2rem] uppercase tracking-normal text-white bg-client-primary rounded-[30px] min-h-[25px] min-w-[50px] items-center justify-center">
+                        <div className="px-[10px] absolute right-[20px] top-[20px] inline-flex text-[12px] uppercase tracking-normal text-white bg-client-primary rounded-[30px] min-h-[25px] min-w-[50px] items-center justify-center">
                             SALE
                         </div>
                     )}
@@ -36,7 +36,7 @@ export const BlogCard = ({ product }: { product: Product }) => {
                             <StarIcon
                                 key={i}
                                 sx={{
-                                    fontSize: "2rem !important",
+                                    fontSize: "20px !important",
                                     color: i < product.rating ? "#ffbb00 !important" : "#ccc !important",
                                 }}
                             />
@@ -46,7 +46,7 @@ export const BlogCard = ({ product }: { product: Product }) => {
                     {/* Title */}
                     <Link
                         to={product.url}
-                        className="inline-block text-client-secondary text-[2.4rem] 2xl:text-[2.3rem] line-clamp-1 font-secondary leading-[1.8] transition-all duration-[350ms] ease-in-out my-[10px] group-hover:text-white hover:opacity-70"
+                        className="inline-block text-client-secondary text-[24px] 2xl:text-[23px] line-clamp-1 font-secondary leading-[1.8] transition-all duration-[350ms] ease-in-out my-[10px] group-hover:text-white hover:opacity-70"
                     >
                         {product.title}
                     </Link>
@@ -64,7 +64,7 @@ export const BlogCard = ({ product }: { product: Product }) => {
                             <div className="w-[50px] h-[50px] rounded-full bg-client-primary flex items-center justify-center duration-[375ms] ease-[cubic-bezier(0.7,0,0.3,1)] group-hover:bg-client-secondary">
                                 <ShoppingCartOutlinedIcon
                                     className="text-white"
-                                    sx={{ fontSize: "2.5rem" }}
+                                    sx={{ fontSize: "40px" }}
                                 />
                             </div>
                         </div>

@@ -175,9 +175,9 @@ export const ProductAside = () => {
                 />
                 <button
                     type="submit"
-                    className="absolute top-0 right-0 p-[10px] rotate-90 rounded-full text-white bg-client-primary hover:bg-client-secondary transition-default cursor-pointer w-[5.7rem] h-[5.7rem] flex items-center justify-center"
+                    className="absolute top-0 right-0 p-[10px] rotate-90 rounded-full text-white bg-client-primary hover:bg-client-secondary transition-default cursor-pointer w-[57px] h-[57px] flex items-center justify-center"
                 >
-                    <SearchIcon sx={{ fontSize: "3.5rem" }} />
+                    <SearchIcon sx={{ fontSize: "35px" }} />
                 </button>
             </form>
 
@@ -223,7 +223,7 @@ export const ProductAside = () => {
                     </div>
 
                     {/* Giá hiển thị */}
-                    <div className="flex justify-between mt-[20px] text-client-text text-[1.4rem]">
+                    <div className="flex justify-between mt-[20px] text-client-text text-[14px]">
                         <span>
                             Giá: {(minPriceRange / 100 * maxPrice).toLocaleString("vi-VN")}đ - {(maxPriceRange / 100 * maxPrice).toLocaleString("vi-VN")}đ
                         </span>
@@ -231,7 +231,7 @@ export const ProductAside = () => {
                 </div>
                 <div className="relative block min-w-[135px] mt-[15px]">
                     <button
-                        className={`button-text cursor-pointer before:bg-white after:bg-white bg-client-primary hover:bg-client-secondary text-white hover:[box-shadow:0_0_30px_#ffffff33] inline-block relative mask-[url('/mask-bg-button.svg')] mask-no-repeat mask-center mask-[size:100%] rounded-[10px] px-[40px] py-[10px] text-[1.6rem] font-secondary transition-default`}
+                        className={`button-text cursor-pointer before:bg-white after:bg-white bg-client-primary hover:bg-client-secondary text-white hover:[box-shadow:0_0_30px_#ffffff33] inline-block relative mask-[url('/mask-bg-button.svg')] mask-no-repeat mask-center mask-[size:100%] rounded-[10px] px-[40px] py-[10px] text-[16px] font-secondary transition-default`}
                     >
                         Lọc
                     </button>
@@ -248,13 +248,13 @@ export const ProductAside = () => {
                                 <img src={item.primaryImage} alt="" width={80} height={84} />
                             </Link>
                             <div>
-                                <Link to="#" className="block text-[1.7rem] font-secondary text-client-secondary hover:text-[#10293799] transition-default mb-[2px] line-clamp-1">{item.title}</Link>
+                                <Link to="#" className="block text-[17px] font-secondary text-client-secondary hover:text-[#10293799] transition-default mb-[2px] line-clamp-1">{item.title}</Link>
                                 <div className="flex items-center mb-[7px] ml-[-5px]">
                                     {[...Array(5)].map((_, i) => (
                                         <StarIcon
                                             key={i}
                                             sx={{
-                                                fontSize: "1.8rem !important",
+                                                fontSize: "18px !important",
                                                 color: i < item.rating ? "#ffbb00 !important" : "#ccc !important",
                                             }}
                                         />
@@ -278,7 +278,7 @@ export const ProductAside = () => {
                 <ProductAsideTitle title="Lọc theo thẻ" />
                 <div className="gap-[15px] mt-[10px] p-[20px] bg-[#fff0f066] rounded-[20px] flex flex-wrap">
                     {filterTags.map(item => (
-                        <Link to={item.url} className="text-client-secondary bg-white hover:text-white hover:bg-client-secondary transition-default py-[8px] px-[16px] text-[1.4rem] border border-[#10293726] rounded-[35px]">
+                        <Link to={item.url} className="text-client-secondary bg-white hover:text-white hover:bg-client-secondary transition-default py-[8px] px-[16px] text-[14px] border border-[#10293726] rounded-[35px]">
                             {item.title}
                         </Link>
                     ))}

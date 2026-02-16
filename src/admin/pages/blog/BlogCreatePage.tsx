@@ -15,7 +15,6 @@ import { prefixAdmin } from "../../constants/routes"
 
 import { useNestedBlogCategories } from "../blog-category/hooks/useBlogCategory";
 import { CategoryTreeSelectGeneric } from "../../components/ui/CategoryTreeSelectGeneric";
-import { useBlogTags } from "./hooks/useBlog";
 
 export const BlogCreatePage = () => {
     const { t } = useTranslation();
@@ -46,7 +45,7 @@ export const BlogCreatePage = () => {
                         padding: 0,
                     },
                     option: {
-                        fontSize: '1.4rem',
+                        fontSize: '0.875rem',
                         padding: '6px',
                         marginBottom: '4px',
                         borderRadius: '6px',
@@ -57,7 +56,6 @@ export const BlogCreatePage = () => {
     });
 
     const { data: blogCategories = [] } = useNestedBlogCategories();
-    const { data: availableTags = [] } = useBlogTags();
     const { mutate: create, isPending } = useCreateBlog();
 
     const {
@@ -227,10 +225,10 @@ export const BlogCreatePage = () => {
                                 disabled={isPending}
                                 sx={{
                                     background: '#1C252E',
-                                    minHeight: "4.8rem",
-                                    minWidth: "6.4rem",
+                                    minHeight: "3rem",
+                                    minWidth: "4rem",
                                     fontWeight: 700,
-                                    fontSize: "1.4rem",
+                                    fontSize: "0.875rem",
                                     padding: "8px 16px",
                                     borderRadius: "8px",
                                     textTransform: "none",

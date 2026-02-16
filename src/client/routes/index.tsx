@@ -25,6 +25,12 @@ import { ReviewPage } from "../pages/dashboard/Review";
 import { OrderDetailPage } from "../pages/dashboard/OrderDetail";
 import { OrderHistoryPage } from "../pages/dashboard/OrderHistory";
 import { OrderInvoicePage } from "../pages/dashboard/OrderInvoice";
+import { PetListPage } from "../pages/dashboard/PetList";
+import { PetCreatePage } from "../pages/dashboard/PetCreate";
+import { PetEditPage } from "../pages/dashboard/PetEdit";
+import { BookingSuccessPage } from "../pages/booking/BookingSuccess";
+import { BookingHistoryPage } from "../pages/dashboard/BookingHistory";
+import { BookingDetailPage } from "../pages/dashboard/BookingDetail";
 import { AuthGuard } from "../components/guards/AuthGuard";
 
 export const ClientRoutes: RouteObject[] = [
@@ -32,11 +38,17 @@ export const ClientRoutes: RouteObject[] = [
     { path: "/product/detail/:slug", element: <ProductDetailPage /> },
     { path: "/shop", element: <ProductListPage /> },
     { path: "/bai-viet", element: <BlogListPage /> },
-    { path: "/dat-lich", element: <BookingPage /> },
     { path: "/cart", element: <CartPage /> },
     { path: "/checkout", element: <CheckoutPage /> },
     { path: "/order/success", element: <CheckSuccessPage /> },
-    { path: "/dich-vu", element: <ServicePage /> },
+    { path: "/services", element: <ServicePage /> },
+    {
+        element: <AuthGuard />,
+        children: [
+            { path: "/services/booking", element: <BookingPage /> },
+            { path: "/services/booking/success", element: <BookingSuccessPage /> },
+        ]
+    },
     { path: "/auth/register", element: <RegisterPage /> },
     { path: "/auth/login", element: <LoginPage /> },
     { path: "/auth/forgot-password", element: <ForgotPasswordPage /> },
@@ -58,6 +70,11 @@ export const ClientRoutes: RouteObject[] = [
             { path: "order/invoice/:id", element: <OrderInvoicePage /> },
             { path: "order/detail/:id", element: <OrderDetailPage /> },
             { path: "orders", element: <OrderHistoryPage /> },
+            { path: "bookings", element: <BookingHistoryPage /> },
+            { path: "booking/detail/:id", element: <BookingDetailPage /> },
+            { path: "pet", element: <PetListPage /> },
+            { path: "pet/create", element: <PetCreatePage /> },
+            { path: "pet/edit/:id", element: <PetEditPage /> },
         ]
     },
 ];

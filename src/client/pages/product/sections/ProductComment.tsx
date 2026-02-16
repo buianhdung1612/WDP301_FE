@@ -9,16 +9,16 @@ export const ProductComment = () => {
     return (
         <div>
             <div className="app-container">
-                <h2 className="text-[3.5rem] 2xl:text-[2.8rem] font-secondary text-client-secondary">Đánh giá của khách hàng</h2>
+                <h2 className="text-[35px] 2xl:text-[28px] font-secondary text-client-secondary">Đánh giá của khách hàng</h2>
                 <ul className="mb-[60px]">
                     <li className="py-[30px] border-b border-[#10293726] mb-[30pxx] flex">
                         <div className="flex">
-                            <img src="https://secure.gravatar.com/avatar/4b4d70c085ba692974261304da0860f360cb1f3a616203402e9e19f2d3bda5f8?s=60&d=mm&r=g" alt="" width={60} height={60} className="w-[6rem] h-[6rem] rounded-[10px] border border-[#e1dde7]" />
+                            <img src="https://secure.gravatar.com/avatar/4b4d70c085ba692974261304da0860f360cb1f3a616203402e9e19f2d3bda5f8?s=60&d=mm&r=g" alt="" width={60} height={60} className="w-[60px] h-[60px] rounded-[10px] border border-[#e1dde7]" />
                             <div className="ml-[20px] w-[74.2%]">
                                 <div className="flex items-center mb-[10px]">
-                                    <strong className="font-secondary text-[1.6rem] text-client-secondary">Hihhihi</strong>
+                                    <strong className="font-secondary text-[16px] text-client-secondary">Hihhihi</strong>
                                     <span className="text-client-text mx-[5px]">-</span>
-                                    <span className="text-client-text text-[1.4rem]">24 / 6 / 2025</span>
+                                    <span className="text-client-text text-[14px]">24 / 6 / 2025</span>
                                 </div>
                                 <p className="text-client-text leading-[1.8]">Sản phẩm thật sự vượt ngoài mong đợi! 💯 Chất lượng tốt, thiết kế tinh tế và sử dụng rất dễ dàng. Sau một thời gian trải nghiệm, mình cảm thấy rất hài lòng — đáng đồng tiền bát gạo. Giao hàng nhanh, đóng gói cẩn thận, dịch vụ hỗ trợ cũng cực kỳ nhiệt tình. Sẽ tiếp tục ủng hộ trong tương lai! 🌟</p>
                             </div>
@@ -28,7 +28,7 @@ export const ProductComment = () => {
                                 <StarIcon
                                     key={i}
                                     sx={{
-                                        fontSize: "2rem !important",
+                                        fontSize: "20px !important",
                                         color: i < 5 ? "#ffbb00 !important" : "#ccc !important",
                                     }}
                                 />
@@ -37,12 +37,12 @@ export const ProductComment = () => {
                     </li>
                     <li className="py-[30px] border-b border-[#10293726] mb-[30pxx] flex">
                         <div className="flex">
-                            <img src="https://secure.gravatar.com/avatar/4b4d70c085ba692974261304da0860f360cb1f3a616203402e9e19f2d3bda5f8?s=60&d=mm&r=g" alt="" width={60} height={60} className="w-[6rem] h-[6rem] rounded-[10px] border border-[#e1dde7]" />
+                            <img src="https://secure.gravatar.com/avatar/4b4d70c085ba692974261304da0860f360cb1f3a616203402e9e19f2d3bda5f8?s=60&d=mm&r=g" alt="" width={60} height={60} className="w-[60px] h-[60px] rounded-[10px] border border-[#e1dde7]" />
                             <div className="ml-[20px] w-[74.2%]">
                                 <div className="flex items-center mb-[10px]">
-                                    <strong className="font-secondary text-[1.6rem] text-client-secondary">Hihhihi</strong>
+                                    <strong className="font-secondary text-[16px] text-client-secondary">Hihhihi</strong>
                                     <span className="text-client-text mx-[5px]">-</span>
-                                    <span className="text-client-text text-[1.4rem]">24 / 6 / 2025</span>
+                                    <span className="text-client-text text-[14px]">24 / 6 / 2025</span>
                                 </div>
                                 <p className="text-client-text leading-[1.8]">Sản phẩm thật sự vượt ngoài mong đợi! 💯 Chất lượng tốt, thiết kế tinh tế và sử dụng rất dễ dàng. Sau một thời gian trải nghiệm, mình cảm thấy rất hài lòng — đáng đồng tiền bát gạo. Giao hàng nhanh, đóng gói cẩn thận, dịch vụ hỗ trợ cũng cực kỳ nhiệt tình. Sẽ tiếp tục ủng hộ trong tương lai! 🌟</p>
                             </div>
@@ -52,7 +52,7 @@ export const ProductComment = () => {
                                 <StarIcon
                                     key={i}
                                     sx={{
-                                        fontSize: "2rem !important",
+                                        fontSize: "20px !important",
                                         color: i < 5 ? "#ffbb00 !important" : "#ccc !important",
                                     }}
                                 />
@@ -62,7 +62,7 @@ export const ProductComment = () => {
                 </ul>
             </div>
             <form className="app-container  mt-[70px] pb-[150px] 2xl:pb-[120px]">
-                <h3 className="text-[3rem] 2xl:text-[2.4rem] font-secondary text-client-secondary mb-[20px]">Thêm đánh giá</h3>
+                <h3 className="text-[30px] 2xl:text-[24px] font-secondary text-client-secondary mb-[20px]">Thêm đánh giá</h3>
                 <p className="text-client-text font-[500] mb-[20px]">Địa chỉ email của bạn sẽ không được công khai. Các trường bắt buộc được đánh dấu <span className="text-[#FF0000]">*</span></p>
                 <label className="text-client-text block font-[500] mb-[5px]" htmlFor="">Đánh giá của bạn</label>
                 <div className="flex mb-[20px]">
@@ -81,14 +81,14 @@ export const ProductComment = () => {
                                 {isActive ? (
                                     <StarIcon
                                         sx={{
-                                            fontSize: "2.8rem",
+                                            fontSize: "28px",
                                             color: "#FF6262",
                                         }}
                                     />
                                 ) : (
                                     <StarBorderIcon
                                         sx={{
-                                            fontSize: "2.8rem",
+                                            fontSize: "28px",
                                             color: "#ccc",
                                         }}
                                     />

@@ -74,7 +74,7 @@ export const AgeRangeListDialog = ({ open, onClose }: AgeRangeListDialogProps) =
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    fontSize: '1.8rem',
+                    fontSize: '1.125rem',
                     fontWeight: 700,
                     padding: "8px 8px 16px 8px"
                 }}>
@@ -93,9 +93,9 @@ export const AgeRangeListDialog = ({ open, onClose }: AgeRangeListDialogProps) =
                             onClick={handleCreate}
                             sx={{
                                 background: '#1C252E',
-                                minHeight: "3.6rem",
+                                minHeight: "2.25rem",
                                 fontWeight: 700,
-                                fontSize: "1.4rem",
+                                fontSize: "0.875rem",
                                 padding: "6px 16px",
                                 borderRadius: "8px",
                                 textTransform: "none",
@@ -116,7 +116,7 @@ export const AgeRangeListDialog = ({ open, onClose }: AgeRangeListDialogProps) =
                                 <CircularProgress />
                             </Box>
                         ) : ageRanges.length === 0 ? (
-                            <Typography sx={{ textAlign: 'center', color: '#919EAB', py: 4, fontSize: '1.4rem' }}>
+                            <Typography sx={{ textAlign: 'center', color: '#919EAB', py: 4, fontSize: '0.875rem' }}>
                                 {t("admin.product.age_range.no_data")}
                             </Typography>
                         ) : (
@@ -139,7 +139,7 @@ export const AgeRangeListDialog = ({ open, onClose }: AgeRangeListDialogProps) =
                                                             '&:hover': { backgroundColor: 'rgba(99, 115, 129, 0.08)' }
                                                         }}
                                                     >
-                                                        <EditIcon sx={{ fontSize: '1.8rem', color: '#637381' }} />
+                                                        <EditIcon sx={{ fontSize: '1.125rem', color: '#637381' }} />
                                                     </IconButton>
                                                 </Tooltip>
                                                 <Tooltip title={t("admin.common.delete")}>
@@ -150,7 +150,7 @@ export const AgeRangeListDialog = ({ open, onClose }: AgeRangeListDialogProps) =
                                                             '&:hover': { backgroundColor: 'rgba(255, 86, 48, 0.08)' }
                                                         }}
                                                     >
-                                                        <DeleteIcon sx={{ fontSize: '1.8rem', color: '#FF5630' }} />
+                                                        <DeleteIcon sx={{ fontSize: '1.125rem', color: '#FF5630' }} />
                                                     </IconButton>
                                                 </Tooltip>
                                             </Stack>
@@ -159,8 +159,8 @@ export const AgeRangeListDialog = ({ open, onClose }: AgeRangeListDialogProps) =
                                         <ListItemText
                                             primary={item.name}
                                             secondary={item.description}
-                                            primaryTypographyProps={{ fontSize: '1.5rem', fontWeight: 600, color: '#212B36' }}
-                                            secondaryTypographyProps={{ fontSize: '1.3rem' }}
+                                            primaryTypographyProps={{ fontSize: '0.9375rem', fontWeight: 600, color: '#212B36' }}
+                                            secondaryTypographyProps={{ fontSize: '0.8125rem' }}
                                         />
                                     </ListItem>
                                 ))}

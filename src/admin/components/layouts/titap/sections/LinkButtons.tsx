@@ -72,7 +72,7 @@ export const LinkButtons = memo(({ editor, active }: LinkButtonProps) => {
                     }
                 }}
             >
-                <Typography variant="subtitle2" sx={{ mb: "10px", fontWeight: 600, fontSize: "1.4rem" }}>{t("admin.tiptap.link_dialog.title")}</Typography>
+                <Typography variant="subtitle2" sx={{ mb: "10px", fontWeight: 600, fontSize: "0.875rem" }}>{t("admin.tiptap.link_dialog.title")}</Typography>
 
                 <Stack direction="row" spacing={1} alignItems="center">
                     <TextField
@@ -85,7 +85,7 @@ export const LinkButtons = memo(({ editor, active }: LinkButtonProps) => {
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 borderRadius: '8px',
-                                fontSize: "1.4rem",
+                                fontSize: "0.875rem",
                                 padding: "8px 14px",
                                 height: "40px",
 
@@ -106,7 +106,7 @@ export const LinkButtons = memo(({ editor, active }: LinkButtonProps) => {
                         sx={{
                             bgcolor: linkUrl.trim() ? '#1C252E' : '#919eab3d',
                             color: linkUrl.trim() ? '#fff' : '#919eabcc',
-                            fontSize: "1.4rem",
+                            fontSize: "0.875rem",
                             fontWeight: "700",
                             borderRadius: '8px',
                             height: '36px',

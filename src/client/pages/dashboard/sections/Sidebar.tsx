@@ -64,7 +64,7 @@ export const Sidebar = () => {
                     <div className="px-[40px] pt-[40px] pb-[30px] bg-white text-center">
                         <div className="mx-auto w-[150px] h-[150px] shadow-[0px_7px_29px_0px_#64646f33] border-[3px] border-white rounded-full relative group">
                             <img src={user.avatar || "https://i.imgur.com/CgtIu6c.jpeg"} alt="" className="w-full h-full object-cover rounded-full" />
-                            <label htmlFor="profile_photo" className="hover:bg-client-primary hover:text-white cursor-pointer transition-default w-[30px] h-[30px] text-[1.2rem] bg-white flex justify-center items-center absolute bottom-[5px] right-[5px] text-[#333] border-[#dddddd] rounded-full z-10">
+                            <label htmlFor="profile_photo" className="hover:bg-client-primary hover:text-white cursor-pointer transition-default w-[30px] h-[30px] text-[12px] bg-white flex justify-center items-center absolute bottom-[5px] right-[5px] text-[#333] border-[#dddddd] rounded-full z-10">
                                 <Camera />
                             </label>
                             {uploading && (
@@ -81,60 +81,72 @@ export const Sidebar = () => {
                                 disabled={uploading}
                             />
                         </div>
-                        <h3 className="text-[2.2rem] mt-[22px] mb-[5px] font-[600] text-client-secondary uppercase leading-tight">{user.fullName}</h3>
+                        <h3 className="text-[22px] mt-[22px] mb-[5px] font-[600] text-client-secondary uppercase leading-tight">{user.fullName}</h3>
                         <p className="text-[#7d7b7b] font-[500]">{user.email}</p>
                     </div>
                     <ul className="">
-                        <li className="bg-[#FFF0F0] text-[1.4rem] my-[10px] font-[500] py-[12px] px-[25px] uppercase text-client-primary border-y border-dashed border-[#dddddd]">Tổng quan</li>
+                        <li className="bg-[#FFF0F0] text-[14px] my-[10px] font-[500] py-[12px] px-[25px] uppercase text-client-primary border-y border-dashed border-[#dddddd]">Tổng quan</li>
                         <li>
-                            <Link to={"/dashboard/overview"} className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/overview" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                                <AlignJustify className="w-[2rem] h-[2rem]" />
+                            <Link to={"/dashboard/overview"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/overview" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <AlignJustify className="w-[20px] h-[20px]" />
                                 Tổng quan
                             </Link>
                         </li>
                         <li>
-                            <Link to={"/dashboard/orders"} className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/order") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                                <ShoppingBag className="w-[2rem] h-[2rem]" />
+                            <Link to={"/dashboard/orders"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/order") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <ShoppingBag className="w-[20px] h-[20px]" />
                                 Đơn hàng
                             </Link>
                         </li>
-                        <li className="bg-[#FFF0F0] text-[1.4rem] my-[10px] font-[500] py-[12px] px-[25px] uppercase text-client-primary border-y border-dashed border-[#dddddd]">Cài đặt tài khoản</li>
                         <li>
-                            <Link to={"/dashboard/profile"} className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/profile" || pathname === "/dashboard/profile/edit" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                                <User className="w-[2rem] h-[2rem]" />
+                            <Link to={"/dashboard/bookings"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/booking") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <AlignJustify className="w-[20px] h-[20px]" />
+                                Dịch vụ
+                            </Link>
+                        </li>
+                        <li className="bg-[#FFF0F0] text-[14px] my-[10px] font-[500] py-[12px] px-[25px] uppercase text-client-primary border-y border-dashed border-[#dddddd]">Cài đặt tài khoản</li>
+                        <li>
+                            <Link to={"/dashboard/profile"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/profile" || pathname === "/dashboard/profile/edit" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <User className="w-[20px] h-[20px]" />
                                 Thông tin cá nhân
                             </Link>
                         </li>
                         <li>
-                            <Link to={"/dashboard/address"} className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/address") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                                <Arcade className="w-[2rem] h-[2rem]" />
+                            <Link to={"/dashboard/address"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/address") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <Arcade className="w-[20px] h-[20px]" />
                                 Địa chỉ
                             </Link>
                         </li>
                         <li>
-                            <Link to={"/dashboard/wishlist"} className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/wishlist" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                                <Heart className="w-[2rem] h-[2rem]" />
+                            <Link to={"/dashboard/pet"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/pet") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <AlignJustify className="w-[20px] h-[20px]" />
+                                Thú cưng
+                            </Link>
+                        </li>
+                        <li>
+                            <Link to={"/dashboard/wishlist"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/wishlist" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <Heart className="w-[20px] h-[20px]" />
                                 Yêu thích
                             </Link>
                         </li>
                         <li>
-                            <Link to={"/dashboard/review"} className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/review" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                                <Star className="w-[2rem] h-[2rem]" />
+                            <Link to={"/dashboard/review"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/review" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <Star className="w-[20px] h-[20px]" />
                                 Đánh giá
                             </Link>
                         </li>
                         <li>
-                            <Link to={"/dashboard/change-password"} className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/change-password" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                                <Lock className="w-[2rem] h-[2rem]" />
+                            <Link to={"/dashboard/change-password"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/change-password" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <Lock className="w-[20px] h-[20px]" />
                                 Đổi mật khẩu
                             </Link>
                         </li>
                         <li>
                             <button
                                 onClick={handleLogout}
-                                className="inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] text-[#7d7b7b] hover:text-client-primary transition-default w-full"
+                                className="inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] text-[#7d7b7b] hover:text-client-primary transition-default w-full"
                             >
-                                <LogOut className="w-[2rem] h-[2rem]" />
+                                <LogOut className="w-[20px] h-[20px]" />
                                 Đăng xuất
                             </button>
                         </li>

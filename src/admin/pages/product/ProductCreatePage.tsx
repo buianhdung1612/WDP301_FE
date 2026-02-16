@@ -12,7 +12,7 @@ import { useCreateProductData, useCreateProduct } from "./hooks/useProduct";
 import { toast } from "react-toastify";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createProductSchema, CreateProductFormValues } from "../../schemas/product.schema";
+import { createProductSchema } from "../../schemas/product.schema";
 
 interface CustomFile extends File {
     preview: string;
@@ -43,8 +43,8 @@ export const ProductCreatePage = () => {
         setValue,
         watch,
         reset,
-        formState: { errors }
-    } = useForm<CreateProductFormValues>({
+        formState: { }
+    } = useForm<any>({
         resolver: zodResolver(createProductSchema),
         defaultValues: {
             name: "",
@@ -103,7 +103,7 @@ export const ProductCreatePage = () => {
                         "& .MuiTableCell-root": {
                             fontWeight: 600,
                             color: "#637381",
-                            fontSize: "1.6rem",
+                            fontSize: "1rem",
                         }
                     }
                 }
@@ -111,21 +111,21 @@ export const ProductCreatePage = () => {
             MuiTableCell: {
                 styleOverrides: {
                     root: {
-                        fontSize: "1.6rem",
+                        fontSize: "1rem",
                     }
                 }
             },
             MuiTypography: {
                 styleOverrides: {
                     root: {
-                        fontSize: "1.6rem",
+                        fontSize: "1rem",
                     },
                     subtitle1: {
-                        fontSize: "1.6rem",
+                        fontSize: "1rem",
                         fontWeight: 600,
                     },
                     subtitle2: {
-                        fontSize: "1.6rem",
+                        fontSize: "1rem",
                         fontWeight: 600,
                     }
                 }
@@ -133,21 +133,21 @@ export const ProductCreatePage = () => {
             MuiFormControlLabel: {
                 styleOverrides: {
                     label: {
-                        fontSize: "1.6rem",
+                        fontSize: "1rem",
                     }
                 }
             },
             MuiInputLabel: {
                 styleOverrides: {
                     root: {
-                        fontSize: "1.6rem",
+                        fontSize: "1rem",
                     }
                 }
             },
             MuiOutlinedInput: {
                 styleOverrides: {
                     root: {
-                        fontSize: "1.6rem",
+                        fontSize: "1rem",
                     }
                 }
             }
@@ -202,7 +202,6 @@ export const ProductCreatePage = () => {
         const combinations = cartesian(attrValues);
         const priceOldField = watch("priceOld");
         const priceNewField = watch("priceNew");
-        const stockField = watch("stock");
 
         const newVariants: Variant[] = combinations.map((combo, index) => ({
             id: `v-${Date.now()}-${index}`,
@@ -220,7 +219,7 @@ export const ProductCreatePage = () => {
         setVariants(prev => prev.map(v => v.id === id ? { ...v, [field]: value } : v));
     };
 
-    const onSubmit = (data: CreateProductFormValues) => {
+    const onSubmit = (data: any) => {
         const payload = {
             ...data,
             category: JSON.stringify(data.category),
@@ -489,7 +488,7 @@ export const ProductCreatePage = () => {
                                     <Button
                                         variant="outlined"
                                         size="large"
-                                        sx={{ mt: 2, textTransform: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '1.4rem' }}
+                                        sx={{ mt: 2, textTransform: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '0.875rem' }}
                                         onClick={generateVariants}
                                     >
                                         Tạo biến thể
@@ -528,7 +527,7 @@ export const ProductCreatePage = () => {
                                                                 </TableCell>
                                                                 {v.attributeValue.map((attr, idx) => (
                                                                     <TableCell key={idx}>
-                                                                        <Typography sx={{ fontSize: '1.4rem' }}>{attr.label}</Typography>
+                                                                        <Typography sx={{ fontSize: '0.875rem' }}>{attr.label}</Typography>
                                                                     </TableCell>
                                                                 ))}
                                                                 <TableCell>
@@ -559,7 +558,7 @@ export const ProductCreatePage = () => {
                                 sx={{
                                     background: '#1C252E',
                                     fontWeight: 700,
-                                    fontSize: "1.4rem",
+                                    fontSize: "0.875rem",
                                     padding: "8px 24px",
                                     borderRadius: "8px",
                                     textTransform: "none",

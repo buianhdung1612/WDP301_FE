@@ -52,8 +52,8 @@ export const ProductListSearch = () => {
                     <div onClick={toggleFilter} className='cursor-pointer flex items-center'>
                         <div className="text-client-secondary">Bộ lọc</div>
                         <TuneIcon style={{
-                            width: "1.6rem",
-                            height: "1.6rem",
+                            width: "16px",
+                            height: "16px",
                             marginLeft: "10px",
                             cursor: "pointer",
                             transform: isFilterOpen ? "rotate(90deg)" : "rotate(0deg)",
@@ -69,8 +69,8 @@ export const ProductListSearch = () => {
                     >
                         {selectedOption?.label}
                         <ArrowDropDownIcon style={{
-                            width: "2rem",
-                            height: "2rem",
+                            width: "20px",
+                            height: "20px",
                             cursor: "pointer",
                             marginLeft: "15px",
                             transform: menuOpen ? "rotate(180deg)" : "rotate(0deg)",
@@ -137,14 +137,14 @@ export const ProductListSearch = () => {
                 `}
             >
                 <div className='m-[10px] p-[20px] bg-[#fff0f0] rounded-[20px]'>
-                    <h2 className='mb-[15px] text-[2.1rem] font-secondary'>Đánh giá trung bình</h2>
+                    <h2 className='mb-[15px] text-[21px] font-secondary'>Đánh giá trung bình</h2>
                     <div className="flex items-center justify-between text-client-secondary hover:text-[#10293780] cursor-pointer transition-default mb-[15px]">
                         <div>
                             {[...Array(5)].map((_, i) => (
                                 <StarIcon
                                     key={i}
                                     sx={{
-                                        fontSize: "1.9rem !important",
+                                        fontSize: "19px !important",
                                         color: i < 4 ? "#ffbb00 !important" : "#ccc !important",
                                     }}
                                 />
@@ -158,7 +158,7 @@ export const ProductListSearch = () => {
                                 <StarIcon
                                     key={i}
                                     sx={{
-                                        fontSize: "1.9rem !important",
+                                        fontSize: "19px !important",
                                         color: i < 3 ? "#ffbb00 !important" : "#ccc !important",
                                     }}
                                 />
@@ -168,7 +168,7 @@ export const ProductListSearch = () => {
                     </div>
                 </div>
                 <div className='m-[10px] p-[20px] bg-[#fff0f0] rounded-[20px]'>
-                    <h2 className='mb-[15px] text-[2.1rem] font-secondary'>Lọc theo gram</h2>
+                    <h2 className='mb-[15px] text-[21px] font-secondary'>Lọc theo gram</h2>
                     <ul className='grid gap-y-[10px]'>
                         <li className='text-client-secondary pb-[5px] flex justify-between'>
                             <div className='hover:text-[#10293780] cursor-pointer transition-default'>10 Gói</div>
@@ -189,7 +189,7 @@ export const ProductListSearch = () => {
                     </ul>
                 </div>
                 <div className='m-[10px] p-[20px] bg-[#fff0f0] rounded-[20px]'>
-                    <h2 className='mb-[15px] text-[2.1rem] font-secondary'>Lọc theo kích cỡ</h2>
+                    <h2 className='mb-[15px] text-[21px] font-secondary'>Lọc theo kích cỡ</h2>
                     <ul className='grid gap-y-[10px]'>
                         <li className='text-client-secondary pb-[5px] flex justify-between'>
                             <div className='hover:text-[#10293780] cursor-pointer transition-default'>Lớn</div>

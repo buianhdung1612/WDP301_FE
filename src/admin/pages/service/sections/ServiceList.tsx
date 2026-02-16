@@ -28,7 +28,7 @@ export const ServiceList = () => {
                         columnUnsortedIcon: UnsortedIcon,
                         noRowsOverlay: () => (
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                                {isLoading ? <CircularProgress size={32} /> : <span className='text-[1.8rem]'>Không có dữ liệu để hiển thị</span>}
+                                {isLoading ? <CircularProgress size={32} /> : <span className='text-[1.125rem]'>Không có dữ liệu để hiển thị</span>}
                             </Box>
                         )
                     }}

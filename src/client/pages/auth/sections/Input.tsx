@@ -22,7 +22,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                     className="w-full mb-[5px] bg-white text-client-text outline-none border border-[#d7d7d7] px-[32px] py-[16px] rounded-[40px] focus:border focus:border-client-primary transition-default"
                     {...rest}
                 />
-                {error && <span className={`${errorColor} ml-[32px] text-[1.4rem]`}>{error}</span>}
+                {error && <span className={`${errorColor} ml-[32px] text-[14px]`}>{error}</span>}
             </p>
         )
     }

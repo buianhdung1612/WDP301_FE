@@ -72,16 +72,6 @@ const generateSlug = (title: string): string => {
         .trim();
 };
 
-/** Map status từ FE (uppercase) sang BE (lowercase) */
-const mapStatusToBackend = (status: string): string => {
-    const statusMap: Record<string, string> = {
-        'DRAFT': 'draft',
-        'PUBLISHED': 'published',
-        'ARCHIVED': 'archived',
-    };
-    return statusMap[status] || 'draft';
-};
-
 /** Map status từ BE (lowercase) sang FE (uppercase) */
 export const mapStatusToFrontend = (status: string): string => {
     const statusMap: Record<string, string> = {

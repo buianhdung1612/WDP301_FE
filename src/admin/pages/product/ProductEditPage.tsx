@@ -10,10 +10,10 @@ import { prefixAdmin } from "../../constants/routes";
 import { CategoryTreeSelectGeneric } from "../../components/ui/CategoryTreeSelectGeneric";
 import { useCreateProductData, useUpdateProduct, useProductDetail } from "./hooks/useProduct";
 import { toast } from "react-toastify";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createProductSchema, CreateProductFormValues } from "../../schemas/product.schema";
+import { createProductSchema } from "../../schemas/product.schema";
 
 interface CustomFile extends File {
     preview: string;
@@ -45,8 +45,8 @@ export const ProductEditPage = () => {
         setValue,
         watch,
         reset,
-        formState: { errors }
-    } = useForm<CreateProductFormValues>({
+        formState: { }
+    } = useForm<any>({
         resolver: zodResolver(createProductSchema),
         defaultValues: {
             name: "",
@@ -64,7 +64,7 @@ export const ProductEditPage = () => {
         }
     });
 
-    const [resetKey, setResetKey] = useState(0);
+    const [resetKey] = useState(0);
     const [expandedDetail, setExpandedDetail] = useState(true);
     const [expandedExtra, setExpandedExtra] = useState(true);
     const [expandedPrice, setExpandedPrice] = useState(true);
@@ -107,7 +107,7 @@ export const ProductEditPage = () => {
                         "& .MuiTableCell-root": {
                             fontWeight: 600,
                             color: "#637381",
-                            fontSize: "1.6rem",
+                            fontSize: "1rem",
                         }
                     }
                 }
@@ -115,21 +115,21 @@ export const ProductEditPage = () => {
             MuiTableCell: {
                 styleOverrides: {
                     root: {
-                        fontSize: "1.6rem",
+                        fontSize: "1rem",
                     }
                 }
             },
             MuiTypography: {
                 styleOverrides: {
                     root: {
-                        fontSize: "1.6rem",
+                        fontSize: "1rem",
                     },
                     subtitle1: {
-                        fontSize: "1.6rem",
+                        fontSize: "1rem",
                         fontWeight: 600,
                     },
                     subtitle2: {
-                        fontSize: "1.6rem",
+                        fontSize: "1rem",
                         fontWeight: 600,
                     }
                 }
@@ -137,21 +137,21 @@ export const ProductEditPage = () => {
             MuiFormControlLabel: {
                 styleOverrides: {
                     label: {
-                        fontSize: "1.6rem",
+                        fontSize: "1rem",
                     }
                 }
             },
             MuiInputLabel: {
                 styleOverrides: {
                     root: {
-                        fontSize: "1.6rem",
+                        fontSize: "1rem",
                     }
                 }
             },
             MuiOutlinedInput: {
                 styleOverrides: {
                     root: {
-                        fontSize: "1.6rem",
+                        fontSize: "1rem",
                     }
                 }
             }
@@ -252,7 +252,7 @@ export const ProductEditPage = () => {
         setVariants(prev => prev.map(v => v.id === id ? { ...v, [field]: value } : v));
     };
 
-    const onSubmit = (data: CreateProductFormValues) => {
+    const onSubmit = (data: any) => {
         const payload = {
             ...data,
             category: JSON.stringify(data.category),
@@ -500,7 +500,7 @@ export const ProductEditPage = () => {
                                     <Button
                                         variant="outlined"
                                         size="large"
-                                        sx={{ mt: 2, textTransform: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '1.4rem' }}
+                                        sx={{ mt: 2, textTransform: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '0.875rem' }}
                                         onClick={generateVariants}
                                     >
                                         Tạo biến thể
@@ -538,7 +538,7 @@ export const ProductEditPage = () => {
                                                                 </TableCell>
                                                                 {v.attributeValue.map((attr, idx) => (
                                                                     <TableCell key={idx}>
-                                                                        <Typography sx={{ fontSize: '1.4rem' }}>{attr.label}</Typography>
+                                                                        <Typography sx={{ fontSize: '0.875rem' }}>{attr.label}</Typography>
                                                                     </TableCell>
                                                                 ))}
                                                                 <TableCell>
@@ -569,7 +569,7 @@ export const ProductEditPage = () => {
                                 sx={{
                                     background: '#1C252E',
                                     fontWeight: 700,
-                                    fontSize: "1.4rem",
+                                    fontSize: "0.875rem",
                                     padding: "8px 24px",
                                     borderRadius: "8px",
                                     textTransform: "none",

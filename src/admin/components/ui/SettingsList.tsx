@@ -1,4 +1,4 @@
-import React, { type Dispatch, type SetStateAction, type ReactNode, useState, useRef } from 'react';
+import { type Dispatch, type SetStateAction, type ReactNode, useState, useRef } from 'react';
 import { GridDensity } from '@mui/x-data-grid';
 import Tooltip from '@mui/material/Tooltip';
 import Menu from '@mui/material/Menu';
@@ -50,7 +50,7 @@ export const SettingsList = ({ settings, onSettingsChange }: ToolbarProps) => {
                         textTransform: 'none',
                         minWidth: '64px',
                         minHeight: '30px',
-                        fontSize: '1.3rem',
+                        fontSize: '0.8125rem',
                         padding: '4px 8px',
                         fontWeight: 700,
                         borderRadius: '8px',
@@ -68,7 +68,7 @@ export const SettingsList = ({ settings, onSettingsChange }: ToolbarProps) => {
                         }
                     }}
                 >
-                    <SettingsIcon sx={{ fontSize: '1.8rem' }} />
+                    <SettingsIcon sx={{ fontSize: '1.125rem' }} />
                     Cài đặt
                 </Button>
             </Tooltip>
@@ -90,6 +90,9 @@ export const SettingsList = ({ settings, onSettingsChange }: ToolbarProps) => {
                     }
                 }}
                 slotProps={{
+                    paper: {
+                        className: 'background-popup',
+                    },
                     list: {
                         'aria-labelledby': 'settings-menu-trigger',
                     },

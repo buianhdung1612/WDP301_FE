@@ -8,8 +8,10 @@ import { adminTheme } from "../config/theme";
 import '../styles/index.css';
 import { useSidebar } from "../context/sidebar/useSidebar";
 import { SidebarProvider } from "../context/sidebar/SidebarProvider";
+import { useGetMe } from "../pages/authen/hooks/use-get-me";
 
 const LayoutAdminContent = () => {
+    useGetMe();
     const isBlogDetail = useMatch("/admin/blog/detail/:id");
     const { isOpen } = useSidebar();
     const [searchParams, setSearchParams] = useSearchParams();

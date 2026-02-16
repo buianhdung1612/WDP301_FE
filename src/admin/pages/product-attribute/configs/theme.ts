@@ -18,11 +18,11 @@ export const getProductAttributeTheme = (outerTheme: Theme) => createTheme(outer
             styleOverrides: {
                 root: {
                     color: "#919EAB",
-                    fontSize: "1.5rem",
+                    fontSize: "0.9375rem",
                     '&.Mui-focused': {
                         color: "#1C252E",
                         fontWeight: "600",
-                        fontSize: "1.5rem"
+                        fontSize: "0.9375rem"
                     }
                 }
             }
@@ -32,7 +32,7 @@ export const getProductAttributeTheme = (outerTheme: Theme) => createTheme(outer
                 root: {
                     color: "#1C252E",
                     borderRadius: "8px",
-                    fontSize: "1.5rem",
+                    fontSize: "0.9375rem",
                     '& .MuiOutlinedInput-notchedOutline': {
                         borderColor: "#919eab33",
                         transition: 'border-color 0.2s',
@@ -57,7 +57,7 @@ export const getProductAttributeTheme = (outerTheme: Theme) => createTheme(outer
                     padding: 0,
                 },
                 option: {
-                    fontSize: '1.4rem',
+                    fontSize: '0.875rem',
                     padding: '6px',
                     marginBottom: '4px',
                     borderRadius: '6px',
@@ -70,7 +70,7 @@ export const getProductAttributeTheme = (outerTheme: Theme) => createTheme(outer
                 root: {
                     backgroundColor: "rgba(0, 184, 217, 0.16)",
                     color: "#006C9C",
-                    fontSize: "1.3rem",
+                    fontSize: "0.8125rem",
                     height: "24px",
                     borderRadius: "8px",
                 },
@@ -82,7 +82,7 @@ export const getProductAttributeTheme = (outerTheme: Theme) => createTheme(outer
                 deleteIcon: {
                     color: "rgb(0, 108, 156)",
                     opacity: "0.48",
-                    fontSize: "1.5rem",
+                    fontSize: "0.9375rem",
                     marginRight: "4px",
                     marginLeft: "-4px",
                     '&:hover': {
