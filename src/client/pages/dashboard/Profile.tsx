@@ -24,8 +24,8 @@ export const ProfilePage = () => {
                     className="bg-top"
                 />
                 <div className="min-h-[40vh] flex flex-col items-center justify-center gap-4 bg-[#f9f9f9]">
-                    <p className="text-[1.8rem] text-client-secondary">Vui lòng đăng nhập để xem thông tin tài khoản.</p>
-                    <Link to="/auth/login" className="bg-client-secondary text-white px-8 py-3 rounded-full text-[1.6rem] hover:bg-client-primary transition-all">Đăng nhập ngay</Link>
+                    <p className="text-[18px] text-client-secondary">Vui lòng đăng nhập để xem thông tin tài khoản.</p>
+                    <Link to="/auth/login" className="bg-client-secondary text-white px-8 py-3 rounded-full text-[16px] hover:bg-client-primary transition-all">Đăng nhập ngay</Link>
                 </div>
             </>
         );
@@ -40,15 +40,15 @@ export const ProfilePage = () => {
                 className="bg-top"
             />
 
-            <div className="mt-[-150px] mb-[100px] w-[1600px] mx-auto flex">
+            <div className="mt-[-150px] mb-[100px] app-container flex">
                 <div className="w-[25%] px-[12px]">
                     <Sidebar />
                 </div>
                 <div className="w-[75%] px-[12px]">
                     <div className="mt-[100px] p-[35px] bg-white shadow-[0px_8px_24px_#959da533] rounded-[12px]">
-                        <h3 className="text-[2.4rem] font-[600] text-client-secondary mb-[25px] flex items-center justify-between">
+                        <h3 className="text-[24px] font-[600] text-client-secondary mb-[25px] flex items-center justify-between">
                             Thông tin cá nhân
-                            <Link className="relative overflow-hidden group bg-client-primary rounded-[8px] px-[25px] py-[12px] font-[500] text-[1.4rem] text-white" to={"/dashboard/profile/edit"}>
+                            <Link className="relative overflow-hidden group bg-client-primary rounded-[8px] px-[25px] py-[12px] font-[500] text-[14px] text-white" to={"/dashboard/profile/edit"}>
                                 <span className="relative z-10">Chỉnh sửa</span>
                                 <div className="absolute top-0 left-0 w-full h-full bg-client-secondary transition-transform duration-500 ease-in-out transform scale-x-0 origin-left group-hover:scale-x-100"></div>
                             </Link>

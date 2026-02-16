@@ -213,7 +213,7 @@ export const ProductAttributeEditPage = () => {
                                                         <MenuItem
                                                             key={type.value}
                                                             value={type.value}
-                                                            sx={{ fontSize: '1.4rem' }}
+                                                            sx={{ fontSize: '0.875rem' }}
                                                         >
                                                             {type.label}
                                                         </MenuItem>
@@ -223,7 +223,7 @@ export const ProductAttributeEditPage = () => {
                                                     <Typography
                                                         sx={{
                                                             color: '#d32f2f',
-                                                            fontSize: '1.2rem',
+                                                            fontSize: '0.75rem',
                                                             mt: 0.5,
                                                             ml: 1.75
                                                         }}
@@ -367,7 +367,7 @@ export const ProductAttributeEditPage = () => {
                                     sx={{
                                         alignSelf: 'flex-start',
                                         color: '#00A76F',
-                                        fontSize: '1.4rem',
+                                        fontSize: '0.875rem',
                                         fontWeight: 600,
                                         textTransform: 'none',
                                         '&:hover': {
@@ -388,10 +388,10 @@ export const ProductAttributeEditPage = () => {
                                 disabled={isPending}
                                 sx={{
                                     background: '#1C252E',
-                                    minHeight: "4.8rem",
-                                    minWidth: "6.4rem",
+                                    minHeight: "3rem",
+                                    minWidth: "4rem",
                                     fontWeight: 700,
-                                    fontSize: "1.4rem",
+                                    fontSize: "0.875rem",
                                     padding: "8px 22px",
                                     borderRadius: "8px",
                                     textTransform: "none",

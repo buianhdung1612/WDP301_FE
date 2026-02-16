@@ -19,7 +19,7 @@ export const getServiceTheme = (outerTheme: Theme) => createTheme(outerTheme, {
                 root: {
                     color: "#1C252E",
                     borderRadius: "8px",
-                    fontSize: "1.5rem",
+                    fontSize: "0.9375rem",
                     '& .MuiOutlinedInput-notchedOutline': {
                         borderColor: "#919eab33",
                     },

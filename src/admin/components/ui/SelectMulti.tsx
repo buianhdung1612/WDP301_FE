@@ -16,14 +16,17 @@ interface SelectMultiProps {
     label: string;
     options: Option[];
     sx?: any;
+    value?: string[];
+    onChange?: (value: string[]) => void;
+    disabled?: boolean;
 }
 
 // CSS
 const FORM_CONTROL_STYLE = { width: "200px" };
 
 const LABEL_STYLE = {
-    fontSize: "1.5rem",
-    color: "rgb(28, 37, 46)",
+    fontSize: "0.9375rem",
+    color: "#637381",
 
     "&.MuiInputLabel-shrink": {
         color: "#919eab", // Màu của chữ khi đã nằm trên viền
@@ -32,7 +35,7 @@ const LABEL_STYLE = {
 };
 
 const SELECT_SX = {
-    fontSize: "1.5rem",
+    fontSize: "0.9375rem",
     borderRadius: "8px"
 };
 
@@ -68,14 +71,26 @@ const CHECKBOX_STYLE = {
     marginRight: "4px",
 }
 
-export const SelectMulti = memo(({ label, options, sx }: SelectMultiProps) => {
+export const SelectMulti = memo(({ label, options, sx, value, onChange, disabled }: SelectMultiProps) => {
     const { t } = useTranslation();
-    const [selectedValues, setSelectedValues] = useState<string[]>([]);
+    const [internalValues, setInternalValues] = useState<string[]>([]);
+
+    // Use controlled value if provided, otherwise use internal state
+    const selectedValues = value !== undefined ? value : internalValues;
 
     const handleChange = useCallback((event: SelectChangeEvent<string[]>) => {
-        const { target: { value } } = event;
-        setSelectedValues(typeof value === 'string' ? value.split(',') : value);
-    }, []);
+        const { target: { value: newValue } } = event;
+        const result = typeof newValue === 'string' ? newValue.split(',') : newValue;
+
+        // Chỉ giữ lại các giá trị hợp lệ nằm trong danh sách options
+        const validValues = result.filter(v => options.some(opt => opt.value === v));
+
+        if (onChange) {
+            onChange(validValues);
+        } else {
+            setInternalValues(validValues);
+        }
+    }, [onChange, options]);
 
     const handleClose = useCallback(() => {
         setTimeout(() => {
@@ -95,6 +110,7 @@ export const SelectMulti = memo(({ label, options, sx }: SelectMultiProps) => {
     return (
         <FormControl
             sx={{ ...FORM_CONTROL_STYLE, ...sx }}
+            disabled={disabled}
         >
             <InputLabel
                 id="demo-simple-select-label"

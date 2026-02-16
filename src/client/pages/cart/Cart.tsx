@@ -78,7 +78,7 @@ export const CartPage = () => {
     if (loading && items.length > 0) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="text-[2rem] font-secondary text-client-primary animate-pulse">Đang cập nhật giỏ hàng...</div>
+                <div className="text-[20px] font-secondary text-client-primary animate-pulse">Đang cập nhật giỏ hàng...</div>
             </div>
         );
     }
@@ -99,7 +99,7 @@ export const CartPage = () => {
                     <div className="w-[65%] bg-white rounded-[20px] border border-[#d7d7d7] overflow-hidden mx-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="w-full text-[2rem] font-secondary text-white bg-client-primary">
+                                <tr className="w-full text-[20px] font-secondary text-white bg-client-primary">
                                     <th className="w-[80px] border-r border-[#d7d7d7] py-[10px] px-[20px]">
                                         <div className="checkbox flex items-center justify-center">
                                             <input
@@ -158,7 +158,7 @@ export const CartPage = () => {
                                                 <div className="text-center">
                                                     <Link
                                                         to={`/product/detail/${item.detail.slug}`}
-                                                        className="mb-[20px] block text-[2rem] font-secondary"
+                                                        className="mb-[20px] block text-[20px] font-secondary"
                                                     >
                                                         {item.detail.name}
                                                     </Link>
@@ -168,7 +168,7 @@ export const CartPage = () => {
                                                     </p>
 
                                                     <p className="text-client-text mb-[20px] 2xl:mb-[15px]">
-                                                        <span className="font-secondary 2xl:text-[1.4rem] text-client-secondary mr-[5px]">
+                                                        <span className="font-secondary 2xl:text-[14px] text-client-secondary mr-[5px]">
                                                             Phân loại:
                                                         </span>
                                                         {item.variant && item.variant.length > 0
@@ -194,7 +194,7 @@ export const CartPage = () => {
                                                                         item.variant
                                                                     )
                                                                 }
-                                                                className={`w-[40px] h-full rounded-l-[4rem] text-[2.5rem] bg-[#e67e2033] text-center transition-[color] duration-200 ease-linear ${item.quantity <= 1
+                                                                className={`w-[40px] h-full rounded-l-[40px] text-[40px] bg-[#e67e2033] text-center transition-[color] duration-200 ease-linear ${item.quantity <= 1
                                                                     ? "cursor-not-allowed"
                                                                     : "cursor-pointer hover:text-client-primary"
                                                                     }`}
@@ -204,7 +204,7 @@ export const CartPage = () => {
                                                                 min={1}
                                                                 readOnly
                                                                 value={item.quantity}
-                                                                className="w-[40px] h-full bg-[#e67e2033] text-[1.6rem] text-center outline-none no-spinner"
+                                                                className="w-[40px] h-full bg-[#e67e2033] text-[16px] text-center outline-none no-spinner"
                                                             />
                                                             <input
                                                                 type="button"
@@ -218,7 +218,7 @@ export const CartPage = () => {
                                                                         item.variant
                                                                     )
                                                                 }
-                                                                className={`w-[40px] h-full rounded-r-[4rem] text-[2.5rem] bg-[#e67e2033] text-center transition-[color] duration-200 ease-linear ${item.quantity >= maxStock
+                                                                className={`w-[40px] h-full rounded-r-[40px] text-[40px] bg-[#e67e2033] text-center transition-[color] duration-200 ease-linear ${item.quantity >= maxStock
                                                                     ? "cursor-not-allowed"
                                                                     : "cursor-pointer hover:text-client-primary"
                                                                     }`}
@@ -235,10 +235,10 @@ export const CartPage = () => {
                                                         </button>
                                                     </div>
                                                     {maxStock <= 5 && maxStock > 0 && (
-                                                        <p className="text-red-500 text-[1.3rem] mt-[10px]">Chỉ còn lại {maxStock} sản phẩm!</p>
+                                                        <p className="text-red-500 text-[13px] mt-[10px]">Chỉ còn lại {maxStock} sản phẩm!</p>
                                                     )}
                                                     {maxStock === 0 && (
-                                                        <p className="text-red-600 font-bold text-[1.4rem] mt-[10px]">Sản phẩm đã hết hàng!</p>
+                                                        <p className="text-red-600 font-bold text-[14px] mt-[10px]">Sản phẩm đã hết hàng!</p>
                                                     )}
                                                 </div>
                                             </td>
@@ -254,7 +254,7 @@ export const CartPage = () => {
                     </div>
                     <div className="flex-1 ml-[50px]">
                         <div className="sticky top-[20px] overflow-hidden border border-[#d7d7d7] bg-white rounded-[20px]">
-                            <h2 className="py-[10px] px-[20px] text-[2rem] font-secondary text-white bg-client-primary text-center">Tóm tắt đơn hàng</h2>
+                            <h2 className="py-[10px] px-[20px] text-[20px] font-secondary text-white bg-client-primary text-center">Tóm tắt đơn hàng</h2>
 
                             <div className="p-[25px]">
                                 {/* Danh sách sản phẩm đã chọn - Kiểu Billing Summary */}
@@ -266,8 +266,8 @@ export const CartPage = () => {
                                                     <img src={item.detail.images[0]} alt="" className="w-full h-full object-cover" />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <h4 className="text-[1.5rem] font-secondary text-client-secondary truncate mb-[4px]">{item.detail.name}</h4>
-                                                    <div className="flex justify-between items-center text-[1.4rem]">
+                                                    <h4 className="text-[15px] font-secondary text-client-secondary truncate mb-[4px]">{item.detail.name}</h4>
+                                                    <div className="flex justify-between items-center text-[14px]">
                                                         <span className="text-client-text opacity-70">
                                                             {item.detail.priceNew.toLocaleString()}đ × {item.quantity}
                                                         </span>
@@ -276,7 +276,7 @@ export const CartPage = () => {
                                                         </span>
                                                     </div>
                                                     {item.variant && item.variant.length > 0 && (
-                                                        <p className="text-[1.2rem] text-[#999] mt-[4px] italic">
+                                                        <p className="text-[12px] text-[#999] mt-[4px] italic">
                                                             {item.variant.map(v => {
                                                                 const attrName = item.detail.attributeList?.find(a => a._id === v.attrId)?.name || "";
                                                                 return attrName ? `${attrName}: ${v.label}` : v.label;
@@ -287,7 +287,7 @@ export const CartPage = () => {
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="py-[30px] text-center text-[#999] italic text-[1.4rem]">
+                                        <div className="py-[30px] text-center text-[#999] italic text-[14px]">
                                             Chưa có sản phẩm nào được chọn
                                         </div>
                                     )}
@@ -295,13 +295,13 @@ export const CartPage = () => {
 
                                 {/* Chi tiết tiền tệ */}
                                 <div className="space-y-[12px] mb-[25px]">
-                                    <div className="flex justify-between text-[1.5rem] text-client-text">
+                                    <div className="flex justify-between text-[15px] text-client-text">
                                         <span>Tạm tính</span>
                                         <span>{totalAmount.toLocaleString()}đ</span>
                                     </div>
                                     <div className="pt-[15px] border-t-2 border-dashed border-[#eee] flex justify-between items-center">
-                                        <span className="text-[1.8rem] font-secondary text-client-secondary">Tổng thanh toán</span>
-                                        <span className="text-[2.2rem] font-bold text-client-primary">{totalAmount.toLocaleString()}đ</span>
+                                        <span className="text-[18px] font-secondary text-client-secondary">Tổng thanh toán</span>
+                                        <span className="text-[22px] font-bold text-client-primary">{totalAmount.toLocaleString()}đ</span>
                                     </div>
                                 </div>
 
@@ -321,7 +321,7 @@ export const CartPage = () => {
                                     >
                                         Tiến hành thanh toán
                                     </Link>
-                                    <p className="text-[1.2rem] text-[#888] mt-[15px] italic">Nhấn thanh toán để hoàn tất đơn hàng</p>
+                                    <p className="text-[12px] text-[#888] mt-[15px] italic">Nhấn thanh toán để hoàn tất đơn hàng</p>
                                 </div>
                             </div>
                         </div>

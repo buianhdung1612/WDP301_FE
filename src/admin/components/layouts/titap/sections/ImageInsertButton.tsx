@@ -40,7 +40,7 @@ export const ImageInsertButton = memo(({ editor }: { editor: Editor }) => {
     const inputSx = {
         '& .MuiOutlinedInput-root': {
             borderRadius: '8px',
-            fontSize: "1.4rem",
+            fontSize: "0.875rem",
             height: "40px",
             mb: "10px",
             "& input": { padding: "8px 14px" },
@@ -71,7 +71,7 @@ export const ImageInsertButton = memo(({ editor }: { editor: Editor }) => {
                     },
                 }}
             >
-                <Typography sx={{ mb: "10px", fontWeight: 600, fontSize: "1.4rem" }}>
+                <Typography sx={{ mb: "10px", fontWeight: 600, fontSize: "0.875rem" }}>
                     {t("admin.tiptap.image_dialog.title")}
                 </Typography>
 
@@ -103,7 +103,7 @@ export const ImageInsertButton = memo(({ editor }: { editor: Editor }) => {
                         sx={{
                             bgcolor: url.trim() ? '#1C252E' : '#919eab3d',
                             color: url.trim() ? '#fff' : '#919eabcc',
-                            fontSize: "1.4rem",
+                            fontSize: "0.875rem",
                             fontWeight: 700,
                             borderRadius: '8px',
                             width: "64px",

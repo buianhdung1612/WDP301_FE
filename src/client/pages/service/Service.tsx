@@ -6,7 +6,7 @@ import { Section3 } from "./sections/Section3";
 
 const breadcrumbs = [
     { label: "Trang chủ", to: "/" },
-    { label: "Dịch vụ", to: "/dich-vu" },
+    { label: "Dịch vụ", to: "/services" },
 ];
 
 export const ServicePage = () => {

@@ -14,7 +14,7 @@ export const Section4 = () => {
                         <div className="inline-block uppercase text-white bg-[#C32643] px-[18px] py-[5px] rounded-[30px] mb-[10px]">
                             Ưu đãi có hạn!
                         </div>
-                        <h3 className="text-white text-[4rem] font-secondary leading-[1.2] mb-[20px]">Giảm giá đặc biệt</h3>
+                        <h3 className="text-white text-[40px] font-secondary leading-[1.2] mb-[20px]">Giảm giá đặc biệt</h3>
                         <Button
                             content="Mua ngay"
                             svgColor="text-white"
@@ -34,7 +34,7 @@ export const Section4 = () => {
                         <div className="inline-block uppercase text-white bg-[#AF6900] px-[18px] py-[5px] rounded-[30px] mb-[10px]">
                             Tiết kiệm tuyệt vời
                         </div>
-                        <h3 className="text-white text-[4rem] font-secondary leading-[1.2] mb-[20px]">Nhận ngay ưu đãi này</h3>
+                        <h3 className="text-white text-[40px] font-secondary leading-[1.2] mb-[20px]">Nhận ngay ưu đãi này</h3>
                         <Button
                             content="Đặt ngay"
                             svgColor="text-white"

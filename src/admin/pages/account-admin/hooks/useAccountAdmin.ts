@@ -1,10 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAccounts, getAccountById, createAccount, updateAccount, deleteAccount, changeAccountPassword } from "../../../api/account-admin.api";
+import { getAccounts, getAccountById, createAccount, updateAccount, deleteAccount, changeAccountPassword, getStaffByService } from "../../../api/account-admin.api";
 
 export const useAccounts = (params?: any) => {
     return useQuery({
         queryKey: ["accounts-admin", params],
         queryFn: () => getAccounts(params),
+        select: (res: any) => res.data || [],
+    });
+};
+
+export const useStaffByService = (serviceId?: string) => {
+    return useQuery({
+        queryKey: ["staff-by-service", serviceId],
+        queryFn: () => getStaffByService(serviceId!),
+        enabled: !!serviceId,
         select: (res: any) => res.data || [],
     });
 };

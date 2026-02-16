@@ -1,4 +1,4 @@
-import { Box, Stack, TextField, ThemeProvider, useTheme, Button, MenuItem, Select, FormControl, InputLabel, FormControlLabel, Switch, Typography } from "@mui/material"
+import { Box, Stack, TextField, ThemeProvider, useTheme, Button, MenuItem, Select, FormControl, InputLabel } from "@mui/material"
 import { Breadcrumb } from "../../components/ui/Breadcrumb"
 import { Title } from "../../components/ui/Title"
 import { useState, type Dispatch, type SetStateAction } from "react";
@@ -6,7 +6,7 @@ import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
 import { useCreateCoupon } from "./hooks/useCoupon";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
-import { createCouponSchema, CreateCouponFormValues } from "../../schemas/coupon.schema";
+import { createCouponSchema } from "../../schemas/coupon.schema";
 import { getCouponTheme } from "./configs/theme";
 import { prefixAdmin } from "../../constants/routes";
 import { toast } from "react-toastify";
@@ -24,7 +24,7 @@ export const CouponCreatePage = () => {
         handleSubmit,
         reset,
         watch
-    } = useForm<CreateCouponFormValues>({
+    } = useForm<any>({
         resolver: zodResolver(createCouponSchema),
         defaultValues: {
             code: "",
@@ -46,7 +46,7 @@ export const CouponCreatePage = () => {
 
     const { mutate: create, isPending } = useCreateCoupon();
 
-    const onSubmit = (data: CreateCouponFormValues) => {
+    const onSubmit = (data: any) => {
         create(data, {
             onSuccess: (response) => {
                 if (response.success) {
@@ -303,10 +303,10 @@ export const CouponCreatePage = () => {
                                 disabled={isPending}
                                 sx={{
                                     background: '#1C252E',
-                                    minHeight: "4.8rem",
-                                    minWidth: "6.4rem",
+                                    minHeight: "3rem",
+                                    minWidth: "4rem",
                                     fontWeight: 700,
-                                    fontSize: "1.4rem",
+                                    fontSize: "0.875rem",
                                     padding: "8px 16px",
                                     borderRadius: "8px",
                                     textTransform: "none",

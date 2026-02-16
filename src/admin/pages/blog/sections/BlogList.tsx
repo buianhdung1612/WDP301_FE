@@ -22,7 +22,7 @@ export const BlogList = ({ blogs = [], isLoading = false }: BlogListProps) => {
     const [page, setPage] = useState(1);
     const itemsPerPage = 10;
 
-    const handleChangePage = (event: React.ChangeEvent<unknown>, value: number) => {
+    const handleChangePage = (_event: React.ChangeEvent<unknown>, value: number) => {
         setPage(value);
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
@@ -92,7 +92,7 @@ export const BlogList = ({ blogs = [], isLoading = false }: BlogListProps) => {
 
     if (blogs.length === 0) {
         return (
-            <Box sx={{ textAlign: 'center', py: 5, fontSize: '1.6rem', color: '#637381' }}>
+            <Box sx={{ textAlign: 'center', py: 5, fontSize: '1rem', color: '#637381' }}>
                 {t("admin.common.no_data")}
             </Box>
         );
@@ -140,22 +140,22 @@ export const BlogList = ({ blogs = [], isLoading = false }: BlogListProps) => {
                                         justifyContent: "space-between",
                                     }}
                                 >
-                                    <span className="h-[24px] min-w-[24px] px-[6px] rounded-[6px] font-[700] text-[1.2rem] inline-flex items-center" style={{ backgroundColor: statusInfo.bgColor, color: statusInfo.color }}>
+                                    <span className="h-[24px] min-w-[24px] px-[6px] rounded-[6px] font-[700] text-[0.75rem] inline-flex items-center" style={{ backgroundColor: statusInfo.bgColor, color: statusInfo.color }}>
                                         {statusInfo.label}
                                     </span>
-                                    <span className="font-[400] text-[1.2rem] text-[#919EAB]">
+                                    <span className="font-[400] text-[0.75rem] text-[#919EAB]">
                                         {formattedDate}
                                     </span>
                                 </Box>
 
                                 <Stack sx={{ flex: 1, gap: "8px" }}>
                                     <Link
-                                        className="text-[1.4rem] font-[600] leading-[1.57143] line-clamp-2 hover:underline"
+                                        className="text-[0.875rem] font-[600] leading-[1.57143] line-clamp-2 hover:underline"
                                         to={`/${prefixAdmin}/blog/detail/${blog.id}`}
                                     >
                                         {blog.title}
                                     </Link>
-                                    <p className="text-[1.4rem] line-clamp-2 text-[#637381] leading-[1.57143]">
+                                    <p className="text-[0.875rem] line-clamp-2 text-[#637381] leading-[1.57143]">
                                         {blog.excerpt || blog.metaDescription || "..."}
                                     </p>
                                 </Stack>
@@ -182,7 +182,7 @@ export const BlogList = ({ blogs = [], isLoading = false }: BlogListProps) => {
                                             gap: "12px",
                                             flex: 1,
                                             display: "flex",
-                                            fontSize: "1.2rem",
+                                            fontSize: "0.75rem",
                                             color: "#919EAB",
                                             justifyContent: "flex-end",
                                         }}
@@ -259,19 +259,19 @@ export const BlogList = ({ blogs = [], isLoading = false }: BlogListProps) => {
                     <ListItemIcon sx={{ minWidth: '24px !important', mr: 1 }}>
                         <EyeIcon sx={{ width: 20, height: 20 }} />
                     </ListItemIcon>
-                    <ListItemText primaryTypographyProps={{ fontSize: '1.4rem', fontWeight: 500 }}>{t("admin.common.details")}</ListItemText>
+                    <ListItemText primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}>{t("admin.common.details")}</ListItemText>
                 </MenuItem>
                 <MenuItem onClick={handleEdit} sx={{ borderRadius: '6px', py: 1 }}>
                     <ListItemIcon sx={{ minWidth: '24px !important', mr: 1 }}>
                         <EditIcon sx={{ width: 20, height: 20 }} />
                     </ListItemIcon>
-                    <ListItemText primaryTypographyProps={{ fontSize: '1.4rem', fontWeight: 500 }}>{t("admin.common.edit")}</ListItemText>
+                    <ListItemText primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}>{t("admin.common.edit")}</ListItemText>
                 </MenuItem>
                 <MenuItem onClick={handleDelete} sx={{ borderRadius: '6px', py: 1, color: 'error.main' }}>
                     <ListItemIcon sx={{ minWidth: '24px !important', mr: 1, color: 'error.main' }}>
                         <DeleteIcon sx={{ width: 20, height: 20 }} />
                     </ListItemIcon>
-                    <ListItemText primaryTypographyProps={{ fontSize: '1.4rem', fontWeight: 500 }}>{t("admin.common.delete")}</ListItemText>
+                    <ListItemText primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}>{t("admin.common.delete")}</ListItemText>
                 </MenuItem>
             </Popover>
 
@@ -283,7 +283,7 @@ export const BlogList = ({ blogs = [], isLoading = false }: BlogListProps) => {
                 sx={{
                     mt: "64px",
                     "& .MuiPaginationItem-root": {
-                        fontSize: "1.4rem",
+                        fontSize: "0.875rem",
                         color: "#1C252E",
                         lineHeight: "1.57143"
                     },
@@ -291,8 +291,8 @@ export const BlogList = ({ blogs = [], isLoading = false }: BlogListProps) => {
                         opacity: "0.48"
                     },
                     '& .MuiSvgIcon-root': {
-                        width: "2rem",
-                        height: "2rem"
+                        width: "1.25rem",
+                        height: "1.25rem"
                     },
                     "& .Mui-selected": {
                         backgroundColor: "#1C252E !important",

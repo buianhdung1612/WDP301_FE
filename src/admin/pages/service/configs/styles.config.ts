@@ -40,7 +40,7 @@ export const dataGridStyles: SxProps<Theme> = {
         background: COLORS.backgroundLight,
         '& .MuiDataGrid-columnHeader': {
             color: COLORS.secondary,
-            fontSize: "1.4rem",
+            fontSize: "0.875rem",
             border: "none",
             borderBottom: `1px solid ${COLORS.border}`,
             backgroundColor: COLORS.backgroundLight
@@ -51,19 +51,19 @@ export const dataGridStyles: SxProps<Theme> = {
     '& .MuiDataGrid-footerContainer': {
         borderTop: "1px dashed",
         minHeight: "auto",
-        fontSize: "1.4rem",
+        fontSize: "0.875rem",
         color: "inherit",
 
         '& .MuiTablePagination-selectLabel': {
-            fontSize: "1.4rem",
+            fontSize: "0.875rem",
             color: "inherit",
             marginBottom: "-2px"
         },
 
         '& .MuiSelect-select': {
             minHeight: "21.5625px",
-            lineHeight: "2.4rem",
-            fontSize: "1.5rem",
+            lineHeight: "1.5rem",
+            fontSize: "0.9375rem",
         },
 
         '& .MuiSelect-icon': {
@@ -71,7 +71,7 @@ export const dataGridStyles: SxProps<Theme> = {
         },
 
         '& .MuiTablePagination-displayedRows': {
-            fontSize: "1.4rem",
+            fontSize: "0.875rem",
             color: "inherit"
         },
 
@@ -82,8 +82,8 @@ export const dataGridStyles: SxProps<Theme> = {
                 padding: "5px",
 
                 '& .MuiSvgIcon-root': {
-                    width: "2.4rem",
-                    height: "2.4rem",
+                    width: "1.5rem",
+                    height: "1.5rem",
                 }
             }
         },
@@ -96,7 +96,7 @@ export const dataGridStyles: SxProps<Theme> = {
     // CELL
     '& .MuiDataGrid-cell': {
         color: 'inherit',
-        fontSize: "1.4rem",
+        fontSize: "0.875rem",
         display: 'flex',
         alignItems: 'center',
         borderRightStyle: "dashed"

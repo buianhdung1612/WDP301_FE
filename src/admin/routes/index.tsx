@@ -26,7 +26,6 @@ import { ServiceListPage } from "../pages/service/ServiceListPage";
 import { ServiceCreatePage } from "../pages/service/ServiceCreatePage";
 import { ServiceEditPage } from "../pages/service/ServiceEditPage";
 import { ServiceCategoryListPage } from "../pages/service-category/ServiceCategoryListPage";
-import { ServiceCategoryCreatePage } from "../pages/service-category/ServiceCategoryCreatePage";
 import { ServiceCategoryEditPage } from "../pages/service-category/ServiceCategoryEditPage";
 import { RoleListPage } from "../pages/role/RoleListPage";
 import { RoleCreatePage } from "../pages/role/RoleCreatePage";
@@ -34,48 +33,91 @@ import { RoleEditPage } from "../pages/role/RoleEditPage";
 import { AccountAdminListPage } from "../pages/account-admin/AccountAdminListPage";
 import { AccountAdminCreatePage } from "../pages/account-admin/AccountAdminCreatePage";
 import { AccountAdminEditPage } from "../pages/account-admin/AccountAdminEditPage";
-import { ChangePasswordPage } from "../pages/account-admin/ChangePasswordPage";
+import { ChangePasswordPage as ChangePasswordAdminPage } from "../pages/account-admin/ChangePasswordPage";
+import { AccountUserListPage } from "../pages/account-user/AccountUserListPage";
+import { AccountUserCreatePage } from "../pages/account-user/AccountUserCreatePage";
+import { AccountUserEditPage } from "../pages/account-user/AccountUserEditPage";
+import { ChangePasswordPage as ChangePasswordUserPage } from "../pages/account-user/ChangePasswordPage";
+import { BookingListPage } from "../pages/booking/BookingListPage";
+import { BookingCreatePage } from "../pages/booking/BookingCreatePage";
+import { BookingEditPage } from "../pages/booking/BookingEditPage";
+import { BookingDetailPage } from "../pages/booking/BookingDetailPage";
+import { BookingConfigPage } from "../pages/booking/BookingConfigPage";
+import { CalendarPage } from "../pages/calendar/CalendarPage";
+import { SettingGeneralPage } from "../pages/settings/SettingGeneralPage";
+import { BreedListPage } from "../pages/service/BreedListPage";
+// HR Management Pages
+import { ScheduleCalendarPage } from "../pages/hr/ScheduleCalendarPage";
+import { ShiftListPage } from "../pages/hr/ShiftListPage";
+import { DepartmentListPage } from "../pages/hr/DepartmentListPage";
+import { AttendanceListPage } from "../pages/hr/AttendanceListPage";
+import { StaffWorkHistoryPage } from "../pages/hr/StaffWorkHistoryPage";
+
+import { StaffTaskListPage } from "../pages/staff-panel/StaffTaskListPage";
+import { StaffWorkSchedulePage } from "../pages/staff-panel/StaffWorkSchedulePage";
+import { StaffCustomerListPage } from "../pages/staff-panel/StaffCustomerListPage";
+import { PermissionGuard } from "../components/auth/PermissionGuard";
 
 export const AdminRoutes = [
-    { path: "dashboard", element: <DashboardPage /> },
-    { path: "product/list", element: <ProductListPage /> },
-    { path: "product/create", element: <ProductCreatePage /> },
-    { path: "product/edit/:id", element: <ProductEditPage /> },
-    { path: "product-category/list", element: <ProductCategoryListPage /> },
-    { path: "product-category/create", element: <ProductCategoryCreatePage /> },
-    { path: "product-category/edit/:id", element: <ProductCategoryEditPage /> },
-    { path: "product-category/detail/:id", element: <ProductCategoryEditPage /> },
-    { path: "brand/list", element: <BrandListPage /> },
-    { path: "brand/create", element: <BrandCreatePage /> },
-    { path: "brand/edit/:id", element: <BrandEditPage /> },
-    { path: "brand/detail/:id", element: <BrandEditPage /> },
-    { path: "service/list", element: <ServiceListPage /> },
-    { path: "service/create", element: <ServiceCreatePage /> },
-    { path: "service/edit/:id", element: <ServiceEditPage /> },
-    { path: "service/categories", element: <ServiceCategoryListPage /> },
-    { path: "service/categories/create", element: <ServiceCategoryCreatePage /> },
-    { path: "service/categories/edit/:id", element: <ServiceCategoryEditPage /> },
-    { path: "blog/list", element: <BlogListPage /> },
-    { path: "blog/create", element: <BlogCreatePage /> },
-    { path: "blog/edit/:id", element: <BlogEditPage /> },
-    { path: "blog/detail/:id", element: <BlogDetailPage /> },
-    { path: "blog-category/list", element: <BlogCategoryListPage /> },
-    { path: "blog-category/create", element: <BlogCategoryCreatePage /> },
-    { path: "blog-category/edit/:id", element: <BlogCategoryEditPage /> },
-    { path: "blog-category/detail/:id", element: <BlogCategoryEditPage /> },
-    { path: "coupon/list", element: <CouponListPage /> },
-    { path: "coupon/create", element: <CouponCreatePage /> },
-    { path: "coupon/edit/:id", element: <CouponEditPage /> },
-    { path: "product/attribute/list", element: <ProductAttributeListPage /> },
-    { path: "product/attribute/create", element: <ProductAttributeCreatePage /> },
-    { path: "product/attribute/edit/:id", element: <ProductAttributeEditPage /> },
-    { path: "role/list", element: <RoleListPage /> },
-    { path: "role/create", element: <RoleCreatePage /> },
-    { path: "role/edit/:id", element: <RoleEditPage /> },
-    { path: "account-admin/list", element: <AccountAdminListPage /> },
-    { path: "account-admin/create", element: <AccountAdminCreatePage /> },
-    { path: "account-admin/edit/:id", element: <AccountAdminEditPage /> },
-    { path: "account-admin/change-password/:id", element: <ChangePasswordPage /> },
+    { path: "dashboard", element: <PermissionGuard permission="dashboard_view"><DashboardPage /></PermissionGuard> },
+    { path: "product/list", element: <PermissionGuard permission="product_view"><ProductListPage /></PermissionGuard> },
+    { path: "product/create", element: <PermissionGuard permission="product_create"><ProductCreatePage /></PermissionGuard> },
+    { path: "product/edit/:id", element: <PermissionGuard permission="product_edit"><ProductEditPage /></PermissionGuard> },
+    { path: "product-category/list", element: <PermissionGuard permission="product_category_view"><ProductCategoryListPage /></PermissionGuard> },
+    { path: "product-category/create", element: <PermissionGuard permission="product_category_create"><ProductCategoryCreatePage /></PermissionGuard> },
+    { path: "product-category/edit/:id", element: <PermissionGuard permission="product_category_edit"><ProductCategoryEditPage /></PermissionGuard> },
+    { path: "product-category/detail/:id", element: <PermissionGuard permission="product_category_view"><ProductCategoryEditPage /></PermissionGuard> },
+    { path: "brand/list", element: <PermissionGuard permission="brand_view"><BrandListPage /></PermissionGuard> },
+    { path: "brand/create", element: <PermissionGuard permission="brand_create"><BrandCreatePage /></PermissionGuard> },
+    { path: "brand/edit/:id", element: <PermissionGuard permission="brand_edit"><BrandEditPage /></PermissionGuard> },
+    { path: "brand/detail/:id", element: <PermissionGuard permission="brand_view"><BrandEditPage /></PermissionGuard> },
+    { path: "service/list", element: <PermissionGuard permission="service_view"><ServiceListPage /></PermissionGuard> },
+    { path: "service/create", element: <PermissionGuard permission="service_create"><ServiceCreatePage /></PermissionGuard> },
+    { path: "service/edit/:id", element: <PermissionGuard permission="service_edit"><ServiceEditPage /></PermissionGuard> },
+    { path: "service/categories", element: <PermissionGuard permission="service_category_view"><ServiceCategoryListPage /></PermissionGuard> },
+    { path: "service/categories/create", element: <PermissionGuard permission="service_category_create"><ServiceCreatePage /></PermissionGuard> },
+    { path: "service/categories/edit/:id", element: <PermissionGuard permission="service_category_edit"><ServiceCategoryEditPage /></PermissionGuard> },
+    { path: "blog/list", element: <PermissionGuard permission="blog_view"><BlogListPage /></PermissionGuard> },
+    { path: "blog/create", element: <PermissionGuard permission="blog_create"><BlogCreatePage /></PermissionGuard> },
+    { path: "blog/edit/:id", element: <PermissionGuard permission="blog_edit"><BlogEditPage /></PermissionGuard> },
+    { path: "blog/detail/:id", element: <PermissionGuard permission="blog_view"><BlogDetailPage /></PermissionGuard> },
+    { path: "blog-category/list", element: <PermissionGuard permission="blog_category_view"><BlogCategoryListPage /></PermissionGuard> },
+    { path: "blog-category/create", element: <PermissionGuard permission="blog_category_create"><BlogCategoryCreatePage /></PermissionGuard> },
+    { path: "blog-category/edit/:id", element: <PermissionGuard permission="blog_category_edit"><BlogCategoryEditPage /></PermissionGuard> },
+    { path: "blog-category/detail/:id", element: <PermissionGuard permission="blog_category_view"><BlogCategoryEditPage /></PermissionGuard> },
+    { path: "coupon/list", element: <PermissionGuard permission="coupon_view"><CouponListPage /></PermissionGuard> },
+    { path: "coupon/create", element: <PermissionGuard permission="coupon_create"><CouponCreatePage /></PermissionGuard> },
+    { path: "coupon/edit/:id", element: <PermissionGuard permission="coupon_edit"><CouponEditPage /></PermissionGuard> },
+    { path: "product/attribute/list", element: <PermissionGuard permission="product_attribute_view"><ProductAttributeListPage /></PermissionGuard> },
+    { path: "product/attribute/create", element: <PermissionGuard permission="product_attribute_create"><ProductAttributeCreatePage /></PermissionGuard> },
+    { path: "product/attribute/edit/:id", element: <PermissionGuard permission="product_attribute_edit"><ProductAttributeEditPage /></PermissionGuard> },
+    { path: "role/list", element: <PermissionGuard permission="role_view"><RoleListPage /></PermissionGuard> },
+    { path: "role/create", element: <PermissionGuard permission="role_create"><RoleCreatePage /></PermissionGuard> },
+    { path: "role/edit/:id", element: <PermissionGuard permission="role_edit"><RoleEditPage /></PermissionGuard> },
+    { path: "account-admin/list", element: <PermissionGuard permission="account_admin_view"><AccountAdminListPage /></PermissionGuard> },
+    { path: "account-admin/create", element: <PermissionGuard permission="account_admin_create"><AccountAdminCreatePage /></PermissionGuard> },
+    { path: "account-admin/edit/:id", element: <PermissionGuard permission="account_admin_edit"><AccountAdminEditPage /></PermissionGuard> },
+    { path: "account-admin/change-password/:id", element: <PermissionGuard permission="account_admin_edit"><ChangePasswordAdminPage /></PermissionGuard> },
+    { path: "account-user/list", element: <PermissionGuard permission="account_user_view"><AccountUserListPage /></PermissionGuard> },
+    { path: "account-user/create", element: <PermissionGuard permission="account_user_create"><AccountUserCreatePage /></PermissionGuard> },
+    { path: "account-user/edit/:id", element: <PermissionGuard permission="account_user_edit"><AccountUserEditPage /></PermissionGuard> },
+    { path: "account-user/change-password/:id", element: <PermissionGuard permission="account_user_edit"><ChangePasswordUserPage /></PermissionGuard> },
+    { path: "booking/list", element: <PermissionGuard permission="booking_view"><BookingListPage /></PermissionGuard> },
+    { path: "booking/create", element: <PermissionGuard permission="booking_create"><BookingCreatePage /></PermissionGuard> },
+    { path: "booking/edit/:id", element: <PermissionGuard permission="booking_edit"><BookingEditPage /></PermissionGuard> },
+    { path: "booking/detail/:id", element: <PermissionGuard permission="booking_view"><BookingDetailPage /></PermissionGuard> },
+    { path: "booking/config", element: <PermissionGuard permission="booking_view"><BookingConfigPage /></PermissionGuard> },
+    { path: "calendar", element: <PermissionGuard permission="calendar_view"><CalendarPage /></PermissionGuard> },
+    { path: "dashboard/setting-general", element: <PermissionGuard permission="settings_view"><SettingGeneralPage /></PermissionGuard> },
+    { path: "service/breed/list", element: <PermissionGuard permission="breed_view"><BreedListPage /></PermissionGuard> },
+    { path: "schedule-calendar", element: <PermissionGuard permission="schedule_view"><ScheduleCalendarPage /></PermissionGuard> },
+    { path: "shifts", element: <PermissionGuard permission="shift_view"><ShiftListPage /></PermissionGuard> },
+    { path: "departments", element: <PermissionGuard permission="department_view"><DepartmentListPage /></PermissionGuard> },
+    { path: "attendance", element: <PermissionGuard permission="attendance_view"><AttendanceListPage /></PermissionGuard> },
+    { path: "hr/work-history", element: <PermissionGuard permission="hr_view"><StaffWorkHistoryPage /></PermissionGuard> },
+    { path: "staff/tasks", element: <StaffTaskListPage /> },
+    { path: "staff/schedule", element: <StaffWorkSchedulePage /> },
+    { path: "staff/customers", element: <StaffCustomerListPage /> },
 ];
 
 export const AdminAuthRoutes = [

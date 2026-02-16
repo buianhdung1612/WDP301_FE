@@ -41,7 +41,7 @@ export const SortButton = ({ value = 'latest', onChange }: SortButtonProps) => {
                     </span>
                 }
                 sx={{
-                    fontSize: '1.3rem',
+                    fontSize: '0.8125rem',
                     fontWeight: 600,
                     textTransform: 'none',
                     color: '#1C252E',
@@ -66,6 +66,7 @@ export const SortButton = ({ value = 'latest', onChange }: SortButtonProps) => {
                 transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                 slotProps={{
                     paper: {
+                        className: 'background-popup',
                         sx: {
                             minWidth: 140,
                             borderRadius: '10px',
@@ -80,7 +81,7 @@ export const SortButton = ({ value = 'latest', onChange }: SortButtonProps) => {
                         selected={option.value === value}
                         onClick={() => handleClose(option.value)}
                         sx={{
-                            fontSize: '1.4rem',
+                            fontSize: '0.875rem',
                             borderRadius: '6px',
                             '&.Mui-selected': {
                                 fontWeight: 700,

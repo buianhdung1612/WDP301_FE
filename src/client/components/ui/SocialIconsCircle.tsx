@@ -10,7 +10,7 @@ export const SocialIconCircle = ({ className }: { className?: string }) => {
                                              hover:text-white hover:bg-client-primary hover:border-client-primary transition-default"
             >
                 <Link to={"#"}>
-                    <Instagram strokeWidth={2} className="w-[1.6rem] h-[1.6rem]" />
+                    <Instagram strokeWidth={2} className="w-[10px] h-[10px]" />
                 </Link>
             </li>
             <li
@@ -19,7 +19,7 @@ export const SocialIconCircle = ({ className }: { className?: string }) => {
                                                                 hover:text-white hover:bg-client-primary hover:border-client-primary transition-default"
             >
                 <Link to={"#"}>
-                    <Facebook strokeWidth={2} className="w-[1.6rem] h-[1.6rem]" />
+                    <Facebook strokeWidth={2} className="w-[10px] h-[10px]" />
                 </Link>
             </li>
         </ul>

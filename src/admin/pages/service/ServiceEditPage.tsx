@@ -247,8 +247,8 @@ export const ServiceEditPage = () => {
                                         <Table>
                                             <TableHead>
                                                 <TableRow>
-                                                    <TableCell sx={{ fontSize: '1.3rem' }}>Mô tả (VD: Dưới 5kg)</TableCell>
-                                                    <TableCell sx={{ fontSize: '1.3rem' }}>Giá (VNĐ)</TableCell>
+                                                    <TableCell sx={{ fontSize: '0.8125rem' }}>Mô tả (VD: Dưới 5kg)</TableCell>
+                                                    <TableCell sx={{ fontSize: '0.8125rem' }}>Giá (VNĐ)</TableCell>
                                                     <TableCell width={50}></TableCell>
                                                 </TableRow>
                                             </TableHead>
@@ -301,10 +301,10 @@ export const ServiceEditPage = () => {
                                 disabled={isPending}
                                 sx={{
                                     background: '#1C252E',
-                                    minHeight: "4.8rem",
-                                    minWidth: "6.4rem",
+                                    minHeight: "3rem",
+                                    minWidth: "4rem",
                                     fontWeight: 700,
-                                    fontSize: "1.4rem",
+                                    fontSize: "0.875rem",
                                     padding: "8px 16px",
                                     borderRadius: "8px",
                                     textTransform: "none",

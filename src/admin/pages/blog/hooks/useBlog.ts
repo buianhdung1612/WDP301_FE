@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getBlogs, createBlog, getBlogById, updateBlog, deleteBlog, mapStatusToFrontend } from '../../../api/blog.api';
+import { getBlogs, createBlog, getBlogById, updateBlog, deleteBlog } from '../../../api/blog.api';
 import { ApiResponse } from '../../../config/type';
 
 export const useBlogs = () => {

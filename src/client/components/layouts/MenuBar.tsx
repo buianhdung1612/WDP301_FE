@@ -9,12 +9,12 @@ export const MenuBar = () => {
         },
         {
             label: "Dịch vụ",
-            to: "/dich-vu",
+            to: "/services",
             img: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/Menu-img-1.png",
         },
         {
             label: "Đặt lịch",
-            to: "/dat-lich",
+            to: "/services/booking",
             img: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/Menu-img-9.png",
         },
         {

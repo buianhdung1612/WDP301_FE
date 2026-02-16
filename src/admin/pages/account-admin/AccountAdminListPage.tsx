@@ -13,11 +13,11 @@ export const AccountAdminListPage = () => {
         <>
             <div className="mb-[40px] gap-[16px] flex items-start justify-end">
                 <div className="mr-auto">
-                    <Title title="Danh sách tài khoản quản trị" />
+                    <Title title="Danh sách quản trị viên" />
                     <Breadcrumb
                         items={[
                             { label: "Dashboard", to: "/" },
-                            { label: "Tài khoản", to: `/${prefixAdmin}/account-admin/list` },
+                            { label: "Quản trị viên", to: `/${prefixAdmin}/account-admin/list` },
                             { label: "Danh sách" }
                         ]}
                     />
@@ -26,10 +26,10 @@ export const AccountAdminListPage = () => {
                     onClick={() => navigate(`/${prefixAdmin}/account-admin/create`)}
                     sx={{
                         background: '#1C252E',
-                        minHeight: "3.6rem",
-                        minWidth: "6.4rem",
+                        minHeight: "2.25rem",
+                        minWidth: "4rem",
                         fontWeight: 700,
-                        fontSize: "1.4rem",
+                        fontSize: "0.875rem",
                         padding: "6px 12px",
                         borderRadius: "8px",
                         textTransform: "none",

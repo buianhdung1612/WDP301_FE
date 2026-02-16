@@ -392,7 +392,7 @@ export const ProductAttributeCreatePage = () => {
                                                         <MenuItem
                                                             key={type.value}
                                                             value={type.value}
-                                                            sx={{ fontSize: '1.4rem', display: type.value === '' ? 'none' : 'block' }}
+                                                            sx={{ fontSize: '0.875rem', display: type.value === '' ? 'none' : 'block' }}
                                                         >
                                                             {type.label}
                                                         </MenuItem>
@@ -402,7 +402,7 @@ export const ProductAttributeCreatePage = () => {
                                                     <Typography
                                                         sx={{
                                                             color: '#d32f2f',
-                                                            fontSize: '1.2rem',
+                                                            fontSize: '0.75rem',
                                                             mt: 0.5,
                                                             ml: 1.75
                                                         }}
@@ -464,7 +464,7 @@ export const ProductAttributeCreatePage = () => {
                                         mt: 1,
                                         color: '#00A76F', // Primary green
                                         borderColor: 'rgba(0, 167, 111, 0.3)',
-                                        fontSize: '1.4rem',
+                                        fontSize: '0.875rem',
                                         '&:hover': {
                                             borderColor: '#00A76F',
                                             backgroundColor: 'rgba(0, 167, 111, 0.08)'
@@ -484,10 +484,10 @@ export const ProductAttributeCreatePage = () => {
                                 disabled={isPending}
                                 sx={{
                                     background: '#1C252E',
-                                    minHeight: "4.8rem",
-                                    minWidth: "6.4rem",
+                                    minHeight: "3rem",
+                                    minWidth: "4rem",
                                     fontWeight: 700,
-                                    fontSize: "1.4rem",
+                                    fontSize: "0.875rem",
                                     padding: "8px 22px",
                                     borderRadius: "8px",
                                     textTransform: "none",

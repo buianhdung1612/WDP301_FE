@@ -34,14 +34,14 @@ export const Filter = () => {
                                     }
                                 }}
                             >
-                                <CustomFilterIcon sx={{ fontSize: '1.8rem !important' }} />
+                                <CustomFilterIcon sx={{ fontSize: '1.125rem !important' }} />
                             </Badge>
                         }
                         sx={{
                             textTransform: 'none',
                             minWidth: '64px',
                             minHeight: "30px",
-                            fontSize: "1.3rem",
+                            fontSize: "0.8125rem",
                             padding: '4px',
                             fontWeight: "700",
                             borderRadius: "8px",

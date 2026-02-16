@@ -63,7 +63,7 @@ export const ProductAttributeDetailPage = () => {
                     sx={{
                         fontWeight: 700,
                         textTransform: "none",
-                        fontSize: "1.8rem",
+                        fontSize: "1.125rem",
                         borderRadius: "8px",
                         p: 0,
                         mb: 1,
@@ -108,14 +108,14 @@ export const ProductAttributeDetailPage = () => {
 
                 {/* Display Type Badge */}
                 <Box sx={{ textAlign: 'right' }}>
-                    <Typography sx={{ fontSize: '1.2rem', color: '#919EAB', mb: 0.5 }}>Kiểu hiển thị</Typography>
+                    <Typography sx={{ fontSize: '0.75rem', color: '#919EAB', mb: 0.5 }}>Kiểu hiển thị</Typography>
                     <Chip
                         label={displayTypeLabel}
                         sx={{
                             backgroundColor: alpha('#4facfe', 0.1),
                             color: '#4facfe',
                             fontWeight: 600,
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                         }}
                     />
                 </Box>
@@ -141,7 +141,7 @@ export const ProductAttributeDetailPage = () => {
                                 justifyContent: 'center',
                             }}
                         >
-                            <TuneIcon sx={{ fontSize: '3rem', color: '#4facfe' }} />
+                            <TuneIcon sx={{ fontSize: '1.875rem', color: '#4facfe' }} />
                         </Box>
 
                         {/* Name & Count */}
@@ -153,11 +153,11 @@ export const ProductAttributeDetailPage = () => {
                                     backgroundColor: '#22c55e',
                                     color: '#fff',
                                     fontWeight: 700,
-                                    fontSize: '1.2rem',
+                                    fontSize: '0.75rem',
                                     mb: 1
                                 }}
                             />
-                            <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#1C252E' }}>
+                            <Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#1C252E' }}>
                                 {attribute.name}
                             </Typography>
                         </Box>
@@ -166,18 +166,18 @@ export const ProductAttributeDetailPage = () => {
                     {/* Info Grid */}
                     <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, mb: 4 }}>
                         <Box>
-                            <Typography sx={{ fontSize: '1.2rem', color: '#919EAB', fontWeight: 600, mb: 1 }}>
+                            <Typography sx={{ fontSize: '0.75rem', color: '#919EAB', fontWeight: 600, mb: 1 }}>
                                 Ngày tạo
                             </Typography>
-                            <Typography sx={{ fontSize: '1.4rem', color: '#1C252E' }}>
+                            <Typography sx={{ fontSize: '0.875rem', color: '#1C252E' }}>
                                 {attribute.createdAt ? dayjs(attribute.createdAt).locale('vi').format('DD MMM YYYY') : '--'}
                             </Typography>
                         </Box>
                         <Box>
-                            <Typography sx={{ fontSize: '1.2rem', color: '#919EAB', fontWeight: 600, mb: 1 }}>
+                            <Typography sx={{ fontSize: '0.75rem', color: '#919EAB', fontWeight: 600, mb: 1 }}>
                                 Cập nhật lần cuối
                             </Typography>
-                            <Typography sx={{ fontSize: '1.4rem', color: '#1C252E' }}>
+                            <Typography sx={{ fontSize: '0.875rem', color: '#1C252E' }}>
                                 {attribute.updatedAt ? dayjs(attribute.updatedAt).locale('vi').format('DD MMM YYYY') : '--'}
                             </Typography>
                         </Box>
@@ -186,7 +186,7 @@ export const ProductAttributeDetailPage = () => {
                     <Divider sx={{ my: 4 }} />
 
                     {/* Values Table */}
-                    <Typography sx={{ fontSize: '1.4rem', color: '#919EAB', fontWeight: 600, mb: 2 }}>
+                    <Typography sx={{ fontSize: '0.875rem', color: '#919EAB', fontWeight: 600, mb: 2 }}>
                         Danh sách lựa chọn (Options)
                     </Typography>
 
@@ -195,9 +195,9 @@ export const ProductAttributeDetailPage = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow sx={{ backgroundColor: '#f4f6f8' }}>
-                                        <TableCell sx={{ fontWeight: 700, fontSize: '1.3rem', width: 60 }}>#</TableCell>
-                                        <TableCell sx={{ fontWeight: 700, fontSize: '1.3rem' }}>Nhãn (Label)</TableCell>
-                                        <TableCell sx={{ fontWeight: 700, fontSize: '1.3rem', textAlign: isColorType ? 'left' : 'right' }}>
+                                        <TableCell sx={{ fontWeight: 700, fontSize: '0.8125rem', width: 60 }}>#</TableCell>
+                                        <TableCell sx={{ fontWeight: 700, fontSize: '0.8125rem' }}>Nhãn (Label)</TableCell>
+                                        <TableCell sx={{ fontWeight: 700, fontSize: '0.8125rem', textAlign: isColorType ? 'left' : 'right' }}>
                                             {isColorType ? 'Mã màu' : 'Giá trị (Value)'}
                                         </TableCell>
                                     </TableRow>
@@ -206,9 +206,9 @@ export const ProductAttributeDetailPage = () => {
                                     {attribute.options.map((val: any, index: number) => {
                                         return (
                                             <TableRow key={val._id || index} sx={{ '&:hover': { backgroundColor: '#f9fafb' } }}>
-                                                <TableCell sx={{ fontSize: '1.4rem', color: '#637381' }}>{index + 1}</TableCell>
+                                                <TableCell sx={{ fontSize: '0.875rem', color: '#637381' }}>{index + 1}</TableCell>
                                                 <TableCell>
-                                                    <Typography sx={{ fontSize: '1.4rem', fontWeight: 600, color: '#1C252E' }}>
+                                                    <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#1C252E' }}>
                                                         {val.label}
                                                     </Typography>
                                                 </TableCell>
@@ -224,12 +224,12 @@ export const ProductAttributeDetailPage = () => {
                                                                     border: '2px solid #e0e0e0',
                                                                 }}
                                                             />
-                                                            <Typography sx={{ fontSize: '1.3rem', fontFamily: 'monospace', color: '#637381' }}>
+                                                            <Typography sx={{ fontSize: '0.8125rem', fontFamily: 'monospace', color: '#637381' }}>
                                                                 {val.value || '--'}
                                                             </Typography>
                                                         </Box>
                                                     ) : (
-                                                        <Typography sx={{ fontSize: '1.4rem', color: '#1C252E' }}>
+                                                        <Typography sx={{ fontSize: '0.875rem', color: '#1C252E' }}>
                                                             {val.value || '--'}
                                                         </Typography>
                                                     )}
@@ -241,7 +241,7 @@ export const ProductAttributeDetailPage = () => {
                             </Table>
                         </TableContainer>
                     ) : (
-                        <Typography sx={{ fontSize: '1.4rem', color: '#919EAB', fontStyle: 'italic' }}>
+                        <Typography sx={{ fontSize: '0.875rem', color: '#919EAB', fontStyle: 'italic' }}>
                             Chưa có lựa chọn nào
                         </Typography>
                     )}

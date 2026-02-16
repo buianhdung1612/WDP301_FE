@@ -10,12 +10,12 @@
 @import "tw-animate-css";
 
 html {
-    font-size: 62.5%;
+    font-size: 100%;
 }
 
 html body {
     font-family: 'Lora', serif;
-    font-size: 1.6rem;
+    font-size: 16px;
     line-height: 1.5;
     font-weight: 400;
 }

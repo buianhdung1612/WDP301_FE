@@ -53,7 +53,7 @@ export const RenderTitleCell = (params: GridRenderCellParams) => {
                         sx={{
                             color: COLORS.primary,
                             fontWeight: 600,
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             transition: 'color 0.2s',
                         }}
                     >
@@ -91,7 +91,7 @@ export const RenderCreatedAtCell = ({ value }: RenderCreatedAtCellProps) => {
 
             <span
                 style={{
-                    fontSize: "1.4rem",
+                    fontSize: "0.875rem",
                     color: COLORS.primary,
                     transition: 'color 0.2s',
                     textTransform: 'capitalize'
@@ -103,7 +103,7 @@ export const RenderCreatedAtCell = ({ value }: RenderCreatedAtCellProps) => {
                 className="date-text"
                 component='span'
                 sx={{
-                    fontSize: "1.2rem",
+                    fontSize: "0.75rem",
                     color: COLORS.secondary,
                     textTransform: 'lowercase'
                 }}
@@ -133,7 +133,7 @@ export const RenderStatusCell = (params: GridRenderCellParams) => {
 
     return (
         <span
-            className="inline-flex items-center justify-center leading-1.5 min-w-[2.4rem] h-[2.4rem] text-[1.2rem] px-[6px] font-[700] rounded-[6px]"
+            className="inline-flex items-center justify-center leading-1.5 min-w-[1.5rem] h-[1.5rem] text-[0.75rem] px-[6px] font-[700] rounded-[6px]"
             style={{
                 backgroundColor: bg,
                 color: text,
@@ -176,7 +176,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                 {...({
                     sx: {
                         '& .MuiTypography-root': {
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             fontWeight: "600"
                         },
                     },
@@ -190,7 +190,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                 {...({
                     sx: {
                         '& .MuiTypography-root': {
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             fontWeight: "600"
                         },
                     },
@@ -204,7 +204,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                 {...({
                     sx: {
                         '& .MuiTypography-root': {
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             fontWeight: "600",
                             color: "#FF5630"
                         },

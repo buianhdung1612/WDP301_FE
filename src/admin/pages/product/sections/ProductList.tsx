@@ -3,7 +3,6 @@ import {
     GridColDef,
 } from '@mui/x-data-grid';
 import Card from '@mui/material/Card';
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SortAscendingIcon, SortDescendingIcon, UnsortedIcon } from '../../../assets/icons';
 import { columnsInitialState } from '../configs/column.config';
@@ -36,11 +35,11 @@ export const ProductList = () => {
     const localeText = useDataGridLocale();
 
     if (isLoading) {
-        return <div style={{ padding: '40px', textAlign: 'center', fontSize: '1.8rem' }}>Đang tải danh sách sản phẩm...</div>;
+        return <div style={{ padding: '40px', textAlign: 'center', fontSize: '1.125rem' }}>Đang tải danh sách sản phẩm...</div>;
     }
 
     if (error) {
-        return <div style={{ padding: '40px', textAlign: 'center', color: '#FF5630', fontSize: '1.8rem' }}>Lỗi khi tải danh sách sản phẩm. Vui lòng thử lại.</div>;
+        return <div style={{ padding: '40px', textAlign: 'center', color: '#FF5630', fontSize: '1.125rem' }}>Lỗi khi tải danh sách sản phẩm. Vui lòng thử lại.</div>;
     }
 
     return (

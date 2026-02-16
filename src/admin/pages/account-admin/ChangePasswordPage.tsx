@@ -1,4 +1,3 @@
-import { Box, Stack, TextField, Button, Typography, Paper, CircularProgress } from "@mui/material";
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { Title } from "../../components/ui/Title";
 import { useChangeAccountPassword, useAccountDetail } from "./hooks/useAccountAdmin";
@@ -8,6 +7,14 @@ import { changePasswordSchema, ChangePasswordFormValues } from "../../schemas/ac
 import { prefixAdmin } from "../../constants/routes";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+    Box,
+    TextField,
+    Button,
+    Typography,
+    Card,
+    CircularProgress
+} from "@mui/material";
 
 export const ChangePasswordPage = () => {
     const { id } = useParams();
@@ -38,66 +45,108 @@ export const ChangePasswordPage = () => {
         });
     };
 
-    if (isLoading) return <CircularProgress />;
+    if (isLoading) return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
+            <CircularProgress />
+        </Box>
+    );
 
     return (
-        <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
-                <div className="mr-auto">
-                    <Title title={`Đổi mật khẩu: ${account?.fullName}`} />
-                    <Breadcrumb
-                        items={[
-                            { label: "Dashboard", to: "/" },
-                            { label: "Tài khoản", to: `/${prefixAdmin}/account-admin/list` },
-                            { label: "Đổi mật khẩu" }
-                        ]}
-                    />
-                </div>
-            </div>
+        <Box sx={{ maxWidth: '600px', mx: 'auto' }}>
+            <Box sx={{ mb: 5 }}>
+                <Title title="Đổi mật khẩu" />
+                <Breadcrumb
+                    items={[
+                        { label: "Dashboard", to: "/" },
+                        { label: "Quản trị viên", to: `/${prefixAdmin}/account-admin/list` },
+                        { label: "Đổi mật khẩu" }
+                    ]}
+                />
+            </Box>
 
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <Stack spacing={3} sx={{ maxWidth: 500, mx: "auto" }}>
-                    <Paper sx={{ p: 3, borderRadius: 2 }}>
-                        <Stack spacing={3}>
-                            <Controller
-                                name="password"
-                                control={control}
-                                render={({ field, fieldState }) => (
-                                    <TextField
-                                        {...field}
-                                        label="Mật khẩu mới"
-                                        type="password"
-                                        fullWidth
-                                        error={!!fieldState.error}
-                                        helperText={fieldState.error?.message}
-                                    />
-                                )}
-                            />
-                            <Controller
-                                name="confirmPassword"
-                                control={control}
-                                render={({ field, fieldState }) => (
-                                    <TextField
-                                        {...field}
-                                        label="Xác nhận mật khẩu mới"
-                                        type="password"
-                                        fullWidth
-                                        error={!!fieldState.error}
-                                        helperText={fieldState.error?.message}
-                                    />
-                                )}
-                            />
-                        </Stack>
-                    </Paper>
+            <Card sx={{ p: 4, borderRadius: '16px' }}>
+                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, fontSize: '1rem' }}>
+                    Đổi mật khẩu cho: {account?.fullName}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 4, color: 'text.secondary', fontSize: '0.8125rem' }}>
+                    Email: {account?.email}
+                </Typography>
 
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-                        <Button variant="outlined" onClick={() => navigate(`/${prefixAdmin}/account-admin/list`)}>Hủy</Button>
-                        <Button type="submit" variant="contained" disabled={isPending} sx={{ background: "#1C252E" }}>
-                            {isPending ? "Đang xử lý..." : "Đổi mật khẩu"}
-                        </Button>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        <Controller
+                            name="password"
+                            control={control}
+                            render={({ field, fieldState }) => (
+                                <TextField
+                                    {...field}
+                                    label="Mật khẩu mới"
+                                    type="password"
+                                    fullWidth
+                                    error={!!fieldState.error}
+                                    helperText={fieldState.error?.message}
+                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.875rem' } }}
+                                />
+                            )}
+                        />
+
+                        <Controller
+                            name="confirmPassword"
+                            control={control}
+                            render={({ field, fieldState }) => (
+                                <TextField
+                                    {...field}
+                                    label="Xác nhận mật khẩu mới"
+                                    type="password"
+                                    fullWidth
+                                    error={!!fieldState.error}
+                                    helperText={fieldState.error?.message}
+                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.875rem' } }}
+                                />
+                            )}
+                        />
+
+                        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 1 }}>
+                            <Button
+                                variant="outlined"
+                                onClick={() => navigate(-1)}
+                                sx={{
+                                    borderRadius: '8px',
+                                    fontWeight: 600,
+                                    fontSize: '0.875rem',
+                                    textTransform: 'none',
+                                    borderColor: 'rgba(145, 158, 171, 0.3)',
+                                    color: '#1C252E',
+                                    '&:hover': {
+                                        borderColor: '#1C252E',
+                                        bgcolor: 'rgba(28, 37, 46, 0.04)'
+                                    }
+                                }}
+                            >
+                                Hủy
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                disabled={isPending}
+                                sx={{
+                                    bgcolor: '#1C252E',
+                                    color: '#fff',
+                                    borderRadius: '8px',
+                                    px: 4,
+                                    fontWeight: 700,
+                                    fontSize: '0.875rem',
+                                    textTransform: 'none',
+                                    boxShadow: 'none',
+                                    '&:hover': { bgcolor: '#454F5B', boxShadow: 'none' }
+                                }}
+                            >
+                                {isPending ? "Đang xử lý..." : "Cập nhật mật khẩu"}
+                            </Button>
+                        </Box>
                     </Box>
-                </Stack>
-            </form>
-        </>
+                </form>
+            </Card>
+        </Box>
     );
 };

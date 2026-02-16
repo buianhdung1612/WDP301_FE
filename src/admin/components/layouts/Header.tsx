@@ -8,9 +8,15 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Popover from "@mui/material/Popover";
 import MenuItem from "@mui/material/MenuItem";
+import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { toast } from 'react-toastify';
+import { useAuthStore } from "../../../stores/useAuthStore";
+import { useNavigate } from "react-router-dom";
+import { logout as logoutApi } from "../../api/auth.api";
+import Cookies from "js-cookie";
 
 interface Props {
     window?: () => Window;
@@ -44,24 +50,51 @@ function ElevationScroll(props: Props) {
 
 export const Header = () => {
     const { i18n } = useTranslation();
-    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+    const navigate = useNavigate();
+    const { user, logout: logoutStore } = useAuthStore();
+    const [anchorElLang, setAnchorElLang] = useState<HTMLButtonElement | null>(null);
+    const [anchorElUser, setAnchorElUser] = useState<HTMLButtonElement | null>(null);
 
-    const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
-        setAnchorEl(event.currentTarget);
+    const handleOpenLang = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorElLang(event.currentTarget);
     };
 
-    const handleClose = () => {
-        setAnchorEl(null);
+    const handleCloseLang = () => {
+        setAnchorElLang(null);
+    };
+
+    const handleOpenUser = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorElUser(event.currentTarget);
+    };
+
+    const handleCloseUser = () => {
+        setAnchorElUser(null);
+    };
+
+    const handleLogout = async () => {
+        try {
+            const res = await logoutApi();
+            if (res.code === 200) {
+                logoutStore();
+                Cookies.remove("tokenAdmin");
+                toast.success("Đăng xuất thành công!");
+                navigate("/admin/auth/login");
+            }
+        } catch (error) {
+            console.error("Logout error:", error);
+            toast.error("Có lỗi xảy ra khi đăng xuất!");
+        }
     };
 
     const handleChangeLanguage = (lng: string) => {
         i18n.changeLanguage(lng);
         const message = lng === 'vi' ? 'Đã đổi sang Tiếng Việt!' : 'Language changed to English!';
         toast.success(message);
-        handleClose();
+        handleCloseLang();
     };
 
-    const open = Boolean(anchorEl);
+    const openLang = Boolean(anchorElLang);
+    const openUser = Boolean(anchorElUser);
 
     // Flags
     const VI_FLAG = "https://flagcdn.com/w40/vn.png";
@@ -95,18 +128,18 @@ export const Header = () => {
                             alt="TeddyPet"
                             className="w-[24px] h-[24px] object-cover"
                         />
-                        <span className="text-[1.4rem] font-[600] text-[#1c252e]">TeddyPet</span>
+                        <span className="text-[0.875rem] font-[600] text-[#1c252e]">TeddyPet</span>
                     </div>
                     <Box className="flex items-center gap-[6px]">
                         <Box className="flex items-center pr-[8px] cursor-pointer bg-[#919eab14] hover:bg-[#919eab29] rounded-[12px] transition-colors duration-150 ease-in-out">
                             <Box className="p-[8px]">
-                                <svg className="text-[2rem] text-[#637381]" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" id="«ro»" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="m20.71 19.29l-3.4-3.39A7.92 7.92 0 0 0 19 11a8 8 0 1 0-8 8a7.92 7.92 0 0 0 4.9-1.69l3.39 3.4a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.42M5 11a6 6 0 1 1 6 6a6 6 0 0 1-6-6"></path></svg>
+                                <svg className="text-[1.25rem] text-[#637381]" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" id="«ro»" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="m20.71 19.29l-3.4-3.39A7.92 7.92 0 0 0 19 11a8 8 0 1 0-8 8a7.92 7.92 0 0 0 4.9-1.69l3.39 3.4a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.42M5 11a6 6 0 1 1 6 6a6 6 0 0 1-6-6"></path></svg>
                             </Box>
-                            <span className="h-[2.4rem] min-w-[2.4rem] flex items-center justify-center text-[#1C252E] text-[1.2rem] font-[900] pl-[6px] pr-[6px] rounded-[6px] bg-white box-shadow-[0_1px_2px_0_rgba(145,158,171,0.16)]"><span className="text-[0.7rem] mt-[1px] mr-[1px]">⌘</span>K</span>
+                            <span className="h-[1.5rem] min-w-[1.5rem] flex items-center justify-center text-[#1C252E] text-[0.75rem] font-[900] pl-[6px] pr-[6px] rounded-[6px] bg-white box-shadow-[0_1px_2px_0_rgba(145,158,171,0.16)]"><span className="text-[0.4375rem] mt-[1px] mr-[1px]">⌘</span>K</span>
                         </Box>
 
                         <Button
-                            onClick={handleOpen}
+                            onClick={handleOpenLang}
                             sx={{
                                 minWidth: 0,
                                 mx: "10px",
@@ -114,7 +147,7 @@ export const Header = () => {
                                 height: "40px",
                                 padding: "0",
                                 borderRadius: '50%',
-                                backgroundColor: open ? 'rgba(145, 158, 171, 0.16)' : 'transparent',
+                                backgroundColor: openLang ? 'rgba(145, 158, 171, 0.16)' : 'transparent',
                                 '&:hover': {
                                     backgroundColor: 'rgba(145, 158, 171, 0.16)',
                                     scale: "1.04"
@@ -133,9 +166,9 @@ export const Header = () => {
                             />
                         </Button>
                         <Popover
-                            open={open}
-                            anchorEl={anchorEl}
-                            onClose={handleClose}
+                            open={openLang}
+                            anchorEl={anchorElLang}
+                            onClose={handleCloseLang}
                             anchorOrigin={{
                                 vertical: 'bottom',
                                 horizontal: 'right',
@@ -146,6 +179,7 @@ export const Header = () => {
                             }}
                             slotProps={{
                                 paper: {
+                                    className: 'background-popup',
                                     sx: {
                                         ml: 0.75,
                                         width: 168,
@@ -164,7 +198,7 @@ export const Header = () => {
                                 sx={{
                                     padding: "6px 8px",
                                     mb: "4px",
-                                    fontSize: '1.3rem !important',
+                                    fontSize: '0.8125rem !important',
                                     '&.Mui-selected': {
                                         fontWeight: 600,
                                         backgroundColor: '#919eab29 !important',
@@ -183,7 +217,7 @@ export const Header = () => {
                                 sx={{
                                     padding: "6px 8px",
                                     mb: "4px",
-                                    fontSize: '1.3rem !important',
+                                    fontSize: '0.8125rem !important',
                                     '&.Mui-selected': {
                                         fontWeight: 600,
                                         backgroundColor: '#919eab29 !important',
@@ -206,7 +240,7 @@ export const Header = () => {
                             <SettingsIcon
                                 sx={{
                                     color: "#637381",
-                                    fontSize: "2.2rem",
+                                    fontSize: "1.375rem",
                                     animation: "spin 10s linear infinite",
                                     "@keyframes spin": {
                                         "0%": { transform: "rotate(0deg)" },
@@ -216,15 +250,67 @@ export const Header = () => {
                             />
                         </Button>
                         <Button
+                            onClick={handleOpenUser}
                             sx={{
                                 minWidth: 0,
                                 padding: 0,
+                                borderRadius: '50%',
                             }}
                         >
-                            <div className="relative rounded-full p-[3px] w-[4rem] h-[4rem] header__avatar">
-                                <Avatar className="w-full h-full" src="https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/images/mock/avatar/avatar-25.webp" />
+                            <div className={`relative rounded-full p-[3px] w-[2.5rem] h-[2.5rem] header__avatar ${openUser ? 'active' : ''}`}>
+                                <Avatar className="w-full h-full" src={user?.avatar || "https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/images/mock/avatar/avatar-25.webp"} />
                             </div>
                         </Button>
+
+                        <Popover
+                            open={openUser}
+                            anchorEl={anchorElUser}
+                            onClose={handleCloseUser}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'right',
+                            }}
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            slotProps={{
+                                paper: {
+                                    className: 'background-popup',
+                                    sx: {
+                                        p: 0,
+                                        mt: 1,
+                                        ml: 0.75,
+                                        width: 200,
+                                        '& .MuiMenuItem-root': {
+                                            typography: 'body2',
+                                            borderRadius: 0.75,
+                                        },
+                                    },
+                                }
+                            }}
+                        >
+                            <Box sx={{ py: 1.5, px: 2 }}>
+                                <Typography variant="subtitle2" noWrap sx={{ color: '#1C252E', fontWeight: 600 }}>
+                                    {user?.fullName || "Admin"}
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+                                    {user?.email || ""}
+                                </Typography>
+                            </Box>
+
+                            <Divider sx={{ borderStyle: 'dashed' }} />
+
+                            <MenuItem onClick={handleCloseUser} sx={{ m: 1 }}>
+                                Hồ sơ
+                            </MenuItem>
+
+                            <Divider sx={{ borderStyle: 'dashed' }} />
+
+                            <MenuItem onClick={handleLogout} sx={{ m: 1, color: 'error.main', fontWeight: 600 }}>
+                                Đăng xuất
+                            </MenuItem>
+                        </Popover>
                     </Box>
                 </Container>
             </AppBar>

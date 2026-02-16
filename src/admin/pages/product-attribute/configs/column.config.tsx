@@ -35,7 +35,7 @@ export const RenderNameCell = (params: GridRenderCellParams) => {
                 sx={{
                     color: COLORS.primary,
                     fontWeight: 600,
-                    fontSize: '1.4rem',
+                    fontSize: '0.875rem',
                     transition: 'color 0.2s',
                 }}
             >
@@ -53,7 +53,7 @@ export const RenderTypeCell = (params: GridRenderCellParams) => {
     return (
         <span
             style={{
-                fontSize: '1.4rem',
+                fontSize: '0.875rem',
                 color: '#637381',
             }}
         >
@@ -75,7 +75,7 @@ export const RenderOptionsCell = (params: GridRenderCellParams) => {
                     label={`${v.label}`}
                     size="small"
                     sx={{
-                        fontSize: '1.1rem',
+                        fontSize: '0.6875rem',
                         fontWeight: 600,
                         height: '24px',
                         borderRadius: '6px',
@@ -90,7 +90,7 @@ export const RenderOptionsCell = (params: GridRenderCellParams) => {
                     label={`+${options.length - 5}`}
                     size="small"
                     sx={{
-                        fontSize: '1.1rem',
+                        fontSize: '0.6875rem',
                         fontWeight: 600,
                         height: '24px',
                         borderRadius: '6px',
@@ -136,7 +136,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                 {...({
                     sx: {
                         '& .MuiTypography-root': {
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             fontWeight: "600"
                         },
                     },
@@ -150,7 +150,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                 {...({
                     sx: {
                         '& .MuiTypography-root': {
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             fontWeight: "600",
                             color: "#FF5630"
                         },

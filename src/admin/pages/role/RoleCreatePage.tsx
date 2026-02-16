@@ -7,10 +7,16 @@ import { roleSchema } from "../../schemas/role.schema";
 import { prefixAdmin } from "../../constants/routes";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { PERMISSIONS, SKILLS } from "../../constants/roles";
+import { PERMISSIONS_GROUPED } from "../../constants/roles";
+import { useServices } from "../service/hooks/useService";
+import { useDepartments } from "../hr/hooks/useDepartments";
 import { useState, useMemo, Dispatch, SetStateAction } from "react";
 import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
 import { SwitchButton } from "../../components/ui/SwitchButton";
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
     Box,
     TextField,
@@ -21,7 +27,6 @@ import {
     Checkbox,
     FormControlLabel,
     Typography,
-    Paper,
     Switch,
     Stack,
     ThemeProvider,
@@ -32,6 +37,8 @@ import {
 export const RoleCreatePage = () => {
     const navigate = useNavigate();
     const { mutate: create, isPending } = useCreateRole();
+    const { data: services = [] } = useServices();
+    const { data: departments = [] } = useDepartments();
 
     const [expandedInfo, setExpandedInfo] = useState(true);
     const [expandedPermissions, setExpandedPermissions] = useState(true);
@@ -61,19 +68,35 @@ export const RoleCreatePage = () => {
         control,
         handleSubmit,
         watch,
+        setValue,
     } = useForm<any>({
         resolver: zodResolver(roleSchema),
         defaultValues: {
             name: "",
             description: "",
             isStaff: false,
-            skillSet: [],
+            serviceIds: [],
             permissions: [],
+            departmentId: "",
+            commissionRate: 0,
             status: "active",
         },
     });
 
     const isStaff = watch("isStaff");
+    const currentPermissions = watch("permissions") || [];
+
+    const handleSelectGroup = (groupPermissions: string[], isChecked: boolean) => {
+        let newPermissions = [...currentPermissions];
+        if (isChecked) {
+            groupPermissions.forEach(id => {
+                if (!newPermissions.includes(id)) newPermissions.push(id);
+            });
+        } else {
+            newPermissions = newPermissions.filter(id => !groupPermissions.includes(id));
+        }
+        setValue("permissions", newPermissions, { shouldValidate: true });
+    };
 
     const onSubmit = (data: any) => {
         create(data, {
@@ -137,60 +160,131 @@ export const RoleCreatePage = () => {
                                             />
                                         )}
                                     />
+                                    <Controller
+                                        name="departmentId"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                select
+                                                label="Phòng ban"
+                                                error={!!control.getFieldState("departmentId").error}
+                                                helperText={control.getFieldState("departmentId").error?.message}
+                                            >
+                                                <MenuItem value="">-- Chọn phòng ban --</MenuItem>
+                                                {departments.map((dept: any) => (
+                                                    <MenuItem key={dept._id} value={dept._id}>
+                                                        {dept.name}
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>
+                                        )}
+                                    />
+                                    <Controller
+                                        name="commissionRate"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                type="number"
+                                                label="% Hoa hồng mặc định"
+                                                placeholder="0"
+                                                InputProps={{ inputProps: { min: 0, max: 100 } }}
+                                                error={!!control.getFieldState("commissionRate").error}
+                                                helperText={control.getFieldState("commissionRate").error?.message}
+                                            />
+                                        )}
+                                    />
                                 </Box>
                             </Stack>
                         </CollapsibleCard>
 
                         <CollapsibleCard
-                            title="Phân quyền & Kỹ năng"
-                            subheader="Thiết lập quyền hạn và kỹ năng cho nhân viên"
+                            title="Phân quyền chi tiết"
+                            subheader="Thiết lập các hành động cụ thể cho từng module"
                             expanded={expandedPermissions}
                             onToggle={toggle(setExpandedPermissions)}
                         >
                             <Stack p="24px" gap="24px">
                                 <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: "32px" }}>
                                     <Box>
-                                        <Typography sx={{ fontSize: '1.4rem', fontWeight: 600, mb: 1 }}>Danh sách quyền hạn</Typography>
-                                        <Paper variant="outlined" sx={{
-                                            height: 300,
-                                            overflow: 'auto',
-                                            p: 1,
-                                            borderRadius: '8px',
-                                            '&::-webkit-scrollbar': { width: '6px' },
-                                            '&::-webkit-scrollbar-thumb': { backgroundColor: '#e0e0e0', borderRadius: '10px' }
-                                        }}>
-                                            <Controller
-                                                name="permissions"
-                                                control={control}
-                                                render={({ field }) => (
-                                                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                                        {PERMISSIONS.map((perm) => (
-                                                            <FormControlLabel
-                                                                key={perm.id}
-                                                                control={
-                                                                    <Checkbox
-                                                                        checked={field.value.indexOf(perm.id) > -1}
-                                                                        onChange={(e) => {
-                                                                            const newValue = e.target.checked
-                                                                                ? [...field.value, perm.id]
-                                                                                : field.value.filter((id: string) => id !== perm.id);
-                                                                            field.onChange(newValue);
-                                                                        }}
-                                                                    />
-                                                                }
-                                                                label={<Typography sx={{ fontSize: '1.4rem' }}>{perm.name}</Typography>}
-                                                                sx={{ ml: 0 }}
+                                        <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, mb: 2 }}>Danh sách phân quyền</Typography>
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                            {PERMISSIONS_GROUPED.map((group) => {
+                                                const groupIds = group.permissions.map(p => p.id);
+                                                const isAllChecked = groupIds.every(id => currentPermissions.includes(id));
+                                                const isSomeChecked = groupIds.some(id => currentPermissions.includes(id)) && !isAllChecked;
+
+                                                return (
+                                                    <Accordion
+                                                        key={group.module}
+                                                        disableGutters
+                                                        sx={{
+                                                            boxShadow: 'none',
+                                                            '&:before': { display: 'none' },
+                                                            border: '1px solid #919eab3d',
+                                                            borderRadius: '8px !important',
+                                                            overflow: 'hidden'
+                                                        }}
+                                                    >
+                                                        <AccordionSummary
+                                                            expandIcon={<ExpandMoreIcon fontSize="small" />}
+                                                            sx={{
+                                                                bgcolor: '#f4f6f8',
+                                                                minHeight: '48px !important',
+                                                                '& .MuiAccordionSummary-content': { m: '0 !important', alignItems: 'center' }
+                                                            }}
+                                                        >
+                                                            <Checkbox
+                                                                size="small"
+                                                                checked={isAllChecked}
+                                                                indeterminate={isSomeChecked}
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                onChange={(e) => handleSelectGroup(groupIds, e.target.checked)}
+                                                                sx={{ mr: 1, p: 0.5 }}
                                                             />
-                                                        ))}
-                                                    </Box>
-                                                )}
-                                            />
-                                        </Paper>
+                                                            <Typography sx={{ fontSize: '0.875rem', fontWeight: 700 }}>
+                                                                {group.module}
+                                                            </Typography>
+                                                        </AccordionSummary>
+                                                        <AccordionDetails sx={{ p: 2, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 1 }}>
+                                                            <Controller
+                                                                name="permissions"
+                                                                control={control}
+                                                                render={({ field }) => (
+                                                                    <>
+                                                                        {group.permissions.map((perm) => (
+                                                                            <FormControlLabel
+                                                                                key={perm.id}
+                                                                                control={
+                                                                                    <Checkbox
+                                                                                        size="small"
+                                                                                        checked={field.value.indexOf(perm.id) > -1}
+                                                                                        onChange={(e) => {
+                                                                                            const newValue = e.target.checked
+                                                                                                ? [...field.value, perm.id]
+                                                                                                : field.value.filter((id: string) => id !== perm.id);
+                                                                                            field.onChange(newValue);
+                                                                                        }}
+                                                                                    />
+                                                                                }
+                                                                                label={<Typography sx={{ fontSize: '0.8125rem' }}>{perm.name}</Typography>}
+                                                                                sx={{ ml: 0 }}
+                                                                            />
+                                                                        ))}
+                                                                    </>
+                                                                )}
+                                                            />
+                                                        </AccordionDetails>
+                                                    </Accordion>
+                                                );
+                                            })}
+                                        </Box>
                                     </Box>
 
                                     <Box>
                                         <Box sx={{ mb: 3 }}>
-                                            <Typography sx={{ fontSize: '1.4rem', fontWeight: 600, mb: 1 }}>Loại nhóm quyền</Typography>
+                                            <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, mb: 1 }}>Loại nhóm quyền</Typography>
                                             <Controller
                                                 name="isStaff"
                                                 control={control}
@@ -212,7 +306,7 @@ export const RoleCreatePage = () => {
                                                                 }}
                                                             />
                                                         }
-                                                        label={<Typography sx={{ fontSize: '1.4rem' }}>Nhân viên kỹ thuật</Typography>}
+                                                        label={<Typography sx={{ fontSize: '0.875rem' }}>Nhân viên kỹ thuật</Typography>}
                                                     />
                                                 )}
                                             />
@@ -220,9 +314,9 @@ export const RoleCreatePage = () => {
 
                                         {isStaff && (
                                             <Box>
-                                                <Typography sx={{ fontSize: '1.4rem', fontWeight: 600, mb: 1 }}>Kỹ năng chuyên môn</Typography>
+                                                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, mb: 1 }}>Kỹ năng chuyên môn</Typography>
                                                 <Controller
-                                                    name="skillSet"
+                                                    name="serviceIds"
                                                     control={control}
                                                     render={({ field }) => (
                                                         <FormControl fullWidth>
@@ -231,27 +325,30 @@ export const RoleCreatePage = () => {
                                                                 multiple
                                                                 renderValue={(selected: any) => (
                                                                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                                                        {selected.map((val: string) => (
-                                                                            <Box key={val} sx={{
-                                                                                px: 1,
-                                                                                py: 0.2,
-                                                                                fontSize: '1.2rem',
-                                                                                bgcolor: 'rgba(0, 167, 111, 0.16)',
-                                                                                color: 'rgb(0, 120, 103)',
-                                                                                borderRadius: '6px',
-                                                                                fontWeight: 700
-                                                                            }}>
-                                                                                {SKILLS.find(s => s.id === val)?.name || val}
-                                                                            </Box>
-                                                                        ))}
+                                                                        {selected.map((serviceId: string) => {
+                                                                            const service = services.find((s: any) => s._id === serviceId);
+                                                                            return (
+                                                                                <Box key={serviceId} sx={{
+                                                                                    px: 1,
+                                                                                    py: 0.2,
+                                                                                    fontSize: '0.75rem',
+                                                                                    bgcolor: 'rgba(0, 167, 111, 0.16)',
+                                                                                    color: 'rgb(0, 120, 103)',
+                                                                                    borderRadius: '6px',
+                                                                                    fontWeight: 700
+                                                                                }}>
+                                                                                    {service?.name || serviceId}
+                                                                                </Box>
+                                                                            );
+                                                                        })}
                                                                     </Box>
                                                                 )}
-                                                                sx={{ fontSize: '1.4rem' }}
+                                                                sx={{ fontSize: '0.875rem' }}
                                                             >
-                                                                {SKILLS.map((skill) => (
-                                                                    <MenuItem key={skill.id} value={skill.id} sx={{ fontSize: '1.4rem' }}>
-                                                                        <Checkbox checked={field.value.indexOf(skill.id) > -1} />
-                                                                        {skill.name}
+                                                                {services.map((service: any) => (
+                                                                    <MenuItem key={service._id} value={service._id} sx={{ fontSize: '0.875rem' }}>
+                                                                        <Checkbox checked={field.value.indexOf(service._id) > -1} />
+                                                                        {service.name}
                                                                     </MenuItem>
                                                                 ))}
                                                             </Select>
@@ -277,10 +374,10 @@ export const RoleCreatePage = () => {
                                 disabled={isPending}
                                 sx={{
                                     background: '#1C252E',
-                                    minHeight: "4.8rem",
-                                    minWidth: "12rem",
+                                    minHeight: "3rem",
+                                    minWidth: "7.5rem",
                                     fontWeight: 700,
-                                    fontSize: "1.4rem",
+                                    fontSize: "0.875rem",
                                     padding: "8px 16px",
                                     borderRadius: "8px",
                                     textTransform: "none",

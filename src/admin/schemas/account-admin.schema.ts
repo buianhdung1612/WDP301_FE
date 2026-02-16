@@ -4,10 +4,10 @@ export const accountAdminSchema = z.object({
     fullName: z.string().min(1, "Vui lòng nhập họ tên"),
     email: z.string().email("Email không hợp lệ"),
     password: z.string().optional(),
-    phoneNumber: z.string().optional(),
+    phone: z.string().optional(),
     roles: z.array(z.string()).min(1, "Vui lòng chọn ít nhất một nhóm quyền"),
-    status: z.enum(["initial", "active", "inactive"]),
-    avatar: z.string().optional(),
+    status: z.enum(["active", "inactive"]),
+    avatar: z.string().optional().nullable(),
 });
 
 export type AccountAdminFormValues = z.infer<typeof accountAdminSchema>;

@@ -23,7 +23,7 @@ export const ExportImport = () => {
                 disableElevation
                 onClick={() => setOpen(true)}
                 sx={{
-                    fontSize: "2.4rem",
+                    fontSize: "0.9375rem",
                     borderRadius: "50%",
                     padding: "8px",
                     minWidth: "auto"
@@ -38,6 +38,7 @@ export const ExportImport = () => {
                 onClose={() => setOpen(false)}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                PaperProps={{ className: 'background-popup' }}
             >
                 <ExportPrint render={<MenuItem sx={{ gap: "16px", alignItems: "center" }} />} onClick={() => setOpen(false)}>
                     <PrintIcon />

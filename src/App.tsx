@@ -34,11 +34,11 @@ function App() {
             {AdminAuthRoutes.map(({ path, element }) => (
               <Route key={path} path={path} element={element} />
             ))}
-          </Route>
-          <Route path='/admin' element={<LayoutAdmin />}>
-            {AdminRoutes.map(({ path, element }) => (
-              <Route key={path} path={path} element={element} />
-            ))}
+            <Route element={<LayoutAdmin />}>
+              {AdminRoutes.map(({ path, element }) => (
+                <Route key={path} path={path} element={element} />
+              ))}
+            </Route>
           </Route>
         </Routes>
       </ScrollToTopWrapper>
