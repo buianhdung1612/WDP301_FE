@@ -11,13 +11,12 @@ import { useAuthStore } from "../../../stores/useAuthStore";
 import { useServices } from "../../hooks/useService";
 import { getAvailableTimeSlots, createBooking } from "../../api/booking.api";
 import { getMyPets } from "../../api/pet.api";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { PetCreateModal } from "./sections/PetCreateModal";
 import { Tooltip } from "@mui/material";
 import {
     Scissors, Bath, Sparkles, User, Plus, Clock,
-    Calendar, ArrowRight, ArrowLeft, Info, Camera,
-    Check, Cat, Dog
+    Calendar, ArrowRight, ArrowLeft, Info, Camera
 } from "lucide-react";
 
 const getServiceIcon = (name: string) => {
