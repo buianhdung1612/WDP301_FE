@@ -83,11 +83,11 @@ export const RenderCreatedAtCell = ({ value }: RenderCreatedAtCellProps) => {
     const dateObj = dayjs(value);
     if (!dateObj.isValid()) return null;
 
-    // Định dạng: 16 thg 01, 2026
-    const formattedDate = dateObj.format('DD MMM, YYYY');
+    // Định dạng: 16/01/2026
+    const formattedDate = dateObj.format('DD/MM/YYYY');
 
-    // Định dạng: 10:17 SA/CH (hoặc am/pm tùy bạn)
-    const formattedTime = dateObj.format('hh:mm A');
+    // Định dạng: 10:17
+    const formattedTime = dateObj.format('HH:mm');
 
     return (
         <Box

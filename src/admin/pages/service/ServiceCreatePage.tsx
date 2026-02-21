@@ -1,4 +1,4 @@
-import { Box, Stack, TextField, ThemeProvider, useTheme, Button, MenuItem, FormControl, InputLabel, Select, Chip, OutlinedInput, Typography, Table, TableBody, TableCell, TableHead, TableRow, IconButton } from "@mui/material"
+import { Box, Stack, TextField, ThemeProvider, useTheme, Button, MenuItem, FormControl, InputLabel, Select, Chip, OutlinedInput, Typography, Table, TableBody, TableCell, TableHead, TableRow, IconButton, Divider } from "@mui/material"
 import { Breadcrumb } from "../../components/ui/Breadcrumb"
 import { Title } from "../../components/ui/Title"
 import { Tiptap } from "../../components/layouts/titap/Tiptap"
@@ -12,6 +12,7 @@ import { serviceSchema, ServiceFormValues } from "../../schemas/service.schema";
 import { getServiceTheme } from "./configs/theme";
 import { prefixAdmin } from "../../constants/routes";
 import { toast } from "react-toastify";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 import { SwitchButton } from "../../components/ui/SwitchButton";
 import { CategoryParentSelect } from "../../components/ui/CategoryTreeSelect";
 import { Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
@@ -42,7 +43,7 @@ export const ServiceCreatePage = () => {
         handleSubmit,
         watch
     } = useForm<ServiceFormValues>({
-        resolver: zodResolver(serviceSchema),
+        resolver: zodResolver(serviceSchema as any),
         defaultValues: {
             name: "",
             slug: "",
@@ -54,6 +55,10 @@ export const ServiceCreatePage = () => {
             basePrice: 0,
             priceList: [{ label: "", value: 0 }],
             status: "active",
+            minDuration: 0,
+            maxDuration: 0,
+            surchargeType: "none",
+            surchargeValue: 0,
         },
     });
 
@@ -65,6 +70,7 @@ export const ServiceCreatePage = () => {
     const pricingType = watch("pricingType");
 
     const onSubmit = (data: ServiceFormValues) => {
+        console.log("Creating service data:", data);
         create(data, {
             onSuccess: (response) => {
                 if (response.code === 201 || response.success) {
@@ -74,10 +80,16 @@ export const ServiceCreatePage = () => {
                     toast.error(response.message || "Tạo thất bại");
                 }
             },
-            onError: () => {
-                toast.error("Tạo dịch vụ thất bại");
+            onError: (error: any) => {
+                const message = error.response?.data?.message || "Tạo dịch vụ thất bại";
+                toast.error(message);
             }
         });
+    };
+
+    const onError = (errors: any) => {
+        console.error("Form validation errors:", errors);
+        toast.error("Vui lòng kiểm tra lại thông tin các trường bị lỗi");
     };
 
     return (
@@ -95,7 +107,7 @@ export const ServiceCreatePage = () => {
                 </div>
             </div>
             <ThemeProvider theme={localTheme}>
-                <form onSubmit={handleSubmit(onSubmit)}>
+                <form onSubmit={handleSubmit(onSubmit, onError)}>
                     <Stack sx={{ margin: "0px 120px", gap: "40px" }}>
                         <CollapsibleCard
                             title="Thông tin cơ bản"
@@ -126,11 +138,41 @@ export const ServiceCreatePage = () => {
                                     <Controller
                                         name="duration"
                                         control={control}
-                                        render={({ field }) => (
+                                        render={({ field, fieldState }) => (
                                             <TextField
                                                 {...field}
                                                 type="number"
-                                                label="Thời lượng (phút)"
+                                                label="Thời lượng dự kiến (phút)"
+                                                error={!!fieldState.error}
+                                                helperText={fieldState.error?.message}
+                                                onChange={(e) => field.onChange(Number(e.target.value))}
+                                            />
+                                        )}
+                                    />
+                                    <Controller
+                                        name="maxDuration"
+                                        control={control}
+                                        render={({ field, fieldState }) => (
+                                            <TextField
+                                                {...field}
+                                                type="number"
+                                                label="Thời lượng tối đa (phút)"
+                                                error={!!fieldState.error}
+                                                helperText={fieldState.error?.message || "Vượt quá mốc này sẽ tính phụ thu"}
+                                                onChange={(e) => field.onChange(Number(e.target.value))}
+                                            />
+                                        )}
+                                    />
+                                    <Controller
+                                        name="minDuration"
+                                        control={control}
+                                        render={({ field, fieldState }) => (
+                                            <TextField
+                                                {...field}
+                                                type="number"
+                                                label="Thời lượng tối thiểu (phút)"
+                                                error={!!fieldState.error}
+                                                helperText={fieldState.error?.message}
                                                 onChange={(e) => field.onChange(Number(e.target.value))}
                                             />
                                         )}
@@ -138,8 +180,8 @@ export const ServiceCreatePage = () => {
                                     <Controller
                                         name="petTypes"
                                         control={control}
-                                        render={({ field }) => (
-                                            <FormControl fullWidth>
+                                        render={({ field, fieldState }) => (
+                                            <FormControl fullWidth error={!!fieldState.error}>
                                                 <InputLabel>Loại Thú cưng</InputLabel>
                                                 <Select
                                                     {...field}
@@ -157,6 +199,11 @@ export const ServiceCreatePage = () => {
                                                         <MenuItem key={name} value={name}>{name}</MenuItem>
                                                     ))}
                                                 </Select>
+                                                {fieldState.error && (
+                                                    <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5 }}>
+                                                        {fieldState.error.message}
+                                                    </Typography>
+                                                )}
                                             </FormControl>
                                         )}
                                     />
@@ -258,6 +305,40 @@ export const ServiceCreatePage = () => {
                                         </Table>
                                     </Box>
                                 )}
+
+                                <Divider sx={{ borderStyle: 'dashed', my: 1 }} />
+
+                                <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>Cấu hình phụ thu quá giờ</Typography>
+
+                                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px 16px" }}>
+                                    <Controller
+                                        name="surchargeType"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <FormControl fullWidth>
+                                                <InputLabel>Loại phụ thu quá giờ</InputLabel>
+                                                <Select {...field} label="Loại phụ thu quá giờ">
+                                                    <MenuItem value="none">Không có</MenuItem>
+                                                    <MenuItem value="fixed">Cố định (đ/lần)</MenuItem>
+                                                    <MenuItem value="per-minute">Theo phút (đ/phút)</MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                        )}
+                                    />
+                                    <Controller
+                                        name="surchargeValue"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <TextField
+                                                {...field}
+                                                type="number"
+                                                label="Giá trị phụ thu (đ)"
+                                                onChange={(e) => field.onChange(Number(e.target.value))}
+                                                disabled={watch("surchargeType") === "none"}
+                                            />
+                                        )}
+                                    />
+                                </Box>
                             </Stack>
                         </CollapsibleCard>
 
@@ -268,28 +349,13 @@ export const ServiceCreatePage = () => {
                                 checkedValue="active"
                                 uncheckedValue="inactive"
                             />
-                            <Button
+                            <LoadingButton
                                 type="submit"
-                                disabled={isPending}
-                                sx={{
-                                    background: '#1C252E',
-                                    minHeight: "3rem",
-                                    minWidth: "4rem",
-                                    fontWeight: 700,
-                                    fontSize: "0.875rem",
-                                    padding: "8px 16px",
-                                    borderRadius: "8px",
-                                    textTransform: "none",
-                                    boxShadow: "none",
-                                    "&:hover": {
-                                        background: "#454F5B",
-                                        boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
-                                    }
-                                }}
-                                variant="contained"
-                            >
-                                {isPending ? 'Đang tạo...' : 'Tạo dịch vụ'}
-                            </Button>
+                                loading={isPending}
+                                label="Tạo dịch vụ"
+                                loadingLabel="Đang tạo..."
+                                sx={{ minHeight: "3rem", minWidth: "4rem" }}
+                            />
                         </Box>
                     </Stack>
                 </form>

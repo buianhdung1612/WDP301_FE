@@ -45,13 +45,14 @@ import { BookingDetailPage } from "../pages/booking/BookingDetailPage";
 import { BookingConfigPage } from "../pages/booking/BookingConfigPage";
 import { CalendarPage } from "../pages/calendar/CalendarPage";
 import { SettingGeneralPage } from "../pages/settings/SettingGeneralPage";
-import { BreedListPage } from "../pages/service/BreedListPage";
+import { BreedListPage } from "../pages/settings/BreedListPage";
 // HR Management Pages
 import { ScheduleCalendarPage } from "../pages/hr/ScheduleCalendarPage";
 import { ShiftListPage } from "../pages/hr/ShiftListPage";
 import { DepartmentListPage } from "../pages/hr/DepartmentListPage";
 import { AttendanceListPage } from "../pages/hr/AttendanceListPage";
 import { StaffWorkHistoryPage } from "../pages/hr/StaffWorkHistoryPage";
+import { AttendanceConfigPage } from "../pages/hr/AttendanceConfigPage";
 
 import { StaffTaskListPage } from "../pages/staff-panel/StaffTaskListPage";
 import { StaffWorkSchedulePage } from "../pages/staff-panel/StaffWorkSchedulePage";
@@ -109,12 +110,13 @@ export const AdminRoutes = [
     { path: "booking/config", element: <PermissionGuard permission="booking_view"><BookingConfigPage /></PermissionGuard> },
     { path: "calendar", element: <PermissionGuard permission="calendar_view"><CalendarPage /></PermissionGuard> },
     { path: "dashboard/setting-general", element: <PermissionGuard permission="settings_view"><SettingGeneralPage /></PermissionGuard> },
-    { path: "service/breed/list", element: <PermissionGuard permission="breed_view"><BreedListPage /></PermissionGuard> },
+    { path: "settings/breed/list", element: <PermissionGuard permission="breed_view"><BreedListPage /></PermissionGuard> },
     { path: "schedule-calendar", element: <PermissionGuard permission="schedule_view"><ScheduleCalendarPage /></PermissionGuard> },
     { path: "shifts", element: <PermissionGuard permission="shift_view"><ShiftListPage /></PermissionGuard> },
     { path: "departments", element: <PermissionGuard permission="department_view"><DepartmentListPage /></PermissionGuard> },
     { path: "attendance", element: <PermissionGuard permission="attendance_view"><AttendanceListPage /></PermissionGuard> },
     { path: "hr/work-history", element: <PermissionGuard permission="hr_view"><StaffWorkHistoryPage /></PermissionGuard> },
+    { path: "settings/attendance-config", element: <PermissionGuard permission="attendance_edit"><AttendanceConfigPage /></PermissionGuard> },
     { path: "staff/tasks", element: <StaffTaskListPage /> },
     { path: "staff/schedule", element: <StaffWorkSchedulePage /> },
     { path: "staff/customers", element: <StaffCustomerListPage /> },

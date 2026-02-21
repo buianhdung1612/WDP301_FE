@@ -1,4 +1,3 @@
-import Button from "@mui/material/Button";
 import AddIcon from '@mui/icons-material/Add';
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { ProductList } from "./sections/ProductList";
@@ -6,6 +5,7 @@ import { Title } from "../../components/ui/Title";
 import { prefixAdmin } from "../../constants/routes";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 
 export const ProductListPage = () => {
     const { t } = useTranslation();
@@ -24,28 +24,15 @@ export const ProductListPage = () => {
                         ]}
                     />
                 </div>
-                <Button
+                <LoadingButton
                     onClick={() => navigate(`/${prefixAdmin}/product/create`)}
-                    sx={{
-                        background: '#1C252E',
-                        minHeight: "2.25rem",
-                        minWidth: "4rem",
-                        fontWeight: 700,
-                        fontSize: "0.875rem",
-                        padding: "6px 12px",
-                        borderRadius: "8px",
-                        textTransform: "none",
-                        boxShadow: "none",
-                        "&:hover": {
-                            background: "#454F5B",
-                            boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
-                        }
-                    }}
-                    variant="contained"
+                    label={t("admin.product.title.create")}
                     startIcon={<AddIcon />}
-                >
-                    {t("admin.product.title.create")}
-                </Button>
+                    sx={{
+                        minHeight: "2.25rem",
+                        padding: "6px 16px",
+                    }}
+                />
             </div>
             <ProductList />
         </>

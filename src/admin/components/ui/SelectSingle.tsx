@@ -18,6 +18,7 @@ interface SelectSingleProps {
     value?: string;
     onChange?: (value: string) => void;
     disabled?: boolean;
+    showClear?: boolean;
 }
 
 // CSS
@@ -57,7 +58,7 @@ const MENU_PROPS = {
     },
 };
 
-export const SelectSingle = memo(({ label, options, sx, value, onChange, disabled }: SelectSingleProps) => {
+export const SelectSingle = memo(({ label, options, sx, value, onChange, disabled, showClear }: SelectSingleProps) => {
     const [internalValue, setInternalValue] = useState<string>('');
 
     // Use controlled value if provided, otherwise use internal state
@@ -100,6 +101,11 @@ export const SelectSingle = memo(({ label, options, sx, value, onChange, disable
                 sx={SELECT_SX}
                 MenuProps={MENU_PROPS}
             >
+                {showClear && (
+                    <MenuItem value="">
+                        <em>Tất cả</em>
+                    </MenuItem>
+                )}
                 {options.map((option) => (
                     <MenuItem
                         key={option.value}

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { getMyBookings } from "../../api/booking.api";
 import { formatCurrency } from "../../helpers";
 import dayjs from "dayjs";
-import { Clock, Calendar, Scissors, Info } from "lucide-react";
+
 
 export const BookingHistoryPage = () => {
     const [bookings, setBookings] = useState<any[]>([]);
@@ -44,6 +44,10 @@ export const BookingHistoryPage = () => {
                 return "bg-orange-100 text-orange-700";
             case "cancelled":
                 return "bg-red-100 text-red-700";
+            case "in-progress":
+                return "bg-yellow-100 text-yellow-700";
+            case "delayed":
+                return "bg-purple-100 text-purple-700";
             case "no-show":
                 return "bg-gray-100 text-gray-700";
             default:
@@ -58,6 +62,8 @@ export const BookingHistoryPage = () => {
             "completed": "Hoàn thành",
             "cancelled": "Đã hủy",
             "no-show": "Không đến",
+            "in-progress": "Đang thực hiện",
+            "delayed": "Trễ hẹn"
         };
         return map[status] || status;
     };

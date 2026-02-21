@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 const BASE_URL = "/api/v1/admin/account-admin";
 
 const withAuth = () => {
-    const token = Cookies.get("token");
+    const token = Cookies.get("tokenAdmin");
     return {
         headers: {
             Authorization: `Bearer ${token}`,

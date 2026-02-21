@@ -31,6 +31,7 @@ interface BulkDeleteDialogProps {
     onClose: () => void;
     onDelete: (data: any) => void;
     departmentId?: string;
+    loading?: boolean;
 }
 
 export const BulkDeleteDialog = ({
@@ -38,6 +39,7 @@ export const BulkDeleteDialog = ({
     onClose,
     onDelete,
     departmentId,
+    loading = false,
 }: BulkDeleteDialogProps) => {
     const { data: accounts = [] } = useAccounts({ departmentId, status: 'active' });
 
@@ -196,6 +198,7 @@ export const BulkDeleteDialog = ({
                         type="submit"
                         variant="contained"
                         color="error"
+                        disabled={loading}
                         sx={{
                             borderRadius: '8px',
                             textTransform: 'none',
@@ -208,7 +211,7 @@ export const BulkDeleteDialog = ({
                             }
                         }}
                     >
-                        Xác nhận xóa
+                        {loading ? 'Đang xóa...' : 'Xác nhận xóa'}
                     </Button>
                 </DialogActions>
             </form>

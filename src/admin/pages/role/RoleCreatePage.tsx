@@ -17,10 +17,10 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { LoadingButton } from "../../components/ui/LoadingButton";
 import {
     Box,
     TextField,
-    Button,
     MenuItem,
     FormControl,
     Select,
@@ -369,28 +369,13 @@ export const RoleCreatePage = () => {
                                 checkedValue="active"
                                 uncheckedValue="inactive"
                             />
-                            <Button
+                            <LoadingButton
                                 type="submit"
-                                disabled={isPending}
-                                sx={{
-                                    background: '#1C252E',
-                                    minHeight: "3rem",
-                                    minWidth: "7.5rem",
-                                    fontWeight: 700,
-                                    fontSize: "0.875rem",
-                                    padding: "8px 16px",
-                                    borderRadius: "8px",
-                                    textTransform: "none",
-                                    boxShadow: "none",
-                                    "&:hover": {
-                                        background: "#454F5B",
-                                        boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
-                                    }
-                                }}
-                                variant="contained"
-                            >
-                                {isPending ? "Đang tạo..." : "Tạo nhóm quyền"}
-                            </Button>
+                                loading={isPending}
+                                label="Tạo nhóm quyền"
+                                loadingLabel="Đang tạo..."
+                                sx={{ minHeight: "3rem", minWidth: "7.5rem" }}
+                            />
                         </Box>
                     </Stack>
                 </form>

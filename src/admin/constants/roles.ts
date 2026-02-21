@@ -110,7 +110,8 @@ export const PERMISSIONS_GROUPED = [
             { id: "schedule_edit", name: "Cập nhật lịch làm việc" },
             { id: "schedule_delete", name: "Xóa lịch làm việc" },
             { id: "attendance_view", name: "Theo dõi chấm công" },
-            { id: "attendance_edit", name: "Xác nhận công/lương" },
+            { id: "attendance_edit", name: "Quản lý & Cấu hình chấm công" },
+            { id: "attendance_checkin", name: "Tự chấm công (Check-in/out)" },
         ]
     },
     {

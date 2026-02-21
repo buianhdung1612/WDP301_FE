@@ -1,4 +1,4 @@
-import { Box, Card, Grid, TextField, Button, Typography, Stack, alpha, Switch, FormControlLabel } from "@mui/material";
+import { Box, Card, Grid, TextField, Typography, Stack, alpha, Switch, FormControlLabel } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useForm, Controller } from "react-hook-form";
 import { Title } from "../../components/ui/Title";
@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { prefixAdmin } from "../../constants/routes";
 import { useBookingConfig, useUpdateBookingConfig } from "./hooks/useBookingConfig";
 import { COLORS } from "../role/configs/constants";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 
 export const BookingConfigPage = () => {
     const { data: config, isLoading } = useBookingConfig();
@@ -165,26 +166,13 @@ export const BookingConfigPage = () => {
                     </Card>
 
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <Button
+                        <LoadingButton
                             type="submit"
-                            variant="contained"
-                            size="large"
-                            disabled={isPending || isSubmitting}
-                            sx={{
-                                bgcolor: COLORS.primary,
-                                color: '#fff',
-                                px: 4,
-                                py: 1.5,
-                                borderRadius: '12px',
-                                fontSize: '1rem',
-                                fontWeight: 700,
-                                textTransform: 'none',
-                                boxShadow: '0 8px 16px 0 rgba(145, 158, 171, 0.24)',
-                                '&:hover': { bgcolor: '#454F5B' }
-                            }}
-                        >
-                            {isPending || isSubmitting ? "Đang lưu..." : "Lưu cấu hình"}
-                        </Button>
+                            loading={isPending || isSubmitting}
+                            label="Lưu cấu hình"
+                            loadingLabel="Đang lưu..."
+                            sx={{ px: 4, py: 1.5, borderRadius: '12px', fontSize: '1rem' }}
+                        />
                     </Box>
                 </Stack>
             </form>

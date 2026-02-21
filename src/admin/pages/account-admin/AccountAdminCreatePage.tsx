@@ -13,7 +13,6 @@ import { z } from "zod";
 import {
     Box,
     TextField,
-    Button,
     Card,
     MenuItem,
     Stack,
@@ -23,6 +22,7 @@ import {
 import Grid from "@mui/material/Grid";
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import { uploadImagesToCloudinary } from "../../api/uploadCloudinary.api";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 
 export const AccountAdminCreatePage = () => {
     const navigate = useNavigate();
@@ -289,24 +289,12 @@ export const AccountAdminCreatePage = () => {
                             </Box>
 
                             <Stack direction="row" justifyContent="flex-end" sx={{ mt: 3 }}>
-                                <Button
+                                <LoadingButton
                                     type="submit"
-                                    variant="contained"
-                                    disabled={isPending}
-                                    sx={{
-                                        bgcolor: '#1C252E',
-                                        color: '#fff',
-                                        borderRadius: '8px',
-                                        px: 3,
-                                        py: 1,
-                                        fontSize: '0.875rem',
-                                        fontWeight: 700,
-                                        textTransform: 'none',
-                                        '&:hover': { bgcolor: '#454F5B' }
-                                    }}
-                                >
-                                    {isPending ? "Đang tạo..." : "Tạo người dùng"}
-                                </Button>
+                                    loading={isPending}
+                                    label="Tạo người dùng"
+                                    loadingLabel="Đang tạo..."
+                                />
                             </Stack>
                         </Card>
                     </Grid>

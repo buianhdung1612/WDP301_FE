@@ -1,4 +1,5 @@
-import { Box, Stack, TextField, ThemeProvider, useTheme, Button, MenuItem, Select, FormControl, InputLabel, FormHelperText, createTheme } from "@mui/material"
+import { Box, Stack, TextField, ThemeProvider, useTheme, MenuItem, Select, FormControl, InputLabel, FormHelperText, createTheme } from "@mui/material"
+import { LoadingButton } from "../../components/ui/LoadingButton";
 import { useTranslation } from "react-i18next";
 import { Breadcrumb } from "../../components/ui/Breadcrumb"
 import { Title } from "../../components/ui/Title"
@@ -220,28 +221,12 @@ export const BlogCreatePage = () => {
                             </Stack>
                         </CollapsibleCard>
                         <Box gap="24px" sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
-                            <Button
+                            <LoadingButton
                                 type="submit"
-                                disabled={isPending}
-                                sx={{
-                                    background: '#1C252E',
-                                    minHeight: "3rem",
-                                    minWidth: "4rem",
-                                    fontWeight: 700,
-                                    fontSize: "0.875rem",
-                                    padding: "8px 16px",
-                                    borderRadius: "8px",
-                                    textTransform: "none",
-                                    boxShadow: "none",
-                                    "&:hover": {
-                                        background: "#454F5B",
-                                        boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
-                                    }
-                                }}
-                                variant="contained"
-                            >
-                                {isPending ? t('admin.common.processing') : t('admin.blog.title.create')}
-                            </Button>
+                                loading={isPending}
+                                label={t('admin.blog.title.create')}
+                                loadingLabel={t('admin.common.processing')}
+                            />
                         </Box>
                     </Stack>
                 </form>

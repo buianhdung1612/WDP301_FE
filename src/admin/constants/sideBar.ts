@@ -65,7 +65,6 @@ export const menuManagementData = [
         children: [
             { id: "list", label: "Danh sách dịch vụ", path: `/${prefixAdmin}/service/list`, permission: "service_view" },
             { id: "category", label: "Danh mục dịch vụ", path: `/${prefixAdmin}/service/categories`, permission: "service_category_view" },
-            { id: "breed", label: "Giống thú cưng", path: `/${prefixAdmin}/service/breed/list`, permission: "breed_view" },
         ]
     },
     {
@@ -166,6 +165,8 @@ export const menuManagementData = [
         permission: "settings_view",
         children: [
             { id: "general", label: "Cài đặt chung", tKey: "admin.sidebar.setting_general", path: `/${prefixAdmin}/dashboard/setting-general`, permission: "settings_view" },
+            { id: "breed", label: "Giống thú cưng", path: `/${prefixAdmin}/settings/breed/list`, permission: "breed_view" },
+            { id: "attendance-config", label: "Cấu hình chấm công", path: `/${prefixAdmin}/settings/attendance-config`, permission: "attendance_edit" },
         ]
     }
 ];

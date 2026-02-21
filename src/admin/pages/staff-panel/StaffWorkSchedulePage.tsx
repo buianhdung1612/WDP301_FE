@@ -8,17 +8,23 @@ import {
     CircularProgress,
     IconButton,
     Divider,
-    Chip
+    Chip,
+    Button
 } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
-import { useAuthStore } from "../../../stores/useAuthStore";
 import { useQuery } from "@tanstack/react-query";
 import { getMySchedules } from "../../api/work-schedule.api";
 import { Title } from "../../components/ui/Title";
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { prefixAdmin } from "../../constants/routes";
 import { COLORS } from "../role/configs/constants";
+import { useCheckIn, useCheckOut } from "../hr/hooks/useSchedules";
+import { toast } from "react-toastify";
+
+import { useAuthStore } from "../../../stores/useAuthStore";
+
+import { getAttendanceConfig } from "../../api/attendance-config.api";
 
 export const StaffWorkSchedulePage = () => {
     const { t } = useTranslation();
@@ -36,7 +42,40 @@ export const StaffWorkSchedulePage = () => {
         }),
     });
 
+    const { data: configRes } = useQuery({
+        queryKey: ["attendance-config"],
+        queryFn: getAttendanceConfig
+    });
+
+    const config = configRes?.data || {};
+    const earlyLimit = config.checkInEarlyLimit || 15;
+
+    const { mutate: checkIn } = useCheckIn();
+    const { mutate: checkOut } = useCheckOut();
+
+    const userPermissions = user?.permissions || [];
+    const canCheck = userPermissions.includes("attendance_checkin") || userPermissions.includes("attendance_edit");
+    const isAdmin = userPermissions.includes("attendance_edit");
+
     const schedules = scheduleRes?.data || [];
+
+    const handleCheckIn = (id: string) => {
+        if (window.confirm("Xác nhận bắt đầu ca làm việc?")) {
+            checkIn(id, {
+                onSuccess: () => toast.success("Bắt đầu ca làm việc thành công!"),
+                onError: (err: any) => toast.error(err.response?.data?.message || "Lỗi check-in")
+            });
+        }
+    };
+
+    const handleCheckOut = (id: string) => {
+        if (window.confirm("Xác nhận kết thúc ca làm việc?")) {
+            checkOut(id, {
+                onSuccess: () => toast.success("Kết thúc ca làm việc thành công!"),
+                onError: (err: any) => toast.error(err.response?.data?.message || "Lỗi check-out")
+            });
+        }
+    };
 
     // Generate week days
     const weekDays: dayjs.Dayjs[] = [];
@@ -95,7 +134,7 @@ export const StaffWorkSchedulePage = () => {
             ) : (
                 <Box sx={{
                     display: 'grid',
-                    gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)', md: 'repeat(7, 1fr)' },
+                    gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)', lg: 'repeat(7, 1fr)' },
                     gap: 2
                 }}>
                     {weekDays.map((day, index) => {
@@ -103,11 +142,34 @@ export const StaffWorkSchedulePage = () => {
                         const isToday = day.isSame(dayjs(), 'day');
                         const statusStyle = shift ? getStatusColor(shift.status) : null;
 
+                        // Logic kiểm tra giờ check-in
+                        let isTooEarly = false;
+                        let isOutsideSystemTime = false;
+                        let openAt = "";
+
+                        if (shift && isToday && shift.status === 'scheduled') {
+                            const shiftStartStr = shift.shiftId?.startTime;
+                            const shiftStartTime = dayjs(`${dayjs().format('YYYY-MM-DD')}T${shiftStartStr}`);
+
+                            // 1. Kiểm tra giờ hoạt động hệ thống
+                            const systemStartTime = dayjs(`${dayjs().format('YYYY-MM-DD')}T${config.workDayStartTime || '07:00'}`);
+                            const systemEndTime = dayjs(`${dayjs().format('YYYY-MM-DD')}T${config.workDayEndTime || '22:00'}`);
+
+                            if (dayjs().isBefore(systemStartTime) || dayjs().isAfter(systemEndTime)) {
+                                isOutsideSystemTime = true;
+                            }
+
+                            // 2. Kiểm tra giới hạn check-in sớm
+                            const checkInOpenTime = shiftStartTime.subtract(earlyLimit, 'minute');
+                            isTooEarly = dayjs().isBefore(checkInOpenTime);
+                            openAt = checkInOpenTime.format("HH:mm");
+                        }
+
                         return (
                             <Box key={index} sx={{
                                 p: 2,
                                 height: '100%',
-                                minHeight: '180px',
+                                minHeight: '260px',
                                 borderRadius: '16px',
                                 border: isToday ? `2px solid ${COLORS.primary}` : '1px solid rgba(145, 158, 171, 0.2)',
                                 display: 'flex',
@@ -137,7 +199,19 @@ export const StaffWorkSchedulePage = () => {
                                         <Typography variant="caption" sx={{ color: COLORS.secondary }}>
                                             {shift.shiftId?.startTime} - {shift.shiftId?.endTime}
                                         </Typography>
-                                        <Box sx={{ mt: 'auto', pt: 1 }}>
+
+                                        {shift.checkInTime && (
+                                            <Typography variant="caption" sx={{ color: '#00A76F', fontWeight: 600 }}>
+                                                Vào: {dayjs(shift.checkInTime).format("HH:mm")}
+                                            </Typography>
+                                        )}
+                                        {shift.checkOutTime && (
+                                            <Typography variant="caption" sx={{ color: '#00B8D9', fontWeight: 600 }}>
+                                                Ra: {dayjs(shift.checkOutTime).format("HH:mm")}
+                                            </Typography>
+                                        )}
+
+                                        <Box sx={{ mt: 'auto', pt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
                                             <Chip
                                                 label={shift.status === 'scheduled' ? 'Chưa bắt đầu' :
                                                     shift.status === 'checked-in' ? 'Đang làm' :
@@ -148,9 +222,65 @@ export const StaffWorkSchedulePage = () => {
                                                     height: '20px',
                                                     fontWeight: 700,
                                                     bgcolor: statusStyle?.bg,
-                                                    color: statusStyle?.color
+                                                    color: statusStyle?.color,
+                                                    mb: 1
                                                 }}
                                             />
+
+                                            {canCheck && isToday && shift.status === 'scheduled' && (
+                                                <>
+                                                    <Button
+                                                        variant="contained"
+                                                        size="small"
+                                                        fullWidth
+                                                        disabled={(isTooEarly || isOutsideSystemTime) && !isAdmin}
+                                                        onClick={() => handleCheckIn(shift._id)}
+                                                        sx={{
+                                                            borderRadius: '8px',
+                                                            textTransform: 'none',
+                                                            fontWeight: 700,
+                                                            fontSize: '0.75rem',
+                                                            bgcolor: '#00A76F',
+                                                            '&:hover': { bgcolor: '#007B55' },
+                                                            '&.Mui-disabled': {
+                                                                bgcolor: 'rgba(145, 158, 171, 0.24)',
+                                                                color: 'rgba(145, 158, 171, 0.8)'
+                                                            }
+                                                        }}
+                                                    >
+                                                        Check in
+                                                    </Button>
+                                                    {!isAdmin && isOutsideSystemTime && (
+                                                        <Typography variant="caption" sx={{ textAlign: 'center', color: '#FF5630', fontSize: '0.65rem', fontWeight: 600 }}>
+                                                            Hệ thống đóng (Sau {config.workDayEndTime})
+                                                        </Typography>
+                                                    )}
+                                                    {!isAdmin && !isOutsideSystemTime && isTooEarly && (
+                                                        <Typography variant="caption" sx={{ textAlign: 'center', color: '#FF5630', fontSize: '0.65rem', fontWeight: 600 }}>
+                                                            Mở lúc {openAt}
+                                                        </Typography>
+                                                    )}
+                                                </>
+                                            )}
+
+                                            {canCheck && isToday && shift.status === 'checked-in' && (
+                                                <Button
+                                                    variant="contained"
+                                                    size="small"
+                                                    fullWidth
+                                                    onClick={() => handleCheckOut(shift._id)}
+                                                    sx={{
+                                                        borderRadius: '8px',
+                                                        textTransform: 'none',
+                                                        fontWeight: 700,
+                                                        fontSize: '0.75rem',
+                                                        bgcolor: '#00B8D9',
+                                                        '&:hover': { bgcolor: '#007896' }
+                                                    }}
+                                                >
+                                                    Check out
+                                                </Button>
+                                            )}
                                         </Box>
                                     </Box>
                                 ) : (

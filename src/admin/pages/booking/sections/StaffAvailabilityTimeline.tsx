@@ -4,31 +4,37 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useSchedules } from '../../hr/hooks/useSchedules';
 import { useBookings } from '../hooks/useBookingManagement';
 import { Icon } from '@iconify/react';
+import { useStaffByService } from '../../account-admin/hooks/useAccountAdmin';
 
 interface StaffAvailabilityTimelineProps {
     date: Dayjs;
     serviceId?: string;
+    staffList?: any[];
     selectionStart?: Dayjs;
     selectionEnd?: Dayjs;
-    selectedStaffId?: string;
+    selectedStaffIds?: string[];
     onlyShowSelected?: boolean;
+    currentBookingId?: string;
 }
 
-const HOURS = Array.from({ length: 13 }, (_, i) => i + 8); // 8:00 to 20:00
+const HOURS = Array.from({ length: 16 }, (_, i) => i + 8); // 8:00 to 23:00
 
 export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps> = ({
     date,
+    serviceId,
+    staffList: propStaffList,
     selectionStart,
     selectionEnd,
-    selectedStaffId,
-    onlyShowSelected = false
+    selectedStaffIds = [],
+    onlyShowSelected = false,
+    currentBookingId
 }) => {
     const isToday = date.isSame(dayjs(), 'day');
     const currentTimePos = useMemo(() => {
         if (!isToday) return null;
         const now = dayjs();
         const start = 8;
-        const end = 20;
+        const end = 23;
         const currentHour = now.hour() + now.minute() / 60;
         if (currentHour < start || currentHour > end) return null;
         return ((currentHour - start) / (end - start)) * 100;
@@ -46,12 +52,32 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
     });
     const bookings = bookingsRes?.data || [];
 
+    // Fetch staff for this service (only used if propStaffList is not provided)
+    const { data: fetchedStaff = [], isLoading: isLoadingStaff } = useStaffByService(propStaffList ? undefined : serviceId);
+    const capableStaff = propStaffList || fetchedStaff;
+
     const staffData = useMemo(() => {
         const map = new Map();
 
+        // 1. If we have a list of capable staff, start with them
+        if (capableStaff.length > 0) {
+            capableStaff.forEach((staff: any) => {
+                map.set(staff._id, {
+                    info: staff,
+                    schedules: [],
+                    bookings: []
+                });
+            });
+        }
+
+        // 2. Add schedules
         schedules.forEach((s: any) => {
             const staffId = s.staffId?._id;
             if (!staffId) return;
+
+            // If we have a restricted list (serviceId was provided) and this staff isn't in it, skip
+            if (serviceId && !map.has(staffId)) return;
+
             if (!map.has(staffId)) {
                 map.set(staffId, {
                     info: s.staffId,
@@ -62,29 +88,42 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
             map.get(staffId).schedules.push(s);
         });
 
+        // 3. Add bookings
         bookings.forEach((b: any) => {
-            const staffId = b.staffId?._id;
-            if (!staffId) return;
-            if (!map.has(staffId)) {
-                map.set(staffId, {
-                    info: b.staffId,
-                    schedules: [],
-                    bookings: []
-                });
-            }
-            map.get(staffId).bookings.push(b);
+            if (currentBookingId && b._id === currentBookingId) return;
+
+            const assignedStaffIds = (b.staffIds && b.staffIds.length > 0)
+                ? b.staffIds
+                : (b.staffId?._id ? [b.staffId._id] : []);
+
+            assignedStaffIds.forEach((sId: any) => {
+                const staffId = typeof sId === 'object' ? sId?._id : sId;
+                if (!staffId) return;
+
+                // If we have a restricted list and this staff isn't in it, skip
+                if (serviceId && !map.has(staffId)) return;
+
+                if (!map.has(staffId)) {
+                    map.set(staffId, {
+                        info: b.staffId,
+                        schedules: [],
+                        bookings: []
+                    });
+                }
+                map.get(staffId).bookings.push(b);
+            });
         });
 
         const allStaff = Array.from(map.values()).sort((a, b) => a.info.fullName.localeCompare(b.info.fullName));
 
-        if (onlyShowSelected && selectedStaffId) {
-            return allStaff.filter(s => s.info._id === selectedStaffId);
+        if (onlyShowSelected && selectedStaffIds.length > 0) {
+            return allStaff.filter(s => selectedStaffIds.includes(s.info._id));
         }
 
         return allStaff;
-    }, [schedules, bookings, selectedStaffId]);
+    }, [schedules, bookings, capableStaff, selectedStaffIds, onlyShowSelected, currentBookingId]);
 
-    if (isLoadingSchedules || isLoadingBookings) {
+    if (isLoadingSchedules || isLoadingBookings || isLoadingStaff) {
         return (
             <Stack spacing={2} sx={{ mt: 2 }}>
                 {[1, 2, 3].map(i => (
@@ -245,8 +284,8 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
 
                                     {/* Existing Bookings */}
                                     {staff.bookings.map((b: any) => {
-                                        const start = dayjs(b.start);
-                                        const end = dayjs(b.end);
+                                        const start = dayjs(b.actualStart || b.start);
+                                        const end = dayjs(b.completedAt || b.expectedFinish || b.end);
                                         const startH = start.hour() + start.minute() / 60;
                                         const endH = end.hour() + end.minute() / 60;
 
@@ -293,7 +332,7 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
 
                                             if (width <= 0) return null;
 
-                                            const isSelectedStaff = selectedStaffId === staff.info._id;
+                                            const isSelectedStaff = selectedStaffIds.includes(staff.info._id);
 
                                             return (
                                                 <Box

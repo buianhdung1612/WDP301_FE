@@ -27,6 +27,7 @@ import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { getProductAttributeTheme } from "./configs/theme";
 import { prefixAdmin } from "../../constants/routes";
 import { toast } from "react-toastify";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 import { z } from "zod";
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -383,28 +384,13 @@ export const ProductAttributeEditPage = () => {
 
                         {/* Submit button */}
                         <Box gap="24px" sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
-                            <Button
+                            <LoadingButton
                                 type="submit"
-                                disabled={isPending}
-                                sx={{
-                                    background: '#1C252E',
-                                    minHeight: "3rem",
-                                    minWidth: "4rem",
-                                    fontWeight: 700,
-                                    fontSize: "0.875rem",
-                                    padding: "8px 22px",
-                                    borderRadius: "8px",
-                                    textTransform: "none",
-                                    boxShadow: "none",
-                                    "&:hover": {
-                                        background: "#454F5B",
-                                        boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
-                                    }
-                                }}
-                                variant="contained"
-                            >
-                                {isPending ? "Đang cập nhật..." : "Cập nhật thuộc tính"}
-                            </Button>
+                                loading={isPending}
+                                label="Cập nhật thuộc tính"
+                                loadingLabel="Đang cập nhật..."
+                                sx={{ minHeight: "3rem", minWidth: "4rem", padding: "8px 22px" }}
+                            />
                         </Box>
                     </Stack>
                 </form>

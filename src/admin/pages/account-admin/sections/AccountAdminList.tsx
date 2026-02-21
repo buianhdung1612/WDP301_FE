@@ -64,7 +64,6 @@ export const AccountAdminList = () => {
 
     const accounts = Array.isArray(accountsRaw) ? accountsRaw : [];
 
-    // Map roles for SelectMulti
     const roleOptions = roles.map((role: any) => ({
         value: role._id,
         label: role.name

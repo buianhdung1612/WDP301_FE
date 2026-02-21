@@ -94,7 +94,7 @@ export const RenderCreatedAtCell = (params: GridRenderCellParams) => {
                     color: COLORS.primary,
                     transition: 'color 0.2s',
                 }}>
-                {dayjs(date).format('DD MMM YYYY')}
+                {dayjs(date).format('DD/MM/YYYY')}
             </span>
 
             <Box
@@ -105,7 +105,7 @@ export const RenderCreatedAtCell = (params: GridRenderCellParams) => {
                     color: COLORS.secondary
                 }}
             >
-                {dayjs(date).format('hh:mm a')}
+                {dayjs(date).format('HH:mm')}
             </Box>
         </Box >
     );

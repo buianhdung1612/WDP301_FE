@@ -12,7 +12,6 @@ import { useEffect, useRef, useState } from "react";
 import {
     Box,
     TextField,
-    Button,
     Typography,
     Card,
     MenuItem,
@@ -22,6 +21,7 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { uploadImagesToCloudinary } from "../../api/uploadCloudinary.api";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 
 export const AccountAdminEditPage = () => {
     const { id } = useParams();
@@ -206,10 +206,11 @@ export const AccountAdminEditPage = () => {
                             </Typography>
 
                             <Box sx={{ mt: 4 }}>
-                                <Button
+                                <LoadingButton
                                     variant="contained"
                                     color="error"
                                     onClick={handleDelete}
+                                    label="Xóa tài khoản"
                                     sx={{
                                         color: '#B71D18',
                                         bgcolor: 'rgba(255, 86, 48, 0.08)',
@@ -226,9 +227,7 @@ export const AccountAdminEditPage = () => {
                                         boxShadow: 'none',
                                         border: 'none',
                                     }}
-                                >
-                                    Xóa tài khoản
-                                </Button>
+                                />
                             </Box>
                         </Card>
                     </Grid>
@@ -325,24 +324,12 @@ export const AccountAdminEditPage = () => {
                             </Box>
 
                             <Stack direction="row" justifyContent="flex-end" sx={{ mt: 3 }}>
-                                <Button
+                                <LoadingButton
                                     type="submit"
-                                    variant="contained"
-                                    disabled={isPending}
-                                    sx={{
-                                        bgcolor: '#1C252E',
-                                        color: '#fff',
-                                        borderRadius: '8px',
-                                        px: 3,
-                                        py: 1,
-                                        fontSize: '0.875rem',
-                                        fontWeight: 700,
-                                        textTransform: 'none',
-                                        '&:hover': { bgcolor: '#454F5B' }
-                                    }}
-                                >
-                                    {isPending ? "Đang lưu..." : "Lưu thay đổi"}
-                                </Button>
+                                    loading={isPending}
+                                    label="Lưu thay đổi"
+                                    loadingLabel="Đang lưu..."
+                                />
                             </Stack>
                         </Card>
                     </Grid>

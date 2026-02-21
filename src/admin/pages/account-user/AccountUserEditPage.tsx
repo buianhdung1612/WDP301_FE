@@ -22,6 +22,7 @@ import {
 import Grid from "@mui/material/Grid";
 import { uploadImagesToCloudinary } from "../../api/uploadCloudinary.api";
 import { UserPetList } from "./sections/UserPetList";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 
 export const AccountUserEditPage = () => {
     const { id } = useParams();
@@ -291,29 +292,12 @@ export const AccountUserEditPage = () => {
                             </Box>
 
                             <Stack direction="row" justifyContent="flex-end" sx={{ mt: 3 }}>
-                                <Button
+                                <LoadingButton
                                     type="submit"
-                                    variant="contained"
-                                    disabled={isPending}
-                                    sx={{
-                                        bgcolor: '#1C252E',
-                                        color: '#fff',
-                                        minHeight: "2.25rem",
-                                        minWidth: "7.5rem",
-                                        fontWeight: 700,
-                                        fontSize: '0.875rem',
-                                        padding: "6px 16px",
-                                        borderRadius: '8px',
-                                        textTransform: 'none',
-                                        boxShadow: 'none',
-                                        '&:hover': {
-                                            bgcolor: '#454F5B',
-                                            boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
-                                        }
-                                    }}
-                                >
-                                    {isPending ? "Đang lưu..." : "Lưu thay đổi"}
-                                </Button>
+                                    loading={isPending}
+                                    label="Lưu thay đổi"
+                                    loadingLabel="Đang lưu..."
+                                />
                             </Stack>
                         </Card>
 

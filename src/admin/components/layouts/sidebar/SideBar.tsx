@@ -5,9 +5,13 @@ import { menuManagementData, menuOverviewData, menuStaffData } from "../../../co
 import { IconButton } from "@mui/material";
 import { ArrowIcon } from "../../../assets/icons";
 import { useSidebar } from "../../../context/sidebar/useSidebar";
+import { useAuthStore } from "../../../../stores/useAuthStore";
 
 export const SideBar = () => {
     const { isOpen, toggleSidebar } = useSidebar();
+    const { user } = useAuthStore();
+
+    const isStaff = user?.roles?.some((role: any) => role.isStaff);
 
     return (
         <div className={`flex fixed top-0 left-0 flex-col z-[1200] h-full bg-white border-r border-[#919eab1f] transition-[width] duration-[120ms] ease-linear ${isOpen ? 'w-[300px]' : 'w-[88px]'}`}>
@@ -46,7 +50,7 @@ export const SideBar = () => {
                     <nav className={`text-[#637381] ${isOpen ? 'px-[16px]' : 'px-[4px]'}`}>
                         <ul>
                             <NavGroup title={"admin.overview"} data={menuOverviewData} />
-                            <NavGroup title="Bảng nhân viên" data={menuStaffData} />
+                            {isStaff && <NavGroup title="Bảng nhân viên" data={menuStaffData} />}
                             <NavGroup title={"admin.management"} data={menuManagementData} />
                         </ul>
                     </nav>

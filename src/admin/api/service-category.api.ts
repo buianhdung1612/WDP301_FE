@@ -6,7 +6,7 @@ import { ApiResponse } from '../config/type';
 const BASE_URL = '/api/v1/admin/service/categories';
 
 const withAuth = () => {
-    const token = Cookies.get('token');
+    const token = Cookies.get("tokenAdmin");
     return {
         headers: {
             Authorization: `Bearer ${token}`,

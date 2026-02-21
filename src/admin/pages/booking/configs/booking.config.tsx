@@ -25,15 +25,15 @@ export const getBookingColumns = (
         {
             field: "userId",
             headerName: "Khách hàng",
-            flex: 1.5,
-            minWidth: 220,
+            flex: 1.2,
+            minWidth: 180,
             renderCell: (params: GridRenderCellParams) => (
-                <Stack direction="row" spacing={2} alignItems="center" sx={{ py: "16px", px: "16px", height: '100%' }}>
+                <Stack direction="row" spacing={2} alignItems="center" sx={{ py: "16px", px: "12px", height: '100%' }}>
                     <Avatar
                         src={params.value?.avatar}
                         sx={{
-                            width: 36,
-                            height: 36,
+                            width: 32,
+                            height: 32,
                             borderRadius: '10px',
                             bgcolor: 'rgba(145, 158, 171, 0.08)',
                         }}
@@ -55,9 +55,9 @@ export const getBookingColumns = (
             field: "serviceId",
             headerName: "Dịch vụ",
             flex: 1,
-            minWidth: 160,
+            minWidth: 140,
             renderCell: (params: GridRenderCellParams) => (
-                <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', px: "16px" }}>
+                <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', px: "12px" }}>
                     <Typography noWrap sx={{ fontSize: '0.8125rem', color: COLORS.primary, fontWeight: 500 }}>
                         {params.value?.name || "N/A"}
                     </Typography>
@@ -67,22 +67,38 @@ export const getBookingColumns = (
         {
             field: "start",
             headerName: "Thời gian",
-            width: 180,
+            width: 200,
             renderCell: (params: GridRenderCellParams) => {
-                const { start, end } = params.row;
+                const { start, end, actualStart, completedAt, bookingStatus } = params.row;
                 if (!start) return (
                     <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', px: "16px" }}>
                         <Typography sx={{ fontSize: '0.8125rem' }}>N/A</Typography>
                     </Box>
                 );
+
+                const isCompleted = bookingStatus === 'completed';
+                const isInProgress = bookingStatus === 'in-progress';
+
                 return (
-                    <Stack spacing={0.5} justifyContent="center" sx={{ height: '100%', px: "16px" }}>
+                    <Stack spacing={0.25} justifyContent="center" sx={{ height: '100%', px: "16px" }}>
                         <Typography sx={{ fontWeight: 600, fontSize: '0.8125rem', color: COLORS.primary }}>
                             {dayjs(start).format("DD/MM/YYYY")}
                         </Typography>
-                        <Typography sx={{ color: COLORS.success, fontSize: '0.75rem', fontWeight: 600 }}>
-                            {dayjs(start).format("HH:mm")} - {dayjs(end).format("HH:mm")}
-                        </Typography>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                            <Typography sx={{ color: COLORS.secondary, fontSize: '0.75rem', fontWeight: 500, textDecoration: (actualStart || completedAt) ? 'line-through' : 'none', opacity: (actualStart || completedAt) ? 0.6 : 1 }}>
+                                {dayjs(start).format("HH:mm")} - {dayjs(end).format("HH:mm")}
+                            </Typography>
+                        </Stack>
+                        {isInProgress && actualStart && (
+                            <Typography sx={{ color: '#00A76F', fontSize: '0.7rem', fontWeight: 700 }}>
+                                🟢 Bắt đầu: {dayjs(actualStart).format("HH:mm")}
+                            </Typography>
+                        )}
+                        {isCompleted && actualStart && completedAt && (
+                            <Typography sx={{ color: '#22C55E', fontSize: '0.7rem', fontWeight: 700 }}>
+                                ✨ Thực tế: {dayjs(actualStart).format("HH:mm")} - {dayjs(completedAt).format("HH:mm")}
+                            </Typography>
+                        )}
                     </Stack>
                 );
             }
@@ -123,42 +139,55 @@ export const getBookingColumns = (
         },
         {
             field: "staffId",
-            headerName: "Nhân viên",
-            width: 140,
-            align: 'center',
-            headerAlign: 'center',
+            headerName: "Nhân viên thực hiện",
+            flex: 1,
+            minWidth: 150,
             renderCell: (params: GridRenderCellParams) => {
-                const hasStaff = params.value && params.value._id;
+                const staffIds = params.row.staffIds || [];
+                const staffId = params.row.staffId;
+
+                // Trình bày danh sách nhân viên: ưu tiên mảng staffIds, nếu trống thì dùng staffId đơn lẻ
+                const displayStaff = staffIds.length > 0 ? staffIds : (staffId ? [staffId] : []);
+
                 return (
-                    <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {hasStaff ? (
-                            <Chip
-                                label={params.value.fullName || "Đã phân bổ"}
-                                icon={<Icon icon="eva:checkmark-circle-2-fill" width={16} />}
-                                sx={{
-                                    borderRadius: '6px',
-                                    fontWeight: 700,
-                                    fontSize: '0.6875rem',
-                                    color: '#00A76F',
-                                    bgcolor: 'rgba(0, 167, 111, 0.16)',
-                                    height: '24px',
-                                    '& .MuiChip-label': { px: '8px' },
-                                    '& .MuiChip-icon': { ml: '6px', color: '#00A76F' }
-                                }}
-                            />
+                    <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', px: "8px" }}>
+                        {displayStaff.length > 0 ? (
+                            <Stack direction="column" spacing={0.5} justifyContent="center" sx={{ width: '100%' }}>
+                                {displayStaff.map((staff: any, index: number) => (
+                                    <Chip
+                                        key={staff?._id || index}
+                                        label={staff?.fullName || "N/V"}
+                                        size="small"
+                                        icon={<Icon icon="eva:person-fill" width={14} />}
+                                        sx={{
+                                            borderRadius: '6px',
+                                            fontWeight: 700,
+                                            fontSize: '0.625rem',
+                                            color: '#00A76F',
+                                            bgcolor: 'rgba(0, 167, 111, 0.16)',
+                                            height: '22px',
+                                            width: 'fit-content',
+                                            maxWidth: '100%',
+                                            '& .MuiChip-label': { px: '6px', overflow: 'hidden', textOverflow: 'ellipsis' },
+                                            '& .MuiChip-icon': { ml: '4px', color: '#00A76F' }
+                                        }}
+                                    />
+                                ))}
+                            </Stack>
                         ) : (
                             <Chip
                                 label="Chưa phân bổ"
-                                icon={<Icon icon="eva:alert-triangle-fill" width={16} />}
+                                size="small"
+                                icon={<Icon icon="eva:alert-triangle-fill" width={14} />}
                                 sx={{
                                     borderRadius: '6px',
                                     fontWeight: 700,
-                                    fontSize: '0.6875rem',
+                                    fontSize: '0.625rem',
                                     color: '#FFAB00',
                                     bgcolor: 'rgba(255, 171, 0, 0.16)',
-                                    height: '24px',
-                                    '& .MuiChip-label': { px: '8px' },
-                                    '& .MuiChip-icon': { ml: '6px', color: '#FFAB00' }
+                                    height: '22px',
+                                    '& .MuiChip-label': { px: '6px' },
+                                    '& .MuiChip-icon': { ml: '4px', color: '#FFAB00' }
                                 }}
                             />
                         )}

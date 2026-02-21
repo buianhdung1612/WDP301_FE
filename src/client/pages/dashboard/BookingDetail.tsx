@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ProductBanner } from "../product/sections/ProductBanner";
 import { Sidebar } from "./sections/Sidebar";
 import { useParams, Link } from "react-router-dom";
@@ -6,12 +6,45 @@ import { getMyBooking, exportBookingPdf } from "../../api/booking.api";
 import { formatCurrency } from "../../helpers";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
+import { useQuery } from "@tanstack/react-query";
+
+// Timer component to check overtime locally every few seconds
+const OvertimeTimer = ({ startedAt, maxDuration }: { startedAt: string, maxDuration: number }) => {
+    const [isOver, setIsOver] = useState(false);
+
+    const check = useCallback(() => {
+        if (!startedAt || maxDuration <= 0) return;
+        const diff = dayjs().diff(dayjs(startedAt), 'minute');
+        setIsOver(diff > maxDuration);
+    }, [startedAt, maxDuration]);
+
+    useEffect(() => {
+        check();
+        const interval = setInterval(check, 30000); // Check every 30s
+        return () => clearInterval(interval);
+    }, [check]);
+
+    if (!isOver) return null;
+
+    return (
+        <div className="mt-2 text-[11px] text-[#FF5630] font-bold bg-[#FF5630]/5 p-2 rounded-lg border border-[#FF5630]/20 flex items-center gap-2">
+            <span className="flex h-2 w-2 rounded-full bg-[#FF5630] animate-pulse"></span>
+            Dịch vụ đang quá giờ tối đa - có thể phát sinh phụ thu
+        </div>
+    );
+};
 
 export const BookingDetailPage = () => {
     const { id } = useParams();
-    const [booking, setBooking] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
     const [exporting, setExporting] = useState(false);
+
+    const { data: bookingRes, isLoading: loading } = useQuery<any>({
+        queryKey: ["booking", id],
+        queryFn: () => getMyBooking(id!),
+        enabled: !!id,
+        refetchInterval: 5000, // Sync every 5 seconds
+    });
+    const booking = bookingRes?.data;
 
     const breadcrumbs = [
         { label: "Trang chủ", to: "/" },
@@ -19,24 +52,6 @@ export const BookingDetailPage = () => {
         { label: "Lịch sử dịch vụ", to: "/dashboard/bookings" },
         { label: `Chi tiết đặt lịch`, to: `/dashboard/booking/detail/${id}` },
     ];
-
-    useEffect(() => {
-        const fetchBooking = async () => {
-            if (!id) return;
-            try {
-                const response = await getMyBooking(id);
-                if (response.code === 200) {
-                    setBooking(response.data);
-                }
-            } catch (error) {
-                console.error("Failed to fetch booking detail:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchBooking();
-    }, [id]);
 
     const handleExportPdf = async () => {
         if (!booking) return;
@@ -67,6 +82,8 @@ export const BookingDetailPage = () => {
             case "confirmed": return "text-[#007BFF]";
             case "pending": return "text-[#f97316]";
             case "cancelled": return "text-[#ff0000]";
+            case "in-progress": return "text-[#FFAB00]";
+            case "delayed": return "text-[#FF5630]";
             default: return "text-[#7d7b7b]";
         }
     };
@@ -81,6 +98,19 @@ export const BookingDetailPage = () => {
             "in-progress": "Đang làm"
         };
         return map[status] || status;
+    };
+
+    const getPetStatusChip = (status: string, bookingStatus: string) => {
+        if (bookingStatus === 'cancelled') return <span className="bg-red-50 text-red-500 px-2 py-0.5 rounded text-[11px] font-bold border border-red-100 uppercase">Đã hủy</span>;
+
+        switch (status) {
+            case "completed":
+                return <span className="bg-green-50 text-green-600 px-2 py-0.5 rounded text-[11px] font-bold border border-green-100 uppercase">Hoàn thành</span>;
+            case "in-progress":
+                return <span className="bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded text-[11px] font-bold border border-yellow-100 uppercase">Đang làm</span>;
+            default:
+                return <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-[11px] font-bold border border-blue-100 uppercase">Chờ thực hiện</span>;
+        }
     };
 
     if (loading) return <div className="p-10 text-center text-[16px]">Đang tải...</div>;
@@ -162,8 +192,52 @@ export const BookingDetailPage = () => {
                                 <tbody>
                                     <tr className="border-b border-[#eee]">
                                         <td className="p-[20px]">
-                                            <p className="font-[600] text-client-secondary text-[16px]">{booking.serviceId?.name}</p>
-                                            <p className="text-[13px] text-[#7d7b7b] mt-1">Bé cưng: {booking.petIds?.map((p: any) => p.name).join(", ")}</p>
+                                            <p className="font-[600] text-client-secondary text-[16px] mb-3">{booking.serviceId?.name}</p>
+                                            <div className="space-y-3">
+                                                {booking.petIds?.map((pet: any) => {
+                                                    const mapping = booking.petStaffMap?.find((m: any) =>
+                                                        (m.petId?._id || m.petId) === pet._id
+                                                    );
+                                                    const petStatus = mapping?.status || 'pending';
+                                                    const surcharge = mapping?.surchargeAmount || 0;
+
+                                                    return (
+                                                        <div key={pet._id} className="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-10 h-10 rounded-full bg-client-primary/10 flex items-center justify-center overflow-hidden border border-client-primary/20">
+                                                                        {pet.avatar ? (
+                                                                            <img src={pet.avatar} alt={pet.name} className="w-full h-full object-cover" />
+                                                                        ) : (
+                                                                            <span className="text-client-primary font-bold">{pet.name?.charAt(0)}</span>
+                                                                        )}
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-[14px] font-bold text-client-secondary">{pet.name}</p>
+                                                                        <p className="text-[11px] text-[#7d7b7b]">{pet.breed || "Giống loài"}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="text-right">
+                                                                    {getPetStatusChip(petStatus, booking.bookingStatus)}
+                                                                </div>
+                                                            </div>
+
+                                                            {petStatus === 'in-progress' && mapping?.startedAt && (
+                                                                <OvertimeTimer
+                                                                    startedAt={mapping.startedAt}
+                                                                    maxDuration={booking.serviceId?.maxDuration || 0}
+                                                                />
+                                                            )}
+
+                                                            {surcharge > 0 && (
+                                                                <div className="mt-2 text-[11px] text-[#FF5630] font-bold bg-[#FF5630]/5 p-2 rounded-lg border border-[#FF5630]/20">
+                                                                    Phụ thu: {formatCurrency(surcharge)} ({mapping?.surchargeNotes || "Quá giờ"})
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
                                         </td>
                                         <td className="p-[20px] text-center text-[15px] font-[500]">{dayjs(booking.start).format("DD/MM/YYYY")}</td>
                                         <td className="p-[20px] text-center text-[15px] font-[500] text-client-primary">{dayjs(booking.start).format("HH:mm")}</td>
@@ -173,6 +247,14 @@ export const BookingDetailPage = () => {
                                     </tr>
                                 </tbody>
                                 <tfoot>
+                                    {booking.petStaffMap?.some((m: any) => m.surchargeAmount > 0) && (
+                                        <tr>
+                                            <td colSpan={3} className="p-[20px] pb-0 text-right font-[600] text-[#7d7b7b]">Phụ phí quá giờ:</td>
+                                            <td className="p-[20px] pb-0 text-right font-[700] text-[16px] text-[#FF5630]">
+                                                +{formatCurrency(booking.petStaffMap.reduce((sum: number, m: any) => sum + (m.surchargeAmount || 0), 0))}
+                                            </td>
+                                        </tr>
+                                    )}
                                     <tr>
                                         <td colSpan={3} className="p-[20px] text-right font-[600] text-[#7d7b7b]">Thành tiền:</td>
                                         <td className="p-[20px] text-right font-[800] text-[22px] text-client-primary">{formatCurrency(booking.total || 0)}</td>

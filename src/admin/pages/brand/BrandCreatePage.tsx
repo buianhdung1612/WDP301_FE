@@ -1,4 +1,4 @@
-import { Box, Stack, TextField, ThemeProvider, useTheme, Button } from "@mui/material"
+import { Box, Stack, TextField, ThemeProvider, useTheme } from "@mui/material"
 import { Breadcrumb } from "../../components/ui/Breadcrumb"
 import { Title } from "../../components/ui/Title"
 import { Tiptap } from "../../components/layouts/titap/Tiptap"
@@ -13,6 +13,7 @@ import { getBrandTheme } from "./configs/theme";
 import { prefixAdmin } from "../../constants/routes";
 import { FormUploadSingleFile } from "../../components/upload/FormUploadSingleFile";
 import { toast } from "react-toastify";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 
 export const BrandCreatePage = () => {
     const [expandedDetail, setExpandedDetail] = useState(true);
@@ -129,28 +130,13 @@ export const BrandCreatePage = () => {
                                 checkedValue="active"
                                 uncheckedValue="inactive"
                             />
-                            <Button
+                            <LoadingButton
                                 type="submit"
-                                disabled={isPending}
-                                sx={{
-                                    background: '#1C252E',
-                                    minHeight: "3rem",
-                                    minWidth: "4rem",
-                                    fontWeight: 700,
-                                    fontSize: "0.875rem",
-                                    padding: "8px 16px",
-                                    borderRadius: "8px",
-                                    textTransform: "none",
-                                    boxShadow: "none",
-                                    "&:hover": {
-                                        background: "#454F5B",
-                                        boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
-                                    }
-                                }}
-                                variant="contained"
-                            >
-                                {isPending ? 'Đang tạo...' : 'Tạo thương hiệu'}
-                            </Button>
+                                loading={isPending}
+                                label="Tạo thương hiệu"
+                                loadingLabel="Đang tạo..."
+                                sx={{ minHeight: "3rem", minWidth: "4rem" }}
+                            />
                         </Box>
                     </Stack>
                 </form>

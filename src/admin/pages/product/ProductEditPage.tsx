@@ -14,6 +14,7 @@ import { useParams } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createProductSchema } from "../../schemas/product.schema";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 
 interface CustomFile extends File {
     preview: string;
@@ -562,24 +563,12 @@ export const ProductEditPage = () => {
                         </CollapsibleCard>
 
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: "16px" }}>
-                            <Button
-                                variant="contained"
+                            <LoadingButton
                                 type="submit"
-                                disabled={isPending}
-                                sx={{
-                                    background: '#1C252E',
-                                    fontWeight: 700,
-                                    fontSize: "0.875rem",
-                                    padding: "8px 24px",
-                                    borderRadius: "8px",
-                                    textTransform: "none",
-                                    "&:hover": {
-                                        background: "#454F5B",
-                                    }
-                                }}
-                            >
-                                {isPending ? "Đang xử lý..." : "Cập nhật sản phẩm"}
-                            </Button>
+                                loading={isPending}
+                                label="Cập nhật sản phẩm"
+                                loadingLabel="Đang xử lý..."
+                            />
                         </Box>
                     </Stack>
                 </form>

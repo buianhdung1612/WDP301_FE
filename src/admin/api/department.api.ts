@@ -4,7 +4,7 @@ import { apiApp } from "../../api/index";
 const BASE_URL = "/api/v1/admin/departments";
 
 const withAuth = () => {
-    const token = Cookies.get("token");
+    const token = Cookies.get("tokenAdmin");
     return {
         headers: {
             Authorization: `Bearer ${token}`,

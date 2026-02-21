@@ -31,6 +31,7 @@ interface ScheduleEventDialogProps {
     selectedEvent?: any;
     selectedDate?: Date;
     departmentId?: string;
+    loading?: boolean;
 }
 
 export const ScheduleEventDialog = ({
@@ -41,6 +42,7 @@ export const ScheduleEventDialog = ({
     selectedEvent,
     selectedDate,
     departmentId,
+    loading = false,
 }: ScheduleEventDialogProps) => {
     const { data: accounts = [] } = useAccounts({ departmentId, status: 'active' });
     const { data: shifts = [] } = useShifts({ departmentId, status: 'active' });
@@ -115,89 +117,89 @@ export const ScheduleEventDialog = ({
                     <CloseIcon />
                 </IconButton>
             </DialogTitle>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <DialogContent sx={{ bgcolor: '#F4F6F8 !important', py: '24px !important' }}>
-                    <Grid container spacing={2.5}>
-                        <Grid size={{ xs: 12 }}>
-                            <Controller
-                                name="staffId"
-                                control={control}
-                                rules={{ required: 'Vui lòng chọn nhân viên' }}
-                                render={({ field, fieldState: { error } }) => (
-                                    <TextField
-                                        {...field}
-                                        select
-                                        fullWidth
-                                        label="Nhân viên"
-                                        error={!!error}
-                                        helperText={error?.message}
-                                        sx={{ bgcolor: '#fff', borderRadius: '8px' }}
-                                    >
-                                        {filteredAccounts.map((account: any) => {
-                                            const isBusy = busyStaffIds.includes(account._id) && account._id !== selectedEvent?.extendedProps?.staffId;
-                                            return (
-                                                <MenuItem
-                                                    key={account._id}
-                                                    value={account._id}
-                                                    disabled={isBusy}
-                                                    sx={{
-                                                        display: 'flex',
-                                                        justifyContent: 'space-between',
-                                                        alignItems: 'center',
-                                                        opacity: isBusy ? 0.6 : 1
-                                                    }}
-                                                >
-                                                    <Box>
-                                                        {account.fullName} ({account.email})
-                                                    </Box>
-                                                    {isBusy && (
-                                                        <Typography variant="caption" sx={{ color: '#FF5630', fontWeight: 600 }}>
-                                                            Bận
-                                                        </Typography>
-                                                    )}
-                                                </MenuItem>
-                                            );
-                                        })}
-                                        {filteredAccounts.length === 0 && (
-                                            <MenuItem disabled>Không có nhân viên trong phòng ban này</MenuItem>
-                                        )}
-                                    </TextField>
-                                )}
-                            />
-                        </Grid>
-
-                        <Grid size={{ xs: 12 }}>
-                            <Controller
-                                name="shiftId"
-                                control={control}
-                                rules={{ required: 'Vui lòng chọn ca làm việc' }}
-                                render={({ field, fieldState: { error } }) => {
-                                    return (
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <DialogContent sx={{ bgcolor: '#F4F6F8 !important', py: '24px !important' }}>
+                        <Grid container spacing={2.5}>
+                            <Grid size={{ xs: 12 }}>
+                                <Controller
+                                    name="staffId"
+                                    control={control}
+                                    rules={{ required: 'Vui lòng chọn nhân viên' }}
+                                    render={({ field, fieldState: { error } }) => (
                                         <TextField
                                             {...field}
                                             select
                                             fullWidth
-                                            label="Ca làm việc"
+                                            label="Nhân viên"
                                             error={!!error}
                                             helperText={error?.message}
                                             sx={{ bgcolor: '#fff', borderRadius: '8px' }}
                                         >
-                                            {filteredShifts.map((shift: any) => (
-                                                <MenuItem key={shift._id} value={shift._id}>
-                                                    {shift.name} ({shift.startTime} - {shift.endTime})
-                                                </MenuItem>
-                                            ))}
-                                            {filteredShifts.length === 0 && (
-                                                <MenuItem disabled>Không có ca phù hợp cho phòng ban này</MenuItem>
+                                            {filteredAccounts.map((account: any) => {
+                                                const isBusy = busyStaffIds.includes(account._id) && account._id !== selectedEvent?.extendedProps?.staffId;
+                                                return (
+                                                    <MenuItem
+                                                        key={account._id}
+                                                        value={account._id}
+                                                        disabled={isBusy}
+                                                        sx={{
+                                                            display: 'flex',
+                                                            justifyContent: 'space-between',
+                                                            alignItems: 'center',
+                                                            opacity: isBusy ? 0.6 : 1
+                                                        }}
+                                                    >
+                                                        <Box>
+                                                            {account.fullName} ({account.email})
+                                                        </Box>
+                                                        {isBusy && (
+                                                            <Typography variant="caption" sx={{ color: '#FF5630', fontWeight: 600 }}>
+                                                                Bận
+                                                            </Typography>
+                                                        )}
+                                                    </MenuItem>
+                                                );
+                                            })}
+                                            {filteredAccounts.length === 0 && (
+                                                <MenuItem disabled>Không có nhân viên trong phòng ban này</MenuItem>
                                             )}
                                         </TextField>
-                                    );
-                                }}
-                            />
-                        </Grid>
+                                    )}
+                                />
+                            </Grid>
 
-                        <Grid size={{ xs: 12 }}>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <Grid size={{ xs: 12 }}>
+                                <Controller
+                                    name="shiftId"
+                                    control={control}
+                                    rules={{ required: 'Vui lòng chọn ca làm việc' }}
+                                    render={({ field, fieldState: { error } }) => {
+                                        return (
+                                            <TextField
+                                                {...field}
+                                                select
+                                                fullWidth
+                                                label="Ca làm việc"
+                                                error={!!error}
+                                                helperText={error?.message}
+                                                sx={{ bgcolor: '#fff', borderRadius: '8px' }}
+                                            >
+                                                {filteredShifts.map((shift: any) => (
+                                                    <MenuItem key={shift._id} value={shift._id}>
+                                                        {shift.name} ({shift.startTime} - {shift.endTime})
+                                                    </MenuItem>
+                                                ))}
+                                                {filteredShifts.length === 0 && (
+                                                    <MenuItem disabled>Không có ca phù hợp cho phòng ban này</MenuItem>
+                                                )}
+                                            </TextField>
+                                        );
+                                    }}
+                                />
+                            </Grid>
+
+                            <Grid size={{ xs: 12 }}>
                                 <Controller
                                     name="date"
                                     control={control}
@@ -205,94 +207,97 @@ export const ScheduleEventDialog = ({
                                         <DatePicker
                                             {...field}
                                             label="Ngày làm việc"
-                                            sx={{
-                                                width: '100%',
-                                                bgcolor: '#fff',
-                                                borderRadius: '8px'
+                                            slotProps={{
+                                                textField: {
+                                                    fullWidth: true,
+                                                    sx: { bgcolor: '#fff', borderRadius: '8px' }
+                                                }
                                             }}
                                         />
                                     )}
                                 />
-                            </LocalizationProvider>
-                        </Grid>
+                            </Grid>
 
-                        <Grid size={{ xs: 12 }}>
-                            <Controller
-                                name="notes"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        multiline
-                                        rows={3}
-                                        label="Ghi chú"
-                                        sx={{ bgcolor: '#fff', borderRadius: '8px' }}
-                                    />
-                                )}
-                            />
+                            <Grid size={{ xs: 12 }}>
+                                <Controller
+                                    name="notes"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            fullWidth
+                                            multiline
+                                            rows={3}
+                                            label="Ghi chú"
+                                            sx={{ bgcolor: '#fff', borderRadius: '8px' }}
+                                        />
+                                    )}
+                                />
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions sx={{ p: '16px 24px', gap: 1.5 }}>
-                    {selectedEvent && (
+                    </DialogContent>
+                    <DialogActions sx={{ p: '16px 24px', gap: 1.5 }}>
+                        {selectedEvent && (
+                            <Button
+                                onClick={() => onDelete?.(selectedEvent.id)}
+                                color="error"
+                                variant="outlined"
+                                disabled={loading}
+                                sx={{
+                                    borderRadius: '8px',
+                                    textTransform: 'none',
+                                    fontWeight: 700,
+                                    mr: 'auto',
+                                    borderColor: 'rgba(255, 86, 48, 0.32)',
+                                    '&:hover': {
+                                        bgcolor: 'rgba(255, 86, 48, 0.08)',
+                                        borderColor: '#FF5630',
+                                    }
+                                }}
+                            >
+                                {loading ? 'Đang xóa...' : 'Xóa ca'}
+                            </Button>
+                        )}
                         <Button
-                            onClick={() => onDelete?.(selectedEvent.id)}
-                            color="error"
+                            onClick={onClose}
                             variant="outlined"
                             sx={{
                                 borderRadius: '8px',
                                 textTransform: 'none',
                                 fontWeight: 700,
-                                mr: 'auto',
-                                borderColor: 'rgba(255, 86, 48, 0.32)',
+                                padding: '8px 20px',
+                                color: '#1C252E',
+                                borderColor: 'rgba(145, 158, 171, 0.32)',
                                 '&:hover': {
-                                    bgcolor: 'rgba(255, 86, 48, 0.08)',
-                                    borderColor: '#FF5630',
+                                    bgcolor: 'rgba(145, 158, 171, 0.08)',
+                                    borderColor: '#1C252E',
                                 }
                             }}
                         >
-                            Xóa ca
+                            Hủy
                         </Button>
-                    )}
-                    <Button
-                        onClick={onClose}
-                        variant="outlined"
-                        sx={{
-                            borderRadius: '8px',
-                            textTransform: 'none',
-                            fontWeight: 700,
-                            padding: '8px 20px',
-                            color: '#1C252E',
-                            borderColor: 'rgba(145, 158, 171, 0.32)',
-                            '&:hover': {
-                                bgcolor: 'rgba(145, 158, 171, 0.08)',
-                                borderColor: '#1C252E',
-                            }
-                        }}
-                    >
-                        Hủy
-                    </Button>
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        sx={{
-                            borderRadius: '8px',
-                            textTransform: 'none',
-                            fontWeight: 700,
-                            padding: '8px 20px',
-                            bgcolor: '#1C252E',
-                            boxShadow: 'none',
-                            '&:hover': {
-                                bgcolor: '#454F5B',
-                                boxShadow: '0 8px 16px 0 rgba(145 158 171 / 16%)',
-                            }
-                        }}
-                    >
-                        {selectedEvent ? 'Cập nhật' : 'Thêm mới'}
-                    </Button>
-                </DialogActions>
-            </form>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            disabled={loading}
+                            sx={{
+                                borderRadius: '8px',
+                                textTransform: 'none',
+                                fontWeight: 700,
+                                padding: '8px 20px',
+                                bgcolor: '#1C252E',
+                                boxShadow: 'none',
+                                '&:hover': {
+                                    bgcolor: '#454F5B',
+                                    boxShadow: '0 8px 16px 0 rgba(145 158 171 / 16%)',
+                                }
+                            }}
+                        >
+                            {loading ? 'Đang xử lý...' : (selectedEvent ? 'Cập nhật' : 'Thêm mới')}
+                        </Button>
+                    </DialogActions>
+                </form>
+            </LocalizationProvider>
         </Dialog>
     );
 };

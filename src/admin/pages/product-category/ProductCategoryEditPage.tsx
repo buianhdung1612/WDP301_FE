@@ -1,4 +1,4 @@
-import { Box, Stack, TextField, ThemeProvider, useTheme, Button, CircularProgress } from "@mui/material";
+import { Box, Stack, TextField, ThemeProvider, useTheme, CircularProgress } from "@mui/material";
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { Title } from "../../components/ui/Title";
 import { Tiptap } from "../../components/layouts/titap/Tiptap";
@@ -13,6 +13,7 @@ import { getProductCategoryTheme } from "./configs/theme";
 import { prefixAdmin } from "../../constants/routes";
 import { FormUploadSingleFile } from "../../components/upload/FormUploadSingleFile";
 import { toast } from "react-toastify";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 import { CategoryParentSelect } from "../../components/ui/CategoryTreeSelect";
 import { useParams } from "react-router-dom";
 
@@ -166,28 +167,13 @@ export const ProductCategoryEditPage = () => {
                                 uncheckedValue="inactive"
                             />
 
-                            <Button
+                            <LoadingButton
                                 type="submit"
-                                disabled={isUpdating}
-                                sx={{
-                                    background: '#1C252E',
-                                    minHeight: "3rem",
-                                    minWidth: "4rem",
-                                    fontWeight: 700,
-                                    fontSize: "0.875rem",
-                                    padding: "8px 16px",
-                                    borderRadius: "8px",
-                                    textTransform: "none",
-                                    boxShadow: "none",
-                                    "&:hover": {
-                                        background: "#454F5B",
-                                        boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
-                                    }
-                                }}
-                                variant="contained"
-                            >
-                                {isUpdating ? 'Đang cập nhật...' : 'Cập nhật danh mục'}
-                            </Button>
+                                loading={isUpdating}
+                                label="Cập nhật danh mục"
+                                loadingLabel="Đang cập nhật..."
+                                sx={{ minHeight: "3rem", minWidth: "4rem" }}
+                            />
                         </Box>
                     </Stack>
                 </form>

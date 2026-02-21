@@ -10,6 +10,8 @@ import {
     Divider,
     CircularProgress,
     Chip,
+    alpha,
+    Avatar
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { Title } from "../../components/ui/Title";
@@ -19,7 +21,7 @@ import { useServices } from "../service/hooks/useService";
 import { useUsers } from "../account-user/hooks/useAccountUser";
 import { usePets } from "../account-user/hooks/usePet";
 import { useStaffByService } from "../account-admin/hooks/useAccountAdmin";
-import { useBookingDetail, useUpdateBooking, useBookings } from "./hooks/useBookingManagement";
+import { useBookingDetail, useUpdateBooking, useBookings, useSuggestAssignment } from "./hooks/useBookingManagement";
 import { useSchedules } from "../hr/hooks/useSchedules";
 import { Icon } from "@iconify/react";
 import { toast } from "react-toastify";
@@ -36,6 +38,7 @@ import { StaffAvailabilityTimeline } from "./sections/StaffAvailabilityTimeline"
 import { QuickCustomerDialog } from "./sections/QuickCustomerDialog";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { useTranslation } from "react-i18next";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 
 export const BookingEditPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -51,6 +54,7 @@ export const BookingEditPage = () => {
     const { data: usersRes } = useUsers({ limit: 1000 });
     const users = (usersRes as any)?.recordList || (Array.isArray(usersRes) ? usersRes : []);
     const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking();
+    const { mutateAsync: suggestAssignment, isPending: isSuggesting } = useSuggestAssignment();
     const [quickCustomerDialogOpen, setQuickCustomerDialogOpen] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -58,6 +62,8 @@ export const BookingEditPage = () => {
         petIds: [] as string[],
         serviceId: "",
         staffId: "",
+        staffIds: [] as string[],
+        petStaffMap: [] as { petId: string, staffId: string }[],
         date: dayjs(),
         startTime: dayjs().set('hour', 9).set('minute', 0),
         endTime: dayjs().set('hour', 10).set('minute', 0),
@@ -75,6 +81,8 @@ export const BookingEditPage = () => {
                 petIds: booking.petIds?.map((p: any) => p._id) || [],
                 serviceId: booking.serviceId?._id || "",
                 staffId: booking.staffId?._id || "",
+                staffIds: booking.staffIds?.map((s: any) => s._id) || (booking.staffId?._id ? [booking.staffId._id] : []),
+                petStaffMap: booking.petStaffMap || [],
                 date: dayjs(booking.start),
                 startTime: dayjs(booking.start),
                 endTime: dayjs(booking.end),
@@ -90,7 +98,7 @@ export const BookingEditPage = () => {
     const isReadOnly = useMemo(() =>
         ["completed", "cancelled"].includes(booking?.bookingStatus), [booking]);
 
-    const { data: staffList = [], isLoading: isLoadingStaff } = useStaffByService(formData.serviceId);
+    const { data: staffList = [] } = useStaffByService(formData.serviceId);
 
     const { data: schedulesRes } = useSchedules({
         date: formData.date.format('YYYY-MM-DD')
@@ -103,6 +111,7 @@ export const BookingEditPage = () => {
     const bookings = bookingsRes?.data || [];
 
     const staffAvailability = useMemo(() => {
+        if (!formData.serviceId) return {};
         const startH = formData.startTime.hour() + formData.startTime.minute() / 60;
         const endH = formData.endTime.hour() + formData.endTime.minute() / 60;
 
@@ -129,25 +138,50 @@ export const BookingEditPage = () => {
 
             acc[staff._id] = {
                 available: hasShift && !hasOverlap,
+                hasShift,
+                hasOverlap,
                 reason: !hasShift ? "Không có ca" : (hasOverlap ? "Trùng lịch" : "")
             };
             return acc;
         }, {});
-    }, [staffList, schedules, bookings, formData.startTime, formData.endTime, id]);
+    }, [staffList, schedules, bookings, formData.startTime, formData.endTime, id, formData.serviceId]);
+
+    const eligibleStaffList = useMemo(() => {
+        if (!formData.serviceId) return [];
+        return staffList.filter((s: any) => staffAvailability[s._id]?.hasShift);
+    }, [staffList, staffAvailability, formData.serviceId]);
+
+    const selectedService = useMemo(() =>
+        services.find((s: any) => s._id === formData.serviceId),
+        [services, formData.serviceId]);
+
+
 
     const { data: userPets = [] } = usePets({ userId: formData.userId });
 
+    // Cập nhật duration dựa trên số lượng thú cưng cho mỗi nhân viên
     useEffect(() => {
-        if (formData.serviceId && !isReadOnly) {
-            const service = services.find((s: any) => s._id === formData.serviceId);
-            if (service && service.duration) {
-                const newEndTime = formData.startTime.add(service.duration, 'minute');
-                if (!newEndTime.isSame(formData.endTime)) {
-                    setFormData(prev => ({ ...prev, endTime: newEndTime }));
+        if (!isReadOnly && formData.serviceId && selectedService) {
+            const baseDuration = selectedService.duration || 30;
+
+            // Đếm số lượng thú cưng cho mỗi nhân viên
+            const staffPetCounts: Record<string, number> = {};
+            formData.petStaffMap.forEach(m => {
+                if (m.staffId) {
+                    staffPetCounts[m.staffId] = (staffPetCounts[m.staffId] || 0) + 1;
                 }
+            });
+
+            // Lấy số lượng thú cưng lớn nhất mà một nhân viên phải xử lý
+            const maxPetsPerStaff = Math.max(0, ...Object.values(staffPetCounts), 1);
+            const totalDuration = baseDuration * maxPetsPerStaff;
+
+            const newEndTime = formData.startTime.add(totalDuration, 'minute');
+            if (!newEndTime.isSame(formData.endTime)) {
+                setFormData(prev => ({ ...prev, endTime: newEndTime }));
             }
         }
-    }, [formData.serviceId, formData.startTime, services, formData.endTime, isReadOnly]);
+    }, [formData.serviceId, formData.startTime, formData.petStaffMap, selectedService, formData.endTime, isReadOnly]);
 
     useEffect(() => {
         if (isStaff && !isReadOnly) {
@@ -167,6 +201,25 @@ export const BookingEditPage = () => {
         }
     }, [staffList, formData.serviceId, formData.staffId, isStaff, user?.id, isReadOnly]);
 
+    // Tự động phân bổ nhân viên cho thú cưng (Round-robin)
+    useEffect(() => {
+        if (!isReadOnly && formData.petIds.length > 0 && formData.staffIds.length > 0) {
+            // Kiểm tra xem mapping hiện tại có khớp với danh sách thú cưng đã chọn không
+            const currentPetIds = formData.petStaffMap.map(m => m.petId);
+            const isPetsListChanged = formData.petIds.length !== currentPetIds.length ||
+                formData.petIds.some(id => !currentPetIds.includes(id));
+
+            // Nếu danh sách thú cưng thay đổi, hoặc mapping đang trống, tự động tạo mapping mới
+            if (isPetsListChanged || formData.petStaffMap.length === 0) {
+                const newMap = formData.petIds.map((petId, index) => ({
+                    petId,
+                    staffId: formData.staffIds[index % formData.staffIds.length]
+                }));
+                setFormData(prev => ({ ...prev, petStaffMap: newMap }));
+            }
+        }
+    }, [formData.petIds, formData.staffIds, isReadOnly]);
+
     const userOptions = useMemo(() =>
         users.map((u: any) => ({
             value: u._id,
@@ -180,14 +233,14 @@ export const BookingEditPage = () => {
         })), [userPets]);
 
     const staffOptions = useMemo(() =>
-        staffList.map((staff: any) => {
+        eligibleStaffList.map((staff: any) => {
             const availability = staffAvailability[staff._id];
             return {
                 value: staff._id,
                 label: staff.fullName + (availability?.available ? "" : ` (${availability?.reason})`),
                 disabled: !availability?.available
             };
-        }), [staffList, staffAvailability]);
+        }), [eligibleStaffList, staffAvailability]);
 
     const serviceOptions = useMemo(() =>
         services.map((service: any) => ({
@@ -196,43 +249,10 @@ export const BookingEditPage = () => {
             price: service.basePrice || 0
         })), [services]);
 
-    const selectedService = useMemo(() =>
-        services.find((s: any) => s._id === formData.serviceId),
-        [services, formData.serviceId]);
 
-    const isTimeDisabled = (time: dayjs.Dayjs, type: 'start' | 'end') => {
-        const isToday = formData.date.isSame(dayjs(), 'day');
-        if (isToday && time.isBefore(dayjs().subtract(1, 'minute'))) return true;
 
-        const totalMinutes = time.hour() * 60 + time.minute();
-        const duration = selectedService?.duration || 0;
-
-        // 1. Get working blocks (either individual staff shifts or global blocks)
-        let workingBlocks = [
-            { start: 8 * 60, end: 12 * 60 },
-            { start: 13 * 60, end: 17 * 60 },
-            { start: 17 * 60, end: 19 * 60 }
-        ];
-
-        if (formData.staffId) {
-            const staffSchedule = schedules.find((s: any) => s.staffId?._id === formData.staffId);
-            if (staffSchedule?.shiftId) {
-                const [sH, sM] = staffSchedule.shiftId.startTime.split(':').map(Number);
-                const [eH, eM] = staffSchedule.shiftId.endTime.split(':').map(Number);
-                workingBlocks = [{ start: sH * 60 + sM, end: eH * 60 + eM }];
-            }
-        }
-
-        // 2. Validate based on blocks and duration
-        if (type === 'start') {
-            return !workingBlocks.some(block =>
-                totalMinutes >= block.start && (totalMinutes + duration) <= block.end
-            );
-        }
-
-        return !workingBlocks.some(block =>
-            totalMinutes > block.start && totalMinutes <= block.end
-        );
+    const isTimeDisabled = (_time: dayjs.Dayjs, _type: 'start' | 'end') => {
+        return false; // Temporarily disabled for testing
     };
 
     const pricing = useMemo(() => {
@@ -295,37 +315,48 @@ export const BookingEditPage = () => {
             return;
         }
 
-        // Validate 15-min intervals
-        if (startDateTime.minute() % 15 !== 0 || endDateTime.minute() % 15 !== 0) {
-            toast.error("Thời gian phải là bội số của 15 phút (00, 15, 30, 45)");
-            return;
-        }
-
-        // Validate working blocks
+        // Validate working blocks (Temporarily disabled for testing)
+        /*
         const startTotal = startDateTime.hour() * 60 + startDateTime.minute();
         const endTotal = endDateTime.hour() * 60 + endDateTime.minute();
-        const workingBlocks = [
-            { start: 8 * 60, end: 12 * 60 },
-            { start: 13 * 60, end: 17 * 60 },
-            { start: 17 * 60, end: 19 * 60 }
-        ];
+
+        let workingBlocks = uniqueShifts.map(s => {
+            const [sH, sM] = s.start.split(':').map(Number);
+            const [eH, eM] = s.end.split(':').map(Number);
+            return { start: sH * 60 + sM, end: eH * 60 + eM };
+        });
+
+        if (workingBlocks.length === 0) {
+            workingBlocks = [
+                { start: 8 * 60, end: 12 * 60 },
+                { start: 13 * 60, end: 17 * 60 },
+                { start: 17 * 60, end: 23 * 60 }
+            ];
+        }
 
         const isValidBlock = workingBlocks.some(block =>
             startTotal >= block.start && endTotal <= block.end
         );
 
         if (!isValidBlock) {
-            toast.error("Thời gian đặt lịch phải nằm trong các ca (08:00-12:00, 13:00-17:00, 17:00-19:00)");
+            const shiftInfo = uniqueShifts.length > 0
+                ? uniqueShifts.map(s => `${s.start}-${s.end}`).join(', ')
+                : "08:00-12:00, 13:00-17:00, 17:00-23:00";
+            toast.error(`Thời gian đặt lịch phải nằm trong các ca (${shiftInfo})`);
             return;
         }
 
-        if (formData.staffId) {
-            const availability = staffAvailability[formData.staffId];
+        // Kiểm tra tính khả dụng của tất cả nhân viên đã phân công
+        const assignedStaffIds = Array.from(new Set(formData.petStaffMap.map(m => m.staffId).filter(id => id)));
+        for (const staffId of assignedStaffIds) {
+            const availability = staffAvailability[staffId];
             if (availability && !availability.available) {
-                toast.error(`Nhân viên này đang bận hoặc không có ca làm việc (${availability.reason})`);
+                const staffName = staffList.find((s: any) => s._id === staffId)?.fullName || "Nhân viên";
+                toast.error(`${staffName} đang bận hoặc không có ca làm việc (${availability.reason})`);
                 return;
             }
         }
+        */
 
         const data = {
             ...formData,
@@ -334,6 +365,11 @@ export const BookingEditPage = () => {
             subTotal: pricing.subTotal,
             total: pricing.total
         };
+
+        // Auto-fix mapping if needed
+        if (formData.petIds.length === 1 && formData.staffIds.length >= 1) {
+            data.petStaffMap = [{ petId: formData.petIds[0], staffId: formData.staffIds[0] }];
+        }
 
         updateBooking({ id: id!, data }, {
             onSuccess: () => {
@@ -401,35 +437,18 @@ export const BookingEditPage = () => {
                     <Grid size={{ xs: 12, md: 8 }}>
                         <Card sx={{ p: 3, borderRadius: '20px', boxShadow: COLORS.shadow }}>
                             <Stack spacing={3}>
-                                <Stack direction="row" spacing={2.5}>
-                                    <SelectSingle
-                                        label="Dịch vụ"
-                                        options={serviceOptions}
-                                        value={formData.serviceId}
-                                        onChange={(val) => setFormData({ ...formData, serviceId: val })}
-                                        disabled={isReadOnly}
-                                        sx={{ width: '100%' }}
-                                    />
-                                    {!isStaff && (
-                                        <SelectSingle
-                                            label="Nhân viên"
-                                            options={[{ value: "", label: "Chưa chỉ định" }, ...staffOptions]}
-                                            value={formData.staffId}
-                                            onChange={(val) => setFormData({ ...formData, staffId: val })}
-                                            disabled={isReadOnly || isLoadingStaff || !formData.serviceId}
-                                            sx={{ width: '100%' }}
-                                        />
-                                    )}
-                                    {isStaff && (
-                                        <TextField
-                                            label="Nhân viên"
-                                            fullWidth
-                                            value={booking?.staffId?.fullName || user?.fullName || "Chính mình"}
-                                            disabled
-                                            sx={{ '& .MuiInputBase-input.Mui-disabled': { WebkitTextFillColor: COLORS.primary, fontWeight: 700 } }}
-                                        />
-                                    )}
+                                <Stack direction="row" spacing={1} alignItems="center">
+                                    <Icon icon="solar:clipboard-list-bold-duotone" width={24} color={COLORS.primary} />
+                                    <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.125rem' }}>1. Dịch vụ & Thời gian</Typography>
                                 </Stack>
+                                <SelectSingle
+                                    label="Dịch vụ"
+                                    options={serviceOptions}
+                                    value={formData.serviceId}
+                                    onChange={(val) => setFormData({ ...formData, serviceId: val })}
+                                    disabled={isReadOnly}
+                                    sx={{ width: '100%' }}
+                                />
 
                                 <Grid container spacing={2.5}>
                                     <Grid size={{ xs: 12, sm: 4.5 }}>
@@ -450,7 +469,7 @@ export const BookingEditPage = () => {
                                             onChange={(val) => setFormData({ ...formData, startTime: val || dayjs() })}
                                             disabled={isReadOnly}
                                             ampm={false} format="HH:mm"
-                                            minutesStep={15}
+                                            minutesStep={1}
                                             shouldDisableTime={(timeValue) => isTimeDisabled(timeValue, 'start')}
                                             slotProps={{ textField: { fullWidth: true } }}
                                         />
@@ -462,28 +481,183 @@ export const BookingEditPage = () => {
                                             onChange={(val) => setFormData({ ...formData, endTime: val || dayjs() })}
                                             disabled={isReadOnly}
                                             ampm={false} format="HH:mm"
-                                            minutesStep={15}
+                                            minutesStep={1}
                                             shouldDisableTime={(timeValue) => isTimeDisabled(timeValue, 'end')}
                                             slotProps={{ textField: { fullWidth: true } }}
                                         />
                                     </Grid>
                                 </Grid>
 
+                                <Divider sx={{ borderStyle: 'dashed' }} />
+
+                                <Stack direction="row" spacing={1} alignItems="center">
+                                    <Icon icon="solar:users-group-rounded-bold-duotone" width={24} color={COLORS.primary} />
+                                    <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.125rem' }}>2. Nhân viên & Phân công</Typography>
+                                </Stack>
+
+                                {!isStaff && (
+                                    <SelectMulti
+                                        label="Chọn danh sách nhân viên thực hiện (chung)"
+                                        options={staffOptions}
+                                        value={formData.staffIds}
+                                        onChange={(val) => {
+                                            if (val.length > formData.petIds.length && formData.petIds.length > 0) {
+                                                toast.error(`Số lượng nhân viên (${val.length}) không được vượt quá số lượng thú cưng (${formData.petIds.length}).`);
+                                                return;
+                                            }
+                                            setFormData({ ...formData, staffIds: val, staffId: val[0] || "" });
+                                        }}
+                                        disabled={isReadOnly || !formData.serviceId || formData.petIds.length === 0}
+                                        sx={{ width: '100%' }}
+                                    />
+                                )}
+                                {isStaff && (
+                                    <TextField
+                                        label="Nhân viên"
+                                        fullWidth
+                                        value={booking?.staffIds?.map((s: any) => s.fullName).join(", ") || user?.fullName || "Chính mình"}
+                                        disabled
+                                        sx={{ '& .MuiInputBase-input.Mui-disabled': { WebkitTextFillColor: COLORS.primary, fontWeight: 700 } }}
+                                    />
+                                )}
+
+                                {formData.petIds.length === 0 ? (
+                                    <Box sx={{ p: 3, textAlign: 'center', bgcolor: alpha('#919EAB', 0.08), borderRadius: '16px', border: '1px dashed', borderColor: alpha('#919EAB', 0.2) }}>
+                                        <Typography variant="body2" sx={{ color: '#637381' }}>
+                                            Vui lòng chọn <b>Thú cưng</b> ở cột bên phải để bắt đầu phân công.
+                                        </Typography>
+                                    </Box>
+                                ) : (
+                                    <Box sx={{ p: 2, bgcolor: alpha(COLORS.primary, 0.04), borderRadius: '16px', border: '1px solid', borderColor: alpha(COLORS.primary, 0.1) }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: COLORS.primary, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Icon icon="solar:user-speak-bold-duotone" />
+                                            Bảng phân công chi tiết ({formData.petIds.length} thú cưng)
+                                        </Typography>
+                                        <Stack spacing={1.5}>
+                                            {formData.petIds.map((petId) => {
+                                                const pet = userPets.find(p => p._id === petId);
+                                                const currentMapping = formData.petStaffMap.find(m => m.petId === petId);
+                                                return (
+                                                    <Stack
+                                                        key={petId}
+                                                        direction="row"
+                                                        spacing={2}
+                                                        alignItems="center"
+                                                        justifyContent="space-between"
+                                                        sx={{
+                                                            p: 1.5,
+                                                            bgcolor: '#fff',
+                                                            borderRadius: '12px',
+                                                            boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                                                        }}
+                                                    >
+                                                        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flex: 1 }}>
+                                                            <Avatar sx={{ width: 32, height: 32, bgcolor: alpha(COLORS.primary, 0.1), color: COLORS.primary, fontSize: '0.875rem' }}>
+                                                                {pet?.name?.charAt(0)}
+                                                            </Avatar>
+                                                            <Box>
+                                                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{pet?.name || "Thú cưng"}</Typography>
+                                                                <Typography variant="caption" sx={{ color: '#637381' }}>{pet?.breed || (pet?.type === 'dog' ? 'Chó' : 'Mèo')}</Typography>
+                                                            </Box>
+                                                        </Stack>
+
+                                                        <Icon icon="solar:arrow-right-linear" width={18} color="#919EAB" />
+
+                                                        <SelectSingle
+                                                            label="Chọn người làm"
+                                                            options={formData.staffIds.length > 0 ? formData.staffIds.map(sid => ({
+                                                                value: sid,
+                                                                label: staffList.find(s => s._id === sid)?.fullName || "Nhân viên"
+                                                            })) : staffOptions}
+                                                            value={currentMapping?.staffId || ""}
+                                                            onChange={(val) => {
+                                                                const newMap = [...formData.petStaffMap];
+                                                                const idx = newMap.findIndex(m => m.petId === petId);
+                                                                if (idx > -1) newMap[idx].staffId = val;
+                                                                else newMap.push({ petId, staffId: val });
+                                                                setFormData({ ...formData, petStaffMap: newMap });
+                                                            }}
+                                                            sx={{ width: 220, '& .MuiOutlinedInput-root': { height: 40 } }}
+                                                            disabled={isReadOnly}
+                                                        />
+                                                    </Stack>
+                                                );
+                                            })}
+                                        </Stack>
+
+                                        {!isReadOnly && (
+                                            <LoadingButton
+                                                size="small"
+                                                variant="contained"
+                                                color="primary"
+                                                loading={isSuggesting}
+                                                label="Tự động phân bổ lại"
+                                                onClick={async () => {
+                                                    if (formData.petIds.length === 0) {
+                                                        toast.error("Vui lòng chọn khách hàng và thú cưng trước khi phân bổ!");
+                                                        return;
+                                                    }
+
+                                                    const isOnlyMeAsAdmin = formData.staffIds.length === 1 && formData.staffIds[0] === user?.id && !isStaff;
+                                                    const hasManualSelection = formData.staffIds.length > 0 && !isOnlyMeAsAdmin;
+
+                                                    // Smart distribution (API call)
+                                                    try {
+                                                        const merge = (d: dayjs.Dayjs, t: dayjs.Dayjs) =>
+                                                            d.hour(t.hour()).minute(t.minute()).second(0).format('YYYY-MM-DDTHH:mm:ss');
+
+                                                        const res = await suggestAssignment({
+                                                            date: formData.date.format('YYYY-MM-DD'),
+                                                            startTime: merge(formData.date, formData.startTime),
+                                                            endTime: merge(formData.date, formData.endTime),
+                                                            serviceId: formData.serviceId,
+                                                            petIds: formData.petIds,
+                                                            staffIds: hasManualSelection ? formData.staffIds : []
+                                                        });
+
+                                                        if (res.code === 200) {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                petStaffMap: res.data.petStaffMap,
+                                                                staffIds: res.data.staffIds,
+                                                                staffId: res.data.staffIds[0] || ""
+                                                            }));
+                                                            toast.success(hasManualSelection
+                                                                ? "Đã phân bổ xoay vòng trong danh sách nhân viên bạn chọn!"
+                                                                : "Đã tự động tìm và phân bổ nhân viên tối ưu nhất!");
+                                                        }
+                                                    } catch (err: any) {
+                                                        toast.error(err?.response?.data?.message || "Không thể tự động phân bổ!");
+                                                    }
+                                                }}
+                                                sx={{ mt: 2, textTransform: 'none', fontWeight: 600 }}
+                                                startIcon={<Icon icon="solar:reorder-bold" />}
+                                                disabled={staffList.length === 0}
+                                            />
+                                        )}
+                                    </Box>
+                                )}
+
                                 <TextField
-                                    fullWidth multiline rows={4} label="Ghi chú"
+                                    fullWidth multiline rows={3} label="Ghi chú"
                                     value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                                     disabled={isReadOnly}
                                 />
 
                                 <Box>
-                                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: '#637381' }}>Lịch nhân viên {formData.date.format('DD/MM/YYYY')}</Typography>
+                                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: '#637381', display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Icon icon="solar:calendar-bold-duotone" width={20} />
+                                        Lịch nhân viên thực tế {formData.date.format('DD/MM/YYYY')}
+                                    </Typography>
                                     <StaffAvailabilityTimeline
                                         date={formData.date}
                                         serviceId={formData.serviceId}
+                                        staffList={eligibleStaffList}
                                         selectionStart={formData.startTime}
                                         selectionEnd={formData.endTime}
-                                        selectedStaffId={formData.staffId}
+                                        selectedStaffIds={Array.from(new Set(formData.petStaffMap.map(m => m.staffId).filter(id => id)))}
                                         onlyShowSelected={isStaff}
+                                        currentBookingId={id}
                                     />
                                 </Box>
                             </Stack>
@@ -518,7 +692,17 @@ export const BookingEditPage = () => {
                                         label="Thú cưng"
                                         options={petOptions}
                                         value={formData.petIds}
-                                        onChange={(val) => setFormData({ ...formData, petIds: val })}
+                                        onChange={(val) => {
+                                            if (isReadOnly) return;
+                                            setFormData(prev => {
+                                                let newStaffIds = prev.staffIds;
+                                                if (val.length > 0 && prev.staffIds.length > val.length) {
+                                                    newStaffIds = prev.staffIds.slice(0, val.length);
+                                                    toast.info(`Đã tự động giảm số nhân viên xuống còn ${val.length} để khớp với số thú cưng.`);
+                                                }
+                                                return { ...prev, petIds: val, staffIds: newStaffIds };
+                                            });
+                                        }}
                                         disabled={isReadOnly || !formData.userId}
                                     />
                                     <Divider sx={{ borderStyle: 'dashed' }} />
@@ -590,13 +774,14 @@ export const BookingEditPage = () => {
                             </Card>
 
                             {!isReadOnly && (
-                                <Button
-                                    fullWidth variant="contained" size="large"
-                                    onClick={handleSubmit} disabled={isUpdating}
-                                    sx={{ bgcolor: COLORS.primary, py: 1.5, borderRadius: '12px', fontWeight: 700 }}
-                                >
-                                    {isUpdating ? "Đang lưu..." : "Lưu thay đổi"}
-                                </Button>
+                                <LoadingButton
+                                    fullWidth
+                                    loading={isUpdating}
+                                    label="Lưu thay đổi"
+                                    loadingLabel="Đang lưu..."
+                                    onClick={handleSubmit}
+                                    sx={{ py: 1.5, borderRadius: '12px' }}
+                                />
                             )}
                         </Stack>
                     </Grid>

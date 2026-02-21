@@ -59,23 +59,13 @@ export const BookingPage = () => {
     const [activeTimeSession, setActiveTimeSession] = useState("Sáng"); // Sáng, Chiều, Tối
 
     const [note, setNote] = useState("");
-    const [fullName, setFullName] = useState("");
-    const [phone, setPhone] = useState("");
-
-    // Prefill user info
-    useEffect(() => {
-        if (user) {
-            setFullName(user.fullName || "");
-            setPhone(user.phone || "");
-        }
-    }, [user]);
 
     const filteredSlotsBySession = useMemo(() => {
         return availableSlots.filter(slot => {
             const hour = parseInt(slot.time.split(":")[0]);
-            if (activeTimeSession === "Sáng") return hour < 12;
-            if (activeTimeSession === "Chiều") return hour >= 12 && hour < 17;
-            if (activeTimeSession === "Tối") return hour >= 17;
+            if (activeTimeSession === "Sáng") return hour < 13;
+            if (activeTimeSession === "Chiều") return hour >= 13 && hour < 18;
+            if (activeTimeSession === "Tối") return hour >= 18;
             return true;
         });
     }, [availableSlots, activeTimeSession]);
@@ -86,8 +76,8 @@ export const BookingPage = () => {
         availableSlots.forEach(slot => {
             const hour = parseInt(slot.time.split(":")[0]);
             if (slot.totalStaff > 0) {
-                if (hour < 12) sessions["Sáng"] = true;
-                else if (hour < 17) sessions["Chiều"] = true;
+                if (hour < 13) sessions["Sáng"] = true;
+                else if (hour < 18) sessions["Chiều"] = true;
                 else sessions["Tối"] = true;
             }
         });
@@ -163,33 +153,25 @@ export const BookingPage = () => {
     // Fetch available slots
     useEffect(() => {
         const fetchSlots = async () => {
-            if (!selectedDate) return;
+            if (!selectedDate || !selectedServiceId) return;
             setIsLoadingSlots(true);
             try {
-                const res = await getAvailableTimeSlots(selectedDate, selectedServiceId || undefined);
-                if (res.code === 200 && res.data && res.data.length > 0) {
+                const res = await getAvailableTimeSlots(
+                    selectedDate,
+                    selectedServiceId,
+                    selectedPetIds.length || 1
+                );
+                if (res.code === 200 && res.data) {
                     setAvailableSlots(res.data);
-                } else {
-                    // Provide default slots for testing if BE returns empty or not implemented
-                    const defaultSlots = [
-                        "08:00", "09:00", "10:00", "11:00",
-                        "13:00", "14:00", "15:00", "16:00", "17:00"
-                    ].map(t => ({ time: t, availableSlots: 5, totalStaff: 5, freeStaff: 5, status: "available" }));
-                    setAvailableSlots(defaultSlots);
                 }
             } catch (error) {
-                console.warn("Lấy khung giờ từ BE lỗi, dùng khung giờ mặc định để test:", error);
-                const defaultSlots = [
-                    "08:00", "09:00", "10:00", "11:00",
-                    "13:00", "14:00", "15:00", "16:00", "17:00"
-                ].map(t => ({ time: t, availableSlots: 5, totalStaff: 5, freeStaff: 5, status: "available" }));
-                setAvailableSlots(defaultSlots);
+                console.error("Error fetching slots:", error);
             } finally {
                 setIsLoadingSlots(false);
             }
         };
         fetchSlots();
-    }, [selectedDate, selectedServiceId]);
+    }, [selectedDate, selectedServiceId, selectedPetIds.length]);
 
     // Pricing Logic
     const pricing = useMemo(() => {
@@ -283,10 +265,7 @@ export const BookingPage = () => {
                 serviceId: selectedServiceId,
                 petIds: selectedPetIds,
                 startTime: startDateTime.toISOString(),
-                notes: note,
-                customerName: fullName,
-                customerPhone: phone,
-                customerEmail: user.email || ""
+                notes: note
             };
 
             const response = await createBooking(bookingData);
@@ -478,7 +457,9 @@ export const BookingPage = () => {
                                         {filteredSlotsBySession.length > 0 ? (
                                             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
                                                 {filteredSlotsBySession.map((slot, idx) => {
-                                                    const isAvailable = slot.status === "available";
+                                                    const isPastTime = selectedDate === dayjs().format("YYYY-MM-DD") &&
+                                                        dayjs(`${selectedDate} ${slot.time}`, "YYYY-MM-DD HH:mm").isBefore(dayjs());
+                                                    const isAvailable = slot.status === "available" && !isPastTime;
                                                     const isFull = slot.status === "full";
                                                     const isClosed = slot.status === "closed";
                                                     const isSelected = selectedTimeSlot?.time === slot.time;
@@ -486,7 +467,7 @@ export const BookingPage = () => {
                                                     return (
                                                         <Tooltip
                                                             key={idx}
-                                                            title={isFull ? "Tất cả nhân viên đã bận" : isClosed ? "Spa không có nhân viên trực" : ""}
+                                                            title={isPastTime ? "Giờ này đã trôi qua" : (isFull ? "Tất cả nhân viên đã bận" : isClosed ? "Spa không có nhân viên trực" : "")}
                                                             arrow
                                                         >
                                                             <button
@@ -502,7 +483,7 @@ export const BookingPage = () => {
                                                                 {slot.time}
                                                                 {!isAvailable && (
                                                                     <span className="text-[8px] font-medium uppercase mt-0.5 opacity-80">
-                                                                        {isFull ? "Hết chỗ" : "Đóng cửa"}
+                                                                        {isPastTime ? "Đã qua" : (isFull ? "Hết chỗ" : "Đóng cửa")}
                                                                     </span>
                                                                 )}
                                                                 {isAvailable && slot.freeStaff <= 2 && (
@@ -532,25 +513,16 @@ export const BookingPage = () => {
                         className="grid grid-cols-1 lg:grid-cols-2 gap-12"
                     >
                         <div className="space-y-8">
-                            <div className="space-y-4">
-                                <h4 className="text-[18px] font-bold text-[#181818] ml-4">Thông tin liên lạc</h4>
-                                <div className="space-y-4">
-                                    <input
-                                        type="text"
-                                        placeholder="Họ và tên của bạn"
-                                        value={fullName}
-                                        readOnly
-                                        className="w-full py-4 px-8 border-2 border-gray-300 rounded-full text-[16px] outline-none bg-gray-50 text-gray-600 cursor-not-allowed"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Số điện thoại liên hệ"
-                                        value={phone}
-                                        readOnly
-                                        className="w-full py-4 px-8 border-2 border-gray-300 rounded-full text-[16px] outline-none bg-gray-50 text-gray-600 cursor-not-allowed"
-                                    />
+                            <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm flex items-center gap-6">
+                                <div className="w-20 h-20 rounded-full bg-client-primary/10 flex items-center justify-center text-client-primary">
+                                    <User className="w-10 h-10" />
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="text-[20px] font-bold text-[#181818] mb-1">{user?.fullName}</h4>
+                                    <p className="text-gray-500 font-medium">{user?.phone} • {user?.email}</p>
                                 </div>
                             </div>
+
                             <div className="space-y-4">
                                 <h4 className="text-[18px] font-bold text-[#181818] ml-4">Ghi chú cho Spa</h4>
                                 <textarea

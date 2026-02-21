@@ -1,4 +1,4 @@
-import { Box, Stack, TextField, ThemeProvider, useTheme, Button } from "@mui/material"
+import { Box, Stack, TextField, ThemeProvider, useTheme } from "@mui/material"
 import { Breadcrumb } from "../../components/ui/Breadcrumb"
 import { Title } from "../../components/ui/Title"
 import { Tiptap } from "../../components/layouts/titap/Tiptap"
@@ -12,6 +12,7 @@ import { getProductCategoryTheme } from "./configs/theme";
 import { prefixAdmin } from "../../constants/routes";
 import { FormUploadSingleFile } from "../../components/upload/FormUploadSingleFile";
 import { toast } from "react-toastify";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 import { CategoryParentSelect } from "../../components/ui/CategoryTreeSelect";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -158,28 +159,13 @@ export const ProductCategoryCreatePage = () => {
                                 checkedValue="active"
                                 uncheckedValue="inactive"
                             />
-                            <Button
+                            <LoadingButton
                                 type="submit"
-                                disabled={isPending}
-                                sx={{
-                                    background: '#1C252E',
-                                    minHeight: "3rem",
-                                    minWidth: "4rem",
-                                    fontWeight: 700,
-                                    fontSize: "0.875rem",
-                                    padding: "8px 16px",
-                                    borderRadius: "8px",
-                                    textTransform: "none",
-                                    boxShadow: "none",
-                                    "&:hover": {
-                                        background: "#454F5B",
-                                        boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
-                                    }
-                                }}
-                                variant="contained"
-                            >
-                                {isPending ? t("admin.common.loading") : t("admin.product_category.title.create")}
-                            </Button>
+                                loading={isPending}
+                                label={t("admin.product_category.title.create")}
+                                loadingLabel={t("admin.common.loading")}
+                                sx={{ minHeight: "3rem", minWidth: "4rem" }}
+                            />
                         </Box>
                     </Stack>
                 </form>

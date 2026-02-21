@@ -38,9 +38,6 @@ import {
 } from '../../assets/icons';
 import { primaryButtonStyles } from './configs/styles.config';
 
-const capitalizeFirstLetter = (string: string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-};
 
 import { useDepartments } from './hooks/useDepartments';
 
@@ -80,11 +77,11 @@ export const ScheduleCalendarPage = () => {
         return true;
     });
 
-    const { mutate: createSchedule } = useCreateSchedule();
-    const { mutate: updateSchedule } = useUpdateSchedule();
-    const { mutate: bulkCreateSchedules } = useBulkCreateSchedules();
-    const { mutate: deleteSchedule } = useDeleteSchedule();
-    const { mutate: bulkDeleteSchedules } = useBulkDeleteSchedules();
+    const { mutate: createSchedule, isPending: isCreating } = useCreateSchedule();
+    const { mutate: updateSchedule, isPending: isUpdating } = useUpdateSchedule();
+    const { mutate: bulkCreateSchedules, isPending: isBulkCreating } = useBulkCreateSchedules();
+    const { mutate: deleteSchedule, isPending: isDeleting } = useDeleteSchedule();
+    const { mutate: bulkDeleteSchedules, isPending: isBulkDeleting } = useBulkDeleteSchedules();
 
 
     const handleOpenDialog = (event?: any, selectDate?: Date) => {
@@ -394,7 +391,7 @@ export const ScheduleCalendarPage = () => {
                         </IconButton>
 
                         <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.0625rem', minWidth: '160px', textAlign: 'center', color: "#1C252E" }}>
-                            {capitalizeFirstLetter(date.format('MMMM YYYY'))}
+                            {`Tháng ${date.format('MM/YYYY')}`}
                         </Typography>
 
                         <IconButton size="medium" onClick={handleNext}>
@@ -511,6 +508,7 @@ export const ScheduleCalendarPage = () => {
                 selectedEvent={selectedEvent}
                 selectedDate={selectedDate}
                 departmentId={currentTab}
+                loading={isCreating || isUpdating || isDeleting}
             />
 
             <BulkScheduleDialog
@@ -518,6 +516,7 @@ export const ScheduleCalendarPage = () => {
                 onClose={() => setOpenBulkDialog(false)}
                 onSave={handleSaveBulk}
                 departmentId={currentTab}
+                loading={isBulkCreating}
             />
 
             <BulkDeleteDialog
@@ -525,6 +524,7 @@ export const ScheduleCalendarPage = () => {
                 onClose={() => setOpenBulkDeleteDialog(false)}
                 onDelete={handleDeleteBulk}
                 departmentId={currentTab}
+                loading={isBulkDeleting}
             />
         </Box>
     );

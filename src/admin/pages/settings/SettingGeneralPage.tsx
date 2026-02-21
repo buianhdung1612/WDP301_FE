@@ -1,4 +1,4 @@
-import { Box, Card, Grid, TextField, Button, Typography, Stack } from "@mui/material";
+import { Box, Card, Grid, TextField, Typography, Stack } from "@mui/material";
 import { Link } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
@@ -12,6 +12,7 @@ import { uploadImagesToCloudinary } from "../../api/uploadCloudinary.api";
 import Tooltip from '@mui/material/Tooltip';
 import { useSettingGeneral, useUpdateSettingGeneral } from "./hooks/useSettingGeneral";
 import { useServices } from "../service/hooks/useService";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 
 const PREDEFINED_COLORS = [
     "#00A76F", // Green
@@ -267,12 +268,13 @@ export const SettingGeneralPage = () => {
                                 <Typography variant="body2" sx={{ mb: 3, color: '#637381', fontSize: '0.8125rem' }}>
                                     Quản lý danh sách giống chó và mèo được gợi ý khi khách hàng thêm thú cưng mới.
                                 </Typography>
-                                <Button
+                                <LoadingButton
                                     component={Link}
                                     to="/admin/breed/list"
                                     fullWidth
                                     variant="outlined"
                                     startIcon={<Icon icon="solar:pets-bold" />}
+                                    label="Quản lý ngay"
                                     sx={{
                                         borderRadius: '8px',
                                         textTransform: 'none',
@@ -286,9 +288,7 @@ export const SettingGeneralPage = () => {
                                             bgcolor: 'rgba(28, 37, 46, 0.04)'
                                         }
                                     }}
-                                >
-                                    Quản lý ngay
-                                </Button>
+                                />
                             </Card>
                         </Stack>
                     </Grid>
@@ -439,25 +439,17 @@ export const SettingGeneralPage = () => {
                             </Box>
 
                             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
-                                <Button
+                                <LoadingButton
                                     type="submit"
-                                    variant="contained"
-                                    size="large"
-                                    disabled={isSubmitting}
+                                    loading={isSubmitting}
+                                    label="Lưu cài đặt"
+                                    loadingLabel="Đang lưu..."
                                     sx={{
-                                        bgcolor: '#1C252E',
-                                        color: 'white',
-                                        '&:hover': { bgcolor: '#454F5B' },
                                         minWidth: 140,
                                         height: 48,
                                         fontSize: '0.9375rem',
-                                        fontWeight: 700,
-                                        borderRadius: '8px',
-                                        textTransform: 'none'
                                     }}
-                                >
-                                    {isSubmitting ? "Đang lưu..." : "Lưu cài đặt"}
-                                </Button>
+                                />
                             </Box>
                         </Card>
                     </Grid>

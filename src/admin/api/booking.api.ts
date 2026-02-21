@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 const BASE_URL = '/api/v1/admin/booking/bookings';
 
 const withAuth = () => {
-    const token = Cookies.get('token');
+    const token = Cookies.get("tokenAdmin");
     return {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -35,10 +35,10 @@ export const createBooking = async (data: any) => {
     return response.data;
 };
 
-export const updateBookingStatus = async (id: string, status: string) => {
+export const updateBookingStatus = async (id: string, status: string, petId?: string) => {
     const endpoint = status === 'confirmed' ? 'confirm' : status === 'cancelled' ? 'cancel' : status === 'completed' ? 'complete' : '';
     if (!endpoint) throw new Error("Invalid status update");
-    const response = await apiApp.patch(`${BASE_URL}/${id}/${endpoint}`, {}, withAuth());
+    const response = await apiApp.patch(`${BASE_URL}/${id}/${endpoint}`, { petId }, withAuth());
     return response.data;
 };
 
@@ -53,8 +53,8 @@ export const assignStaffToBooking = async (bookingId: string, staffId: string) =
     return response.data;
 };
 
-export const startBooking = async (id: string) => {
-    const response = await apiApp.patch(`${BASE_URL}/${id}/start`, {}, withAuth());
+export const startBooking = async (id: string, petId?: string) => {
+    const response = await apiApp.patch(`${BASE_URL}/${id}/start`, { petId }, withAuth());
     return response.data;
 };
 
@@ -82,5 +82,15 @@ export const exportStaffSchedule = async (date: string) => {
         params: { date },
         responseType: 'blob'
     });
+    return response.data;
+};
+
+export const autoAssignBookings = async (date: string) => {
+    const response = await apiApp.post(`${BASE_URL}/auto-assign`, { date }, withAuth());
+    return response.data;
+};
+
+export const suggestSmartAssignment = async (data: { date: string, startTime: string, endTime: string, serviceId: string, petIds: string[], staffIds?: string[] }) => {
+    const response = await apiApp.post(`${BASE_URL}/suggest-assignment`, data, withAuth());
     return response.data;
 };

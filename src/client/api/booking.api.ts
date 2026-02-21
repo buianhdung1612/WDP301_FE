@@ -2,10 +2,10 @@ import { apiApp } from "../../api/index";
 
 const API_BOOKING = "/api/v1/client/booking";
 
-export const getAvailableTimeSlots = async (date: string, serviceId?: string) => {
+export const getAvailableTimeSlots = async (date: string, serviceId?: string, count: number = 1) => {
     try {
         const response = await apiApp.get(`${API_BOOKING}/time-slots`, {
-            params: { date, serviceId }
+            params: { date, serviceId, count }
         });
         return response.data;
     } catch (error) {

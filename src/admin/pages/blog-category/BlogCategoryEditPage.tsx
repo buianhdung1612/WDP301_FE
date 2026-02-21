@@ -1,4 +1,5 @@
-import { Box, Stack, TextField, ThemeProvider, useTheme, Button, CircularProgress } from "@mui/material";
+import { Box, Stack, TextField, ThemeProvider, useTheme, CircularProgress } from "@mui/material";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { Title } from "../../components/ui/Title";
 import { Tiptap } from "../../components/layouts/titap/Tiptap";
@@ -164,28 +165,12 @@ export const BlogCategoryEditPage = () => {
                                 uncheckedValue="inactive"
                             />
 
-                            <Button
+                            <LoadingButton
                                 type="submit"
-                                disabled={isUpdating}
-                                sx={{
-                                    background: '#1C252E',
-                                    minHeight: "3rem",
-                                    minWidth: "4rem",
-                                    fontWeight: 700,
-                                    fontSize: "0.875rem",
-                                    padding: "8px 16px",
-                                    borderRadius: "8px",
-                                    textTransform: "none",
-                                    boxShadow: "none",
-                                    "&:hover": {
-                                        background: "#454F5B",
-                                        boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
-                                    }
-                                }}
-                                variant="contained"
-                            >
-                                {isUpdating ? 'Đang cập nhật...' : 'Cập nhật danh mục'}
-                            </Button>
+                                loading={isUpdating}
+                                label="Cập nhật danh mục"
+                                loadingLabel="Đang cập nhật..."
+                            />
                         </Box>
                     </Stack>
                 </form>

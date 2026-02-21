@@ -68,6 +68,7 @@ export const useCheckIn = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["schedules"] });
             queryClient.invalidateQueries({ queryKey: ["calendar"] });
+            queryClient.invalidateQueries({ queryKey: ["staff-schedules"] });
         },
     });
 };
@@ -79,6 +80,7 @@ export const useCheckOut = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["schedules"] });
             queryClient.invalidateQueries({ queryKey: ["calendar"] });
+            queryClient.invalidateQueries({ queryKey: ["staff-schedules"] });
         },
     });
 };

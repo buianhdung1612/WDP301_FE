@@ -109,7 +109,8 @@ export const BlogList = ({ blogs = [], isLoading = false }: BlogListProps) => {
             >
                 {currentData.map((blog: any) => {
                     const statusInfo = getStatusColor(blog.status);
-                    const formattedDate = dayjs(blog.createdAt).locale('vi').format('DD MMM YYYY');
+                    // Định dạng: 16/01/2026
+                    const formattedDate = dayjs(blog.createdAt).format('DD/MM/YYYY');
 
                     return (
                         <Card

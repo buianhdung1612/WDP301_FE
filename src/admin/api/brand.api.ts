@@ -6,7 +6,7 @@ const BASE_URL = '/api/v1/admin/brand';
 
 /** Header auth dùng chung */
 const withAuth = () => {
-    const token = Cookies.get('token');
+    const token = Cookies.get("tokenAdmin");
 
     return {
         headers: {

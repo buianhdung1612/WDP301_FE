@@ -212,7 +212,7 @@ export const BreedListPage = () => {
                     <Breadcrumb
                         items={[
                             { label: "Dashboard", to: "/" },
-                            { label: "Dịch vụ", to: `/${prefixAdmin}/service/list` },
+                            { label: "Cài đặt", to: `/${prefixAdmin}/dashboard/setting-general` },
                             { label: "Giống thú cưng" }
                         ]}
                     />

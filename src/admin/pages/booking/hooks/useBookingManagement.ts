@@ -11,7 +11,9 @@ import {
     getRecommendedStaff,
     getStaffTasks,
     getStaffBookingDetail,
-    updateBooking
+    updateBooking,
+    autoAssignBookings,
+    suggestSmartAssignment as apiSuggestSmartAssignment
 } from "../../../api/booking.api";
 
 export const useAvailableSlots = (params: { date: string, serviceId: string, departmentId?: string }) => {
@@ -50,9 +52,11 @@ export const useCreateBooking = () => {
 export const useUpdateBookingStatus = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, status }: { id: string; status: string }) => updateBookingStatus(id, status),
-        onSuccess: () => {
+        mutationFn: ({ id, status, petId }: { id: string; status: string; petId?: string }) => updateBookingStatus(id, status, petId),
+        onSuccess: (_data, variables) => {
             queryClient.invalidateQueries({ queryKey: ["bookings"] });
+            queryClient.invalidateQueries({ queryKey: ["booking", variables.id] });
+            queryClient.invalidateQueries({ queryKey: ["staff-tasks"] });
         },
     });
 };
@@ -73,10 +77,11 @@ export const useAssignStaff = () => {
 export const useStartBooking = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id: string) => startBooking(id),
-        onSuccess: (_data, id) => {
-            queryClient.invalidateQueries({ queryKey: ["booking", id] });
+        mutationFn: ({ id, petId }: { id: string; petId?: string }) => startBooking(id, petId),
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ["booking", variables.id] });
             queryClient.invalidateQueries({ queryKey: ["bookings"] });
+            queryClient.invalidateQueries({ queryKey: ["staff-tasks"] });
         },
     });
 };
@@ -124,5 +129,21 @@ export const useUpdateBooking = () => {
             queryClient.invalidateQueries({ queryKey: ["booking", variables.id] });
             queryClient.invalidateQueries({ queryKey: ["bookings"] });
         },
+    });
+};
+export const useAutoAssignBookings = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (date: string) => autoAssignBookings(date),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["bookings"] });
+        },
+    });
+};
+
+export const useSuggestAssignment = () => {
+    return useMutation({
+        mutationFn: (data: { date: string, startTime: string, endTime: string, serviceId: string, petIds: string[], staffIds?: string[] }) =>
+            apiSuggestSmartAssignment(data),
     });
 };
