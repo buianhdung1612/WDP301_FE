@@ -206,7 +206,7 @@ export const ScheduleCalendarPage = () => {
     };
 
     return (
-        <Box sx={{ p: '24px' }}>
+        <Box sx={{ p: "calc(3 * var(--spacing))" }}>
             <Box sx={{ mb: '40px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <Box sx={{ flexGrow: 1 }}>
                     <Title title="Lịch làm việc nhân viên" />
@@ -225,11 +225,11 @@ export const ScheduleCalendarPage = () => {
                         sx={{
                             ...primaryButtonStyles,
                             bgcolor: 'transparent',
-                            color: '#161C24',
-                            borderColor: 'rgba(145, 158, 171, 0.24)',
+                            color: 'var(--palette-text-primary)',
+                            borderColor: 'var(--palette-background-neutral)',
                             '&:hover': {
-                                bgcolor: alpha('#919EAB', 0.08),
-                                borderColor: '#161C24',
+                                bgcolor: 'var(--palette-action-hover)',
+                                borderColor: 'var(--palette-text-primary)',
                             }
                         }}
                     >
@@ -243,11 +243,11 @@ export const ScheduleCalendarPage = () => {
                         sx={{
                             ...primaryButtonStyles,
                             bgcolor: 'transparent',
-                            color: '#FF5630',
+                            color: 'var(--palette-error-main)',
                             borderColor: alpha('#FF5630', 0.24),
                             '&:hover': {
                                 bgcolor: alpha('#FF5630', 0.08),
-                                borderColor: '#FF5630',
+                                borderColor: 'var(--palette-error-main)',
                             }
                         }}
                     >
@@ -267,26 +267,26 @@ export const ScheduleCalendarPage = () => {
             <Card
                 elevation={0}
                 sx={{
-                    bgcolor: 'white',
+                    bgcolor: 'var(--palette-background-paper)',
                     backgroundImage: 'none',
-                    borderRadius: '16px',
-                    boxShadow: '0 0 2px 0 rgba(145, 158, 171, 0.2), 0 12px 24px -4px rgba(145, 158, 171, 0.12)',
-                    color: "#1C252E",
+                    borderRadius: 'var(--shape-borderRadius-lg)',
+                    boxShadow: 'var(--customShadows-card)',
+                    color: "var(--palette-text-primary)",
                     '& .fc': {
-                        '--fc-border-color': 'rgba(145, 158, 171, 0.2)',
-                        '--fc-today-bg-color': 'rgba(255, 171, 0, 0.08)',
+                        '--fc-border-color': 'var(--palette-background-neutral)',
+                        '--fc-today-bg-color': 'var(--palette-warning-lighter)',
                         '--fc-event-border-color': 'transparent',
                     },
                     '& .fc-scrollgrid': {
-                        borderLeft: '1px solid rgba(145, 158, 171, 0.2) !important',
-                        borderRadius: '0 0 16px 16px',
+                        borderLeft: '1px solid var(--palette-background-neutral) !important',
+                        borderRadius: '0 0 var(--shape-borderRadius-lg) var(--shape-borderRadius-lg)',
                     },
                     '& .fc-theme-standard td, & .fc-theme-standard th': {
-                        borderRight: '1px solid rgba(145, 158, 171, 0.2) !important',
-                        borderBottom: '1px solid rgba(145, 158, 171, 0.2) !important',
+                        borderRight: '1px solid var(--palette-background-neutral) !important',
+                        borderBottom: '1px solid var(--palette-background-neutral) !important',
                     },
                     '& .fc-col-header-cell-cushion': {
-                        color: '#637381',
+                        color: 'var(--palette-text-secondary)',
                         fontWeight: 700,
                         textDecoration: 'none',
                         textTransform: 'capitalize',
@@ -294,7 +294,7 @@ export const ScheduleCalendarPage = () => {
                         padding: '12px 0',
                     },
                     '& .fc-daygrid-day-number': {
-                        color: '#637381',
+                        color: 'var(--palette-text-secondary)',
                         fontWeight: 400,
                         textDecoration: 'none',
                         fontSize: '0.875rem',
@@ -302,14 +302,14 @@ export const ScheduleCalendarPage = () => {
                     },
                     '& .fc-event': {
                         cursor: 'pointer',
-                        borderRadius: '6px',
+                        borderRadius: "var(--shape-borderRadius-sm)",
                         padding: '2px 4px',
                         fontSize: '0.8125rem',
                         border: 'none',
                     },
                     '& .fc-theme-standard .fc-scrollgrid': {
                         border: 'none',
-                        borderTop: '1px solid rgba(145, 158, 171, 0.2)',
+                        borderTop: '1px solid var(--palette-background-neutral)',
                     },
                 }}
             >
@@ -322,14 +322,14 @@ export const ScheduleCalendarPage = () => {
                                 textTransform: 'none',
                                 fontWeight: 600,
                                 fontSize: '0.875rem',
-                                color: '#637381',
+                                color: 'var(--palette-text-secondary)',
                                 minHeight: '48px',
                                 '&.Mui-selected': {
-                                    color: '#1C252E',
+                                    color: 'var(--palette-text-primary)',
                                 }
                             },
                             '& .MuiTabs-indicator': {
-                                bgcolor: '#1C252E',
+                                bgcolor: 'var(--palette-text-primary)',
                             }
                         }}
                     >
@@ -352,11 +352,11 @@ export const ScheduleCalendarPage = () => {
                                 borderRadius: "10px",
                                 '& .MuiToggleButton-root': {
                                     border: 'none !important',
-                                    borderRadius: '8px !important',
+                                    borderRadius: 'var(--shape-borderRadius-sm) !important',
                                     p: '4px !important',
                                     '&.Mui-selected': {
-                                        bgcolor: 'rgba(28, 37, 46, 0.08)',
-                                        color: '#1C252E',
+                                        bgcolor: 'var(--palette-action-selected)',
+                                        color: 'var(--palette-text-primary)',
                                     }
                                 }
                             }}
@@ -387,15 +387,15 @@ export const ScheduleCalendarPage = () => {
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', flexGrow: 1, justifyContent: 'center' }}>
                         <IconButton size="medium" onClick={handlePrev}>
-                            <ChevronLeftIcon sx={{ fontSize: 20, color: '#637381' }} />
+                            <ChevronLeftIcon sx={{ fontSize: 20, color: 'var(--palette-text-secondary)' }} />
                         </IconButton>
 
-                        <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.0625rem', minWidth: '160px', textAlign: 'center', color: "#1C252E" }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.0625rem', minWidth: '160px', textAlign: 'center', color: "var(--palette-text-primary)" }}>
                             {`Tháng ${date.format('MM/YYYY')}`}
                         </Typography>
 
                         <IconButton size="medium" onClick={handleNext}>
-                            <ChevronRightIcon sx={{ fontSize: 20, color: '#637381' }} />
+                            <ChevronRightIcon sx={{ fontSize: 20, color: 'var(--palette-text-secondary)' }} />
                         </IconButton>
                     </Box>
 
@@ -404,14 +404,14 @@ export const ScheduleCalendarPage = () => {
                         size="small"
                         onClick={handleToday}
                         sx={{
-                            bgcolor: '#FF5630',
-                            borderRadius: '8px',
+                            bgcolor: 'var(--palette-error-main)',
+                            borderRadius: "var(--shape-borderRadius)",
                             minHeight: "30px",
                             minWidth: "64px",
                             fontSize: "0.75rem",
                             textTransform: 'none',
                             fontWeight: 700,
-                            '&:hover': { bgcolor: '#B71D18' }
+                            '&:hover': { bgcolor: 'var(--palette-error-dark)' }
                         }}
                     >
                         Hôm nay
@@ -529,3 +529,7 @@ export const ScheduleCalendarPage = () => {
         </Box>
     );
 };
+
+
+
+

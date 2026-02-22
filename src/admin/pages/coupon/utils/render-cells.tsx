@@ -23,8 +23,8 @@ export const RenderTitleCell = (params: GridRenderCellParams) => {
             sx={{
                 display: 'flex',
                 alignItems: 'center',
-                py: "16px",
-                gap: "16px",
+                py: "calc(2 * var(--spacing))",
+                gap: "calc(2 * var(--spacing))",
                 width: "100%",
             }}>
             <ListItemText
@@ -91,8 +91,8 @@ export const RenderCreatedAtCell = ({ value }: RenderCreatedAtCellProps) => {
 export const RenderTypeDiscountCell = (params: GridRenderCellParams) => {
     const type = params.value;
     const label = type === 'percentage' ? 'Phần trăm' : 'Cố định';
-    const bg = type === 'percentage' ? '#FFAB0029' : '#00B8D929';
-    const text = type === 'percentage' ? '#B76E00' : '#006C9C';
+    const bg = type === 'percentage' ? 'var(--palette-warning-lighter)' : 'var(--palette-info-lighter)';
+    const text = type === 'percentage' ? 'var(--palette-warning-dark)' : 'var(--palette-info-dark)';
 
     return (
         <span
@@ -120,7 +120,7 @@ export const RenderDateRangeCell = (params: GridRenderCellParams) => {
     return (
         <Box sx={{ fontSize: '0.75rem' }}>
             <div>{startDateFormat || '--'}</div>
-            <div style={{ color: '#637381' }}>→ {endDateFormat || '--'}</div>
+            <div style={{ color: 'var(--palette-text-secondary)' }}>→ {endDateFormat || '--'}</div>
         </Box>
     );
 };
@@ -129,17 +129,17 @@ export const RenderStatusCell = (params: GridRenderCellParams) => {
     const status = params.row.status;
 
     let label = "Hoạt động";
-    let bg = "#00B8D929";
-    let text = "#006C9C";
+    let bg = "var(--palette-info-lighter)";
+    let text = "var(--palette-info-dark)";
 
     if (status === 'active') {
         label = "Hoạt động";
-        bg = "#00B8D929";
-        text = "#006C9C";
+        bg = "var(--palette-info-lighter)";
+        text = "var(--palette-info-dark)";
     } else {
         label = "Tạm dừng";
-        bg = "#EF444429";
-        text = "#B91C1C";
+        bg = "var(--palette-error-lighter)";
+        text = "var(--palette-error-dark)";
     }
 
     return (
@@ -217,7 +217,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                         '& .MuiTypography-root': {
                             fontSize: '0.8125rem',
                             fontWeight: "600",
-                            color: "#FF5630"
+                            color: "var(--palette-error-main)"
                         },
                     },
                 } as any)}
@@ -226,3 +226,8 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
         </GridActionsCell>
     );
 }
+
+
+
+
+

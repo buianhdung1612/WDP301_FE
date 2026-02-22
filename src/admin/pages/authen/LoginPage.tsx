@@ -51,7 +51,7 @@ export const LoginPage = () => {
                         maxWidth={false}
                         sx={{
                             height: "72px",
-                            px: "24px",
+                            px: "calc(3 * var(--spacing))",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
@@ -73,7 +73,7 @@ export const LoginPage = () => {
                             }}>
                             <SettingsIcon
                                 sx={{
-                                    color: "#637381",
+                                    color: "var(--palette-text-secondary)",
                                     fontSize: "1.375rem",
                                     animation: "spin 10s linear infinite",
                                     "@keyframes spin": {
@@ -88,11 +88,11 @@ export const LoginPage = () => {
                         {/* Left */}
                         <div className="left-header-auth flex flex-col items-center justify-center gap-[64px] max-w-[480px] px-[24px] pb-[24px] pt-[72px] w-full min-h-full relative">
                             <div className="text-center">
-                                <Typography sx={{ fontSize: "1.875rem", fontWeight: "700", color: "#1C252E" }}>Chào mừng</Typography>
-                                <Typography sx={{ fontSize: "0.9375rem", mt: "16px", color: "#637381" }}>Nâng cao hiệu quả với quy trình tối ưu.</Typography>
+                                <Typography sx={{ fontSize: "1.875rem", fontWeight: "700", color: "var(--palette-text-primary)" }}>Chào mừng</Typography>
+                                <Typography sx={{ fontSize: "0.9375rem", mt: "16px", color: "var(--palette-text-secondary)" }}>Nâng cao hiệu quả với quy trình tối ưu.</Typography>
                             </div>
                             <img src="https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/illustrations/illustration-dashboard.webp" alt="" className="w-full aspect-[4/3] object-cover" />
-                            <ul className="gap-[16px] flex">
+                            <ul className="gap-[calc(2*var(--spacing))] flex">
                                 {LOGOS.map((logo, index) => (
                                     <li
                                         key={index}
@@ -110,9 +110,9 @@ export const LoginPage = () => {
                         {/* Right */}
                         <div className="flex flex-col items-center justify-center flex-1 py-[80px] px-[16px]">
                             <Box sx={{ width: "100%", maxWidth: "420px", display: "flex", flexDirection: "column" }}>
-                                <h5 className="text-[1.1875rem] font-[700] mb-[40px]">Đăng nhập vào tài khoản của bạn</h5>
+                                <h5 className="text-[1.1875rem] font-[700] mb-[calc(5*var(--spacing))]">Đăng nhập vào tài khoản của bạn</h5>
                                 <form onSubmit={handleSubmit(onSubmit)}>
-                                    <Box sx={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                                    <Box sx={{ display: "flex", flexDirection: "column", gap: "calc(3 * var(--spacing))" }}>
                                         <Controller
                                             name="usernameOrEmail"
                                             control={control}
@@ -153,7 +153,7 @@ export const LoginPage = () => {
                                                                                 padding: "8px",
                                                                             }}
                                                                         >
-                                                                            {showPassword ? <NoEyeIcon sx={{ color: "#637381", mr: "0" }} /> : <EyeIcon sx={{ color: "#637381", mr: "0" }} />}
+                                                                            {showPassword ? <NoEyeIcon sx={{ color: "var(--palette-text-secondary)", mr: "0" }} /> : <EyeIcon sx={{ color: "var(--palette-text-secondary)", mr: "0" }} />}
                                                                         </IconButton>
                                                                     </InputAdornment>
                                                                 )
@@ -168,21 +168,21 @@ export const LoginPage = () => {
                                             disabled={isPending}
                                             sx={{
                                                 padding: "8px 16px",
-                                                color: "#fff",
+                                                color: "var(--palette-common-white)",
                                                 textTransform: "unset",
                                                 minHeight: "48px",
-                                                borderRadius: "8px",
+                                                borderRadius: "var(--shape-borderRadius)",
                                                 fontSize: "0.875rem",
                                                 fontWeight: "700",
-                                                backgroundColor: "#1C252E",
+                                                backgroundColor: "var(--palette-text-primary)",
                                                 borderColor: "currentColor",
                                                 '&:hover': {
-                                                    backgroundColor: "#454F5B",
-                                                    boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
+                                                    backgroundColor: "var(--palette-grey-700)",
+                                                    boxShadow: "var(--customShadows-z8)"
                                                 },
                                                 '&:disabled': {
                                                     backgroundColor: "#B8BFCC",
-                                                    color: "#fff"
+                                                    color: "var(--palette-common-white)"
                                                 }
                                             }}>
                                             {isPending ? "Đang đăng nhập..." : "Đăng nhập"}
@@ -197,3 +197,6 @@ export const LoginPage = () => {
         </>
     )
 }
+
+
+

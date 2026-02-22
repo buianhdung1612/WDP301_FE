@@ -10,6 +10,7 @@ import SecurityIcon from '@mui/icons-material/Security';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import SettingsIcon from '@mui/icons-material/Settings';
 import BadgeIcon from '@mui/icons-material/Badge';
+import ChatIcon from '@mui/icons-material/Chat';
 
 export const menuOverviewData = [
     {
@@ -58,12 +59,23 @@ export const menuManagementData = [
         ]
     },
     {
+        id: "orders",
+        label: "Đơn hàng",
+        Icon: ArticleIcon,
+        permission: "product_view",
+        children: [
+            { id: "list", label: "Danh sách đơn hàng", path: `/${prefixAdmin}/order/list`, permission: "product_view" },
+            { id: "create", label: "Tạo đơn hàng", path: `/${prefixAdmin}/order/create`, permission: "product_create" },
+        ]
+    },
+    {
         id: "services",
         label: "Dịch vụ",
         Icon: PetsIcon,
         permission: "service_view",
         children: [
             { id: "list", label: "Danh sách dịch vụ", path: `/${prefixAdmin}/service/list`, permission: "service_view" },
+            { id: "create", label: "Tạo dịch vụ", path: `/${prefixAdmin}/service/create`, permission: "service_create" },
             { id: "category", label: "Danh mục dịch vụ", path: `/${prefixAdmin}/service/categories`, permission: "service_category_view" },
         ]
     },
@@ -156,6 +168,12 @@ export const menuManagementData = [
         Icon: CalendarMonthIcon,
         path: `/${prefixAdmin}/calendar`,
         permission: "calendar_view"
+    },
+    {
+        id: "chat",
+        label: "Chat",
+        Icon: ChatIcon,
+        path: `/${prefixAdmin}/chat`,
     },
     {
         id: "settings",

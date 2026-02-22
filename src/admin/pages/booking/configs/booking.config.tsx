@@ -2,7 +2,6 @@ import { GridColDef, GridRenderCellParams, GridActionsCell, GridActionsCellItem 
 import { Typography, Stack, Avatar, Chip, Box } from "@mui/material";
 import { Icon } from "@iconify/react";
 import dayjs from "dayjs";
-import { COLORS } from "../../role/configs/constants";
 
 export const getBookingColumns = (
     onStatusUpdate: (id: string, status: string) => void,
@@ -14,9 +13,11 @@ export const getBookingColumns = (
             field: "code",
             headerName: "Mã đơn",
             width: 100,
+            align: 'center',
+            headerAlign: 'center',
             renderCell: (params: GridRenderCellParams) => (
-                <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', px: "16px" }}>
-                    <Typography sx={{ fontWeight: 700, fontSize: '0.8125rem', color: COLORS.primary }}>
+                <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', px: "calc(2 * var(--spacing))" }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: '0.8125rem', color: 'var(--palette-text-primary)' }}>
                         #{params.value?.slice(-6).toUpperCase() || 'N/A'}
                     </Typography>
                 </Box>
@@ -28,42 +29,30 @@ export const getBookingColumns = (
             flex: 1.2,
             minWidth: 180,
             renderCell: (params: GridRenderCellParams) => (
-                <Stack direction="row" spacing={2} alignItems="center" sx={{ py: "16px", px: "12px", height: '100%' }}>
+                <Stack direction="row" spacing={2} alignItems="center" sx={{ py: "calc(2 * var(--spacing))", px: "12px", height: '100%' }}>
                     <Avatar
                         src={params.value?.avatar}
                         sx={{
                             width: 32,
                             height: 32,
-                            borderRadius: '10px',
-                            bgcolor: 'rgba(145, 158, 171, 0.08)',
+                            borderRadius: 'var(--shape-borderRadius-sm)',
+                            bgcolor: 'var(--palette-background-neutral)',
                         }}
                     >
-                        <Icon icon="eva:person-fill" width={20} style={{ color: COLORS.secondary }} />
+                        <Icon icon="eva:person-fill" width={20} style={{ color: 'var(--palette-text-secondary)' }} />
                     </Avatar>
                     <Stack spacing={0.25} sx={{ minWidth: 0 }}>
-                        <Typography noWrap sx={{ fontWeight: 600, fontSize: '0.8125rem', color: COLORS.primary }}>
+                        <Typography noWrap sx={{ fontWeight: 600, fontSize: '0.8125rem', color: 'var(--palette-text-primary)' }}>
                             {params.value?.fullName || 'Khách vãng lai'}
                         </Typography>
-                        <Typography noWrap sx={{ color: COLORS.secondary, fontSize: '0.75rem' }}>
-                            {params.value?.phone || "Không có SĐT"}
+                        <Typography noWrap sx={{ color: 'var(--palette-text-secondary)', fontSize: '0.75rem' }}>
+                            {params.value?.email || "Không có Email"}
                         </Typography>
                     </Stack>
                 </Stack>
             )
         },
-        {
-            field: "serviceId",
-            headerName: "Dịch vụ",
-            flex: 1,
-            minWidth: 140,
-            renderCell: (params: GridRenderCellParams) => (
-                <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', px: "12px" }}>
-                    <Typography noWrap sx={{ fontSize: '0.8125rem', color: COLORS.primary, fontWeight: 500 }}>
-                        {params.value?.name || "N/A"}
-                    </Typography>
-                </Box>
-            )
-        },
+
         {
             field: "start",
             headerName: "Thời gian",
@@ -71,7 +60,7 @@ export const getBookingColumns = (
             renderCell: (params: GridRenderCellParams) => {
                 const { start, end, actualStart, completedAt, bookingStatus } = params.row;
                 if (!start) return (
-                    <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', px: "16px" }}>
+                    <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', px: "calc(2 * var(--spacing))" }}>
                         <Typography sx={{ fontSize: '0.8125rem' }}>N/A</Typography>
                     </Box>
                 );
@@ -80,22 +69,22 @@ export const getBookingColumns = (
                 const isInProgress = bookingStatus === 'in-progress';
 
                 return (
-                    <Stack spacing={0.25} justifyContent="center" sx={{ height: '100%', px: "16px" }}>
-                        <Typography sx={{ fontWeight: 600, fontSize: '0.8125rem', color: COLORS.primary }}>
+                    <Stack spacing={0.25} justifyContent="center" sx={{ height: '100%', px: "calc(2 * var(--spacing))" }}>
+                        <Typography sx={{ fontWeight: 600, fontSize: '0.8125rem', color: 'var(--palette-text-primary)' }}>
                             {dayjs(start).format("DD/MM/YYYY")}
                         </Typography>
                         <Stack direction="row" spacing={1} alignItems="center">
-                            <Typography sx={{ color: COLORS.secondary, fontSize: '0.75rem', fontWeight: 500, textDecoration: (actualStart || completedAt) ? 'line-through' : 'none', opacity: (actualStart || completedAt) ? 0.6 : 1 }}>
+                            <Typography sx={{ color: 'var(--palette-text-secondary)', fontSize: '0.75rem', fontWeight: 500, textDecoration: (actualStart || completedAt) ? 'line-through' : 'none', opacity: (actualStart || completedAt) ? 0.6 : 1 }}>
                                 {dayjs(start).format("HH:mm")} - {dayjs(end).format("HH:mm")}
                             </Typography>
                         </Stack>
                         {isInProgress && actualStart && (
-                            <Typography sx={{ color: '#00A76F', fontSize: '0.7rem', fontWeight: 700 }}>
+                            <Typography sx={{ color: 'var(--palette-primary-main)', fontSize: '0.7rem', fontWeight: 700 }}>
                                 🟢 Bắt đầu: {dayjs(actualStart).format("HH:mm")}
                             </Typography>
                         )}
                         {isCompleted && actualStart && completedAt && (
-                            <Typography sx={{ color: '#22C55E', fontSize: '0.7rem', fontWeight: 700 }}>
+                            <Typography sx={{ color: 'var(--palette-success-main)', fontSize: '0.7rem', fontWeight: 700 }}>
                                 ✨ Thực tế: {dayjs(actualStart).format("HH:mm")} - {dayjs(completedAt).format("HH:mm")}
                             </Typography>
                         )}
@@ -105,26 +94,26 @@ export const getBookingColumns = (
         },
         {
             field: "bookingStatus",
-            headerName: "Trạng thái",
+            headerName: "Trạng thái đơn",
             width: 130,
             align: 'center',
             headerAlign: 'center',
             renderCell: (params: GridRenderCellParams) => {
                 const statusMap: any = {
-                    pending: { label: t("admin.booking.status.pending"), color: "#FFAB00", bg: "rgba(255, 171, 0, 0.16)" },
-                    confirmed: { label: t("admin.booking.status.confirmed"), color: "#00B8D9", bg: "rgba(0, 184, 217, 0.16)" },
-                    delayed: { label: "Trễ hẹn", color: "#FF5630", bg: "rgba(255, 86, 48, 0.16)" },
-                    "in-progress": { label: t("admin.booking.status.in_progress"), color: "#00A76F", bg: "rgba(0, 167, 111, 0.16)" },
-                    completed: { label: t("admin.booking.status.completed"), color: "#22C55E", bg: "rgba(34, 197, 94, 0.16)" },
-                    cancelled: { label: t("admin.booking.status.cancelled"), color: "#FF5630", bg: "rgba(255, 86, 48, 0.16)" }
+                    pending: { label: t("admin.booking.status.pending"), color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)" },
+                    confirmed: { label: t("admin.booking.status.confirmed"), color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)" },
+                    delayed: { label: "Trễ hẹn", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
+                    "in-progress": { label: t("admin.booking.status.in_progress"), color: "var(--palette-primary-dark)", bg: "var(--palette-primary-lighter)" },
+                    completed: { label: t("admin.booking.status.completed"), color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
+                    cancelled: { label: t("admin.booking.status.cancelled"), color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" }
                 };
-                const status = statusMap[params.value] || { label: params.value, color: COLORS.disabled, bg: "rgba(145, 158, 171, 0.16)" };
+                const status = statusMap[params.value] || { label: params.value, color: 'var(--palette-text-disabled)', bg: "var(--palette-background-neutral)" };
                 return (
                     <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Chip
                             label={status.label}
                             sx={{
-                                borderRadius: '6px',
+                                borderRadius: "var(--shape-borderRadius-sm)",
                                 fontWeight: 700,
                                 fontSize: '0.6875rem',
                                 color: status.color,
@@ -138,63 +127,37 @@ export const getBookingColumns = (
             }
         },
         {
-            field: "staffId",
-            headerName: "Nhân viên thực hiện",
-            flex: 1,
-            minWidth: 150,
+            field: "paymentStatus",
+            headerName: "Thanh toán",
+            width: 130,
+            align: 'center',
+            headerAlign: 'center',
             renderCell: (params: GridRenderCellParams) => {
-                const staffIds = params.row.staffIds || [];
-                const staffId = params.row.staffId;
-
-                // Trình bày danh sách nhân viên: ưu tiên mảng staffIds, nếu trống thì dùng staffId đơn lẻ
-                const displayStaff = staffIds.length > 0 ? staffIds : (staffId ? [staffId] : []);
-
+                const statusMap: any = {
+                    unpaid: { label: "Chưa trả tiền", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
+                    paid: { label: "Đã thanh toán", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
+                    refunded: { label: "Đã hoàn tiền", color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)" }
+                };
+                const status = statusMap[params.value] || { label: params.value, color: 'var(--palette-text-disabled)', bg: "var(--palette-background-neutral)" };
                 return (
-                    <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', px: "8px" }}>
-                        {displayStaff.length > 0 ? (
-                            <Stack direction="column" spacing={0.5} justifyContent="center" sx={{ width: '100%' }}>
-                                {displayStaff.map((staff: any, index: number) => (
-                                    <Chip
-                                        key={staff?._id || index}
-                                        label={staff?.fullName || "N/V"}
-                                        size="small"
-                                        icon={<Icon icon="eva:person-fill" width={14} />}
-                                        sx={{
-                                            borderRadius: '6px',
-                                            fontWeight: 700,
-                                            fontSize: '0.625rem',
-                                            color: '#00A76F',
-                                            bgcolor: 'rgba(0, 167, 111, 0.16)',
-                                            height: '22px',
-                                            width: 'fit-content',
-                                            maxWidth: '100%',
-                                            '& .MuiChip-label': { px: '6px', overflow: 'hidden', textOverflow: 'ellipsis' },
-                                            '& .MuiChip-icon': { ml: '4px', color: '#00A76F' }
-                                        }}
-                                    />
-                                ))}
-                            </Stack>
-                        ) : (
-                            <Chip
-                                label="Chưa phân bổ"
-                                size="small"
-                                icon={<Icon icon="eva:alert-triangle-fill" width={14} />}
-                                sx={{
-                                    borderRadius: '6px',
-                                    fontWeight: 700,
-                                    fontSize: '0.625rem',
-                                    color: '#FFAB00',
-                                    bgcolor: 'rgba(255, 171, 0, 0.16)',
-                                    height: '22px',
-                                    '& .MuiChip-label': { px: '6px' },
-                                    '& .MuiChip-icon': { ml: '4px', color: '#FFAB00' }
-                                }}
-                            />
-                        )}
+                    <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Chip
+                            label={status.label}
+                            sx={{
+                                borderRadius: "var(--shape-borderRadius-sm)",
+                                fontWeight: 700,
+                                fontSize: '0.6875rem',
+                                color: status.color,
+                                bgcolor: status.bg,
+                                height: '24px',
+                                '& .MuiChip-label': { px: '8px' }
+                            }}
+                        />
                     </Box>
                 );
             }
         },
+
         {
             field: "actions",
             headerName: "",
@@ -203,7 +166,7 @@ export const getBookingColumns = (
             headerAlign: 'center',
             align: 'center',
             renderCell: (params: GridRenderCellParams) => (
-                <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', px: "16px" }}>
+                <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', px: "calc(2 * var(--spacing))" }}>
                     <GridActionsCell {...params}>
                         <GridActionsCellItem
                             icon={<Icon icon="solar:pen-bold" width={20} />}
@@ -217,7 +180,7 @@ export const getBookingColumns = (
                                 label="Xác nhận đơn"
                                 onClick={() => onStatusUpdate(params.row._id, 'confirmed')}
                                 showInMenu
-                                {...({ sx: { color: COLORS.success, '& .MuiTypography-root': { color: COLORS.success } } } as any)}
+                                {...({ sx: { color: 'var(--palette-success-main)', '& .MuiTypography-root': { color: 'var(--palette-success-main)' } } } as any)}
                             />
                         )}
                         {['pending', 'confirmed'].includes(params.row.bookingStatus) && (
@@ -226,7 +189,7 @@ export const getBookingColumns = (
                                 label="Hủy đơn"
                                 onClick={() => onStatusUpdate(params.row._id, 'cancelled')}
                                 showInMenu
-                                {...({ sx: { color: '#FF5630', '& .MuiTypography-root': { color: '#FF5630' } } } as any)}
+                                {...({ sx: { color: 'var(--palette-error-main)', '& .MuiTypography-root': { color: 'var(--palette-error-main)' } } } as any)}
                             />
                         )}
                         <GridActionsCellItem
@@ -248,3 +211,7 @@ export const bookingColumnsInitialState = {
         },
     },
 };
+
+
+
+

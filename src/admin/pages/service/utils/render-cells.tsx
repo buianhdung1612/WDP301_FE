@@ -47,7 +47,7 @@ export const RenderCategoryCell = (params: GridRenderCellParams) => {
     const categoryName = typeof category === 'object' ? category?.name : "Không xác định";
 
     return (
-        <span style={{ fontSize: '0.8125rem', color: '#637381' }}>
+        <span style={{ fontSize: '0.8125rem', color: 'var(--palette-text-secondary)' }}>
             {categoryName}
         </span>
     );
@@ -56,8 +56,8 @@ export const RenderCategoryCell = (params: GridRenderCellParams) => {
 export const RenderStatusCell = (params: GridRenderCellParams) => {
     const status = params.row.status;
     const label = status === 'active' ? "Hoạt động" : "Tạm dừng";
-    const bg = status === 'active' ? "#00B8D929" : "#EF444429";
-    const text = status === 'active' ? "#006C9C" : "#B91C1C";
+    const bg = status === 'active' ? "var(--palette-info-lighter)" : "var(--palette-error-lighter)";
+    const text = status === 'active' ? "var(--palette-info-dark)" : "var(--palette-error-dark)";
 
     return (
         <span
@@ -134,7 +134,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                         '& .MuiTypography-root': {
                             fontSize: '0.8125rem',
                             fontWeight: "600",
-                            color: "#FF5630"
+                            color: "var(--palette-error-main)"
                         },
                     },
                 } as any)}
@@ -143,3 +143,8 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
         </GridActionsCell>
     );
 }
+
+
+
+
+

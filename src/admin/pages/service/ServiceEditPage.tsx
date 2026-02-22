@@ -126,7 +126,7 @@ export const ServiceEditPage = () => {
 
     return (
         <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
+            <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
                     <Title title="Chỉnh sửa dịch vụ" />
                     <Breadcrumb
@@ -140,15 +140,15 @@ export const ServiceEditPage = () => {
             </div>
             <ThemeProvider theme={localTheme}>
                 <form onSubmit={handleSubmit(onSubmit, onError)}>
-                    <Stack sx={{ margin: "0px 120px", gap: "40px" }}>
+                    <Stack sx={{ margin: "0px calc(15 * var(--spacing))", gap: "calc(5 * var(--spacing))" }}>
                         <CollapsibleCard
                             title="Thông tin cơ bản"
                             subheader="Tên, mô tả, danh mục..."
                             expanded={expandedDetail}
                             onToggle={toggle(setExpandedDetail)}
                         >
-                            <Stack p="24px" gap="24px">
-                                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px 16px" }}>
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
+                                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))" }}>
                                     <Controller
                                         name="name"
                                         control={control}
@@ -259,7 +259,7 @@ export const ServiceEditPage = () => {
                             expanded={expandedPricing}
                             onToggle={toggle(setExpandedPricing)}
                         >
-                            <Stack p="24px" gap="24px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Controller
                                     name="pricingType"
                                     control={control}
@@ -342,7 +342,7 @@ export const ServiceEditPage = () => {
 
                                 <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>Cấu hình phụ thu quá giờ</Typography>
 
-                                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px 16px" }}>
+                                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))" }}>
                                     <Controller
                                         name="surchargeType"
                                         control={control}
@@ -374,7 +374,7 @@ export const ServiceEditPage = () => {
                             </Stack>
                         </CollapsibleCard>
 
-                        <Box gap="24px" sx={{ display: "flex", alignItems: "center" }}>
+                        <Box gap="calc(3 * var(--spacing))" sx={{ display: "flex", alignItems: "center" }}>
                             <SwitchButton
                                 control={control}
                                 name="status"
@@ -395,3 +395,7 @@ export const ServiceEditPage = () => {
         </>
     );
 };
+
+
+
+

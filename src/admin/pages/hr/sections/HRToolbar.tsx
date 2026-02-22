@@ -19,7 +19,7 @@ export const HRToolbar = ({ searchPlaceholder = "Tìm kiếm...", children }: HR
                             '& .MuiInputBase-root': {
                                 fontSize: '0.875rem',
                                 height: '40px',
-                                borderRadius: '8px',
+                                borderRadius: "var(--shape-borderRadius)",
                             },
                         }
                     } as any,
@@ -30,3 +30,7 @@ export const HRToolbar = ({ searchPlaceholder = "Tìm kiếm...", children }: HR
         </Toolbar>
     );
 };
+
+
+
+

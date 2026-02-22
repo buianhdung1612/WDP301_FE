@@ -104,3 +104,7 @@ export const useDeleteProductAgeRange = () => {
         mutationFn: async (id: string | number) => ({ success: true, id, message: "Success" }),
     });
 };
+
+
+
+

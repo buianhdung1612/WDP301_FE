@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+﻿import React, { useMemo } from 'react';
 import { Box, Typography, Stack, Tooltip, Avatar, alpha, Skeleton } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import { useSchedules } from '../../hr/hooks/useSchedules';
@@ -129,7 +129,7 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                 {[1, 2, 3].map(i => (
                     <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Skeleton variant="circular" width={32} height={32} />
-                        <Skeleton variant="rounded" width="100%" height={32} sx={{ borderRadius: '8px' }} />
+                        <Skeleton variant="rounded" width="100%" height={32} sx={{ borderRadius: "var(--shape-borderRadius)" }} />
                     </Box>
                 ))}
             </Stack>
@@ -142,17 +142,17 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                 p: 4,
                 mt: 2,
                 textAlign: 'center',
-                bgcolor: alpha('#919EAB', 0.04),
-                borderRadius: '16px',
+                bgcolor: 'rgba(145, 158, 171, 0.04)',
+                borderRadius: "var(--shape-borderRadius-lg)",
                 border: '1px dashed',
-                borderColor: alpha('#919EAB', 0.2),
+                borderColor: 'rgba(145, 158, 171, 0.20)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: 1.5
             }}>
-                <Icon icon="solar:calendar-slash-bold-duotone" width={48} color={alpha('#919EAB', 0.5)} />
-                <Typography variant="body2" sx={{ color: '#637381', fontWeight: 500 }}>
+                <Icon icon="solar:calendar-slash-bold-duotone" width={48} color={'rgba(145, 158, 171, 0.50)'} />
+                <Typography variant="body2" sx={{ color: 'var(--palette-text-secondary)', fontWeight: 500 }}>
                     Không có nhân viên thực hiện nhiệm vụ trong ngày này
                 </Typography>
             </Box>
@@ -163,10 +163,10 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
         <Box sx={{
             mt: 2,
             p: 2,
-            bgcolor: '#FFFFFF',
-            borderRadius: '16px',
+            bgcolor: "var(--palette-background-paper)",
+            borderRadius: "var(--shape-borderRadius-lg)",
             border: '1px solid',
-            borderColor: alpha('#919EAB', 0.12),
+            borderColor: 'rgba(145, 158, 171, 0.12)',
             boxShadow: '0 4px 12px 0 rgba(145, 158, 171, 0.08)',
             overflow: 'hidden'
         }}>
@@ -176,16 +176,16 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                     <Box sx={{
                         display: 'flex',
                         borderBottom: '1px solid',
-                        borderColor: alpha('#919EAB', 0.1),
+                        borderColor: 'rgba(145, 158, 171, 0.10)',
                         pb: 1.5,
                         mb: 2
                     }}>
                         <Box sx={{ width: 180, flexShrink: 0 }}>
-                            <Typography variant="overline" sx={{ color: '#919EAB', fontWeight: 700 }}>Nhân viên</Typography>
+                            <Typography variant="overline" sx={{ color: 'var(--palette-text-disabled)', fontWeight: 700 }}>Nhân viên</Typography>
                         </Box>
                         {HOURS.map(hour => (
                             <Box key={hour} sx={{ flex: 1, textAlign: 'center' }}>
-                                <Typography sx={{ fontSize: '0.7rem', fontWeight: 800, color: '#637381' }}>
+                                <Typography sx={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--palette-text-secondary)' }}>
                                     {hour}:00
                                 </Typography>
                             </Box>
@@ -200,16 +200,16 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                                 <Box sx={{ width: 180, pr: 2, flexShrink: 0 }}>
                                     <Stack direction="row" spacing={1.5} alignItems="center">
                                         <Box sx={{ position: 'relative' }}>
-                                            <Avatar src={staff.info.avatar} sx={{ width: 32, height: 32, border: '2px solid #fff', boxShadow: '0 0 0 1px #919EAB33' }} />
+                                            <Avatar src={staff.info.avatar} sx={{ width: 32, height: 32, border: '2px solid #fff', boxShadow: '0 0 0 1px var(--palette-text-disabled)33' }} />
                                             {staff.schedules.length > 0 && (
                                                 <Box sx={{
                                                     position: 'absolute', bottom: -2, right: -2,
-                                                    width: 10, height: 10, bgcolor: '#00A76F',
+                                                    width: 10, height: 10, bgcolor: 'var(--palette-primary-main)',
                                                     borderRadius: '50%', border: '2px solid #fff'
                                                 }} />
                                             )}
                                         </Box>
-                                        <Typography noWrap sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#1C252E' }}>
+                                        <Typography noWrap sx={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--palette-text-primary)' }}>
                                             {staff.info.fullName}
                                         </Typography>
                                     </Stack>
@@ -220,10 +220,10 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                                     flex: (HOURS.length - 1),
                                     position: 'relative',
                                     height: 36,
-                                    bgcolor: alpha('#919EAB', 0.04),
+                                    bgcolor: 'rgba(145, 158, 171, 0.04)',
                                     borderRadius: '10px',
                                     transition: 'all 0.2s',
-                                    '&:hover': { bgcolor: alpha('#919EAB', 0.08) }
+                                    '&:hover': { bgcolor: 'rgba(145, 158, 171, 0.08)' }
                                 }}>
                                     {/* Hour vertical dividers */}
                                     {HOURS.map((_, idx) => (
@@ -234,7 +234,7 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                                                 left: `${(idx / (HOURS.length - 1)) * 100}%`,
                                                 height: '100%',
                                                 width: '1px',
-                                                bgcolor: alpha('#919EAB', 0.08)
+                                                bgcolor: 'rgba(145, 158, 171, 0.08)'
                                             }}
                                         />
                                     ))}
@@ -244,10 +244,10 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                                         <Box sx={{
                                             position: 'absolute', left: `${currentTimePos}%`,
                                             top: -4, bottom: -4, width: '2px',
-                                            bgcolor: '#FF5630', zIndex: 20,
+                                            bgcolor: 'var(--palette-error-main)', zIndex: 20,
                                             '&::before': {
                                                 content: '""', position: 'absolute', top: -2, left: -3,
-                                                width: 8, height: 8, bgcolor: '#FF5630', borderRadius: '50%'
+                                                width: 8, height: 8, bgcolor: 'var(--palette-error-main)', borderRadius: '50%'
                                             }
                                         }} />
                                     )}
@@ -271,10 +271,10 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                                                         position: 'absolute',
                                                         top: 0, bottom: 0,
                                                         left: `${left}%`, width: `${width}%`,
-                                                        bgcolor: alpha('#00A76F', 0.08),
+                                                        bgcolor: 'rgba(0, 167, 111, 0.08)',
                                                         border: '1px solid',
-                                                        borderColor: alpha('#00A76F', 0.2),
-                                                        borderRadius: '8px',
+                                                        borderColor: 'rgba(0, 167, 111, 0.20)',
+                                                        borderRadius: "var(--shape-borderRadius)",
                                                         zIndex: 1
                                                     }}
                                                 />
@@ -307,8 +307,8 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                                                         position: 'absolute',
                                                         top: 6, bottom: 6,
                                                         left: `${left}%`, width: `${width}%`,
-                                                        background: 'linear-gradient(135deg, #00A76F 0%, #008559 100%)',
-                                                        borderRadius: '6px',
+                                                        background: 'linear-gradient(135deg, var(--palette-primary-main) 0%, #008559 100%)',
+                                                        borderRadius: "var(--shape-borderRadius-sm)",
                                                         boxShadow: '0 4px 8px rgba(0, 167, 111, 0.24)',
                                                         zIndex: 5,
                                                         cursor: 'pointer',
@@ -341,9 +341,9 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                                                         top: isSelectedStaff ? -2 : 4,
                                                         bottom: isSelectedStaff ? -2 : 4,
                                                         left: `${left}%`, width: `${width}%`,
-                                                        border: isSelectedStaff ? '2px solid #FFAB00' : '2px dashed #919EAB',
+                                                        border: isSelectedStaff ? '2px solid #FFAB00' : '2px dashed var(--palette-text-disabled)',
                                                         bgcolor: isSelectedStaff ? alpha('#FFAB00', 0.15) : 'transparent',
-                                                        borderRadius: '8px',
+                                                        borderRadius: "var(--shape-borderRadius)",
                                                         zIndex: 15,
                                                         pointerEvents: 'none',
                                                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -377,7 +377,7 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                 mt: 3,
                 pt: 2.5,
                 borderTop: '1px solid',
-                borderColor: alpha('#919EAB', 0.1),
+                borderColor: 'rgba(145, 158, 171, 0.10)',
                 display: 'flex',
                 alignItems: 'center',
                 flexWrap: 'wrap',
@@ -385,43 +385,47 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
             }}>
                 <Box sx={{
                     display: 'flex', alignItems: 'center', gap: 1,
-                    px: 1.5, py: 0.75, bgcolor: alpha('#00A76F', 0.08),
-                    borderRadius: '8px', border: '1px solid', borderColor: alpha('#00A76F', 0.1)
+                    px: 1.5, py: 0.75, bgcolor: 'rgba(0, 167, 111, 0.08)',
+                    borderRadius: "var(--shape-borderRadius)", border: '1px solid', borderColor: 'rgba(0, 167, 111, 0.10)'
                 }}>
-                    <Box sx={{ width: 10, height: 10, bgcolor: alpha('#00A76F', 0.2), border: '1px solid', borderColor: '#00A76F', borderRadius: '3px' }} />
-                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#00A76F' }}>Ca trực dự kiến</Typography>
+                    <Box sx={{ width: 10, height: 10, bgcolor: 'rgba(0, 167, 111, 0.20)', border: '1px solid', borderColor: 'var(--palette-primary-main)', borderRadius: '3px' }} />
+                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--palette-primary-main)' }}>Ca trực dự kiến</Typography>
                 </Box>
 
                 <Box sx={{
                     display: 'flex', alignItems: 'center', gap: 1,
-                    px: 1.5, py: 0.75, bgcolor: alpha('#00A76F', 0.15),
-                    borderRadius: '8px', border: '1px solid', borderColor: alpha('#00A76F', 0.1),
+                    px: 1.5, py: 0.75, bgcolor: 'rgba(0, 167, 111, 0.15)',
+                    borderRadius: "var(--shape-borderRadius)", border: '1px solid', borderColor: 'rgba(0, 167, 111, 0.10)',
                     background: 'linear-gradient(135deg, rgba(0, 167, 111, 0.1) 0%, rgba(0, 133, 89, 0.1) 100%)'
                 }}>
-                    <Box sx={{ width: 10, height: 10, background: 'linear-gradient(135deg, #00A76F 0%, #008559 100%)', borderRadius: '3px' }} />
+                    <Box sx={{ width: 10, height: 10, background: 'linear-gradient(135deg, var(--palette-primary-main) 0%, #008559 100%)', borderRadius: '3px' }} />
                     <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#008559' }}>Lịch đã chiếm chỗ</Typography>
                 </Box>
 
                 <Box sx={{
                     display: 'flex', alignItems: 'center', gap: 1,
-                    px: 1.5, py: 0.75, bgcolor: alpha('#919EAB', 0.08),
-                    borderRadius: '8px', border: '1px dashed', borderColor: alpha('#919EAB', 0.3)
+                    px: 1.5, py: 0.75, bgcolor: 'rgba(145, 158, 171, 0.08)',
+                    borderRadius: "var(--shape-borderRadius)", border: '1px dashed', borderColor: 'rgba(145, 158, 171, 0.30)'
                 }}>
-                    <Box sx={{ width: 10, height: 10, border: '2px dashed #919EAB', borderRadius: '3px' }} />
-                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#637381' }}>Giờ bạn đang chọn</Typography>
+                    <Box sx={{ width: 10, height: 10, border: '2px dashed var(--palette-text-disabled)', borderRadius: '3px' }} />
+                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--palette-text-secondary)' }}>Giờ bạn đang chọn</Typography>
                 </Box>
 
                 {isToday && (
                     <Box sx={{
                         display: 'flex', alignItems: 'center', gap: 1,
-                        px: 1.5, py: 0.75, bgcolor: alpha('#FF5630', 0.08),
-                        borderRadius: '8px', border: '1px solid', borderColor: alpha('#FF5630', 0.1)
+                        px: 1.5, py: 0.75, bgcolor: 'rgba(255, 86, 48, 0.08)',
+                        borderRadius: "var(--shape-borderRadius)", border: '1px solid', borderColor: 'rgba(255, 86, 48, 0.10)'
                     }}>
-                        <Box sx={{ width: 10, height: 2, bgcolor: '#FF5630', borderRadius: '1px' }} />
-                        <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#FF5630' }}>Hiện tại</Typography>
+                        <Box sx={{ width: 10, height: 2, bgcolor: 'var(--palette-error-main)', borderRadius: '1px' }} />
+                        <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--palette-error-main)' }}>Hiện tại</Typography>
                     </Box>
                 )}
             </Box>
         </Box>
     );
 };
+
+
+
+

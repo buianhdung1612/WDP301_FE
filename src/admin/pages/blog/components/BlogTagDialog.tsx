@@ -73,7 +73,7 @@ export const BlogTagDialog = ({ open, onClose }: BlogTagDialogProps) => {
             fullWidth
             PaperProps={{
                 sx: {
-                    borderRadius: "16px",
+                    borderRadius: "var(--shape-borderRadius-lg)",
                     padding: "16px",
                 }
             }}
@@ -88,7 +88,7 @@ export const BlogTagDialog = ({ open, onClose }: BlogTagDialogProps) => {
             }}>
                 {t("admin.blog.tags.title")}
                 <Tooltip title={t("admin.common.close")}>
-                    <IconButton onClick={onClose} size="small" sx={{ '&:hover': { backgroundColor: '#f4f6f8' } }}>
+                    <IconButton onClick={onClose} size="small" sx={{ '&:hover': { backgroundColor: 'var(--palette-background-neutral)' } }}>
                         <CloseIcon />
                     </IconButton>
                 </Tooltip>
@@ -109,7 +109,7 @@ export const BlogTagDialog = ({ open, onClose }: BlogTagDialogProps) => {
                         size="small"
                         InputProps={{
                             sx: {
-                                borderRadius: '8px',
+                                borderRadius: "var(--shape-borderRadius)",
                                 fontSize: '0.875rem'
                             }
                         }}
@@ -119,16 +119,16 @@ export const BlogTagDialog = ({ open, onClose }: BlogTagDialogProps) => {
                         onClick={handleCreate}
                         disabled={!tagName.trim() || isCreating}
                         sx={{
-                            borderRadius: '8px',
+                            borderRadius: "var(--shape-borderRadius)",
                             textTransform: 'none',
                             fontWeight: 600,
                             fontSize: '0.875rem',
                             minWidth: '80px',
-                            background: '#1C252E',
+                            background: 'var(--palette-text-primary)',
                             boxShadow: "none",
                             '&:hover': {
-                                background: '#454F5B',
-                                boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
+                                background: "var(--palette-grey-700)",
+                                boxShadow: "var(--customShadows-z8)"
                             }
                         }}
                     >
@@ -143,7 +143,7 @@ export const BlogTagDialog = ({ open, onClose }: BlogTagDialogProps) => {
                             <CircularProgress />
                         </Box>
                     ) : tags.length === 0 ? (
-                        <Typography sx={{ textAlign: 'center', color: '#919EAB', py: 4, fontSize: '0.875rem' }}>
+                        <Typography sx={{ textAlign: 'center', color: 'var(--palette-text-disabled)', py: 4, fontSize: '0.875rem' }}>
                             {t("admin.blog.tags.no_tags")}
                         </Typography>
                     ) : (
@@ -159,15 +159,15 @@ export const BlogTagDialog = ({ open, onClose }: BlogTagDialogProps) => {
                                                 onClick={() => handleDelete(tag.id || tag.tagId)}
                                                 sx={{ '&:hover': { backgroundColor: 'rgba(255, 86, 48, 0.08)' } }}
                                             >
-                                                <DeleteIcon sx={{ fontSize: '1.125rem', color: '#FF5630' }} />
+                                                <DeleteIcon sx={{ fontSize: '1.125rem', color: 'var(--palette-error-main)' }} />
                                             </IconButton>
                                         </Tooltip>
                                     }
                                     sx={{
-                                        borderRadius: '8px',
+                                        borderRadius: "var(--shape-borderRadius)",
                                         mb: 1,
                                         '&:hover': {
-                                            backgroundColor: '#919EAB14'
+                                            backgroundColor: 'var(--palette-text-disabled)14'
                                         }
                                     }}
                                 >
@@ -185,3 +185,7 @@ export const BlogTagDialog = ({ open, onClose }: BlogTagDialogProps) => {
         </Dialog>
     );
 };
+
+
+
+

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+﻿import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
     Box,
@@ -386,7 +386,7 @@ export const BookingEditPage = () => {
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
-            <Box sx={{ maxWidth: '1200px', mx: 'auto', p: '1.5rem' }}>
+            <Box sx={{ maxWidth: '1200px', mx: 'auto', p: "calc(3 * var(--spacing))" }}>
                 <Box sx={{ mb: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Stack direction="row" spacing={2} alignItems="center">
                         <Box>
@@ -403,7 +403,7 @@ export const BookingEditPage = () => {
                             <Chip
                                 label={t(`admin.booking.status.${booking.bookingStatus.replace('-', '_')}`)}
                                 sx={{
-                                    borderRadius: '6px',
+                                    borderRadius: "var(--shape-borderRadius-sm)",
                                     fontWeight: 700,
                                     fontSize: '0.75rem',
                                     height: '28px',
@@ -414,7 +414,7 @@ export const BookingEditPage = () => {
                                                     'rgba(0, 184, 217, 0.16)',
                                     color:
                                         booking.bookingStatus === 'completed' ? '#22C55E' :
-                                            booking.bookingStatus === 'cancelled' ? '#FF5630' :
+                                            booking.bookingStatus === 'cancelled' ? 'var(--palette-error-main)' :
                                                 booking.bookingStatus === 'pending' ? '#FFAB00' :
                                                     '#00B8D9'
                                 }}
@@ -425,7 +425,7 @@ export const BookingEditPage = () => {
                 </Box>
 
                 {isReadOnly && (
-                    <Box sx={{ mb: 3, p: 2, borderRadius: '12px', bgcolor: 'rgba(255, 86, 48, 0.08)', border: '1px solid rgba(255, 86, 48, 0.24)' }}>
+                    <Box sx={{ mb: 3, p: 2, borderRadius: "var(--shape-borderRadius-md)", bgcolor: 'rgba(255, 86, 48, 0.08)', border: '1px solid rgba(255, 86, 48, 0.24)' }}>
                         <Typography sx={{ color: '#B71D18', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Icon icon="eva:alert-circle-fill" />
                             Đơn hàng đã {formData.bookingStatus === 'completed' ? 'hoàn thành' : 'bị hủy'}, không thể chỉnh sửa thông tin.
@@ -522,13 +522,13 @@ export const BookingEditPage = () => {
                                 )}
 
                                 {formData.petIds.length === 0 ? (
-                                    <Box sx={{ p: 3, textAlign: 'center', bgcolor: alpha('#919EAB', 0.08), borderRadius: '16px', border: '1px dashed', borderColor: alpha('#919EAB', 0.2) }}>
-                                        <Typography variant="body2" sx={{ color: '#637381' }}>
+                                    <Box sx={{ p: 3, textAlign: 'center', bgcolor: 'rgba(145, 158, 171, 0.08)', borderRadius: "var(--shape-borderRadius-lg)", border: '1px dashed', borderColor: 'rgba(145, 158, 171, 0.20)' }}>
+                                        <Typography variant="body2" sx={{ color: 'var(--palette-text-secondary)' }}>
                                             Vui lòng chọn <b>Thú cưng</b> ở cột bên phải để bắt đầu phân công.
                                         </Typography>
                                     </Box>
                                 ) : (
-                                    <Box sx={{ p: 2, bgcolor: alpha(COLORS.primary, 0.04), borderRadius: '16px', border: '1px solid', borderColor: alpha(COLORS.primary, 0.1) }}>
+                                    <Box sx={{ p: 2, bgcolor: 'rgba(33, 43, 54, 0.04)', borderRadius: "var(--shape-borderRadius-lg)", border: '1px solid', borderColor: 'rgba(33, 43, 54, 0.10)' }}>
                                         <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: COLORS.primary, display: 'flex', alignItems: 'center', gap: 1 }}>
                                             <Icon icon="solar:user-speak-bold-duotone" />
                                             Bảng phân công chi tiết ({formData.petIds.length} thú cưng)
@@ -546,22 +546,22 @@ export const BookingEditPage = () => {
                                                         justifyContent="space-between"
                                                         sx={{
                                                             p: 1.5,
-                                                            bgcolor: '#fff',
-                                                            borderRadius: '12px',
+                                                            bgcolor: "var(--palette-background-paper)",
+                                                            borderRadius: "var(--shape-borderRadius-md)",
                                                             boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
                                                         }}
                                                     >
                                                         <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flex: 1 }}>
-                                                            <Avatar sx={{ width: 32, height: 32, bgcolor: alpha(COLORS.primary, 0.1), color: COLORS.primary, fontSize: '0.875rem' }}>
+                                                            <Avatar sx={{ width: 32, height: 32, bgcolor: 'rgba(33, 43, 54, 0.10)', color: COLORS.primary, fontSize: '0.875rem' }}>
                                                                 {pet?.name?.charAt(0)}
                                                             </Avatar>
                                                             <Box>
                                                                 <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{pet?.name || "Thú cưng"}</Typography>
-                                                                <Typography variant="caption" sx={{ color: '#637381' }}>{pet?.breed || (pet?.type === 'dog' ? 'Chó' : 'Mèo')}</Typography>
+                                                                <Typography variant="caption" sx={{ color: 'var(--palette-text-secondary)' }}>{pet?.breed || (pet?.type === 'dog' ? 'Chó' : 'Mèo')}</Typography>
                                                             </Box>
                                                         </Stack>
 
-                                                        <Icon icon="solar:arrow-right-linear" width={18} color="#919EAB" />
+                                                        <Icon icon="solar:arrow-right-linear" width={18} color="var(--palette-text-disabled)" />
 
                                                         <SelectSingle
                                                             label="Chọn người làm"
@@ -645,7 +645,7 @@ export const BookingEditPage = () => {
                                 />
 
                                 <Box>
-                                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: '#637381', display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: 'var(--palette-text-secondary)', display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <Icon icon="solar:calendar-bold-duotone" width={20} />
                                         Lịch nhân viên thực tế {formData.date.format('DD/MM/YYYY')}
                                     </Typography>
@@ -669,7 +669,7 @@ export const BookingEditPage = () => {
                             <Card sx={{ p: 3, borderRadius: '20px', boxShadow: COLORS.shadow }}>
                                 <Stack spacing={3}>
                                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#637381' }}>Khách hàng & Thú cưng</Typography>
+                                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'var(--palette-text-secondary)' }}>Khách hàng & Thú cưng</Typography>
                                         {!isReadOnly && (
                                             <Button
                                                 size="small"
@@ -780,7 +780,7 @@ export const BookingEditPage = () => {
                                     label="Lưu thay đổi"
                                     loadingLabel="Đang lưu..."
                                     onClick={handleSubmit}
-                                    sx={{ py: 1.5, borderRadius: '12px' }}
+                                    sx={{ py: 1.5, borderRadius: "var(--shape-borderRadius-md)" }}
                                 />
                             )}
                         </Stack>
@@ -803,3 +803,7 @@ export const BookingEditPage = () => {
         </LocalizationProvider>
     );
 };
+
+
+
+

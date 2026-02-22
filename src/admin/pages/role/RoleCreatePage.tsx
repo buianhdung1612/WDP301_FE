@@ -54,10 +54,10 @@ export const RoleCreatePage = () => {
                     root: {
                         backgroundImage: "none !important",
                         backdropFilter: "none !important",
-                        backgroundColor: "#fff !important",
-                        boxShadow: "0 0 2px 0 #919eab33, 0 12px 24px -4px #919eab1f",
-                        borderRadius: "16px",
-                        color: "#1C252E",
+                        backgroundColor: "var(--palette-background-paper) !important",
+                        boxShadow: "var(--customShadows-card)",
+                        borderRadius: "var(--shape-borderRadius-lg)",
+                        color: "var(--palette-text-primary)",
                     },
                 }
             },
@@ -112,7 +112,7 @@ export const RoleCreatePage = () => {
 
     return (
         <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
+            <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
                     <Title title="Tạo nhóm quyền" />
                     <Breadcrumb
@@ -127,15 +127,15 @@ export const RoleCreatePage = () => {
 
             <ThemeProvider theme={localTheme}>
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    <Stack sx={{ margin: "0px 120px", gap: "40px" }}>
+                    <Stack sx={{ margin: "0px calc(15 * var(--spacing))", gap: "calc(5 * var(--spacing))" }}>
                         <CollapsibleCard
                             title="Thông tin chung"
                             subheader="Thông tin cơ bản của nhóm quyền"
                             expanded={expandedInfo}
                             onToggle={toggle(setExpandedInfo)}
                         >
-                            <Stack p="24px" gap="24px">
-                                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px 16px" }}>
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
+                                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))" }}>
                                     <Controller
                                         name="name"
                                         control={control}
@@ -205,7 +205,7 @@ export const RoleCreatePage = () => {
                             expanded={expandedPermissions}
                             onToggle={toggle(setExpandedPermissions)}
                         >
-                            <Stack p="24px" gap="24px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: "32px" }}>
                                     <Box>
                                         <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, mb: 2 }}>Danh sách phân quyền</Typography>
@@ -222,7 +222,7 @@ export const RoleCreatePage = () => {
                                                         sx={{
                                                             boxShadow: 'none',
                                                             '&:before': { display: 'none' },
-                                                            border: '1px solid #919eab3d',
+                                                            border: '1px solid var(--palette-text-disabled)3d',
                                                             borderRadius: '8px !important',
                                                             overflow: 'hidden'
                                                         }}
@@ -230,7 +230,7 @@ export const RoleCreatePage = () => {
                                                         <AccordionSummary
                                                             expandIcon={<ExpandMoreIcon fontSize="small" />}
                                                             sx={{
-                                                                bgcolor: '#f4f6f8',
+                                                                bgcolor: 'var(--palette-background-neutral)',
                                                                 minHeight: '48px !important',
                                                                 '& .MuiAccordionSummary-content': { m: '0 !important', alignItems: 'center' }
                                                             }}
@@ -297,9 +297,9 @@ export const RoleCreatePage = () => {
                                                                 checked={field.value}
                                                                 sx={{
                                                                     '& .MuiSwitch-switchBase.Mui-checked': {
-                                                                        color: '#00A76F',
+                                                                        color: 'var(--palette-primary-main)',
                                                                         '& + .MuiSwitch-track': {
-                                                                            backgroundColor: '#00A76F',
+                                                                            backgroundColor: 'var(--palette-primary-main)',
                                                                             opacity: 1,
                                                                         },
                                                                     },
@@ -334,7 +334,7 @@ export const RoleCreatePage = () => {
                                                                                     fontSize: '0.75rem',
                                                                                     bgcolor: 'rgba(0, 167, 111, 0.16)',
                                                                                     color: 'rgb(0, 120, 103)',
-                                                                                    borderRadius: '6px',
+                                                                                    borderRadius: "var(--shape-borderRadius-sm)",
                                                                                     fontWeight: 700
                                                                                 }}>
                                                                                     {service?.name || serviceId}
@@ -362,7 +362,7 @@ export const RoleCreatePage = () => {
                             </Stack>
                         </CollapsibleCard>
 
-                        <Box gap="24px" sx={{ display: "flex", alignItems: "center" }}>
+                        <Box gap="calc(3 * var(--spacing))" sx={{ display: "flex", alignItems: "center" }}>
                             <SwitchButton
                                 control={control}
                                 name="status"
@@ -383,3 +383,7 @@ export const RoleCreatePage = () => {
         </>
     );
 };
+
+
+
+

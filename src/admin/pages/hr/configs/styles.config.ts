@@ -6,7 +6,7 @@ export const toolbarStyles = {
     root: {
         padding: '16px',
         paddingRight: "8px",
-        gap: '16px',
+        gap: "calc(2 * var(--spacing))",
         display: 'flex',
         justifyContent: 'space-between',
         minHeight: 'auto',
@@ -17,7 +17,7 @@ export const toolbarStyles = {
 export const dataGridCardStyles = {
     background: COLORS.background,
     color: COLORS.primary,
-    borderRadius: '16px',
+    borderRadius: 'var(--shape-borderRadius-lg)',
     height: '640px',
     display: 'flex',
     flexDirection: 'column' as const,
@@ -56,7 +56,7 @@ export const dataGridStyles: SxProps<Theme> = {
         },
         '& .MuiDataGrid-menuIcon': {
             '& .MuiButtonBase-root': {
-                color: "#637381",
+                color: "var(--palette-text-secondary)",
                 rotate: '90deg'
             }
         },
@@ -164,7 +164,7 @@ export const dataGridStyles: SxProps<Theme> = {
     },
 
     '& .MuiDataGrid-actionsCell .MuiIconButton-root': {
-        color: '#637381',
+        color: 'var(--palette-text-secondary)',
     },
 
     '& .MuiDataGrid-actionsCell .MuiSvgIcon-root': {
@@ -186,12 +186,12 @@ export const primaryButtonStyles = {
     fontWeight: 700,
     fontSize: "0.875rem",
     padding: "6px 12px",
-    borderRadius: "8px",
+    borderRadius: "var(--shape-borderRadius)",
     textTransform: "none" as const,
     boxShadow: "none",
     "&:hover": {
-        background: "#454F5B",
-        boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
+        background: "var(--palette-grey-700)",
+        boxShadow: "var(--customShadows-z8)"
     }
 };
 
@@ -209,7 +209,12 @@ export const dialogStyles = {
         padding: '16px 24px',
     },
     '& .MuiPaper-root': {
-        borderRadius: '16px',
+        borderRadius: 'var(--shape-borderRadius-lg)',
         boxShadow: '0 0 2px 0 rgba(145, 158, 171, 0.24), 0 20px 40px -4px rgba(145, 158, 171, 0.24)',
     }
 };
+
+
+
+
+

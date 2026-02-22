@@ -43,6 +43,22 @@ const backgroundPopup = {
 };
 
 export const adminTheme = createTheme({
+    typography: {
+        fontFamily: '"Public Sans", "Barlow", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+        h1: { fontWeight: 800, fontSize: "2.5rem", lineHeight: 1.25, fontFamily: '"Barlow", sans-serif' },
+        h2: { fontWeight: 800, fontSize: "2rem", lineHeight: 1.3333333333333333, fontFamily: '"Barlow", sans-serif' },
+        h3: { fontWeight: 700, fontSize: "1.5rem", lineHeight: 1.5, fontFamily: '"Barlow", sans-serif' },
+        h4: { fontWeight: 700, fontSize: "1.25rem", lineHeight: 1.5 },
+        h5: { fontWeight: 700, fontSize: "1.125rem", lineHeight: 1.5 },
+        h6: { fontWeight: 600, fontSize: "1.0625rem", lineHeight: 1.5555555555555556 },
+        subtitle1: { fontWeight: 600, fontSize: "1rem", lineHeight: 1.5 },
+        subtitle2: { fontWeight: 600, fontSize: "0.875rem", lineHeight: 1.5714285714285714 },
+        body1: { fontWeight: 400, fontSize: "1rem", lineHeight: 1.5 },
+        body2: { fontWeight: 400, fontSize: "0.875rem", lineHeight: 1.5714285714285714 },
+        caption: { fontWeight: 400, fontSize: "0.75rem", lineHeight: 1.5 },
+        overline: { fontWeight: 700, fontSize: "0.75rem", lineHeight: 1.5, textTransform: 'uppercase' },
+        button: { fontWeight: 700, fontSize: "0.875rem", lineHeight: 1.7142857142857142, textTransform: 'unset' },
+    },
     components: {
         MuiMenuItem: {
             styleOverrides: {

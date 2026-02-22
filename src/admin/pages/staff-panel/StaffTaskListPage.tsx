@@ -44,9 +44,9 @@ const ServiceTimer = ({ startedAt, duration, maxDuration, minDuration, surcharge
     const isOverMax = maxDuration > 0 && elapsed > maxDuration;
 
     const getColor = () => {
-        if (isOverMax) return '#FF5630'; // Red - Surcharge
-        if (duration > 0 && elapsed >= duration) return '#FFAB00'; // Orange - Over expected
-        return '#00B8D9'; // Blue - Normal
+        if (isOverMax) return 'var(--palette-error-main)'; // Red - Surcharge
+        if (duration > 0 && elapsed >= duration) return 'var(--palette-warning-main)'; // Orange - Over expected
+        return 'var(--palette-info-main)'; // Blue - Normal
     };
 
     const getRemainingForMin = () => {
@@ -85,7 +85,7 @@ const ServiceTimer = ({ startedAt, duration, maxDuration, minDuration, surcharge
                 )}
             </Stack>
             {isOverMax && surchargeType !== 'none' && (
-                <Typography variant="caption" sx={{ color: '#FF5630', fontWeight: 800, fontSize: '10px', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 800, fontSize: '10px', display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Icon icon="solar:bill-list-bold-duotone" width={12} />
                     Dự kiến phụ thu: {estSurcharge.toLocaleString()}đ
                 </Typography>
@@ -141,22 +141,22 @@ export const StaffTaskListPage = () => {
         switch (status) {
             case "confirmed":
             case "pending":
-                return <Chip label="Chờ thực hiện" size="small" sx={{ bgcolor: 'rgba(0, 184, 217, 0.16)', color: '#00B8D9', fontWeight: 700 }} />;
+                return <Chip label="Chờ thực hiện" size="small" sx={{ bgcolor: 'var(--palette-info-lighter)', color: 'var(--palette-info-dark)', fontWeight: 700 }} />;
             case "in-progress":
-                return <Chip label="Đang thực hiện" size="small" sx={{ bgcolor: 'rgba(255, 171, 0, 0.16)', color: '#FFAB00', fontWeight: 700 }} />;
+                return <Chip label="Đang thực hiện" size="small" sx={{ bgcolor: 'var(--palette-warning-lighter)', color: 'var(--palette-warning-dark)', fontWeight: 700 }} />;
             case "completed":
-                return <Chip label="Hoàn thành" size="small" sx={{ bgcolor: 'rgba(34, 197, 94, 0.16)', color: '#22C55E', fontWeight: 700 }} />;
+                return <Chip label="Hoàn thành" size="small" sx={{ bgcolor: 'var(--palette-success-lighter)', color: 'var(--palette-success-dark)', fontWeight: 700 }} />;
             case "delayed":
-                return <Chip label="Trễ hẹn" size="small" sx={{ bgcolor: 'rgba(255, 86, 48, 0.16)', color: '#FF5630', fontWeight: 700 }} />;
+                return <Chip label="Trễ hẹn" size="small" sx={{ bgcolor: 'var(--palette-error-lighter)', color: 'var(--palette-error-dark)', fontWeight: 700 }} />;
             case "cancelled":
-                return <Chip label="Đã hủy" size="small" sx={{ bgcolor: 'rgba(255, 86, 48, 0.16)', color: '#FF5630', fontWeight: 700 }} />;
+                return <Chip label="Đã hủy" size="small" sx={{ bgcolor: 'var(--palette-error-lighter)', color: 'var(--palette-error-dark)', fontWeight: 700 }} />;
             default:
                 return <Chip label={status} size="small" />;
         }
     };
 
     return (
-        <Box sx={{ maxWidth: '1200px', mx: 'auto', p: '1.5rem' }}>
+        <Box sx={{ maxWidth: '1200px', mx: 'auto', p: "calc(3 * var(--spacing))" }}>
             <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                 <Box>
                     <Title title="Công việc hôm nay" />
@@ -188,8 +188,8 @@ export const StaffTaskListPage = () => {
                     <CircularProgress />
                 </Box>
             ) : tasks.length === 0 ? (
-                <Card sx={{ p: 8, textAlign: 'center', borderRadius: '16px', bgcolor: 'rgba(145, 158, 171, 0.04)', border: '1px dashed rgba(145, 158, 171, 0.2)' }}>
-                    <Icon icon="eva:file-text-outline" width={64} style={{ color: '#919EAB', marginBottom: '16px' }} />
+                <Card sx={{ p: 8, textAlign: 'center', borderRadius: 'var(--shape-borderRadius-lg)', bgcolor: 'var(--palette-background-neutral)', border: '1px dashed var(--palette-shared-inputOutlined)' }}>
+                    <Icon icon="eva:file-text-outline" width={64} style={{ color: 'var(--palette-text-disabled)', marginBottom: '16px' }} />
                     <Typography variant="h6" sx={{ color: COLORS.secondary, mb: 3 }}>
                         Không có lịch đặt nào được phân công cho bạn trong ngày này
                     </Typography>
@@ -206,7 +206,7 @@ export const StaffTaskListPage = () => {
                                 px: 4,
                                 py: 1.5,
                                 boxShadow: '0 8px 16px 0 rgba(145, 158, 171, 0.24)',
-                                '&:hover': { bgcolor: '#454F5B' }
+                                '&:hover': { bgcolor: 'var(--palette-grey-800)' }
                             }}
                         >
                             Tạo đơn dịch vụ mới
@@ -224,14 +224,14 @@ export const StaffTaskListPage = () => {
                         return (
                             <Card key={task._id} sx={{
                                 p: 3,
-                                borderRadius: '16px',
-                                boxShadow: '0 0 2px 0 rgba(145, 158, 171, 0.2), 0 12px 24px -4px rgba(145, 158, 171, 0.12)',
-                                borderLeft: `6px solid ${task.bookingStatus === 'in-progress' ? '#FFAB00' :
-                                    task.bookingStatus === 'completed' ? '#22C55E' :
-                                        task.bookingStatus === 'cancelled' ? '#FF5630' :
-                                            '#00B8D9'
+                                borderRadius: 'var(--shape-borderRadius-lg)',
+                                boxShadow: 'var(--customShadows-card)',
+                                borderLeft: `6px solid ${task.bookingStatus === 'in-progress' ? 'var(--palette-warning-main)' :
+                                    task.bookingStatus === 'completed' ? 'var(--palette-success-main)' :
+                                        task.bookingStatus === 'cancelled' ? 'var(--palette-error-main)' :
+                                            'var(--palette-info-main)'
                                     }`,
-                                bgcolor: task.bookingStatus === 'cancelled' ? 'rgba(255, 86, 48, 0.04)' : 'background.paper'
+                                bgcolor: task.bookingStatus === 'cancelled' ? 'var(--palette-error-lighter)' : 'var(--palette-background-paper)'
                             }}>
                                 <Stack spacing={3}>
                                     <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ md: 'center' }}>
@@ -302,9 +302,9 @@ export const StaffTaskListPage = () => {
                                             {assignedToMe.length > 0 ? assignedToMe.map((m: any, idx: number) => (
                                                 <Card key={idx} variant="outlined" sx={{
                                                     p: 2,
-                                                    bgcolor: task.bookingStatus === 'cancelled' ? 'rgba(255, 86, 48, 0.08)' : 'rgba(145, 158, 171, 0.04)',
-                                                    borderRadius: '12px',
-                                                    borderColor: task.bookingStatus === 'cancelled' ? 'rgba(255, 86, 48, 0.2)' : 'rgba(145, 158, 171, 0.12)'
+                                                    bgcolor: task.bookingStatus === 'cancelled' ? 'var(--palette-error-lighter)' : 'var(--palette-background-neutral)',
+                                                    borderRadius: 'var(--shape-borderRadius-md)',
+                                                    borderColor: task.bookingStatus === 'cancelled' ? 'var(--palette-error-light)' : 'var(--palette-action-hover)'
                                                 }}>
                                                     <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
                                                         <Stack direction="row" spacing={2} alignItems="center">
@@ -335,7 +335,7 @@ export const StaffTaskListPage = () => {
                                                                             onClick={() => handleStart(task._id, m.petId?._id)}
                                                                             disabled={isStarting || task.bookingStatus === 'pending'}
                                                                             sx={{
-                                                                                borderRadius: '8px',
+                                                                                borderRadius: "var(--shape-borderRadius)",
                                                                                 textTransform: 'none',
                                                                                 ...(task.bookingStatus === 'pending' && {
                                                                                     bgcolor: 'rgba(145, 158, 171, 0.24)',
@@ -368,7 +368,7 @@ export const StaffTaskListPage = () => {
                                                                                     (task.serviceId?.minDuration > 0 &&
                                                                                         dayjs().diff(dayjs(m.startedAt), 'minute') < task.serviceId.minDuration)
                                                                                 }
-                                                                                sx={{ borderRadius: '8px', textTransform: 'none', color: '#fff' }}
+                                                                                sx={{ borderRadius: "var(--shape-borderRadius)", textTransform: 'none', color: "var(--palette-common-white)" }}
                                                                             >
                                                                                 Xong
                                                                             </Button>
@@ -379,9 +379,9 @@ export const StaffTaskListPage = () => {
 
                                                             {m.status === 'completed' && task.bookingStatus !== 'cancelled' && (
                                                                 <Stack alignItems="flex-end">
-                                                                    <Icon icon="eva:checkmark-circle-2-fill" width={24} style={{ color: '#22C55E' }} />
+                                                                    <Icon icon="eva:checkmark-circle-2-fill" width={24} style={{ color: 'var(--palette-success-main)' }} />
                                                                     {m.surchargeAmount > 0 && (
-                                                                        <Typography variant="caption" sx={{ color: '#FF5630', fontWeight: 700, mt: 0.5 }}>
+                                                                        <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 700, mt: 0.5 }}>
                                                                             +{m.surchargeAmount.toLocaleString()}đ phụ thu
                                                                         </Typography>
                                                                     )}
@@ -389,7 +389,7 @@ export const StaffTaskListPage = () => {
                                                             )}
 
                                                             {task.bookingStatus === 'cancelled' && (
-                                                                <Typography variant="caption" sx={{ color: '#FF5630', fontWeight: 700 }}>
+                                                                <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 700 }}>
                                                                     Lịch đã hủy
                                                                 </Typography>
                                                             )}
@@ -412,3 +412,7 @@ export const StaffTaskListPage = () => {
         </Box>
     );
 };
+
+
+
+

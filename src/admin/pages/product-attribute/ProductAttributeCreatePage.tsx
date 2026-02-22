@@ -103,8 +103,8 @@ const SortableAttributeOption = ({ id, index, control, remove, fieldsLength, isC
             sx={{
                 display: "flex",
                 alignItems: "center", // Vertically center everything
-                gap: "16px",
-                backgroundColor: '#fff',
+                gap: "calc(2 * var(--spacing))",
+                backgroundColor: "var(--palette-background-paper)",
                 padding: '8px 0', // Add some breathing room
             }}
         >
@@ -116,13 +116,13 @@ const SortableAttributeOption = ({ id, index, control, remove, fieldsLength, isC
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#919EAB',
+                    color: 'var(--palette-text-disabled)',
                     cursor: 'grab',
                     padding: '8px',
                     borderRadius: '50%',
                     '&:hover': {
                         backgroundColor: 'rgba(145, 158, 171, 0.08)',
-                        color: '#637381'
+                        color: 'var(--palette-text-secondary)'
                     },
                     '&:active': {
                         cursor: 'grabbing',
@@ -174,9 +174,9 @@ const SortableAttributeOption = ({ id, index, control, remove, fieldsLength, isC
                                     sx={{
                                         width: 40, // Match small input height
                                         height: 40,
-                                        borderRadius: '8px',
-                                        border: '1px solid #919eab33',
-                                        backgroundColor: isValidHex ? colorValue : '#f4f6f8',
+                                        borderRadius: "var(--shape-borderRadius)",
+                                        border: '1px solid var(--palette-text-disabled)33',
+                                        backgroundColor: isValidHex ? colorValue : 'var(--palette-background-neutral)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
@@ -227,7 +227,7 @@ const SortableAttributeOption = ({ id, index, control, remove, fieldsLength, isC
                     onClick={() => remove(index)}
                     disabled={fieldsLength === 1}
                     sx={{
-                        color: fieldsLength === 1 ? '#919EAB' : '#FF5630',
+                        color: fieldsLength === 1 ? 'var(--palette-text-disabled)' : 'var(--palette-error-main)',
                         '&:hover': {
                             backgroundColor: 'rgba(255, 86, 48, 0.08)'
                         }
@@ -319,7 +319,7 @@ export const ProductAttributeCreatePage = () => {
 
     return (
         <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
+            <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
                     <Title title="Tạo thuộc tính sản phẩm" />
                     <Breadcrumb
@@ -334,8 +334,8 @@ export const ProductAttributeCreatePage = () => {
             <ThemeProvider theme={localTheme}>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <Stack sx={{
-                        margin: "0px 120px",
-                        gap: "40px"
+                        margin: "0px calc(15 * var(--spacing))",
+                        gap: "calc(5 * var(--spacing))"
                     }}>
                         {/* Thông tin cơ bản */}
                         <CollapsibleCard
@@ -344,12 +344,12 @@ export const ProductAttributeCreatePage = () => {
                             expanded={expandedDetail}
                             onToggle={toggle(setExpandedDetail)}
                         >
-                            <Stack p="24px" gap="24px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Box
                                     sx={{
                                         display: "grid",
                                         gridTemplateColumns: "repeat(2, 1fr)",
-                                        gap: "24px 16px",
+                                        gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))",
                                     }}
                                 >
                                     <Controller
@@ -377,7 +377,7 @@ export const ProductAttributeCreatePage = () => {
                                                     displayEmpty
                                                     renderValue={(selected) => {
                                                         if (!selected) {
-                                                            return <span style={{ color: '#919EAB' }}>-- Chọn kiểu hiển thị --</span>;
+                                                            return <span style={{ color: 'var(--palette-text-disabled)' }}>-- Chọn kiểu hiển thị --</span>;
                                                         }
                                                         const selectedOption = ATTRIBUTE_TYPES_WITH_DEFAULT.find(opt => opt.value === selected);
                                                         return selectedOption ? selectedOption.label : selected;
@@ -425,7 +425,7 @@ export const ProductAttributeCreatePage = () => {
                             expanded={expandedValues}
                             onToggle={toggle(setExpandedValues)}
                         >
-                            <Stack p="24px" gap="16px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(2 * var(--spacing))">
                                 <DndContext
                                     sensors={sensors}
                                     collisionDetection={closestCenter}
@@ -463,11 +463,11 @@ export const ProductAttributeCreatePage = () => {
                                         fontWeight: 600,
                                         py: 1.5,
                                         mt: 1,
-                                        color: '#00A76F', // Primary green
+                                        color: 'var(--palette-primary-main)', // Primary green
                                         borderColor: 'rgba(0, 167, 111, 0.3)',
                                         fontSize: '0.875rem',
                                         '&:hover': {
-                                            borderColor: '#00A76F',
+                                            borderColor: 'var(--palette-primary-main)',
                                             backgroundColor: 'rgba(0, 167, 111, 0.08)'
                                         }
                                     }}
@@ -479,7 +479,7 @@ export const ProductAttributeCreatePage = () => {
 
 
                         {/* Submit button */}
-                        <Box gap="24px" sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+                        <Box gap="calc(3 * var(--spacing))" sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
                             <LoadingButton
                                 type="submit"
                                 loading={isPending}
@@ -494,3 +494,7 @@ export const ProductAttributeCreatePage = () => {
         </>
     )
 }
+
+
+
+

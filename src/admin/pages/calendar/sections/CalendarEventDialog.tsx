@@ -141,21 +141,21 @@ export const CalendarEventDialog: React.FC<CalendarEventDialogProps> = ({
     const commonPickerStyles = {
         '& .MuiOutlinedInput-root': {
             fontSize: '0.9375rem',
-            borderRadius: '8px',
+            borderRadius: "var(--shape-borderRadius)",
             '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#919eab33 !important',
+                borderColor: 'var(--palette-text-disabled)33 !important',
                 borderWidth: '1px',
             },
             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#1C252E !important',
+                borderColor: 'var(--palette-text-primary) !important',
                 borderWidth: '2px !important',
             },
         },
         '& .MuiInputLabel-root': {
             fontSize: '1rem',
             fontWeight: 600,
-            color: '#637381',
-            '&.Mui-focused': { color: '#1C252E' }
+            color: 'var(--palette-text-secondary)',
+            '&.Mui-focused': { color: 'var(--palette-text-primary)' }
         },
         '& .MuiInputBase-input': {
             fontSize: '0.9375rem',
@@ -172,7 +172,7 @@ export const CalendarEventDialog: React.FC<CalendarEventDialogProps> = ({
                 maxWidth="sm"
                 PaperProps={{
                     sx: {
-                        borderRadius: '16px',
+                        borderRadius: "var(--shape-borderRadius-lg)",
                         boxShadow: '0 24px 48px -12px rgba(0, 0, 0, 0.16)',
                         backgroundImage: 'none',
                         maxWidth: '600px',
@@ -186,15 +186,15 @@ export const CalendarEventDialog: React.FC<CalendarEventDialogProps> = ({
                     p: '16px 24px',
                     fontWeight: 700,
                     fontSize: '1.125rem',
-                    color: '#1C252E'
+                    color: 'var(--palette-text-primary)'
                 }}>
                     Thêm sự kiện
-                    <IconButton onClick={onClose} size="small" sx={{ color: '#637381' }}>
+                    <IconButton onClick={onClose} size="small" sx={{ color: 'var(--palette-text-secondary)' }}>
                         <CloseIcon sx={{ fontSize: 20 }} />
                     </IconButton>
                 </DialogTitle>
 
-                <DialogContent sx={{ p: '8px 24px 24px !important', bgcolor: '#F4F6F8' }}>
+                <DialogContent sx={{ p: '8px 24px 24px !important', bgcolor: 'var(--palette-background-neutral)' }}>
                     <Stack spacing={3} sx={{ mt: 1 }}>
                         <SelectSingle
                             label="Dịch vụ"
@@ -212,7 +212,7 @@ export const CalendarEventDialog: React.FC<CalendarEventDialogProps> = ({
                             ampm={false}
                             minutesStep={15}
                             slots={{
-                                openPickerIcon: (props) => <CalendarIcon {...props} sx={{ fontSize: 24, color: '#637381' }} />,
+                                openPickerIcon: (props) => <CalendarIcon {...props} sx={{ fontSize: 24, color: 'var(--palette-text-secondary)' }} />,
                             }}
                             slotProps={{
                                 textField: {
@@ -223,11 +223,11 @@ export const CalendarEventDialog: React.FC<CalendarEventDialogProps> = ({
                                 popper: {
                                     sx: {
                                         '& .MuiPaper-root': {
-                                            borderRadius: '16px',
+                                            borderRadius: "var(--shape-borderRadius-lg)",
                                             boxShadow: '0 8px 16px 0 rgba(145, 158, 171, 0.16)',
                                             border: '1px solid rgba(145, 158, 171, 0.12)',
                                             mt: 1,
-                                            bgcolor: '#fff',
+                                            bgcolor: "var(--palette-background-paper)",
                                             backgroundImage: 'none',
                                             '& .MuiPickersLayout-root': {
                                                 padding: '8px',
@@ -235,10 +235,10 @@ export const CalendarEventDialog: React.FC<CalendarEventDialogProps> = ({
                                             '& .MuiPickersDay-root': {
                                                 fontSize: '0.75rem',
                                                 fontWeight: 500,
-                                                '&:hover': { bgcolor: '#00a76f14 !important' }
+                                                '&:hover': { bgcolor: 'var(--palette-primary-main)14 !important' }
                                             },
                                             '& .MuiPickersDay-root.Mui-selected': {
-                                                bgcolor: '#00A76F !important',
+                                                bgcolor: 'var(--palette-primary-main) !important',
                                                 color: '#fff !important'
                                             }
                                         }
@@ -255,7 +255,7 @@ export const CalendarEventDialog: React.FC<CalendarEventDialogProps> = ({
                             ampm={false}
                             minutesStep={15}
                             slots={{
-                                openPickerIcon: (props) => <CalendarIcon {...props} sx={{ fontSize: 24, color: '#637381' }} />,
+                                openPickerIcon: (props) => <CalendarIcon {...props} sx={{ fontSize: 24, color: 'var(--palette-text-secondary)' }} />,
                             }}
                             slotProps={{
                                 textField: {
@@ -266,11 +266,11 @@ export const CalendarEventDialog: React.FC<CalendarEventDialogProps> = ({
                                 popper: {
                                     sx: {
                                         '& .MuiPaper-root': {
-                                            borderRadius: '16px',
+                                            borderRadius: "var(--shape-borderRadius-lg)",
                                             boxShadow: '0 8px 16px 0 rgba(145, 158, 171, 0.16)',
                                             border: '1px solid rgba(145, 158, 171, 0.12)',
                                             mt: 1,
-                                            bgcolor: '#fff',
+                                            bgcolor: "var(--palette-background-paper)",
                                             backgroundImage: 'none',
                                             '& .MuiPickersLayout-root': {
                                                 padding: '8px',
@@ -278,10 +278,10 @@ export const CalendarEventDialog: React.FC<CalendarEventDialogProps> = ({
                                             '& .MuiPickersDay-root': {
                                                 fontSize: '0.75rem',
                                                 fontWeight: 500,
-                                                '&:hover': { bgcolor: '#00a76f14 !important' }
+                                                '&:hover': { bgcolor: 'var(--palette-primary-main)14 !important' }
                                             },
                                             '& .MuiPickersDay-root.Mui-selected': {
-                                                bgcolor: '#00A76F !important',
+                                                bgcolor: 'var(--palette-primary-main) !important',
                                                 color: '#fff !important'
                                             }
                                         }
@@ -330,7 +330,7 @@ export const CalendarEventDialog: React.FC<CalendarEventDialogProps> = ({
                         />
 
                         <Box sx={{ mt: 1 }}>
-                            <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: '#637381', display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: 'var(--palette-text-secondary)', display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Icon icon="solar:calendar-bold-duotone" width={20} />
                                 Lịch biểu nhân viên thực tế
                             </Typography>
@@ -349,12 +349,12 @@ export const CalendarEventDialog: React.FC<CalendarEventDialogProps> = ({
                         onClick={onClose}
                         variant="outlined"
                         sx={{
-                            borderRadius: '8px',
+                            borderRadius: "var(--shape-borderRadius)",
                             textTransform: 'none',
                             fontWeight: 700,
                             fontSize: '0.875rem',
-                            padding: '6px 16px',
-                            color: '#1C252E',
+                            padding: "var(--shape-borderRadius-sm) calc(2 * var(--spacing))",
+                            color: 'var(--palette-text-primary)',
                             borderColor: 'rgba(145, 158, 171, 0.32)',
                         }}
                     >
@@ -364,13 +364,13 @@ export const CalendarEventDialog: React.FC<CalendarEventDialogProps> = ({
                         onClick={handleSave}
                         variant="contained"
                         sx={{
-                            borderRadius: '8px',
+                            borderRadius: "var(--shape-borderRadius)",
                             textTransform: 'none',
                             fontWeight: 700,
                             fontSize: '0.875rem',
-                            padding: '6px 16px',
-                            bgcolor: '#1C252E',
-                            '&:hover': { bgcolor: '#454F5B' }
+                            padding: "var(--shape-borderRadius-sm) calc(2 * var(--spacing))",
+                            bgcolor: 'var(--palette-text-primary)',
+                            '&:hover': { bgcolor: "var(--palette-grey-700)" }
                         }}
                     >
                         Tạo mới
@@ -380,3 +380,6 @@ export const CalendarEventDialog: React.FC<CalendarEventDialogProps> = ({
         </LocalizationProvider>
     );
 };
+
+
+

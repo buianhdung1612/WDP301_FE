@@ -7,20 +7,20 @@ export const getProductAttributeTheme = (outerTheme: Theme) => createTheme(outer
                 root: {
                     backgroundImage: "none !important",
                     backdropFilter: "none !important",
-                    backgroundColor: "#fff !important",
-                    boxShadow: "0 0 2px 0 #919eab33, 0 12px 24px -4px #919eab1f",
-                    borderRadius: "16px",
-                    color: "#1C252E",
+                    backgroundColor: "var(--palette-background-paper) !important",
+                    boxShadow: "var(--customShadows-card)",
+                    borderRadius: "var(--shape-borderRadius-lg)",
+                    color: "var(--palette-text-primary)",
                 },
             }
         },
         MuiFormLabel: {
             styleOverrides: {
                 root: {
-                    color: "#919EAB",
+                    color: "var(--palette-text-disabled)",
                     fontSize: "0.9375rem",
                     '&.Mui-focused': {
-                        color: "#1C252E",
+                        color: "var(--palette-text-primary)",
                         fontWeight: "600",
                         fontSize: "0.9375rem"
                     }
@@ -30,18 +30,18 @@ export const getProductAttributeTheme = (outerTheme: Theme) => createTheme(outer
         MuiOutlinedInput: {
             styleOverrides: {
                 root: {
-                    color: "#1C252E",
-                    borderRadius: "8px",
+                    color: "var(--palette-text-primary)",
+                    borderRadius: "var(--shape-borderRadius)",
                     fontSize: "0.9375rem",
                     '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: "#919eab33",
+                        borderColor: "var(--palette-text-disabled)33",
                         transition: 'border-color 0.2s',
                     },
                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: "#1C252E",
+                        borderColor: "var(--palette-text-primary)",
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: "#1C252E",
+                        borderColor: "var(--palette-text-primary)",
                         borderWidth: "2px",
                     },
 
@@ -60,7 +60,7 @@ export const getProductAttributeTheme = (outerTheme: Theme) => createTheme(outer
                     fontSize: '0.875rem',
                     padding: '6px',
                     marginBottom: '4px',
-                    borderRadius: '6px',
+                    borderRadius: "var(--shape-borderRadius-sm)",
 
                 },
             },
@@ -72,7 +72,7 @@ export const getProductAttributeTheme = (outerTheme: Theme) => createTheme(outer
                     color: "#006C9C",
                     fontSize: "0.8125rem",
                     height: "24px",
-                    borderRadius: "8px",
+                    borderRadius: "var(--shape-borderRadius)",
                 },
                 label: {
                     paddingLeft: "8px",
@@ -94,3 +94,7 @@ export const getProductAttributeTheme = (outerTheme: Theme) => createTheme(outer
         }
     }
 });
+
+
+
+

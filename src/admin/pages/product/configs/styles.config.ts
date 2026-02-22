@@ -25,7 +25,7 @@ export const dataGridStyles: SxProps<Theme> = {
 
         '& .MuiDataGrid-menuIcon': {
             '& .MuiButtonBase-root': {
-                color: "#637381",
+                color: "var(--palette-text-secondary)",
                 rotate: '90deg'
             }
 
@@ -152,7 +152,7 @@ export const dataGridStyles: SxProps<Theme> = {
     },
 
     '& .MuiDataGrid-actionsCell .MuiIconButton-root': {
-        color: '#637381',
+        color: 'var(--palette-text-secondary)',
     },
 
     '& .MuiDataGrid-actionsCell .MuiSvgIcon-root': {
@@ -174,7 +174,7 @@ export const dataGridStyles: SxProps<Theme> = {
 export const toolbarStyles = {
     root: {
         padding: '16px',
-        gap: '16px',
+        gap: "calc(2 * var(--spacing))",
         display: 'flex',
         justifyContent: 'space-between',
         minHeight: 'auto',
@@ -185,7 +185,7 @@ export const toolbarStyles = {
 export const dataGridCardStyles = {
     background: COLORS.background,
     color: COLORS.primary,
-    borderRadius: '16px',
+    borderRadius: 'var(--shape-borderRadius-lg)',
     height: '640px',
     display: 'flex',
     flexDirection: 'column' as const,
@@ -221,7 +221,7 @@ export const columnsPanelStyles: SxProps<Theme> = {
         fontSize: '1rem',
         padding: '0 14px',
         color: COLORS.primary,
-        borderRadius: '8px',
+        borderRadius: "var(--shape-borderRadius)",
         lineHeight: '24px',
         height: '56px',
     },
@@ -255,7 +255,7 @@ export const columnsPanelStyles: SxProps<Theme> = {
             fontWeight: '700',
             fontSize: '0.875rem',
             textTransform: 'none',
-            borderRadius: '8px',
+            borderRadius: "var(--shape-borderRadius)",
             color: COLORS.primary,
             '&:hover': {
                 background: COLORS.borderHover,
@@ -293,6 +293,11 @@ export const filterPanelStyles: SxProps<Theme> = {
     '& .MuiInputBase-root': {
         color: COLORS.primary,
         fontSize: '1rem',
-        borderRadius: '8px',
+        borderRadius: "var(--shape-borderRadius)",
     },
 };
+
+
+
+
+

@@ -17,6 +17,7 @@ import { useAuthStore } from "../../../stores/useAuthStore";
 import { useNavigate } from "react-router-dom";
 import { logout as logoutApi } from "../../api/auth.api";
 import Cookies from "js-cookie";
+import { prefixAdmin } from "../../constants/routes";
 
 interface Props {
     window?: () => Window;
@@ -301,7 +302,7 @@ export const Header = () => {
 
                             <Divider sx={{ borderStyle: 'dashed' }} />
 
-                            <MenuItem onClick={handleCloseUser} sx={{ m: 1 }}>
+                            <MenuItem onClick={() => { navigate(`/${prefixAdmin}/profile`); handleCloseUser(); }} sx={{ m: 1 }}>
                                 Hồ sơ
                             </MenuItem>
 

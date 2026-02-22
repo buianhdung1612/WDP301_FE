@@ -30,3 +30,7 @@ export const useUpdateBookingConfig = () => {
         }
     });
 };
+
+
+
+

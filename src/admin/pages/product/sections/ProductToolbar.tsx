@@ -34,7 +34,7 @@ export const ProductToolbar = ({
 
     return (
         <Toolbar style={toolbarStyles.root}>
-            <div className='flex gap-[16px] items-stretch'>
+            <div className='flex gap-[calc(2*var(--spacing))] items-stretch'>
                 <SelectMulti label={t("admin.product.toolbar.status")} options={statusOptions} />
                 <SelectMulti label={t("admin.product.toolbar.stock")} options={stockOptions} />
                 <Search />
@@ -51,3 +51,7 @@ export const ProductToolbar = ({
         </Toolbar>
     );
 };
+
+
+
+

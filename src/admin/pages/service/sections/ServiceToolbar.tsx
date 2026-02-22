@@ -8,9 +8,9 @@ import { ExportImport } from "../../../components/ui/ExportImport";
 export const ServiceToolbar = () => {
     return (
         <Toolbar style={toolbarStyles.root}>
-            <div className='flex gap-[16px] w-full'>
+            <div className='flex gap-[calc(2*var(--spacing))] w-full'>
                 <SelectMulti label="Trạng thái" options={STATUS_OPTIONS} />
-                <div className="flex flex-1 items-center gap-[16px]">
+                <div className="flex flex-1 items-center gap-[calc(2*var(--spacing))]">
                     <div className="flex-1">
                         <Search maxWidth="100%" />
                     </div>
@@ -20,3 +20,7 @@ export const ServiceToolbar = () => {
         </Toolbar>
     );
 };
+
+
+
+

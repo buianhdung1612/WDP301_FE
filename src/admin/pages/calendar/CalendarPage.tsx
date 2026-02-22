@@ -69,13 +69,13 @@ export const CalendarPage = () => {
                 pending: '#FFAB00',   // Orange
                 confirmed: '#00B8D9', // Blue
                 'in-progress': '#006C9C', // Dark Blue
-                completed: '#00A76F', // Green
-                cancelled: '#FF5630', // Red
+                completed: 'var(--palette-primary-main)', // Green
+                cancelled: 'var(--palette-error-main)', // Red
             };
 
             const calendarEvents = bookings.map((booking: any) => {
-                const serviceColor = serviceColorsMap[booking.serviceId?._id || booking.serviceId] || '#00A76F';
-                const statusColor = statusColors[booking.bookingStatus] || '#919EAB';
+                const serviceColor = serviceColorsMap[booking.serviceId?._id || booking.serviceId] || 'var(--palette-primary-main)';
+                const statusColor = statusColors[booking.bookingStatus] || 'var(--palette-text-disabled)';
 
                 // Use start/end dates from booking
                 const start = booking.start;
@@ -89,7 +89,7 @@ export const CalendarPage = () => {
                     start: start,
                     end: end,
                     color: statusColor,
-                    textColor: '#ffffff',
+                    textcolor: "var(--palette-common-white)",
                     extendedProps: {
                         bookingId: booking._id,
                         status: booking.bookingStatus,
@@ -162,25 +162,25 @@ export const CalendarPage = () => {
 
     return (
         <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
+            <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
                     <Title title="Lịch" />
                 </div>
                 <Button
                     onClick={handleOpenEventDialog}
                     sx={{
-                        background: '#1C252E',
+                        background: 'var(--palette-text-primary)',
                         minHeight: "2.25rem",
                         minWidth: "4rem",
                         fontWeight: 700,
                         fontSize: "0.875rem",
                         padding: "6px 12px",
-                        borderRadius: "8px",
+                        borderRadius: "var(--shape-borderRadius)",
                         textTransform: "none",
                         boxShadow: "none",
                         "&:hover": {
-                            background: "#454F5B",
-                            boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
+                            background: "var(--palette-grey-700)",
+                            boxShadow: "var(--customShadows-z8)"
                         }
                     }}
                     variant="contained"
@@ -191,8 +191,8 @@ export const CalendarPage = () => {
             </div>
 
             <Typography variant="body2" sx={{ fontWeight: 400, fontSize: '0.875rem', display: "block", mb: "10px" }}>
-                <Box component="span" sx={{ color: '#1C252E', fontWeight: 600 }}>{events.length}</Box>{' '}
-                <Box component="span" sx={{ color: '#637381', fontWeight: 400 }}>kết quả tìm thấy</Box>
+                <Box component="span" sx={{ color: 'var(--palette-text-primary)', fontWeight: 600 }}>{events.length}</Box>{' '}
+                <Box component="span" sx={{ color: 'var(--palette-text-secondary)', fontWeight: 400 }}>kết quả tìm thấy</Box>
             </Typography>
             <Box sx={{ mb: 3, display: "flex", flexWrap: 'wrap', gap: 1.5 }}>
                 <Box
@@ -201,11 +201,11 @@ export const CalendarPage = () => {
                         alignItems: 'center',
                         gap: '8px',
                         p: '8px',
-                        borderRadius: '8px',
-                        border: '1px solid #919eab33',
+                        borderRadius: "var(--shape-borderRadius)",
+                        border: '1px solid var(--palette-text-disabled)33',
                     }}
                 >
-                    <Typography variant="subtitle2" sx={{ fontSize: '0.875rem', color: '#1C252E', fontWeight: 600 }}>
+                    <Typography variant="subtitle2" sx={{ fontSize: '0.875rem', color: 'var(--palette-text-primary)', fontWeight: 600 }}>
                         Ngày:
                     </Typography>
                     <Box
@@ -214,7 +214,7 @@ export const CalendarPage = () => {
                             alignItems: 'center',
                             px: '8px',
                             py: 0,
-                            borderRadius: '6px',
+                            borderRadius: "var(--shape-borderRadius-sm)",
                             bgcolor: 'rgba(145, 158, 171, 0.16)',
                         }}
                     >
@@ -225,12 +225,12 @@ export const CalendarPage = () => {
                                 p: 0.25,
                                 ml: "5px",
                                 opacity: 0.48,
-                                bgcolor: "#1C252E",
-                                color: "#fff",
+                                bgcolor: "var(--palette-text-primary)",
+                                color: "var(--palette-common-white)",
                                 mr: "-3px",
                                 '&:hover': {
                                     opacity: 1,
-                                    bgcolor: '#1C252E'
+                                    bgcolor: 'var(--palette-text-primary)'
                                 }
                             }}
                         >
@@ -242,7 +242,7 @@ export const CalendarPage = () => {
                 <Button
                     startIcon={<DeleteIcon style={{ marginRight: 0 }} sx={{ fontSize: 18 }} />}
                     sx={{
-                        color: '#FF5630',
+                        color: 'var(--palette-error-main)',
                         fontWeight: 600,
                         fontSize: '0.875rem',
                         textTransform: 'none',
@@ -256,11 +256,11 @@ export const CalendarPage = () => {
             <Card
                 elevation={0}
                 sx={{
-                    bgcolor: 'white',
+                    bgcolor: "var(--palette-background-paper)",
                     backgroundImage: 'none',
-                    borderRadius: '16px',
-                    boxShadow: '0 0 2px 0 #919eab33, 0 12px 24px -4px #919eab1f',
-                    color: "#1C252E",
+                    borderRadius: "var(--shape-borderRadius-lg)",
+                    boxShadow: "var(--customShadows-card)",
+                    color: "var(--palette-text-primary)",
                     mx: '-10px',
                     '& .fc': {
                         flex: '1 1 auto',
@@ -270,25 +270,25 @@ export const CalendarPage = () => {
                         fontSize: '1rem',
                         '--fc-border-color': 'rgba(145, 158, 171, 0.2)',
                         '--fc-page-bg-color': '#fff',
-                        '--fc-neutral-bg-color': '#F4F6F8',
-                        '--fc-neutral-text-color': '#637381',
+                        '--fc-neutral-bg-color': 'var(--palette-background-neutral)',
+                        '--fc-neutral-text-color': 'var(--palette-text-secondary)',
                         '--fc-button-text-color': '#fff',
-                        '--fc-button-bg-color': '#00A76F',
-                        '--fc-button-border-color': '#00A76F',
+                        '--fc-button-bg-color': 'var(--palette-primary-main)',
+                        '--fc-button-border-color': 'var(--palette-primary-main)',
                         '--fc-button-hover-bg-color': '#007B55',
                         '--fc-button-hover-border-color': '#007B55',
                         '--fc-button-active-bg-color': '#005249',
                         '--fc-button-active-border-color': '#005249',
-                        '--fc-event-bg-color': '#00A76F',
-                        '--fc-event-border-color': '#00A76F',
+                        '--fc-event-bg-color': 'var(--palette-primary-main)',
+                        '--fc-event-border-color': 'var(--palette-primary-main)',
                         '--fc-event-text-color': '#fff',
                         '--fc-event-selected-overlay-color': 'rgba(0, 0, 0, 0.25)',
                         '--fc-more-link-bg-color': 'rgba(145, 158, 171, 0.12)',
-                        '--fc-more-link-text-color': '#1C252E',
+                        '--fc-more-link-text-color': 'var(--palette-text-primary)',
                         '--fc-non-business-color': 'rgba(145, 158, 171, 0.08)',
                         '--fc-highlight-color': 'rgba(0, 167, 111, 0.08)',
                         '--fc-today-bg-color': 'rgba(255, 171, 0, 0.08)',
-                        '--fc-now-indicator-color': '#FF5630',
+                        '--fc-now-indicator-color': 'var(--palette-error-main)',
                         '--fc-daygrid-event-dot-width': '8px',
                         '--fc-list-event-dot-width': '10px',
                         '--fc-list-event-hover-bg-color': 'rgba(145, 158, 171, 0.08)',
@@ -317,7 +317,7 @@ export const CalendarPage = () => {
                         position: 'sticky',
                         top: 0,
                         zIndex: 3,
-                        backgroundColor: '#fff',
+                        backgroundColor: "var(--palette-background-paper)",
                     },
                     '& .fc .fc-col-header-cell': {
                         height: '47.8px',
@@ -328,7 +328,7 @@ export const CalendarPage = () => {
                         '& .fc-col-header-cell-cushion': {
                             fontWeight: 700,
                             fontSize: '0.9375rem',
-                            color: '#1C252E',
+                            color: 'var(--palette-text-primary)',
                             textTransform: 'capitalize',
                             textDecoration: 'none !important',
                             padding: '0',
@@ -342,7 +342,7 @@ export const CalendarPage = () => {
                         verticalAlign: 'middle !important',
                     },
                     '& .fc .fc-timegrid-axis-cushion': {
-                        color: '#637381',
+                        color: 'var(--palette-text-secondary)',
                         fontSize: '0.875rem',
                         fontWeight: 400,
                         textDecoration: 'none !important',
@@ -352,7 +352,7 @@ export const CalendarPage = () => {
                         justifyContent: 'center',
                     },
                     '& .fc .fc-timegrid-slot-label-cushion': {
-                        color: '#637381',
+                        color: 'var(--palette-text-secondary)',
                         fontSize: '0.875rem',
                         fontWeight: 400,
                         textAlign: 'right',
@@ -361,8 +361,8 @@ export const CalendarPage = () => {
                     '& .fc .fc-daygrid-day': {
                         '&.fc-day-today': {
                             '& .fc-daygrid-day-number': {
-                                bgcolor: '#FF5630',
-                                color: '#fff',
+                                bgcolor: 'var(--palette-error-main)',
+                                color: "var(--palette-common-white)",
                                 borderRadius: '50%',
                                 width: '26px',
                                 height: '26px',
@@ -377,14 +377,14 @@ export const CalendarPage = () => {
                         fontSize: '0.875rem',
                         fontWeight: 400,
                         padding: '4px 8px',
-                        color: '#637381', // Default color for days without events
+                        color: 'var(--palette-text-secondary)', // Default color for days without events
                         textDecoration: 'none !important',
                     },
                     '& .fc .fc-day-has-event .fc-daygrid-day-number': {
-                        color: '#1C252E', // Bold color for days with events
+                        color: 'var(--palette-text-primary)', // Bold color for days with events
                     },
                     '& .fc .fc-daygrid-event': {
-                        borderRadius: '6px',
+                        borderRadius: "var(--shape-borderRadius-sm)",
                         padding: 0,
                         border: 'none !important',
                         marginLeft: '4px',
@@ -436,7 +436,7 @@ export const CalendarPage = () => {
                     },
                     '& .fc .fc-list-event-time': {
                         fontSize: '0.875rem',
-                        color: '#637381',
+                        color: 'var(--palette-text-secondary)',
                         fontWeight: 400,
                     },
                     '& .fc .fc-list-event-title': {
@@ -458,7 +458,7 @@ export const CalendarPage = () => {
                         sx={{
                             gap: '4px',
                             p: 0.5,
-                            border: '1px solid #919eab29',
+                            border: '1px solid var(--palette-text-disabled)29',
                             borderRadius: "10px",
                             '& .MuiToggleButton-root': {
                                 border: 'none !important',
@@ -466,7 +466,7 @@ export const CalendarPage = () => {
                                 p: '4px !important',
                                 '&.Mui-selected': {
                                     bgcolor: 'rgba(28, 37, 46, 0.08)',
-                                    color: '#1C252E',
+                                    color: 'var(--palette-text-primary)',
                                     '&:hover': {
                                         bgcolor: 'rgba(28, 37, 46, 0.16)',
                                     }
@@ -498,15 +498,15 @@ export const CalendarPage = () => {
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <IconButton size="medium" onClick={handlePrev}>
-                            <ChevronLeftIcon sx={{ fontSize: 20, color: '#637381' }} />
+                            <ChevronLeftIcon sx={{ fontSize: 20, color: 'var(--palette-text-secondary)' }} />
                         </IconButton>
 
-                        <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.0625rem', minWidth: '160px', textAlign: 'center', color: "#1C252E" }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.0625rem', minWidth: '160px', textAlign: 'center', color: "var(--palette-text-primary)" }}>
                             {capitalizeFirstLetter(dayjs(date).format('MMMM YYYY'))}
                         </Typography>
 
                         <IconButton size="medium" onClick={handleNext}>
-                            <ChevronRightIcon sx={{ fontSize: 20, color: '#637381' }} />
+                            <ChevronRightIcon sx={{ fontSize: 20, color: 'var(--palette-text-secondary)' }} />
                         </IconButton>
                     </Box>
 
@@ -516,8 +516,8 @@ export const CalendarPage = () => {
                             size="small"
                             onClick={handleToday}
                             sx={{
-                                bgcolor: '#FF5630',
-                                borderRadius: '8px',
+                                bgcolor: 'var(--palette-error-main)',
+                                borderRadius: "var(--shape-borderRadius)",
                                 minHeight: "30px",
                                 minWidth: "64px",
                                 fontSize: "0.75rem",
@@ -532,8 +532,8 @@ export const CalendarPage = () => {
                             Today
                         </Button>
                         <IconButton size="medium" onClick={handleOpenFilters}>
-                            <Badge variant="dot" sx={{ '& .MuiBadge-badge': { bgcolor: '#FF5630' } }} invisible={false}>
-                                <CalendarFilterIcon sx={{ color: '#637381' }} />
+                            <Badge variant="dot" sx={{ '& .MuiBadge-badge': { bgcolor: 'var(--palette-error-main)' } }} invisible={false}>
+                                <CalendarFilterIcon sx={{ color: 'var(--palette-text-secondary)' }} />
                             </Badge>
                         </IconButton>
                     </Box>
@@ -651,5 +651,9 @@ export const CalendarPage = () => {
         </>
     );
 };
+
+
+
+
 
 

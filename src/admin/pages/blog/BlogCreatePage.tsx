@@ -33,10 +33,10 @@ export const BlogCreatePage = () => {
                     root: {
                         backgroundImage: "none !important",
                         backdropFilter: "none !important",
-                        backgroundColor: "#fff !important",
-                        boxShadow: "0 0 2px 0 #919eab33, 0 12px 24px -4px #919eab1f",
-                        borderRadius: "16px",
-                        color: "#1C252E",
+                        backgroundColor: "var(--palette-background-paper) !important",
+                        boxShadow: "var(--customShadows-card)",
+                        borderRadius: "var(--shape-borderRadius-lg)",
+                        color: "var(--palette-text-primary)",
                     },
                 }
             },
@@ -49,7 +49,7 @@ export const BlogCreatePage = () => {
                         fontSize: '0.875rem',
                         padding: '6px',
                         marginBottom: '4px',
-                        borderRadius: '6px',
+                        borderRadius: "var(--shape-borderRadius-sm)",
                     },
                 },
             },
@@ -104,7 +104,7 @@ export const BlogCreatePage = () => {
 
     return (
         <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
+            <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
                     <Title title={t("admin.blog.title.create")} />
                     <Breadcrumb
@@ -119,8 +119,8 @@ export const BlogCreatePage = () => {
             <ThemeProvider theme={localTheme}>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <Stack sx={{
-                        margin: "0px 120px",
-                        gap: "40px"
+                        margin: "0px calc(15 * var(--spacing))",
+                        gap: "calc(5 * var(--spacing))"
                     }}>
                         <CollapsibleCard
                             title={t("admin.common.details")}
@@ -128,7 +128,7 @@ export const BlogCreatePage = () => {
                             expanded={expandedDetail}
                             onToggle={toggle(setExpandedDetail)}
                         >
-                            <Stack p="24px" gap="24px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Controller
                                     name="name"
                                     control={control}
@@ -183,12 +183,12 @@ export const BlogCreatePage = () => {
                             expanded={expandedExtra}
                             onToggle={toggle(setExpandedExtra)}
                         >
-                            <Stack p="24px" gap="24px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Box
                                     sx={{
                                         display: "grid",
                                         gridTemplateColumns: "repeat(2, 1fr)",
-                                        gap: "24px 16px",
+                                        gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))",
                                     }}
                                 >
                                     <Controller
@@ -220,7 +220,7 @@ export const BlogCreatePage = () => {
                                 </Box>
                             </Stack>
                         </CollapsibleCard>
-                        <Box gap="24px" sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+                        <Box gap="calc(3 * var(--spacing))" sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
                             <LoadingButton
                                 type="submit"
                                 loading={isPending}
@@ -235,3 +235,6 @@ export const BlogCreatePage = () => {
         </>
     )
 }
+
+
+

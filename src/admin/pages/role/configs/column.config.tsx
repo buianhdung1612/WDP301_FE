@@ -40,7 +40,7 @@ export const getColumnsConfig = (
                             fontSize: '0.6875rem',
                             bgcolor: 'rgba(0, 167, 111, 0.16)',
                             color: 'rgb(0, 120, 103)',
-                            borderRadius: '6px',
+                            borderRadius: "var(--shape-borderRadius-sm)",
                             fontWeight: 700,
                             width: 'fit-content'
                         }}>
@@ -113,7 +113,7 @@ export const getColumnsConfig = (
                         } as any)}
                     />
                     <GridActionsCellItem
-                        icon={<DeleteIcon sx={{ fontSize: '1.25rem', color: '#FF5630' }} />}
+                        icon={<DeleteIcon sx={{ fontSize: '1.25rem', color: 'var(--palette-error-main)' }} />}
                         label="Xóa"
                         onClick={() => onDelete(params.row._id)}
                         showInMenu
@@ -122,7 +122,7 @@ export const getColumnsConfig = (
                                 '& .MuiTypography-root': {
                                     fontSize: '0.8125rem',
                                     fontWeight: "600",
-                                    color: "#FF5630"
+                                    color: "var(--palette-error-main)"
                                 },
                             },
                         } as any)}
@@ -139,3 +139,7 @@ export const columnsInitialState = {
         },
     },
 };
+
+
+
+

@@ -39,7 +39,7 @@ export const ServiceColorDialog: React.FC<ServiceColorDialogProps> = ({
             onClose={onClose}
             PaperProps={{
                 sx: {
-                    borderRadius: '16px',
+                    borderRadius: "var(--shape-borderRadius-lg)",
                     width: '100%',
                     maxWidth: '430px',
                     bgcolor: 'background.paper',
@@ -54,10 +54,10 @@ export const ServiceColorDialog: React.FC<ServiceColorDialogProps> = ({
                 p: '16px 20px',
                 borderBottom: '1px dashed rgba(145, 158, 171, 0.2)'
             }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.125rem', color: '#1C252E' }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.125rem', color: 'var(--palette-text-primary)' }}>
                     Cấu hình màu sắc dịch vụ
                 </Typography>
-                <IconButton onClick={onClose} size="small" sx={{ color: '#637381' }}>
+                <IconButton onClick={onClose} size="small" sx={{ color: 'var(--palette-text-secondary)' }}>
                     <CloseIcon sx={{ fontSize: 20 }} />
                 </IconButton>
             </DialogTitle>
@@ -74,7 +74,7 @@ export const ServiceColorDialog: React.FC<ServiceColorDialogProps> = ({
                         const currentColor = serviceColors[id] || colors[0];
                         return (
                             <Box key={id}>
-                                <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, fontSize: '0.875rem', color: '#1C252E' }}>
+                                <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-primary)' }}>
                                     {service.name}
                                 </Typography>
                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
@@ -100,7 +100,7 @@ export const ServiceColorDialog: React.FC<ServiceColorDialogProps> = ({
                                             }}
                                         >
                                             {currentColor === color && (
-                                                <CheckIcon sx={{ color: '#fff', fontSize: 20 }} />
+                                                <CheckIcon sx={{ color: "var(--palette-common-white)", fontSize: 20 }} />
                                             )}
                                         </Box>
                                     ))}
@@ -113,3 +113,7 @@ export const ServiceColorDialog: React.FC<ServiceColorDialogProps> = ({
         </Dialog>
     );
 };
+
+
+
+

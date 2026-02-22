@@ -79,7 +79,7 @@ export const DepartmentListPage = () => {
     );
 
     return (
-        <Box sx={{ p: '24px' }}>
+        <Box sx={{ p: "calc(3 * var(--spacing))" }}>
             <Box sx={{ mb: '40px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <Box sx={{ flexGrow: 1 }}>
                     <Title title="Quản lý Phòng ban" />
@@ -131,5 +131,9 @@ export const DepartmentListPage = () => {
         </Box>
     );
 };
+
+
+
+
 
 

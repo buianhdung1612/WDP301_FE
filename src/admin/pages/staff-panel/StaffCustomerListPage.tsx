@@ -9,7 +9,7 @@ export const StaffCustomerListPage = () => {
 
     return (
         <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
+            <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
                     <Title title="Khách hàng của tôi" />
                     <Breadcrumb
@@ -25,3 +25,7 @@ export const StaffCustomerListPage = () => {
         </>
     );
 };
+
+
+
+

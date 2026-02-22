@@ -113,13 +113,13 @@ export const ScheduleEventDialog = ({
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
                     {selectedEvent ? 'Chỉnh sửa lịch làm việc' : 'Phân ca làm việc mới'}
                 </Typography>
-                <IconButton onClick={onClose} size="small" sx={{ color: '#637381' }}>
+                <IconButton onClick={onClose} size="small" sx={{ color: 'var(--palette-text-secondary)' }}>
                     <CloseIcon />
                 </IconButton>
             </DialogTitle>
             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    <DialogContent sx={{ bgcolor: '#F4F6F8 !important', py: '24px !important' }}>
+                    <DialogContent sx={{ bgcolor: 'var(--palette-background-neutral) !important', py: '24px !important' }}>
                         <Grid container spacing={2.5}>
                             <Grid size={{ xs: 12 }}>
                                 <Controller
@@ -134,7 +134,7 @@ export const ScheduleEventDialog = ({
                                             label="Nhân viên"
                                             error={!!error}
                                             helperText={error?.message}
-                                            sx={{ bgcolor: '#fff', borderRadius: '8px' }}
+                                            sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }}
                                         >
                                             {filteredAccounts.map((account: any) => {
                                                 const isBusy = busyStaffIds.includes(account._id) && account._id !== selectedEvent?.extendedProps?.staffId;
@@ -154,7 +154,7 @@ export const ScheduleEventDialog = ({
                                                             {account.fullName} ({account.email})
                                                         </Box>
                                                         {isBusy && (
-                                                            <Typography variant="caption" sx={{ color: '#FF5630', fontWeight: 600 }}>
+                                                            <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 600 }}>
                                                                 Bận
                                                             </Typography>
                                                         )}
@@ -183,7 +183,7 @@ export const ScheduleEventDialog = ({
                                                 label="Ca làm việc"
                                                 error={!!error}
                                                 helperText={error?.message}
-                                                sx={{ bgcolor: '#fff', borderRadius: '8px' }}
+                                                sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }}
                                             >
                                                 {filteredShifts.map((shift: any) => (
                                                     <MenuItem key={shift._id} value={shift._id}>
@@ -210,7 +210,7 @@ export const ScheduleEventDialog = ({
                                             slotProps={{
                                                 textField: {
                                                     fullWidth: true,
-                                                    sx: { bgcolor: '#fff', borderRadius: '8px' }
+                                                    sx: { bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }
                                                 }
                                             }}
                                         />
@@ -229,7 +229,7 @@ export const ScheduleEventDialog = ({
                                             multiline
                                             rows={3}
                                             label="Ghi chú"
-                                            sx={{ bgcolor: '#fff', borderRadius: '8px' }}
+                                            sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }}
                                         />
                                     )}
                                 />
@@ -244,14 +244,14 @@ export const ScheduleEventDialog = ({
                                 variant="outlined"
                                 disabled={loading}
                                 sx={{
-                                    borderRadius: '8px',
+                                    borderRadius: "var(--shape-borderRadius)",
                                     textTransform: 'none',
                                     fontWeight: 700,
                                     mr: 'auto',
                                     borderColor: 'rgba(255, 86, 48, 0.32)',
                                     '&:hover': {
                                         bgcolor: 'rgba(255, 86, 48, 0.08)',
-                                        borderColor: '#FF5630',
+                                        borderColor: 'var(--palette-error-main)',
                                     }
                                 }}
                             >
@@ -262,15 +262,15 @@ export const ScheduleEventDialog = ({
                             onClick={onClose}
                             variant="outlined"
                             sx={{
-                                borderRadius: '8px',
+                                borderRadius: "var(--shape-borderRadius)",
                                 textTransform: 'none',
                                 fontWeight: 700,
                                 padding: '8px 20px',
-                                color: '#1C252E',
+                                color: 'var(--palette-text-primary)',
                                 borderColor: 'rgba(145, 158, 171, 0.32)',
                                 '&:hover': {
                                     bgcolor: 'rgba(145, 158, 171, 0.08)',
-                                    borderColor: '#1C252E',
+                                    borderColor: 'var(--palette-text-primary)',
                                 }
                             }}
                         >
@@ -281,15 +281,15 @@ export const ScheduleEventDialog = ({
                             variant="contained"
                             disabled={loading}
                             sx={{
-                                borderRadius: '8px',
+                                borderRadius: "var(--shape-borderRadius)",
                                 textTransform: 'none',
                                 fontWeight: 700,
                                 padding: '8px 20px',
-                                bgcolor: '#1C252E',
+                                bgcolor: 'var(--palette-text-primary)',
                                 boxShadow: 'none',
                                 '&:hover': {
-                                    bgcolor: '#454F5B',
-                                    boxShadow: '0 8px 16px 0 rgba(145 158 171 / 16%)',
+                                    bgcolor: "var(--palette-grey-700)",
+                                    boxShadow: "var(--customShadows-z8)",
                                 }
                             }}
                         >
@@ -301,3 +301,7 @@ export const ScheduleEventDialog = ({
         </Dialog>
     );
 };
+
+
+
+

@@ -68,7 +68,7 @@ export const StockProgress = ({ stock, maxStock = 20 }: StockProgressProps) => {
                 height: '100%',
                 width: '100%',
                 fontSize: '0.75rem',
-                color: '#637381',
+                color: 'var(--palette-text-secondary)',
             }}
         >
             <LinearProgress
@@ -77,12 +77,12 @@ export const StockProgress = ({ stock, maxStock = 20 }: StockProgressProps) => {
                 sx={{
                     width: '80px',
                     height: '6px',
-                    borderRadius: '16px',
+                    borderRadius: "var(--shape-borderRadius-lg)",
                     marginBottom: '8px',
                     backgroundColor: status.bgColor,
                     '& .MuiLinearProgress-bar': {
                         backgroundColor: status.color,
-                        borderRadius: '16px',
+                        borderRadius: "var(--shape-borderRadius-lg)",
                     },
                 }}
             />
@@ -90,3 +90,7 @@ export const StockProgress = ({ stock, maxStock = 20 }: StockProgressProps) => {
         </Box>
     );
 };
+
+
+
+

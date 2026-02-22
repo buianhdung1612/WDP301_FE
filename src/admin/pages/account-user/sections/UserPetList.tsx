@@ -157,9 +157,9 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
     };
 
     return (
-        <Card sx={{ mt: 3, borderRadius: '16px', border: '1px solid rgba(145, 158, 171, 0.2)', boxShadow: 'none' }}>
-            <Box sx={{ p: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem', color: '#1C252E' }}>
+        <Card sx={{ mt: 3, borderRadius: "var(--shape-borderRadius-lg)", border: '1px solid rgba(145, 158, 171, 0.2)', boxShadow: 'none' }}>
+            <Box sx={{ p: "calc(3 * var(--spacing))", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem', color: 'var(--palette-text-primary)' }}>
                     Danh sách thú cưng
                 </Typography>
                 <Button
@@ -167,19 +167,19 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
                     startIcon={<Icon icon="eva:plus-fill" />}
                     onClick={() => handleOpenDialog()}
                     sx={{
-                        bgcolor: '#1C252E',
-                        color: '#fff',
+                        bgcolor: 'var(--palette-text-primary)',
+                        color: "var(--palette-common-white)",
                         minHeight: "2.25rem",
                         minWidth: "4rem",
                         fontWeight: 700,
                         fontSize: "0.875rem",
                         padding: "6px 12px",
-                        borderRadius: "8px",
+                        borderRadius: "var(--shape-borderRadius)",
                         textTransform: "none",
                         boxShadow: "none",
                         "&:hover": {
-                            bgcolor: '#454F5B',
-                            boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
+                            bgcolor: "var(--palette-grey-700)",
+                            boxShadow: "var(--customShadows-z8)"
                         }
                     }}
                 >
@@ -190,19 +190,19 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
             <TableContainer>
                 <Table size="medium">
                     <TableHead>
-                        <TableRow sx={{ bgcolor: '#F4F6F8' }}>
-                            <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem', color: '#637381', borderBottom: 'none' }}>Tên</TableCell>
-                            <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem', color: '#637381', borderBottom: 'none' }}>Loại</TableCell>
-                            <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem', color: '#637381', borderBottom: 'none' }}>Giống</TableCell>
-                            <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem', color: '#637381', borderBottom: 'none' }}>Cân nặng</TableCell>
-                            <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem', color: '#637381', borderBottom: 'none' }}>Tuổi</TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.875rem', color: '#637381', borderBottom: 'none' }}>Hành động</TableCell>
+                        <TableRow sx={{ bgcolor: 'var(--palette-background-neutral)' }}>
+                            <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-secondary)', borderBottom: 'none' }}>Tên</TableCell>
+                            <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-secondary)', borderBottom: 'none' }}>Loại</TableCell>
+                            <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-secondary)', borderBottom: 'none' }}>Giống</TableCell>
+                            <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-secondary)', borderBottom: 'none' }}>Cân nặng</TableCell>
+                            <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-secondary)', borderBottom: 'none' }}>Tuổi</TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-secondary)', borderBottom: 'none' }}>Hành động</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {pets.map((pet: any) => (
                             <TableRow key={pet._id} sx={{ '&:hover': { bgcolor: '#F9FAFB' } }}>
-                                <TableCell sx={{ borderBottom: '1px dashed #919eab33' }}>
+                                <TableCell sx={{ borderBottom: '1px dashed var(--palette-text-disabled)33' }}>
                                     <Stack direction="row" spacing={2} alignItems="center">
                                         <Avatar
                                             src={pet.avatar}
@@ -210,43 +210,43 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
                                             sx={{
                                                 width: '2.5rem',
                                                 height: '2.5rem',
-                                                borderRadius: '8px',
+                                                borderRadius: "var(--shape-borderRadius)",
                                                 bgcolor: pet.type === 'dog' ? 'rgba(0, 167, 111, 0.08)' : 'rgba(142, 51, 255, 0.08)'
                                             }}
                                         >
                                             <Icon
                                                 icon={pet.type === 'dog' ? 'mdi:dog' : 'mdi:cat'}
-                                                style={{ fontSize: '1.5rem', color: pet.type === 'dog' ? '#00A76F' : '#8E33FF' }}
+                                                style={{ fontSize: '1.5rem', color: pet.type === 'dog' ? 'var(--palette-primary-main)' : '#8E33FF' }}
                                             />
                                         </Avatar>
                                         <Box>
-                                            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem', color: '#1C252E' }}>{pet.name}</Typography>
-                                            <Typography variant="caption" sx={{ color: '#637381', fontSize: '0.75rem' }}>
+                                            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-primary)' }}>{pet.name}</Typography>
+                                            <Typography variant="caption" sx={{ color: 'var(--palette-text-secondary)', fontSize: '0.75rem' }}>
                                                 {pet.gender === 'male' ? 'Đực' : pet.gender === 'female' ? 'Cái' : 'Không rõ'}
                                             </Typography>
                                         </Box>
                                     </Stack>
                                 </TableCell>
-                                <TableCell sx={{ borderBottom: '1px dashed #919eab33', fontSize: '0.875rem' }}>
+                                <TableCell sx={{ borderBottom: '1px dashed var(--palette-text-disabled)33', fontSize: '0.875rem' }}>
                                     <Stack direction="row" spacing={1} alignItems="center">
                                         <Icon
                                             icon={pet.type === 'dog' ? 'mdi:dog' : 'mdi:cat'}
-                                            style={{ color: '#637381', fontSize: '1.25rem' }}
+                                            style={{ color: 'var(--palette-text-secondary)', fontSize: '1.25rem' }}
                                         />
                                         <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
                                             {pet.type === 'dog' ? 'Chó' : 'Mèo'}
                                         </Typography>
                                     </Stack>
                                 </TableCell>
-                                <TableCell sx={{ borderBottom: '1px dashed #919eab33', fontSize: '0.875rem' }}>{pet.breed || '-'}</TableCell>
-                                <TableCell sx={{ borderBottom: '1px dashed #919eab33', fontSize: '0.875rem' }}>{pet.weight ? `${pet.weight} kg` : '-'}</TableCell>
-                                <TableCell sx={{ borderBottom: '1px dashed #919eab33', fontSize: '0.875rem' }}>{pet.age ? `${pet.age} tuổi` : '-'}</TableCell>
-                                <TableCell align="right" sx={{ borderBottom: '1px dashed #919eab33' }}>
+                                <TableCell sx={{ borderBottom: '1px dashed var(--palette-text-disabled)33', fontSize: '0.875rem' }}>{pet.breed || '-'}</TableCell>
+                                <TableCell sx={{ borderBottom: '1px dashed var(--palette-text-disabled)33', fontSize: '0.875rem' }}>{pet.weight ? `${pet.weight} kg` : '-'}</TableCell>
+                                <TableCell sx={{ borderBottom: '1px dashed var(--palette-text-disabled)33', fontSize: '0.875rem' }}>{pet.age ? `${pet.age} tuổi` : '-'}</TableCell>
+                                <TableCell align="right" sx={{ borderBottom: '1px dashed var(--palette-text-disabled)33' }}>
                                     <Stack direction="row" justifyContent="flex-end" spacing={1}>
-                                        <IconButton onClick={() => handleOpenDialog(pet)} sx={{ color: '#637381', '&:hover': { bgcolor: 'rgba(145, 158, 171, 0.08)' } }}>
+                                        <IconButton onClick={() => handleOpenDialog(pet)} sx={{ color: 'var(--palette-text-secondary)', '&:hover': { bgcolor: 'rgba(145, 158, 171, 0.08)' } }}>
                                             <Icon icon="eva:edit-fill" width={22} />
                                         </IconButton>
-                                        <IconButton onClick={() => handleDelete(pet._id)} sx={{ color: '#FF5630', '&:hover': { bgcolor: 'rgba(255, 86, 48, 0.08)' } }}>
+                                        <IconButton onClick={() => handleDelete(pet._id)} sx={{ color: 'var(--palette-error-main)', '&:hover': { bgcolor: 'rgba(255, 86, 48, 0.08)' } }}>
                                             <Icon icon="eva:trash-2-fill" width={22} />
                                         </IconButton>
                                     </Stack>
@@ -257,8 +257,8 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
                 </Table>
                 {pets.length === 0 && !isLoading && (
                     <Box sx={{ py: 10, textAlign: 'center' }}>
-                        <Icon icon="mdi:paw-off" style={{ width: '4rem', height: '4rem', color: '#919EAB', opacity: 0.24, marginBottom: '1rem' }} />
-                        <Typography variant="body2" sx={{ color: '#919EAB', fontSize: '0.875rem', fontWeight: 500 }}>
+                        <Icon icon="mdi:paw-off" style={{ width: '4rem', height: '4rem', color: 'var(--palette-text-disabled)', opacity: 0.24, marginBottom: '1rem' }} />
+                        <Typography variant="body2" sx={{ color: 'var(--palette-text-disabled)', fontSize: '0.875rem', fontWeight: 500 }}>
                             Khách hàng này chưa có thú cưng nào
                         </Typography>
                     </Box>
@@ -272,7 +272,7 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
                 maxWidth="sm"
                 PaperProps={{
                     sx: {
-                        borderRadius: '16px',
+                        borderRadius: "var(--shape-borderRadius-lg)",
                         backgroundImage: 'none',
                         p: 1
                     }
@@ -291,16 +291,16 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
                                         width: 100,
                                         height: 100,
                                         cursor: 'pointer',
-                                        border: '2px dashed #919EAB33',
+                                        border: '2px dashed var(--palette-text-disabled)33',
                                         bgcolor: 'rgba(145, 158, 171, 0.08)',
                                         '&:hover': { opacity: 0.8 }
                                     }}
                                     onClick={() => fileInputRef.current?.click()}
                                 >
                                     {isUploading ? (
-                                        <CircularProgress size={24} sx={{ color: '#1C252E' }} />
+                                        <CircularProgress size={24} sx={{ color: 'var(--palette-text-primary)' }} />
                                     ) : (
-                                        <Icon icon="solar:camera-add-bold" width={32} color="#637381" />
+                                        <Icon icon="solar:camera-add-bold" width={32} color="var(--palette-text-secondary)" />
                                     )}
                                 </Avatar>
                                 <IconButton
@@ -309,10 +309,10 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
                                         position: 'absolute',
                                         bottom: 0,
                                         right: 0,
-                                        bgcolor: '#1C252E',
-                                        color: '#fff',
+                                        bgcolor: 'var(--palette-text-primary)',
+                                        color: "var(--palette-common-white)",
                                         border: '2px solid #fff',
-                                        '&:hover': { bgcolor: '#454F5B' }
+                                        '&:hover': { bgcolor: "var(--palette-grey-700)" }
                                     }}
                                     onClick={() => fileInputRef.current?.click()}
                                 >
@@ -326,7 +326,7 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
                                 accept="image/*"
                                 onChange={handleFileChange}
                             />
-                            <Typography variant="caption" sx={{ mt: 1.5, color: '#637381', fontWeight: 500 }}>
+                            <Typography variant="caption" sx={{ mt: 1.5, color: 'var(--palette-text-secondary)', fontWeight: 500 }}>
                                 Nhấp để tải ảnh thú cưng
                             </Typography>
                         </Box>
@@ -460,7 +460,7 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
                     <Button
                         onClick={handleCloseDialog}
                         sx={{
-                            color: '#637381',
+                            color: 'var(--palette-text-secondary)',
                             fontSize: '0.875rem',
                             fontWeight: 700,
                             textTransform: 'none',
@@ -473,18 +473,18 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
                         variant="contained"
                         onClick={handleSubmit}
                         sx={{
-                            bgcolor: '#1C252E',
-                            color: '#fff',
+                            bgcolor: 'var(--palette-text-primary)',
+                            color: "var(--palette-common-white)",
                             minHeight: "2.25rem",
                             px: 3,
-                            borderRadius: '8px',
+                            borderRadius: "var(--shape-borderRadius)",
                             fontSize: '0.875rem',
                             fontWeight: 700,
                             textTransform: 'none',
                             boxShadow: 'none',
                             '&:hover': {
-                                bgcolor: '#454F5B',
-                                boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
+                                bgcolor: "var(--palette-grey-700)",
+                                boxShadow: "var(--customShadows-z8)"
                             }
                         }}
                     >
@@ -495,3 +495,7 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
         </Card>
     );
 };
+
+
+
+

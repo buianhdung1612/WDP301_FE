@@ -94,16 +94,16 @@ export const AttendanceConfigPage = () => {
                 <Box sx={{
                     display: 'grid',
                     gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-                    gap: '24px'
+                    gap: "calc(3 * var(--spacing))"
                 }}>
                     {/* Time Window Settings */}
-                    <Card sx={{ p: 3, borderRadius: '16px' }}>
+                    <Card sx={{ p: 3, borderRadius: "var(--shape-borderRadius-lg)" }}>
                         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
-                            <Icon icon="solar:clock-circle-bold-duotone" width={24} color="#00A76F" />
+                            <Icon icon="solar:clock-circle-bold-duotone" width={24} color="var(--palette-primary-main)" />
                             <Typography variant="h6">Giờ mở cửa hệ thống (24h)</Typography>
                         </Stack>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: "calc(2 * var(--spacing))" }}>
                                 <TimePicker
                                     label="Giờ bắt đầu"
                                     value={parseTimeString(formData.workDayStartTime)}
@@ -138,7 +138,7 @@ export const AttendanceConfigPage = () => {
                     </Card>
 
                     {/* Attendance Limits */}
-                    <Card sx={{ p: 3, borderRadius: '16px' }}>
+                    <Card sx={{ p: 3, borderRadius: "var(--shape-borderRadius-lg)" }}>
                         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
                             <Icon icon="solar:user-rounded-bold-duotone" width={24} color="#FFAB00" />
                             <Typography variant="h6">Quy định Chấm công</Typography>
@@ -173,12 +173,12 @@ export const AttendanceConfigPage = () => {
 
                     {/* Other Rules */}
                     <Box sx={{ gridColumn: { xs: '1', md: 'span 2' } }}>
-                        <Card sx={{ p: 3, borderRadius: '16px' }}>
+                        <Card sx={{ p: 3, borderRadius: "var(--shape-borderRadius-lg)" }}>
                             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
                                 <Icon icon="solar:shield-check-bold-duotone" width={24} color="#00B8D9" />
                                 <Typography variant="h6">Các quy tắc khác</Typography>
                             </Stack>
-                            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: '16px' }}>
+                            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: "calc(2 * var(--spacing))" }}>
                                 <TextField
                                     fullWidth
                                     type="number"
@@ -221,3 +221,7 @@ export const AttendanceConfigPage = () => {
         </Box>
     );
 };
+
+
+
+

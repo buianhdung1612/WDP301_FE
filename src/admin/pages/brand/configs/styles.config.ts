@@ -6,7 +6,7 @@ export const toolbarStyles = {
     root: {
         padding: '16px',
         paddingRight: "8px",
-        gap: '16px',
+        gap: "calc(2 * var(--spacing))",
         display: 'flex',
         justifyContent: 'space-between',
         minHeight: 'auto',
@@ -17,7 +17,7 @@ export const toolbarStyles = {
 export const dataGridCardStyles = {
     background: COLORS.background,
     color: COLORS.primary,
-    borderRadius: '16px',
+    borderRadius: 'var(--shape-borderRadius-lg)',
     height: '640px',
     display: 'flex',
     flexDirection: 'column' as const,
@@ -55,7 +55,7 @@ export const dataGridStyles: SxProps<Theme> = {
 
         '& .MuiDataGrid-menuIcon': {
             '& .MuiButtonBase-root': {
-                color: "#637381",
+                color: "var(--palette-text-secondary)",
                 rotate: '90deg'
             }
 
@@ -182,7 +182,7 @@ export const dataGridStyles: SxProps<Theme> = {
     },
 
     '& .MuiDataGrid-actionsCell .MuiIconButton-root': {
-        color: '#637381',
+        color: 'var(--palette-text-secondary)',
     },
 
     '& .MuiDataGrid-actionsCell .MuiSvgIcon-root': {
@@ -197,3 +197,8 @@ export const dataGridStyles: SxProps<Theme> = {
 
     borderWidth: "0"
 };
+
+
+
+
+

@@ -141,8 +141,8 @@ export const QuickCustomerDialog = ({ open, onClose, onSuccess }: QuickCustomerD
             fullWidth
             PaperProps={{
                 sx: {
-                    borderRadius: '16px',
-                    boxShadow: '0 0 2px 0 rgba(145, 158, 171, 0.2), 0 12px 24px -4px rgba(145, 158, 171, 0.12)'
+                    borderRadius: "var(--shape-borderRadius-lg)",
+                    boxShadow: "var(--customShadows-card)"
                 }
             }}
         >
@@ -177,7 +177,7 @@ export const QuickCustomerDialog = ({ open, onClose, onSuccess }: QuickCustomerD
                                 fullWidth
                                 value={customerData.fullName}
                                 onChange={(e) => setCustomerData({ ...customerData, fullName: e.target.value })}
-                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
+                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: "var(--shape-borderRadius)" } }}
                             />
                             <Stack direction="row" spacing={2}>
                                 <TextField
@@ -185,14 +185,14 @@ export const QuickCustomerDialog = ({ open, onClose, onSuccess }: QuickCustomerD
                                     fullWidth
                                     value={customerData.phone}
                                     onChange={(e) => setCustomerData({ ...customerData, phone: e.target.value })}
-                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
+                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: "var(--shape-borderRadius)" } }}
                                 />
                                 <TextField
                                     label="Email (tùy chọn)"
                                     fullWidth
                                     value={customerData.email}
                                     onChange={(e) => setCustomerData({ ...customerData, email: e.target.value })}
-                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
+                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: "var(--shape-borderRadius)" } }}
                                 />
                             </Stack>
                         </Stack>
@@ -212,7 +212,7 @@ export const QuickCustomerDialog = ({ open, onClose, onSuccess }: QuickCustomerD
                                 onClick={handleAddPet}
                                 sx={{
                                     textTransform: 'none',
-                                    borderRadius: '8px',
+                                    borderRadius: "var(--shape-borderRadius)",
                                     fontWeight: 600
                                 }}
                             >
@@ -227,12 +227,12 @@ export const QuickCustomerDialog = ({ open, onClose, onSuccess }: QuickCustomerD
                                     sx={{
                                         p: 2,
                                         bgcolor: 'rgba(145, 158, 171, 0.04)',
-                                        borderRadius: '12px',
+                                        borderRadius: "var(--shape-borderRadius-md)",
                                         border: '1px solid rgba(145, 158, 171, 0.12)'
                                     }}
                                 >
                                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                                        <Typography variant="caption" sx={{ fontWeight: 700, color: '#637381' }}>
+                                        <Typography variant="caption" sx={{ fontWeight: 700, color: 'var(--palette-text-secondary)' }}>
                                             Thú cưng #{index + 1}
                                         </Typography>
                                         {pets.length > 1 && (
@@ -252,7 +252,7 @@ export const QuickCustomerDialog = ({ open, onClose, onSuccess }: QuickCustomerD
                                                 fullWidth
                                                 value={pet.name}
                                                 onChange={(e) => handlePetChange(index, 'name', e.target.value)}
-                                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', bgcolor: '#fff' } }}
+                                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: "var(--shape-borderRadius)", bgcolor: "var(--palette-background-paper)" } }}
                                             />
                                             <TextField
                                                 label="Loại"
@@ -260,7 +260,7 @@ export const QuickCustomerDialog = ({ open, onClose, onSuccess }: QuickCustomerD
                                                 fullWidth
                                                 value={pet.type}
                                                 onChange={(e) => handlePetChange(index, 'type', e.target.value)}
-                                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', bgcolor: '#fff' } }}
+                                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: "var(--shape-borderRadius)", bgcolor: "var(--palette-background-paper)" } }}
                                             >
                                                 <MenuItem value="dog">Chó</MenuItem>
                                                 <MenuItem value="cat">Mèo</MenuItem>
@@ -272,7 +272,7 @@ export const QuickCustomerDialog = ({ open, onClose, onSuccess }: QuickCustomerD
                                                 fullWidth
                                                 value={pet.breed}
                                                 onChange={(e) => handlePetChange(index, 'breed', e.target.value)}
-                                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', bgcolor: '#fff' } }}
+                                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: "var(--shape-borderRadius)", bgcolor: "var(--palette-background-paper)" } }}
                                             />
                                             <TextField
                                                 label="Cân nặng (kg) *"
@@ -280,7 +280,7 @@ export const QuickCustomerDialog = ({ open, onClose, onSuccess }: QuickCustomerD
                                                 type="number"
                                                 value={pet.weight}
                                                 onChange={(e) => handlePetChange(index, 'weight', e.target.value)}
-                                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', bgcolor: '#fff' } }}
+                                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: "var(--shape-borderRadius)", bgcolor: "var(--palette-background-paper)" } }}
                                             />
                                             <TextField
                                                 label="Giới tính"
@@ -288,7 +288,7 @@ export const QuickCustomerDialog = ({ open, onClose, onSuccess }: QuickCustomerD
                                                 fullWidth
                                                 value={pet.gender}
                                                 onChange={(e) => handlePetChange(index, 'gender', e.target.value)}
-                                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', bgcolor: '#fff' } }}
+                                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: "var(--shape-borderRadius)", bgcolor: "var(--palette-background-paper)" } }}
                                             >
                                                 <MenuItem value="male">Đực</MenuItem>
                                                 <MenuItem value="female">Cái</MenuItem>
@@ -306,10 +306,10 @@ export const QuickCustomerDialog = ({ open, onClose, onSuccess }: QuickCustomerD
                 <Button
                     onClick={handleClose}
                     sx={{
-                        borderRadius: '8px',
+                        borderRadius: "var(--shape-borderRadius)",
                         textTransform: 'none',
                         fontWeight: 600,
-                        color: '#637381'
+                        color: 'var(--palette-text-secondary)'
                     }}
                 >
                     Hủy
@@ -320,11 +320,11 @@ export const QuickCustomerDialog = ({ open, onClose, onSuccess }: QuickCustomerD
                     disabled={isCreatingUser || isCreatingPet}
                     sx={{
                         bgcolor: COLORS.primary,
-                        borderRadius: '8px',
+                        borderRadius: "var(--shape-borderRadius)",
                         textTransform: 'none',
                         fontWeight: 700,
                         px: 3,
-                        '&:hover': { bgcolor: '#454F5B' }
+                        '&:hover': { bgcolor: "var(--palette-grey-700)" }
                     }}
                 >
                     {isCreatingUser || isCreatingPet ? "Đang tạo..." : "Tạo khách hàng"}
@@ -333,3 +333,7 @@ export const QuickCustomerDialog = ({ open, onClose, onSuccess }: QuickCustomerD
         </Dialog>
     );
 };
+
+
+
+

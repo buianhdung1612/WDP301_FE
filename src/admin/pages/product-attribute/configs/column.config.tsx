@@ -20,8 +20,8 @@ export const RenderNameCell = (params: GridRenderCellParams) => {
             sx={{
                 display: 'flex',
                 alignItems: 'center',
-                py: "16px",
-                gap: "16px",
+                py: "calc(2 * var(--spacing))",
+                gap: "calc(2 * var(--spacing))",
                 width: "100%",
             }}>
             <Link
@@ -54,7 +54,7 @@ export const RenderTypeCell = (params: GridRenderCellParams) => {
         <span
             style={{
                 fontSize: '0.875rem',
-                color: '#637381',
+                color: 'var(--palette-text-secondary)',
             }}
         >
             {typeOption ? typeOption.label : type}
@@ -78,7 +78,7 @@ export const RenderOptionsCell = (params: GridRenderCellParams) => {
                         fontSize: '0.6875rem',
                         fontWeight: 600,
                         height: '24px',
-                        borderRadius: '6px',
+                        borderRadius: "var(--shape-borderRadius-sm)",
                         background: '#00B8D929',
                         color: '#006C9C',
                         border: 'none'
@@ -93,7 +93,7 @@ export const RenderOptionsCell = (params: GridRenderCellParams) => {
                         fontSize: '0.6875rem',
                         fontWeight: 600,
                         height: '24px',
-                        borderRadius: '6px',
+                        borderRadius: "var(--shape-borderRadius-sm)",
                         background: '#00B8D929',
                         color: '#006C9C',
                     }}
@@ -152,7 +152,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                         '& .MuiTypography-root': {
                             fontSize: '0.8125rem',
                             fontWeight: "600",
-                            color: "#FF5630"
+                            color: "var(--palette-error-main)"
                         },
                     },
                 } as any)}
@@ -202,3 +202,7 @@ export const columnsInitialState = {
         paginationModel: { page: 0, pageSize: 10 },
     },
 };
+
+
+
+

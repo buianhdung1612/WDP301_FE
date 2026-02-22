@@ -93,7 +93,7 @@ export const getShiftColumns = (onEdit: (id: string) => void, onDelete: (id: str
                         '& .MuiTypography-root': {
                             fontSize: '0.8125rem',
                             fontWeight: "600",
-                            color: "#FF5630"
+                            color: "var(--palette-error-main)"
                         },
                     },
                 } as any)}
@@ -101,3 +101,7 @@ export const getShiftColumns = (onEdit: (id: string) => void, onDelete: (id: str
         ]
     }
 ];
+
+
+
+

@@ -95,12 +95,12 @@ export const ShiftDialog = ({
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
                     {selectedItem ? 'Chỉnh sửa ca làm việc' : 'Thêm ca làm việc mới'}
                 </Typography>
-                <IconButton onClick={onClose} size="small" sx={{ color: '#637381' }}>
+                <IconButton onClick={onClose} size="small" sx={{ color: 'var(--palette-text-secondary)' }}>
                     <CloseIcon />
                 </IconButton>
             </DialogTitle>
             <form onSubmit={handleSubmit(onSubmit)}>
-                <DialogContent sx={{ bgcolor: '#F4F6F8 !important', py: '24px !important' }}>
+                <DialogContent sx={{ bgcolor: 'var(--palette-background-neutral) !important', py: '24px !important' }}>
                     <Grid container spacing={2.5}>
                         <Grid size={{ xs: 12 }}>
                             <Controller
@@ -115,7 +115,7 @@ export const ShiftDialog = ({
                                         placeholder="VD: Ca Sáng"
                                         error={!!error}
                                         helperText={error?.message}
-                                        sx={{ bgcolor: '#fff', borderRadius: '8px' }}
+                                        sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }}
                                     />
                                 )}
                             />
@@ -135,7 +135,7 @@ export const ShiftDialog = ({
                                             slotProps={{
                                                 textField: {
                                                     fullWidth: true,
-                                                    sx: { bgcolor: '#fff', borderRadius: '8px' }
+                                                    sx: { bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }
                                                 }
                                             }}
                                         />
@@ -158,7 +158,7 @@ export const ShiftDialog = ({
                                             slotProps={{
                                                 textField: {
                                                     fullWidth: true,
-                                                    sx: { bgcolor: '#fff', borderRadius: '8px' }
+                                                    sx: { bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }
                                                 }
                                             }}
                                         />
@@ -177,7 +177,7 @@ export const ShiftDialog = ({
                                         type="number"
                                         label="Hệ số lương"
                                         inputProps={{ step: 0.1, min: 1 }}
-                                        sx={{ bgcolor: '#fff', borderRadius: '8px' }}
+                                        sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }}
                                     />
                                 )}
                             />
@@ -195,7 +195,7 @@ export const ShiftDialog = ({
                                         label="Phòng ban áp dụng"
                                         error={!!error}
                                         helperText={error?.message || "Chọn phòng ban quản lý ca này"}
-                                        sx={{ bgcolor: '#fff', borderRadius: '8px' }}
+                                        sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }}
                                     >
                                         {departments.map((dept: any) => (
                                             <MenuItem key={dept._id} value={dept._id}>
@@ -216,7 +216,7 @@ export const ShiftDialog = ({
                                         select
                                         fullWidth
                                         label="Trạng thái"
-                                        sx={{ bgcolor: '#fff', borderRadius: '8px' }}
+                                        sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }}
                                     >
                                         <MenuItem value="active">Hoạt động</MenuItem>
                                         <MenuItem value="inactive">Ngừng hoạt động</MenuItem>
@@ -231,15 +231,15 @@ export const ShiftDialog = ({
                         onClick={onClose}
                         variant="outlined"
                         sx={{
-                            borderRadius: '8px',
+                            borderRadius: "var(--shape-borderRadius)",
                             textTransform: 'none',
                             fontWeight: 700,
                             padding: '8px 20px',
-                            color: '#1C252E',
+                            color: 'var(--palette-text-primary)',
                             borderColor: 'rgba(145, 158, 171, 0.32)',
                             '&:hover': {
                                 bgcolor: 'rgba(145, 158, 171, 0.08)',
-                                borderColor: '#1C252E',
+                                borderColor: 'var(--palette-text-primary)',
                             }
                         }}
                     >
@@ -249,15 +249,15 @@ export const ShiftDialog = ({
                         type="submit"
                         variant="contained"
                         sx={{
-                            borderRadius: '8px',
+                            borderRadius: "var(--shape-borderRadius)",
                             textTransform: 'none',
                             fontWeight: 700,
                             padding: '8px 20px',
-                            bgcolor: '#1C252E',
+                            bgcolor: 'var(--palette-text-primary)',
                             boxShadow: 'none',
                             '&:hover': {
-                                bgcolor: '#454F5B',
-                                boxShadow: '0 8px 16px 0 rgba(145 158 171 / 16%)',
+                                bgcolor: "var(--palette-grey-700)",
+                                boxShadow: "var(--customShadows-z8)",
                             }
                         }}
                     >
@@ -268,3 +268,7 @@ export const ShiftDialog = ({
         </Dialog>
     );
 };
+
+
+
+

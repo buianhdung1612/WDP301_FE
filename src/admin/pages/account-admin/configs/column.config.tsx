@@ -4,16 +4,16 @@ import Chip from '@mui/material/Chip';
 import Avatar from '@mui/material/Avatar';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import KeyIcon from '@mui/icons-material/Key';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import { ListItemText } from '@mui/material';
 import { COLORS } from './constants';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 export const getColumnsConfig = (
     onEdit: (id: string) => void,
     onDelete: (id: string) => void,
-    onChangePassword: (id: string) => void
+    onView: (id: string) => void
 ): GridColDef[] => [
         {
             field: 'fullName',
@@ -21,7 +21,7 @@ export const getColumnsConfig = (
             flex: 1,
             minWidth: 280,
             renderCell: (params: GridRenderCellParams) => (
-                <Stack direction="row" spacing={2} alignItems="center" sx={{ py: "16px", px: "16px", height: '100%' }}>
+                <Stack direction="row" spacing={2} alignItems="center" sx={{ py: "calc(2 * var(--spacing))", px: "calc(2 * var(--spacing))", height: '100%' }}>
                     <Avatar
                         src={params.row.avatar}
                         sx={{
@@ -46,7 +46,7 @@ export const getColumnsConfig = (
                             secondary: {
                                 component: 'span',
                                 variant: 'body2',
-                                sx: { color: '#919EAB', fontSize: "0.8125rem" }
+                                sx: { color: 'var(--palette-text-disabled)', fontSize: "0.8125rem" }
                             }
                         }}
                         sx={{ m: 0 }}
@@ -61,7 +61,7 @@ export const getColumnsConfig = (
             align: 'left',
             headerAlign: 'left',
             renderCell: (params: GridRenderCellParams) => (
-                <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', py: "16px", px: "16px" }}>
+                <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', py: "calc(2 * var(--spacing))", px: "calc(2 * var(--spacing))" }}>
                     <Typography sx={{ fontSize: '0.8125rem', color: COLORS.primary }}>
                         {params.value || '-'}
                     </Typography>
@@ -74,7 +74,7 @@ export const getColumnsConfig = (
             flex: 1,
             minWidth: 180,
             renderCell: (params: GridRenderCellParams) => (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, py: "16px", px: "16px", height: '100%', alignItems: 'flex-start', justifyContent: 'center' }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, py: "calc(2 * var(--spacing))", px: "calc(2 * var(--spacing))", height: '100%', alignItems: 'flex-start', justifyContent: 'center' }}>
                     {params.row.rolesName?.length > 0 ? (
                         params.row.rolesName.map((roleName: string, index: number) => (
                             <Typography key={index} sx={{ fontSize: '0.8125rem', color: COLORS.primary }}>
@@ -98,7 +98,7 @@ export const getColumnsConfig = (
                 };
                 const status = statusMap[params.value] || statusMap.inactive;
                 return (
-                    <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: "center", py: "16px" }}>
+                    <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: "center", py: "calc(2 * var(--spacing))" }}>
                         <Chip
                             label={status.label}
                             sx={{
@@ -107,7 +107,7 @@ export const getColumnsConfig = (
                                 fontWeight: 700,
                                 fontSize: '0.6875rem',
                                 height: '24px',
-                                borderRadius: '6px',
+                                borderRadius: "var(--shape-borderRadius-sm)",
                                 '& .MuiChip-label': { px: '6px' }
                             }}
                         />
@@ -125,12 +125,12 @@ export const getColumnsConfig = (
             align: 'center',
             headerAlign: 'center',
             renderCell: (params: GridRenderCellParams) => (
-                <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', py: "16px", px: "16px" }}>
+                <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', py: "calc(2 * var(--spacing))", px: "calc(2 * var(--spacing))" }}>
                     <GridActionsCell {...params}>
                         <GridActionsCellItem
-                            icon={<KeyIcon sx={{ fontSize: '1.25rem' }} />}
-                            label="Đổi mật khẩu"
-                            onClick={() => onChangePassword(params.row._id)}
+                            icon={<VisibilityIcon sx={{ fontSize: '1.25rem' }} />}
+                            label="Chi tiết"
+                            onClick={() => onView(params.row._id)}
                             showInMenu
                             {...({
                                 sx: {
@@ -156,7 +156,7 @@ export const getColumnsConfig = (
                             } as any)}
                         />
                         <GridActionsCellItem
-                            icon={<DeleteIcon sx={{ fontSize: '1.25rem', color: '#FF5630' }} />}
+                            icon={<DeleteIcon sx={{ fontSize: '1.25rem', color: 'var(--palette-error-main)' }} />}
                             label="Xóa"
                             onClick={() => onDelete(params.row._id)}
                             showInMenu
@@ -165,7 +165,7 @@ export const getColumnsConfig = (
                                     '& .MuiTypography-root': {
                                         fontSize: '0.8125rem',
                                         fontWeight: "600",
-                                        color: "#FF5630"
+                                        color: "var(--palette-error-main)"
                                     },
                                 },
                             } as any)}

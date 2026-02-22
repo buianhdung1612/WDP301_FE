@@ -80,18 +80,18 @@ export const BulkDeleteDialog = ({
         >
             <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Stack direction="row" spacing={1.5} alignItems="center">
-                    <Icon icon="solar:trash-bin-trash-bold-duotone" width={24} color="#FF5630" />
+                    <Icon icon="solar:trash-bin-trash-bold-duotone" width={24} color="var(--palette-error-main)" />
                     <Typography variant="h6" sx={{ fontWeight: 700 }}>
                         Xóa ca làm việc hàng loạt
                     </Typography>
                 </Stack>
-                <IconButton onClick={onClose} size="small" sx={{ color: '#637381' }}>
+                <IconButton onClick={onClose} size="small" sx={{ color: 'var(--palette-text-secondary)' }}>
                     <CloseIcon />
                 </IconButton>
             </DialogTitle>
             <form onSubmit={handleSubmit(onSubmit)}>
-                <DialogContent sx={{ bgcolor: '#F4F6F8 !important', py: '24px !important' }}>
-                    <Box sx={{ mb: 3, p: 2, bgcolor: alpha('#FF5630', 0.08), borderRadius: '12px', border: '1px solid', borderColor: alpha('#FF5630', 0.16) }}>
+                <DialogContent sx={{ bgcolor: 'var(--palette-background-neutral) !important', py: '24px !important' }}>
+                    <Box sx={{ mb: 3, p: 2, bgcolor: alpha('#FF5630', 0.08), borderRadius: "var(--shape-borderRadius-md)", border: '1px solid', borderColor: alpha('#FF5630', 0.16) }}>
                         <Typography variant="body2" sx={{ color: '#B71D18', fontWeight: 600 }}>
                             Lưu ý: Hệ thống sẽ xóa các ca làm việc của nhân viên được chọn trong khoảng thời gian này.
                         </Typography>
@@ -119,7 +119,7 @@ export const BulkDeleteDialog = ({
                                                     .map((a: any) => a.fullName)
                                                     .join(', ')
                                         }}
-                                        sx={{ bgcolor: '#fff', borderRadius: '8px' }}
+                                        sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }}
                                     >
                                         <MenuItem value="all" onClick={(e) => {
                                             e.preventDefault();
@@ -150,8 +150,8 @@ export const BulkDeleteDialog = ({
                                             label="Từ ngày"
                                             sx={{
                                                 width: '100%',
-                                                bgcolor: '#fff',
-                                                borderRadius: '8px'
+                                                bgcolor: "var(--palette-background-paper)",
+                                                borderRadius: "var(--shape-borderRadius)"
                                             }}
                                         />
                                     )}
@@ -170,8 +170,8 @@ export const BulkDeleteDialog = ({
                                             label="Đến ngày"
                                             sx={{
                                                 width: '100%',
-                                                bgcolor: '#fff',
-                                                borderRadius: '8px'
+                                                bgcolor: "var(--palette-background-paper)",
+                                                borderRadius: "var(--shape-borderRadius)"
                                             }}
                                         />
                                     )}
@@ -185,11 +185,11 @@ export const BulkDeleteDialog = ({
                         onClick={onClose}
                         variant="outlined"
                         sx={{
-                            borderRadius: '8px',
+                            borderRadius: "var(--shape-borderRadius)",
                             textTransform: 'none',
                             fontWeight: 700,
                             padding: '8px 20px',
-                            color: '#1C252E',
+                            color: 'var(--palette-text-primary)',
                         }}
                     >
                         Hủy bỏ
@@ -200,12 +200,12 @@ export const BulkDeleteDialog = ({
                         color="error"
                         disabled={loading}
                         sx={{
-                            borderRadius: '8px',
+                            borderRadius: "var(--shape-borderRadius)",
                             textTransform: 'none',
                             fontWeight: 700,
                             padding: '8px 20px',
                             boxShadow: 'none',
-                            bgcolor: '#FF5630',
+                            bgcolor: 'var(--palette-error-main)',
                             '&:hover': {
                                 bgcolor: '#B71D18',
                             }
@@ -218,4 +218,8 @@ export const BulkDeleteDialog = ({
         </Dialog>
     );
 };
+
+
+
+
 

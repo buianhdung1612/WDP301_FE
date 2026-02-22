@@ -94,13 +94,13 @@ export const StaffWorkSchedulePage = () => {
             case 'scheduled': return { bg: 'rgba(255, 171, 0, 0.16)', color: '#FFAB00' };
             case 'checked-in': return { bg: 'rgba(0, 184, 217, 0.16)', color: '#00B8D9' };
             case 'checked-out': return { bg: 'rgba(34, 197, 94, 0.16)', color: '#22C55E' };
-            case 'absent': return { bg: 'rgba(255, 86, 48, 0.16)', color: '#FF5630' };
-            default: return { bg: 'rgba(145, 158, 171, 0.16)', color: '#637381' };
+            case 'absent': return { bg: 'rgba(255, 86, 48, 0.16)', color: 'var(--palette-error-main)' };
+            default: return { bg: 'rgba(145, 158, 171, 0.16)', color: 'var(--palette-text-secondary)' };
         }
     };
 
     return (
-        <Box sx={{ maxWidth: '1200px', mx: 'auto', p: '1.5rem' }}>
+        <Box sx={{ maxWidth: '1200px', mx: 'auto', p: "calc(3 * var(--spacing))" }}>
             <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                 <Box>
                     <Title title="Lịch làm việc của tôi" />
@@ -170,7 +170,7 @@ export const StaffWorkSchedulePage = () => {
                                 p: 2,
                                 height: '100%',
                                 minHeight: '260px',
-                                borderRadius: '16px',
+                                borderRadius: "var(--shape-borderRadius-lg)",
                                 border: isToday ? `2px solid ${COLORS.primary}` : '1px solid rgba(145, 158, 171, 0.2)',
                                 display: 'flex',
                                 flexDirection: 'column',
@@ -201,7 +201,7 @@ export const StaffWorkSchedulePage = () => {
                                         </Typography>
 
                                         {shift.checkInTime && (
-                                            <Typography variant="caption" sx={{ color: '#00A76F', fontWeight: 600 }}>
+                                            <Typography variant="caption" sx={{ color: 'var(--palette-primary-main)', fontWeight: 600 }}>
                                                 Vào: {dayjs(shift.checkInTime).format("HH:mm")}
                                             </Typography>
                                         )}
@@ -236,11 +236,11 @@ export const StaffWorkSchedulePage = () => {
                                                         disabled={(isTooEarly || isOutsideSystemTime) && !isAdmin}
                                                         onClick={() => handleCheckIn(shift._id)}
                                                         sx={{
-                                                            borderRadius: '8px',
+                                                            borderRadius: "var(--shape-borderRadius)",
                                                             textTransform: 'none',
                                                             fontWeight: 700,
                                                             fontSize: '0.75rem',
-                                                            bgcolor: '#00A76F',
+                                                            bgcolor: 'var(--palette-primary-main)',
                                                             '&:hover': { bgcolor: '#007B55' },
                                                             '&.Mui-disabled': {
                                                                 bgcolor: 'rgba(145, 158, 171, 0.24)',
@@ -251,12 +251,12 @@ export const StaffWorkSchedulePage = () => {
                                                         Check in
                                                     </Button>
                                                     {!isAdmin && isOutsideSystemTime && (
-                                                        <Typography variant="caption" sx={{ textAlign: 'center', color: '#FF5630', fontSize: '0.65rem', fontWeight: 600 }}>
+                                                        <Typography variant="caption" sx={{ textAlign: 'center', color: 'var(--palette-error-main)', fontSize: '0.65rem', fontWeight: 600 }}>
                                                             Hệ thống đóng (Sau {config.workDayEndTime})
                                                         </Typography>
                                                     )}
                                                     {!isAdmin && !isOutsideSystemTime && isTooEarly && (
-                                                        <Typography variant="caption" sx={{ textAlign: 'center', color: '#FF5630', fontSize: '0.65rem', fontWeight: 600 }}>
+                                                        <Typography variant="caption" sx={{ textAlign: 'center', color: 'var(--palette-error-main)', fontSize: '0.65rem', fontWeight: 600 }}>
                                                             Mở lúc {openAt}
                                                         </Typography>
                                                     )}
@@ -270,7 +270,7 @@ export const StaffWorkSchedulePage = () => {
                                                     fullWidth
                                                     onClick={() => handleCheckOut(shift._id)}
                                                     sx={{
-                                                        borderRadius: '8px',
+                                                        borderRadius: "var(--shape-borderRadius)",
                                                         textTransform: 'none',
                                                         fontWeight: 700,
                                                         fontSize: '0.75rem',
@@ -296,7 +296,7 @@ export const StaffWorkSchedulePage = () => {
                 </Box>
             )}
 
-            <Card sx={{ mt: 4, p: 3, borderRadius: '16px', bgcolor: 'rgba(145, 158, 171, 0.04)' }}>
+            <Card sx={{ mt: 4, p: 3, borderRadius: "var(--shape-borderRadius-lg)", bgcolor: 'rgba(145, 158, 171, 0.04)' }}>
                 <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700 }}>Chú thích trạng thái:</Typography>
                 <Stack direction="row" spacing={3}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -312,7 +312,7 @@ export const StaffWorkSchedulePage = () => {
                         <Typography variant="caption">Đã hoàn thành ca</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#FF5630' }} />
+                        <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'var(--palette-error-main)' }} />
                         <Typography variant="caption">Vắng mặt</Typography>
                     </Box>
                 </Stack>
@@ -320,3 +320,7 @@ export const StaffWorkSchedulePage = () => {
         </Box>
     );
 };
+
+
+
+

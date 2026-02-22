@@ -1,4 +1,4 @@
-import { Box, Card, Grid, TextField, Typography, Stack, alpha, Switch, FormControlLabel } from "@mui/material";
+﻿import { Box, Card, Grid, TextField, Typography, Stack, alpha, Switch, FormControlLabel } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useForm, Controller } from "react-hook-form";
 import { Title } from "../../components/ui/Title";
@@ -43,7 +43,7 @@ export const BookingConfigPage = () => {
     }
 
     return (
-        <Box sx={{ maxWidth: '800px', mx: 'auto', p: '1.5rem' }}>
+        <Box sx={{ maxWidth: '800px', mx: 'auto', p: "calc(3 * var(--spacing))" }}>
             <Box sx={{ mb: 5 }}>
                 <Title title="Cấu hình hệ thống đặt lịch" />
                 <Breadcrumb
@@ -60,8 +60,8 @@ export const BookingConfigPage = () => {
                     <Card sx={{
                         p: 4,
                         borderRadius: '20px',
-                        boxShadow: '0 0 2px 0 rgba(145, 158, 171, 0.2), 0 12px 24px -4px rgba(145, 158, 171, 0.12)',
-                        border: `1px solid ${alpha('#919EAB', 0.12)}`
+                        boxShadow: "var(--customShadows-card)",
+                        border: `1px solid ${rgba(145, 158, 171, 0.12)}`
                     }}>
                         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 4 }}>
                             <Icon icon="solar:settings-bold-duotone" width={24} color={COLORS.primary} />
@@ -123,8 +123,8 @@ export const BookingConfigPage = () => {
                     <Card sx={{
                         p: 4,
                         borderRadius: '20px',
-                        boxShadow: '0 0 2px 0 rgba(145, 158, 171, 0.2), 0 12px 24px -4px rgba(145, 158, 171, 0.12)',
-                        border: `1px solid ${alpha('#919EAB', 0.12)}`
+                        boxShadow: "var(--customShadows-card)",
+                        border: `1px solid ${rgba(145, 158, 171, 0.12)}`
                     }}>
                         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 4 }}>
                             <Icon icon="solar:Bell-bold-duotone" width={24} color={COLORS.primary} />
@@ -171,7 +171,7 @@ export const BookingConfigPage = () => {
                             loading={isPending || isSubmitting}
                             label="Lưu cấu hình"
                             loadingLabel="Đang lưu..."
-                            sx={{ px: 4, py: 1.5, borderRadius: '12px', fontSize: '1rem' }}
+                            sx={{ px: 4, py: 1.5, borderRadius: "var(--shape-borderRadius-md)", fontSize: '1rem' }}
                         />
                     </Box>
                 </Stack>
@@ -179,3 +179,7 @@ export const BookingConfigPage = () => {
         </Box>
     );
 };
+
+
+
+

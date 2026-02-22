@@ -15,10 +15,10 @@ import { useServices } from "../service/hooks/useService";
 import { LoadingButton } from "../../components/ui/LoadingButton";
 
 const PREDEFINED_COLORS = [
-    "#00A76F", // Green
+    "var(--palette-primary-main)", // Green
     "#8e33ff", // Purple
     "#FFAB00", // Orange
-    "#FF5630", // Red
+    "var(--palette-error-main)", // Red
     "#00B8D9", // Cyan
     "#2196f3", // Blue
     "#FF4842", // Light Red
@@ -158,7 +158,7 @@ export const SettingGeneralPage = () => {
                 <Grid container spacing={3}>
                     <Grid size={{ xs: 12, md: 4 }}>
                         <Stack spacing={3}>
-                            <Card sx={{ p: 4, textAlign: 'center', borderRadius: '16px', boxShadow: '0 0 2px 0 rgba(145, 158, 171, 0.2), 0 12px 24px -4px rgba(145, 158, 171, 0.12)', bgcolor: 'white' }}>
+                            <Card sx={{ p: 4, textAlign: 'center', borderRadius: "var(--shape-borderRadius-lg)", boxShadow: "var(--customShadows-card)", bgcolor: "var(--palette-background-paper)" }}>
                                 <Typography variant="subtitle1" sx={{ mb: 3, fontWeight: 700, fontSize: '0.875rem' }}>Logo Website</Typography>
                                 <Box
                                     onClick={handleOpenFile}
@@ -198,26 +198,26 @@ export const SettingGeneralPage = () => {
                                             </Box>
                                         </Box>
                                     ) : (
-                                        <Stack spacing={1} alignItems="center" sx={{ color: '#637381' }}>
+                                        <Stack spacing={1} alignItems="center" sx={{ color: 'var(--palette-text-secondary)' }}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 10.25a.75.75 0 0 1 .75.75v1.25H14a.75.75 0 0 1 0 1.5h-1.25V15a.75.75 0 0 1-1.5 0v-1.25H10a.75.75 0 0 1 0-1.5h1.25V11a.75.75 0 0 1 .75-.75"></path><path fill="currentColor" d="M9.778 21h4.444c3.121 0 4.682 0 5.803-.735a4.4 4.4 0 0 0 1.226-1.204c.749-1.1.749-2.633.749-5.697s0-4.597-.749-5.697a4.4 4.4 0 0 0-1.226-1.204c-.72-.473-1.622-.642-3.003-.702c-.659 0-1.226-.49-1.355-1.125A2.064 2.064 0 0 0 13.634 3h-3.268c-.988 0-1.839.685-2.033 1.636c-.129.635-.696 1.125-1.355 1.125c-1.38.06-2.282.23-3.003.702A4.4 4.4 0 0 0 2.75 7.667C2 8.767 2 10.299 2 13.364s0 4.596.749 5.697c.324.476.74.885 1.226 1.204C5.096 21 6.657 21 9.778 21M16 13a4 4 0 1 1-8 0a4 4 0 0 1 8 0m2-3.75a.75.75 0 0 0 0 1.5h1a.75.75 0 0 0 0-1.5z"></path></svg>
                                             <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>{isUploading ? "Đang tải..." : "Tải logo"}</Typography>
                                         </Stack>
                                     )}
                                 </Box>
-                                <Typography variant="body2" sx={{ mt: 3, color: '#919EAB', fontSize: '0.75rem', lineHeight: 1.5 }}>
+                                <Typography variant="body2" sx={{ mt: 3, color: 'var(--palette-text-disabled)', fontSize: '0.75rem', lineHeight: 1.5 }}>
                                     Định dạng cho phép *.jpeg, *.jpg, *.png, *.gif
                                     <br />
                                     Dung lượng tối đa 3 Mb
                                 </Typography>
                             </Card>
 
-                            <Card sx={{ p: 4, borderRadius: '16px', boxShadow: '0 0 2px 0 rgba(145, 158, 171, 0.2), 0 12px 24px -4px rgba(145, 158, 171, 0.12)', bgcolor: 'white' }}>
+                            <Card sx={{ p: 4, borderRadius: "var(--shape-borderRadius-lg)", boxShadow: "var(--customShadows-card)", bgcolor: "var(--palette-background-paper)" }}>
                                 <Typography variant="subtitle1" sx={{ mb: 3, fontWeight: 700, fontSize: '0.875rem' }}>Màu sắc Dịch vụ</Typography>
 
                                 <Stack spacing={3} sx={{ maxHeight: '400px', overflowY: 'auto', pr: 1 }}>
                                     {fields.map((field, index) => (
                                         <Stack key={field.id} direction="row" spacing={2} alignItems="center" justifyContent="space-between">
-                                            <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#1C252E' }}>
+                                            <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--palette-text-primary)' }}>
                                                 {(field as any).serviceName}
                                             </Typography>
 
@@ -241,7 +241,7 @@ export const SettingGeneralPage = () => {
                                                                             display: 'flex',
                                                                             alignItems: 'center',
                                                                             justifyContent: 'center',
-                                                                            border: isSelected ? '2px solid #1C252E' : '2px solid transparent',
+                                                                            border: isSelected ? '2px solid var(--palette-text-primary)' : '2px solid transparent',
                                                                             transition: 'all 0.2s',
                                                                             '&:hover': { transform: 'scale(1.2)' }
                                                                         }}
@@ -263,9 +263,9 @@ export const SettingGeneralPage = () => {
                                 </Stack>
                             </Card>
 
-                            <Card sx={{ p: 4, borderRadius: '16px', boxShadow: '0 0 2px 0 rgba(145, 158, 171, 0.2), 0 12px 24px -4px rgba(145, 158, 171, 0.12)', bgcolor: 'white' }}>
+                            <Card sx={{ p: 4, borderRadius: "var(--shape-borderRadius-lg)", boxShadow: "var(--customShadows-card)", bgcolor: "var(--palette-background-paper)" }}>
                                 <Typography variant="subtitle1" sx={{ mb: 3, fontWeight: 700, fontSize: '0.875rem' }}>Quản lý Giống</Typography>
-                                <Typography variant="body2" sx={{ mb: 3, color: '#637381', fontSize: '0.8125rem' }}>
+                                <Typography variant="body2" sx={{ mb: 3, color: 'var(--palette-text-secondary)', fontSize: '0.8125rem' }}>
                                     Quản lý danh sách giống chó và mèo được gợi ý khi khách hàng thêm thú cưng mới.
                                 </Typography>
                                 <LoadingButton
@@ -276,15 +276,15 @@ export const SettingGeneralPage = () => {
                                     startIcon={<Icon icon="solar:pets-bold" />}
                                     label="Quản lý ngay"
                                     sx={{
-                                        borderRadius: '8px',
+                                        borderRadius: "var(--shape-borderRadius)",
                                         textTransform: 'none',
                                         fontSize: '0.875rem',
                                         fontWeight: 700,
                                         py: 1.5,
-                                        borderColor: '#919EAB52',
-                                        color: '#1C252E',
+                                        borderColor: 'var(--palette-text-disabled)52',
+                                        color: 'var(--palette-text-primary)',
                                         '&:hover': {
-                                            borderColor: '#1C252E',
+                                            borderColor: 'var(--palette-text-primary)',
                                             bgcolor: 'rgba(28, 37, 46, 0.04)'
                                         }
                                     }}
@@ -294,7 +294,7 @@ export const SettingGeneralPage = () => {
                     </Grid>
 
                     <Grid size={{ xs: 12, md: 8 }}>
-                        <Card sx={{ p: 4, borderRadius: '16px', boxShadow: '0 0 2px 0 rgba(145, 158, 171, 0.2), 0 12px 24px -4px rgba(145, 158, 171, 0.12)', bgcolor: 'white' }}>
+                        <Card sx={{ p: 4, borderRadius: "var(--shape-borderRadius-lg)", boxShadow: "var(--customShadows-card)", bgcolor: "var(--palette-background-paper)" }}>
                             <Typography variant="subtitle1" sx={{ mb: 4, fontWeight: 700, fontSize: '0.875rem' }}>Thông tin chung</Typography>
 
                             <Grid container spacing={3}>
@@ -458,3 +458,7 @@ export const SettingGeneralPage = () => {
         </Box>
     );
 };
+
+
+
+

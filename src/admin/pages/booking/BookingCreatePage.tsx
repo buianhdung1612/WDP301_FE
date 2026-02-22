@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+﻿import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Box,
@@ -322,10 +322,10 @@ export const BookingCreatePage = () => {
             '& .MuiPickersDay-root': {
                 fontSize: '0.75rem',
                 fontWeight: 500,
-                '&:hover': { bgcolor: '#00a76f14 !important' }
+                '&:hover': { bgcolor: 'var(--palette-primary-main)14 !important' }
             },
             '& .MuiPickersDay-root.Mui-selected': {
-                bgcolor: '#1C252E !important',
+                bgcolor: 'var(--palette-text-primary) !important',
                 color: '#fff !important',
             }
         }
@@ -436,7 +436,7 @@ export const BookingCreatePage = () => {
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
-            <Box sx={{ maxWidth: '1200px', mx: 'auto', p: '1.5rem' }}>
+            <Box sx={{ maxWidth: '1200px', mx: 'auto', p: "calc(3 * var(--spacing))" }}>
                 <Box sx={{ mb: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Box>
                         <Title title="Tạo đơn dịch vụ mới" />
@@ -455,8 +455,8 @@ export const BookingCreatePage = () => {
                         <Card sx={{
                             p: 3,
                             borderRadius: '20px',
-                            boxShadow: '0 0 2px 0 rgba(145, 158, 171, 0.2), 0 12px 24px -4px rgba(145, 158, 171, 0.12)',
-                            border: `1px solid ${alpha('#919EAB', 0.12)}`
+                            boxShadow: "var(--customShadows-card)",
+                            border: `1px solid ${'rgba(145, 158, 171, 0.12)'}`
                         }}>
                             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
                                 <Icon icon="solar:clipboard-list-bold-duotone" width={24} color={COLORS.primary} />
@@ -482,7 +482,7 @@ export const BookingCreatePage = () => {
                                             slots={{
                                                 openPickerIcon: ({ ownerState, ...props }: any) => (
                                                     <Box component="span" {...props} sx={{ display: 'flex', cursor: 'pointer' }}>
-                                                        <CalendarIcon sx={{ fontSize: 24, color: '#637381' }} />
+                                                        <CalendarIcon sx={{ fontSize: 24, color: 'var(--palette-text-secondary)' }} />
                                                     </Box>
                                                 ),
                                             }}
@@ -559,13 +559,13 @@ export const BookingCreatePage = () => {
                                 )}
 
                                 {formData.petIds.length === 0 ? (
-                                    <Box sx={{ p: 3, textAlign: 'center', bgcolor: alpha('#919EAB', 0.08), borderRadius: '16px', border: '1px dashed', borderColor: alpha('#919EAB', 0.2) }}>
-                                        <Typography variant="body2" sx={{ color: '#637381' }}>
+                                    <Box sx={{ p: 3, textAlign: 'center', bgcolor: 'rgba(145, 158, 171, 0.08)', borderRadius: "var(--shape-borderRadius-lg)", border: '1px dashed', borderColor: 'rgba(145, 158, 171, 0.20)' }}>
+                                        <Typography variant="body2" sx={{ color: 'var(--palette-text-secondary)' }}>
                                             Vui lòng chọn <b>Khách hàng</b> và <b>Thú cưng</b> ở cột bên phải để bắt đầu phân công.
                                         </Typography>
                                     </Box>
                                 ) : (
-                                    <Box sx={{ p: 2, bgcolor: alpha(COLORS.primary, 0.04), borderRadius: '16px', border: '1px solid', borderColor: alpha(COLORS.primary, 0.1) }}>
+                                    <Box sx={{ p: 2, bgcolor: 'rgba(33, 43, 54, 0.04)', borderRadius: "var(--shape-borderRadius-lg)", border: '1px solid', borderColor: 'rgba(33, 43, 54, 0.10)' }}>
                                         <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: COLORS.primary, display: 'flex', alignItems: 'center', gap: 1 }}>
                                             <Icon icon="solar:user-speak-bold-duotone" />
                                             Bảng phân công chi tiết ({formData.petIds.length} thú cưng)
@@ -583,22 +583,22 @@ export const BookingCreatePage = () => {
                                                         justifyContent="space-between"
                                                         sx={{
                                                             p: 1.5,
-                                                            bgcolor: '#fff',
-                                                            borderRadius: '12px',
+                                                            bgcolor: "var(--palette-background-paper)",
+                                                            borderRadius: "var(--shape-borderRadius-md)",
                                                             boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
                                                         }}
                                                     >
                                                         <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flex: 1 }}>
-                                                            <Avatar sx={{ width: 32, height: 32, bgcolor: alpha(COLORS.primary, 0.1), color: COLORS.primary, fontSize: '0.875rem' }}>
+                                                            <Avatar sx={{ width: 32, height: 32, bgcolor: 'rgba(33, 43, 54, 0.10)', color: COLORS.primary, fontSize: '0.875rem' }}>
                                                                 {pet?.name?.charAt(0)}
                                                             </Avatar>
                                                             <Box>
                                                                 <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{pet?.name || "Thú cưng"}</Typography>
-                                                                <Typography variant="caption" sx={{ color: '#637381' }}>{pet?.breed || (pet?.type === 'dog' ? 'Chó' : 'Mèo')}</Typography>
+                                                                <Typography variant="caption" sx={{ color: 'var(--palette-text-secondary)' }}>{pet?.breed || (pet?.type === 'dog' ? 'Chó' : 'Mèo')}</Typography>
                                                             </Box>
                                                         </Stack>
 
-                                                        <Icon icon="solar:arrow-right-linear" width={18} color="#919EAB" />
+                                                        <Icon icon="solar:arrow-right-linear" width={18} color="var(--palette-text-disabled)" />
 
                                                         <SelectSingle
                                                             label="Chọn người làm"
@@ -673,12 +673,12 @@ export const BookingCreatePage = () => {
                                 )}
 
                                 {selectedService?.pricingType === 'by-weight' && selectedService?.priceList?.length > 0 && (
-                                    <Box sx={{ p: 2, bgcolor: 'rgba(145, 158, 171, 0.08)', borderRadius: '12px' }}>
-                                        <Typography sx={{ fontSize: '0.8125rem', fontWeight: 700, mb: 1, color: '#00A76F' }}>Bảng giá theo cân nặng:</Typography>
+                                    <Box sx={{ p: 2, bgcolor: 'rgba(145, 158, 171, 0.08)', borderRadius: "var(--shape-borderRadius-md)" }}>
+                                        <Typography sx={{ fontSize: '0.8125rem', fontWeight: 700, mb: 1, color: 'var(--palette-primary-main)' }}>Bảng giá theo cân nặng:</Typography>
                                         <Stack spacing={0.5}>
                                             {selectedService.priceList.map((item: any, idx: number) => (
                                                 <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                    <Typography sx={{ fontSize: '0.75rem', color: '#637381' }}>{formatWeightLabel(item.label)}:</Typography>
+                                                    <Typography sx={{ fontSize: '0.75rem', color: 'var(--palette-text-secondary)' }}>{formatWeightLabel(item.label)}:</Typography>
                                                     <Typography sx={{ fontSize: '0.75rem', fontWeight: 600 }}>{item.value.toLocaleString()}đ</Typography>
                                                 </Box>
                                             ))}
@@ -697,7 +697,7 @@ export const BookingCreatePage = () => {
                                 />
 
                                 <Box sx={{ mt: 1 }}>
-                                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: '#637381', display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: 'var(--palette-text-secondary)', display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <Icon icon="solar:calendar-bold-duotone" width={20} />
                                         Lịch biểu nhân viên thực tế trong ngày {formData.date.format('DD/MM/YYYY')}
                                     </Typography>
@@ -721,8 +721,8 @@ export const BookingCreatePage = () => {
                             <Card sx={{
                                 p: 3,
                                 borderRadius: '20px',
-                                boxShadow: '0 0 2px 0 rgba(145, 158, 171, 0.2), 0 12px 24px -4px rgba(145, 158, 171, 0.12)',
-                                border: `1px solid ${alpha('#919EAB', 0.12)}`
+                                boxShadow: "var(--customShadows-card)",
+                                border: `1px solid ${'rgba(145, 158, 171, 0.12)'}`
                             }}>
                                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
                                     <Icon icon="solar:user-rounded-bold-duotone" width={24} color={COLORS.primary} />
@@ -733,12 +733,12 @@ export const BookingCreatePage = () => {
                                         onClick={() => setQuickCustomerDialogOpen(true)}
                                         sx={{
                                             textTransform: 'none',
-                                            borderRadius: '8px',
+                                            borderRadius: "var(--shape-borderRadius)",
                                             fontWeight: 600,
                                             fontSize: '0.75rem',
-                                            bgcolor: alpha(COLORS.primary, 0.08),
+                                            bgcolor: 'rgba(33, 43, 54, 0.08)',
                                             color: COLORS.primary,
-                                            '&:hover': { bgcolor: alpha(COLORS.primary, 0.16) }
+                                            '&:hover': { bgcolor: 'rgba(33, 43, 54, 0.16)' }
                                         }}
                                     >
                                         Tạo mới
@@ -816,10 +816,10 @@ export const BookingCreatePage = () => {
                                     <Divider sx={{ borderStyle: 'dashed' }} />
 
                                     <Stack spacing={1.5}>
-                                        <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#637381' }}>Chi tiết đơn giá:</Typography>
+                                        <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--palette-text-secondary)' }}>Chi tiết đơn giá:</Typography>
                                         {pricing.breakdown.map((item: any, idx: number) => (
                                             <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', pl: 1 }}>
-                                                <Typography sx={{ fontSize: '0.8125rem', color: '#637381' }}>
+                                                <Typography sx={{ fontSize: '0.8125rem', color: 'var(--palette-text-secondary)' }}>
                                                     • {item.name} ({item.desc}{item.weight ? ` - ${item.weight}kg` : ""})
                                                 </Typography>
                                                 <Typography sx={{ fontSize: '0.8125rem', fontWeight: 550 }}>{item.price.toLocaleString()}đ</Typography>
@@ -827,16 +827,16 @@ export const BookingCreatePage = () => {
                                         ))}
 
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1, pt: 1, borderTop: '1px dashed rgba(145, 158, 171, 0.2)' }}>
-                                            <Typography sx={{ fontSize: '0.875rem', color: '#637381' }}>Tạm tính:</Typography>
+                                            <Typography sx={{ fontSize: '0.875rem', color: 'var(--palette-text-secondary)' }}>Tạm tính:</Typography>
                                             <Typography sx={{ fontSize: '0.875rem', fontWeight: 600 }}>{pricing.subTotal.toLocaleString()}đ</Typography>
                                         </Box>
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <Typography sx={{ fontSize: '0.875rem', color: '#637381' }}>Giảm giá:</Typography>
+                                            <Typography sx={{ fontSize: '0.875rem', color: 'var(--palette-text-secondary)' }}>Giảm giá:</Typography>
                                             <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'error.main' }}>-{formData.discount.toLocaleString()}đ</Typography>
                                         </Box>
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', pt: 1.5, borderTop: '1px solid rgba(145, 158, 171, 0.2)' }}>
                                             <Typography sx={{ fontSize: '1rem', fontWeight: 700 }}>Tổng cộng:</Typography>
-                                            <Typography sx={{ fontSize: '1.125rem', fontWeight: 800, color: '#00A76F' }}>{pricing.total.toLocaleString()}đ</Typography>
+                                            <Typography sx={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--palette-primary-main)' }}>{pricing.total.toLocaleString()}đ</Typography>
                                         </Box>
                                     </Stack>
                                 </Stack>
@@ -851,7 +851,7 @@ export const BookingCreatePage = () => {
                                 size="large"
                                 sx={{
                                     py: 1.5,
-                                    borderRadius: '12px',
+                                    borderRadius: "var(--shape-borderRadius-md)",
                                     fontSize: '1rem',
                                     boxShadow: '0 8px 16px 0 rgba(145, 158, 171, 0.24)',
                                 }}
@@ -876,3 +876,7 @@ export const BookingCreatePage = () => {
         </LocalizationProvider>
     );
 };
+
+
+
+

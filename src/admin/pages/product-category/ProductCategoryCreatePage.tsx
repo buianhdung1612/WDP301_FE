@@ -86,7 +86,7 @@ export const ProductCategoryCreatePage = () => {
 
     return (
         <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
+            <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
                     <Title title={t("admin.product_category.title.create")} />
                     <Breadcrumb
@@ -101,8 +101,8 @@ export const ProductCategoryCreatePage = () => {
             <ThemeProvider theme={localTheme}>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <Stack sx={{
-                        margin: "0px 120px",
-                        gap: "40px"
+                        margin: "0px calc(15 * var(--spacing))",
+                        gap: "calc(5 * var(--spacing))"
                     }}>
                         <CollapsibleCard
                             title={t("admin.common.details")}
@@ -110,12 +110,12 @@ export const ProductCategoryCreatePage = () => {
                             expanded={expandedDetail}
                             onToggle={toggle(setExpandedDetail)}
                         >
-                            <Stack p="24px" gap="24px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Box
                                     sx={{
                                         display: "grid",
                                         gridTemplateColumns: "repeat(2, 1fr)",
-                                        gap: "24px 16px",
+                                        gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))",
                                     }}
                                 >
                                     <Controller
@@ -152,7 +152,7 @@ export const ProductCategoryCreatePage = () => {
                                 />
                             </Stack>
                         </CollapsibleCard>
-                        <Box gap="24px" sx={{ display: "flex", alignItems: "center" }}>
+                        <Box gap="calc(3 * var(--spacing))" sx={{ display: "flex", alignItems: "center" }}>
                             <SwitchButton
                                 control={control}
                                 name="status"
@@ -174,3 +174,6 @@ export const ProductCategoryCreatePage = () => {
         </>
     )
 }
+
+
+

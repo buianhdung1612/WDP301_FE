@@ -1,4 +1,4 @@
-import { Box, Card, Grid, Typography, Stack, Avatar, alpha, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, IconButton, Button, Menu, MenuItem, Tooltip, Skeleton } from "@mui/material";
+﻿import { Box, Card, Grid, Typography, Stack, Avatar, alpha, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, IconButton, Button, Menu, MenuItem, Tooltip, Skeleton } from "@mui/material";
 import { useState, useMemo, useEffect } from "react";
 import { Title } from "../../components/ui/Title";
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
@@ -22,7 +22,7 @@ const TabBadge = styled('span')(() => ({
     justifyContent: "center",
     marginLeft: '8px',
     padding: '0px 6px',
-    borderRadius: '6px',
+    borderRadius: "var(--shape-borderRadius-sm)",
     fontSize: '0.7rem',
     fontWeight: 700,
     transition: 'all 0.2s',
@@ -98,16 +98,17 @@ export const StaffWorkHistoryPage = () => {
     const getStatusStyles = (status: string) => {
         switch (status) {
             case "completed": return { color: "#22C55E", bg: alpha("#22C55E", 0.16), text: "Hoàn thành" };
-            case "in-progress": return { color: "#00A76F", bg: alpha("#00A76F", 0.16), text: "Đang làm" };
+            case "in-progress": return { color: "var(--palette-primary-main)", bg: "rgba(0, 167, 111, 0.16)", text: "Đang làm" };
             case "confirmed": return { color: "#00B8D9", bg: alpha("#00B8D9", 0.16), text: "Đã xác nhận" };
-            case "delayed": return { color: "#FF5630", bg: alpha("#FF5630", 0.16), text: "Trễ hẹn" };
-            case "cancelled": return { color: "#919EAB", bg: alpha("#919EAB", 0.16), text: "Đã hủy" };
-            default: return { color: "#919EAB", bg: alpha("#919EAB", 0.16), text: status };
+            case "delayed": return { color: "var(--palette-error-main)", bg: "rgba(255, 86, 48, 0.16)", text: "Trễ hẹn" };
+            case "cancelled": return { color: "var(--palette-text-disabled)", bg: "rgba(145, 158, 171, 0.16)", text: "Đã hủy" };
+            default: return { color: "var(--palette-text-disabled)", bg: "rgba(145, 158, 171, 0.16)", text: status };
         }
     };
 
+
     return (
-        <Box sx={{ p: '1.5rem', minHeight: '100vh', bgcolor: '#F9FAFB' }}>
+        <Box sx={{ p: "calc(3 * var(--spacing))", minHeight: '100vh', bgcolor: '#F9FAFB' }}>
             <Box sx={{ mb: 4 }}>
                 <Title title="Lịch sử dịch vụ nhân sự" />
                 <Breadcrumb
@@ -132,19 +133,19 @@ export const StaffWorkHistoryPage = () => {
                     alignItems: 'center',
                     px: 1,
                     py: 0.5,
-                    borderRadius: '16px',
+                    borderRadius: "var(--shape-borderRadius-lg)",
                     boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
                     border: '1px solid rgba(255, 255, 255, 0.3)',
                     backdropFilter: 'blur(10px)',
                     bgcolor: 'rgba(255, 255, 255, 0.8)'
                 }}>
-                    <IconButton onClick={() => handleMonthChange('prev')} size="small" sx={{ transition: 'all 0.2s', '&:hover': { bgcolor: alpha(COLORS.primary, 0.1), transform: 'scale(1.1)' } }}>
+                    <IconButton onClick={() => handleMonthChange('prev')} size="small" sx={{ transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(33, 43, 54, 0.10)', transform: 'scale(1.1)' } }}>
                         <Icon icon="solar:alt-arrow-left-bold-duotone" width={24} color={COLORS.primary} />
                     </IconButton>
                     <Typography sx={{ mx: 4, fontWeight: 700, fontSize: '1.1rem', textTransform: 'capitalize', minWidth: 180, textAlign: 'center', color: COLORS.primary }}>
                         {`Tháng ${currentMonth.format("MM/YYYY")}`}
                     </Typography>
-                    <IconButton onClick={() => handleMonthChange('next')} size="small" sx={{ transition: 'all 0.2s', '&:hover': { bgcolor: alpha(COLORS.primary, 0.1), transform: 'scale(1.1)' } }}>
+                    <IconButton onClick={() => handleMonthChange('next')} size="small" sx={{ transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(33, 43, 54, 0.10)', transform: 'scale(1.1)' } }}>
                         <Icon icon="solar:alt-arrow-right-bold-duotone" width={24} color={COLORS.primary} />
                     </IconButton>
                 </Card>
@@ -154,7 +155,7 @@ export const StaffWorkHistoryPage = () => {
             <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
                 <Card sx={{
                     p: 0.5,
-                    borderRadius: '16px',
+                    borderRadius: "var(--shape-borderRadius-lg)",
                     bgcolor: 'rgba(255, 255, 255, 0.8)',
                     backdropFilter: 'blur(10px)',
                     border: '1px solid rgba(145, 158, 171, 0.12)',
@@ -169,8 +170,8 @@ export const StaffWorkHistoryPage = () => {
                             minHeight: '44px',
                             '& .MuiTabs-indicator': {
                                 height: '100%',
-                                borderRadius: '12px',
-                                bgcolor: alpha(COLORS.primary, 0.08),
+                                borderRadius: "var(--shape-borderRadius-md)",
+                                bgcolor: 'rgba(33, 43, 54, 0.08)',
                                 zIndex: 0
                             },
                         }}
@@ -181,8 +182,8 @@ export const StaffWorkHistoryPage = () => {
                                 <Box sx={{ display: 'flex', alignItems: 'center', zIndex: 1 }}>
                                     <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Tất cả</Typography>
                                     <TabBadge sx={{
-                                        bgcolor: selectedDepartmentId === 'all' ? COLORS.primary : alpha('#919EAB', 0.12),
-                                        color: selectedDepartmentId === 'all' ? '#fff' : '#637381'
+                                        bgcolor: selectedDepartmentId === 'all' ? COLORS.primary : 'rgba(145, 158, 171, 0.12)',
+                                        color: selectedDepartmentId === 'all' ? '#fff' : 'var(--palette-text-secondary)'
                                     }}>
                                         {allStaff.length}
                                     </TabBadge>
@@ -203,8 +204,8 @@ export const StaffWorkHistoryPage = () => {
                                         <Box sx={{ display: 'flex', alignItems: 'center', zIndex: 1 }}>
                                             <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{dept.name}</Typography>
                                             <TabBadge sx={{
-                                                bgcolor: selectedDepartmentId === dept._id ? COLORS.primary : alpha('#919EAB', 0.12),
-                                                color: selectedDepartmentId === dept._id ? '#fff' : '#637381'
+                                                bgcolor: selectedDepartmentId === dept._id ? COLORS.primary : 'rgba(145, 158, 171, 0.12)',
+                                                color: selectedDepartmentId === dept._id ? '#fff' : 'var(--palette-text-secondary)'
                                             }}>
                                                 {count}
                                             </TabBadge>
@@ -238,14 +239,14 @@ export const StaffWorkHistoryPage = () => {
                                 onClick={(e) => setAnchorEl(e.currentTarget)}
                                 sx={{
                                     justifyContent: 'space-between',
-                                    bgcolor: alpha(COLORS.primary, 0.05),
+                                    bgcolor: 'rgba(33, 43, 54, 0.05)',
                                     color: COLORS.primary,
-                                    borderRadius: '16px',
+                                    borderRadius: "var(--shape-borderRadius-lg)",
                                     py: 1.8,
                                     px: 2,
                                     border: '1px solid',
-                                    borderColor: alpha(COLORS.primary, 0.15),
-                                    '&:hover': { bgcolor: alpha(COLORS.primary, 0.1), borderColor: alpha(COLORS.primary, 0.3) }
+                                    borderColor: 'rgba(33, 43, 54, 0.15)',
+                                    '&:hover': { bgcolor: 'rgba(33, 43, 54, 0.10)', borderColor: 'rgba(33, 43, 54, 0.30)' }
                                 }}
                                 endIcon={<Icon icon="solar:alt-arrow-down-bold-duotone" width={20} />}
                             >
@@ -254,7 +255,7 @@ export const StaffWorkHistoryPage = () => {
                                         src={selectedStaff?.avatar}
                                         sx={{
                                             width: 32, height: 32,
-                                            boxShadow: `0 0 0 2px #fff, 0 0 0 4px ${alpha(COLORS.primary, 0.2)}`
+                                            boxShadow: `0 0 0 2px #fff, 0 0 0 4px ${'rgba(33, 43, 54, 0.20)'}`
                                         }}
                                     />
                                     <Typography variant="subtitle2" fontWeight={700}>{selectedStaff?.fullName || "Chọn nhân viên"}</Typography>
@@ -287,12 +288,12 @@ export const StaffWorkHistoryPage = () => {
                                             setAnchorEl(null);
                                         }}
                                         sx={{
-                                            borderRadius: '12px',
+                                            borderRadius: "var(--shape-borderRadius-md)",
                                             my: 0.5,
                                             py: 1.5,
                                             px: 2,
                                             gap: 2,
-                                            '&.Mui-selected': { bgcolor: alpha(COLORS.primary, 0.1), '&:hover': { bgcolor: alpha(COLORS.primary, 0.15) } }
+                                            '&.Mui-selected': { bgcolor: 'rgba(33, 43, 54, 0.10)', '&:hover': { bgcolor: 'rgba(33, 43, 54, 0.15)' } }
                                         }}
                                     >
                                         <Avatar src={staff.avatar} sx={{ width: 40, height: 40 }} />
@@ -322,7 +323,7 @@ export const StaffWorkHistoryPage = () => {
                                     position: 'absolute',
                                     top: 0, left: 0, right: 0, height: '6px',
                                     bgcolor: COLORS.primary,
-                                    boxShadow: `0 2px 10px ${alpha(COLORS.primary, 0.3)}`
+                                    boxShadow: `0 2px 10px ${'rgba(33, 43, 54, 0.30)'}`
                                 }
                             }}>
                                 <Stack alignItems="center" spacing={2.5} sx={{ mb: 4 }}>
@@ -338,21 +339,21 @@ export const StaffWorkHistoryPage = () => {
                                         />
                                         <Box sx={{
                                             position: 'absolute', bottom: 6, right: 6,
-                                            width: 20, height: 20, bgcolor: '#00A76F',
+                                            width: 20, height: 20, bgcolor: 'var(--palette-primary-main)',
                                             borderRadius: '50%', border: '3px solid #fff',
                                             boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                                         }} />
                                     </Box>
                                     <Box sx={{ textAlign: 'center' }}>
-                                        <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5, color: '#212B36' }}>{selectedStaff.fullName}</Typography>
+                                        <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5, color: 'var(--palette-text-primary)' }}>{selectedStaff.fullName}</Typography>
                                         <Chip
                                             label={selectedStaff.roles?.map((r: any) => r.name).join(', ') || 'Nhân viên'}
                                             size="small"
                                             sx={{
                                                 fontWeight: 700,
-                                                bgcolor: alpha(COLORS.primary, 0.1),
+                                                bgcolor: 'rgba(33, 43, 54, 0.10)',
                                                 color: COLORS.primary,
-                                                borderRadius: '8px',
+                                                borderRadius: "var(--shape-borderRadius)",
                                                 px: 1
                                             }}
                                         />
@@ -360,25 +361,25 @@ export const StaffWorkHistoryPage = () => {
                                 </Stack>
 
                                 <Stack spacing={2.5}>
-                                    <Box sx={{ p: 2.5, bgcolor: '#F4F6F8', borderRadius: '20px', transition: 'all 0.3s', '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' } }}>
+                                    <Box sx={{ p: 2.5, bgcolor: 'var(--palette-background-neutral)', borderRadius: '20px', transition: 'all 0.3s', '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' } }}>
                                         <Stack direction="row" justifyContent="space-between" alignItems="center">
                                             <Stack direction="row" spacing={1.5} alignItems="center">
-                                                <Box sx={{ p: 1, bgcolor: alpha(COLORS.primary, 0.1), borderRadius: '10px' }}>
+                                                <Box sx={{ p: 1, bgcolor: 'rgba(33, 43, 54, 0.10)', borderRadius: '10px' }}>
                                                     <Icon icon="solar:checklist-minimalistic-bold-duotone" width={22} color={COLORS.primary} />
                                                 </Box>
-                                                <Typography variant="body2" sx={{ fontWeight: 700, color: '#637381' }}>Dịch vụ</Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 700, color: 'var(--palette-text-secondary)' }}>Dịch vụ</Typography>
                                             </Stack>
-                                            <Typography variant="h6" sx={{ fontWeight: 700, color: '#212B36' }}>{stats.completed}/{stats.total}</Typography>
+                                            <Typography variant="h6" sx={{ fontWeight: 700, color: 'var(--palette-text-primary)' }}>{stats.completed}/{stats.total}</Typography>
                                         </Stack>
                                     </Box>
 
-                                    <Box sx={{ p: 2.5, bgcolor: '#F4F6F8', borderRadius: '20px', transition: 'all 0.3s', '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' } }}>
+                                    <Box sx={{ p: 2.5, bgcolor: 'var(--palette-background-neutral)', borderRadius: '20px', transition: 'all 0.3s', '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' } }}>
                                         <Stack direction="row" justifyContent="space-between" alignItems="center">
                                             <Stack direction="row" spacing={1.5} alignItems="center">
                                                 <Box sx={{ p: 1, bgcolor: alpha('#22C55E', 0.1), borderRadius: '10px' }}>
                                                     <Icon icon="solar:wad-of-money-bold-duotone" width={22} color="#22C55E" />
                                                 </Box>
-                                                <Typography variant="body2" sx={{ fontWeight: 700, color: '#637381' }}>Doanh thu</Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 700, color: 'var(--palette-text-secondary)' }}>Doanh thu</Typography>
                                             </Stack>
                                             <Typography variant="h6" sx={{ fontWeight: 700, color: '#22C55E' }}>
                                                 {stats.revenue.toLocaleString()}đ
@@ -386,13 +387,13 @@ export const StaffWorkHistoryPage = () => {
                                         </Stack>
                                     </Box>
 
-                                    <Box sx={{ p: 2.5, bgcolor: '#F4F6F8', borderRadius: '20px', transition: 'all 0.3s', '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' } }}>
+                                    <Box sx={{ p: 2.5, bgcolor: 'var(--palette-background-neutral)', borderRadius: '20px', transition: 'all 0.3s', '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' } }}>
                                         <Stack direction="row" justifyContent="space-between" alignItems="center">
                                             <Stack direction="row" spacing={1.5} alignItems="center">
                                                 <Box sx={{ p: 1, bgcolor: alpha('#FFAB00', 0.1), borderRadius: '10px' }}>
                                                     <Icon icon="solar:chart-2-bold-duotone" width={22} color="#FFAB00" />
                                                 </Box>
-                                                <Typography variant="body2" sx={{ fontWeight: 700, color: '#637381' }}>Độ hiệu quả</Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 700, color: 'var(--palette-text-secondary)' }}>Độ hiệu quả</Typography>
                                             </Stack>
                                             <Typography variant="h6" sx={{ fontWeight: 700, color: '#FFAB00' }}>
                                                 {stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0}%
@@ -422,7 +423,7 @@ export const StaffWorkHistoryPage = () => {
                         <Box sx={{
                             p: 3,
                             borderBottom: '1px dashed',
-                            borderColor: alpha('#919EAB', 0.2),
+                            borderColor: 'rgba(145, 158, 171, 0.20)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
@@ -430,15 +431,15 @@ export const StaffWorkHistoryPage = () => {
                             gap: 2
                         }}>
                             <Stack direction="row" spacing={1.5} alignItems="center">
-                                <Box sx={{ p: 1, bgcolor: alpha(COLORS.primary, 0.1), borderRadius: '12px' }}>
+                                <Box sx={{ p: 1, bgcolor: 'rgba(33, 43, 54, 0.10)', borderRadius: "var(--shape-borderRadius-md)" }}>
                                     <Icon icon="solar:history-bold-duotone" width={24} color={COLORS.primary} />
                                 </Box>
-                                <Typography variant="h6" fontWeight={700} sx={{ color: '#212B36' }}>Lịch sử dịch vụ</Typography>
+                                <Typography variant="h6" fontWeight={700} sx={{ color: 'var(--palette-text-primary)' }}>Lịch sử dịch vụ</Typography>
                             </Stack>
 
                             <Stack direction="row" spacing={1.5}>
                                 <Tooltip title="Xuất báo cáo (Excel)">
-                                    <IconButton sx={{ bgcolor: alpha('#22C55E', 0.08), color: '#22C55E', borderRadius: '12px', '&:hover': { bgcolor: alpha('#22C55E', 0.15) } }}>
+                                    <IconButton sx={{ bgcolor: alpha('#22C55E', 0.08), color: '#22C55E', borderRadius: "var(--shape-borderRadius-md)", '&:hover': { bgcolor: alpha('#22C55E', 0.15) } }}>
                                         <Icon icon="solar:file-export-bold-duotone" width={22} />
                                     </IconButton>
                                 </Tooltip>
@@ -450,13 +451,13 @@ export const StaffWorkHistoryPage = () => {
                                 <Table stickyHeader>
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell sx={{ bgcolor: alpha('#F4F6F8', 0.8), color: '#637381', fontWeight: 700 }}>Mã đơn</TableCell>
-                                            <TableCell sx={{ bgcolor: alpha('#F4F6F8', 0.8), color: '#637381', fontWeight: 700 }}>Dịch vụ</TableCell>
-                                            <TableCell sx={{ bgcolor: alpha('#F4F6F8', 0.8), color: '#637381', fontWeight: 700 }}>Khách hàng</TableCell>
-                                            <TableCell sx={{ bgcolor: alpha('#F4F6F8', 0.8), color: '#637381', fontWeight: 700 }}>Ngày thực hiện</TableCell>
-                                            <TableCell sx={{ bgcolor: alpha('#F4F6F8', 0.8), color: '#637381', fontWeight: 700 }}>Thời gian</TableCell>
-                                            <TableCell sx={{ bgcolor: alpha('#F4F6F8', 0.8), color: '#637381', fontWeight: 700 }}>Doanh thu</TableCell>
-                                            <TableCell align="center" sx={{ bgcolor: alpha('#F4F6F8', 0.8), color: '#637381', fontWeight: 700 }}>Trạng thái</TableCell>
+                                            <TableCell sx={{ bgcolor: 'rgba(244, 246, 248, 0.80)', color: 'var(--palette-text-secondary)', fontWeight: 700 }}>Mã đơn</TableCell>
+                                            <TableCell sx={{ bgcolor: 'rgba(244, 246, 248, 0.80)', color: 'var(--palette-text-secondary)', fontWeight: 700 }}>Dịch vụ</TableCell>
+                                            <TableCell sx={{ bgcolor: 'rgba(244, 246, 248, 0.80)', color: 'var(--palette-text-secondary)', fontWeight: 700 }}>Khách hàng</TableCell>
+                                            <TableCell sx={{ bgcolor: 'rgba(244, 246, 248, 0.80)', color: 'var(--palette-text-secondary)', fontWeight: 700 }}>Ngày thực hiện</TableCell>
+                                            <TableCell sx={{ bgcolor: 'rgba(244, 246, 248, 0.80)', color: 'var(--palette-text-secondary)', fontWeight: 700 }}>Thời gian</TableCell>
+                                            <TableCell sx={{ bgcolor: 'rgba(244, 246, 248, 0.80)', color: 'var(--palette-text-secondary)', fontWeight: 700 }}>Doanh thu</TableCell>
+                                            <TableCell align="center" sx={{ bgcolor: 'rgba(244, 246, 248, 0.80)', color: 'var(--palette-text-secondary)', fontWeight: 700 }}>Trạng thái</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
@@ -498,7 +499,7 @@ export const StaffWorkHistoryPage = () => {
                                                             <Typography variant="body2" fontWeight={600}>{dayjs(booking.start).format("DD/MM/YYYY")}</Typography>
                                                         </TableCell>
                                                         <TableCell>
-                                                            <Typography variant="caption" sx={{ fontWeight: 700, px: 1, py: 0.5, borderRadius: '4px', bgcolor: alpha('#919EAB', 0.08) }}>
+                                                            <Typography variant="caption" sx={{ fontWeight: 700, px: 1, py: 0.5, borderRadius: '4px', bgcolor: 'rgba(145, 158, 171, 0.08)' }}>
                                                                 {dayjs(booking.actualStart || booking.start).format("HH:mm")} - {dayjs(booking.completedAt || booking.end).format("HH:mm")}
                                                             </Typography>
                                                         </TableCell>
@@ -514,7 +515,7 @@ export const StaffWorkHistoryPage = () => {
                                                                     fontWeight: 700,
                                                                     color: status.color,
                                                                     bgcolor: status.bg,
-                                                                    borderRadius: '6px'
+                                                                    borderRadius: "var(--shape-borderRadius-sm)"
                                                                 }}
                                                             />
                                                         </TableCell>
@@ -532,3 +533,7 @@ export const StaffWorkHistoryPage = () => {
         </Box>
     );
 };
+
+
+
+

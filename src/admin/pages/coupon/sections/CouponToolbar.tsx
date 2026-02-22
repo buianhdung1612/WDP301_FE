@@ -13,11 +13,11 @@ export const CouponToolbar = () => {
                         '& .MuiInputBase-root': {
                             fontSize: '0.875rem',
                             height: '40px',
-                            borderRadius: '8px',
+                            borderRadius: "var(--shape-borderRadius)",
                         },
                         '& .MuiSvgIcon-root': {
                             fontSize: '1.25rem',
-                            color: '#637381'
+                            color: 'var(--palette-text-secondary)'
                         }
                     }
                 } as any)}
@@ -25,3 +25,7 @@ export const CouponToolbar = () => {
         </Box>
     );
 };
+
+
+
+

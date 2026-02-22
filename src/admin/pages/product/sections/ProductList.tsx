@@ -39,7 +39,7 @@ export const ProductList = () => {
     }
 
     if (error) {
-        return <div style={{ padding: '40px', textAlign: 'center', color: '#FF5630', fontSize: '1.125rem' }}>Lỗi khi tải danh sách sản phẩm. Vui lòng thử lại.</div>;
+        return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--palette-error-main)', fontSize: '1.125rem' }}>Lỗi khi tải danh sách sản phẩm. Vui lòng thử lại.</div>;
     }
 
     return (
@@ -91,3 +91,7 @@ export const ProductList = () => {
         </Card>
     )
 }
+
+
+
+

@@ -13,7 +13,7 @@ export const ProductListPage = () => {
 
     return (
         <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
+            <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
                     <Title title={t("admin.product.title.list")} />
                     <Breadcrumb
@@ -30,7 +30,7 @@ export const ProductListPage = () => {
                     startIcon={<AddIcon />}
                     sx={{
                         minHeight: "2.25rem",
-                        padding: "6px 16px",
+                        padding: "var(--shape-borderRadius-sm) calc(2 * var(--spacing))",
                     }}
                 />
             </div>
@@ -38,3 +38,6 @@ export const ProductListPage = () => {
         </>
     )
 }
+
+
+

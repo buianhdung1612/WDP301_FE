@@ -64,7 +64,7 @@ export const ChangePasswordPage = () => {
                 />
             </Box>
 
-            <Card sx={{ p: 4, borderRadius: '16px' }}>
+            <Card sx={{ p: 4, borderRadius: "var(--shape-borderRadius-lg)" }}>
                 <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, fontSize: '1rem' }}>
                     Đổi mật khẩu cho: {user?.fullName}
                 </Typography>
@@ -85,7 +85,7 @@ export const ChangePasswordPage = () => {
                                     fullWidth
                                     error={!!fieldState.error}
                                     helperText={fieldState.error?.message}
-                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.875rem' } }}
+                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: "var(--shape-borderRadius)", fontSize: '0.875rem' } }}
                                 />
                             )}
                         />
@@ -101,7 +101,7 @@ export const ChangePasswordPage = () => {
                                     fullWidth
                                     error={!!fieldState.error}
                                     helperText={fieldState.error?.message}
-                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px', fontSize: '0.875rem' } }}
+                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: "var(--shape-borderRadius)", fontSize: '0.875rem' } }}
                                 />
                             )}
                         />
@@ -111,14 +111,14 @@ export const ChangePasswordPage = () => {
                                 variant="outlined"
                                 onClick={() => navigate(-1)}
                                 sx={{
-                                    borderRadius: '8px',
+                                    borderRadius: "var(--shape-borderRadius)",
                                     fontWeight: 600,
                                     fontSize: '0.875rem',
                                     textTransform: 'none',
                                     borderColor: 'rgba(145, 158, 171, 0.3)',
-                                    color: '#1C252E',
+                                    color: 'var(--palette-text-primary)',
                                     '&:hover': {
-                                        borderColor: '#1C252E',
+                                        borderColor: 'var(--palette-text-primary)',
                                         bgcolor: 'rgba(28, 37, 46, 0.04)'
                                     }
                                 }}
@@ -130,15 +130,15 @@ export const ChangePasswordPage = () => {
                                 variant="contained"
                                 disabled={isPending}
                                 sx={{
-                                    bgcolor: '#1C252E',
-                                    color: '#fff',
-                                    borderRadius: '8px',
+                                    bgcolor: 'var(--palette-text-primary)',
+                                    color: "var(--palette-common-white)",
+                                    borderRadius: "var(--shape-borderRadius)",
                                     px: 4,
                                     fontWeight: 700,
                                     fontSize: '0.875rem',
                                     textTransform: 'none',
                                     boxShadow: 'none',
-                                    '&:hover': { bgcolor: '#454F5B', boxShadow: 'none' }
+                                    '&:hover': { bgcolor: "var(--palette-grey-700)", boxShadow: 'none' }
                                 }}
                             >
                                 {isPending ? "Đang xử lý..." : "Cập nhật mật khẩu"}
@@ -150,3 +150,7 @@ export const ChangePasswordPage = () => {
         </Box>
     );
 };
+
+
+
+

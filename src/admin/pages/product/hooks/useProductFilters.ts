@@ -48,3 +48,7 @@ export const useProductFilters = () => {
         onClearFilters: handleClearFilters,
     };
 };
+
+
+
+

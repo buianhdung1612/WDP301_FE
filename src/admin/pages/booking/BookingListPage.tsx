@@ -8,7 +8,6 @@ import { Title } from "../../components/ui/Title";
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { prefixAdmin } from "../../constants/routes";
 import { BookingList } from "./sections/BookingList";
-import { COLORS } from "../role/configs/constants";
 import 'dayjs/locale/vi';
 
 export const BookingListPage = () => {
@@ -17,7 +16,7 @@ export const BookingListPage = () => {
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
-            <Box sx={{ maxWidth: '1200px', mx: 'auto', p: '1.5rem' }}>
+            <Box sx={{ maxWidth: '1200px', mx: 'auto', p: "calc(3 * var(--spacing))" }}>
                 <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <Box>
                         <Title title={t("admin.booking.title.list")} />
@@ -33,18 +32,18 @@ export const BookingListPage = () => {
                         startIcon={<Icon icon="eva:plus-fill" />}
                         onClick={() => navigate(`/${prefixAdmin}/booking/create`)}
                         sx={{
-                            bgcolor: COLORS.primary,
-                            color: '#fff',
+                            bgcolor: 'var(--palette-text-primary)',
+                            color: "var(--palette-common-white)",
                             minHeight: "2.5rem",
                             fontWeight: 700,
                             fontSize: '0.875rem',
-                            padding: "0 1rem",
-                            borderRadius: '8px',
+                            padding: "0 calc(2 * var(--spacing))",
+                            borderRadius: 'var(--shape-borderRadius)',
                             textTransform: 'none',
                             boxShadow: 'none',
                             '&:hover': {
-                                bgcolor: '#454F5B',
-                                boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
+                                bgcolor: "var(--palette-grey-700)",
+                                boxShadow: "var(--customShadows-z8)"
                             }
                         }}
                     >
@@ -57,3 +56,7 @@ export const BookingListPage = () => {
         </LocalizationProvider>
     );
 };
+
+
+
+

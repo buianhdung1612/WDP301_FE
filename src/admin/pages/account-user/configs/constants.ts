@@ -5,11 +5,16 @@ export const STATUS_OPTIONS = [
 ];
 
 export const COLORS = {
-    primary: '#1C252E',
-    secondary: '#637381',
+    primary: 'var(--palette-text-primary)',
+    secondary: 'var(--palette-text-secondary)',
     success: '#118D57',
-    error: '#FF5630',
+    error: 'var(--palette-error-main)',
     warning: '#FFAB00',
     info: '#00B8D9',
-    disabled: '#919EAB',
+    disabled: 'var(--palette-text-disabled)',
 };
+
+
+
+
+

@@ -67,7 +67,7 @@ export const AttendanceListPage = () => {
     const years = [2024, 2025, 2026];
 
     return (
-        <Box sx={{ p: '24px' }}>
+        <Box sx={{ p: "calc(3 * var(--spacing))" }}>
             <Box sx={{ mb: '40px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <Box sx={{ flexGrow: 1 }}>
                     <Title title="Chấm công & Lương" />
@@ -82,7 +82,7 @@ export const AttendanceListPage = () => {
                     variant="contained"
                     startIcon={<AutoFixHighIcon />}
                     onClick={() => setOpenGenDialog(true)}
-                    sx={{ ...primaryButtonStyles, bgcolor: '#00A76F', '&:hover': { bgcolor: '#007B55' } }}
+                    sx={{ ...primaryButtonStyles, bgcolor: 'var(--palette-primary-main)', '&:hover': { bgcolor: '#007B55' } }}
                 >
                     Khởi tạo bảng công
                 </Button>
@@ -149,12 +149,12 @@ export const AttendanceListPage = () => {
                     <Typography variant="h6" sx={{ fontWeight: 700 }}>
                         Khởi tạo bảng công mới
                     </Typography>
-                    <IconButton onClick={() => setOpenGenDialog(false)} size="small" sx={{ color: '#637381' }}>
+                    <IconButton onClick={() => setOpenGenDialog(false)} size="small" sx={{ color: 'var(--palette-text-secondary)' }}>
                         <CloseIcon />
                     </IconButton>
                 </DialogTitle>
-                <DialogContent sx={{ bgcolor: '#F4F6F8 !important', py: '24px !important' }}>
-                    <Typography variant="body2" sx={{ mb: 3, color: '#637381', fontWeight: 500 }}>
+                <DialogContent sx={{ bgcolor: 'var(--palette-background-neutral) !important', py: '24px !important' }}>
+                    <Typography variant="body2" sx={{ mb: 3, color: 'var(--palette-text-secondary)', fontWeight: 500 }}>
                         Hệ thống sẽ tự động tổng hợp tất cả lịch làm việc đã hoàn thành (Checked-out) trong tháng để tính lương.
                     </Typography>
                     <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
@@ -164,7 +164,7 @@ export const AttendanceListPage = () => {
                             label="Tháng"
                             value={month}
                             onChange={(e) => setMonth(Number(e.target.value))}
-                            sx={{ bgcolor: '#fff', borderRadius: '8px' }}
+                            sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }}
                         >
                             {months.map(m => <MenuItem key={m} value={m}>Tháng {m}</MenuItem>)}
                         </TextField>
@@ -174,7 +174,7 @@ export const AttendanceListPage = () => {
                             label="Năm"
                             value={year}
                             onChange={(e) => setYear(Number(e.target.value))}
-                            sx={{ bgcolor: '#fff', borderRadius: '8px' }}
+                            sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }}
                         >
                             {years.map(y => <MenuItem key={y} value={y}>{y}</MenuItem>)}
                         </TextField>
@@ -185,15 +185,15 @@ export const AttendanceListPage = () => {
                         onClick={() => setOpenGenDialog(false)}
                         variant="outlined"
                         sx={{
-                            borderRadius: '8px',
+                            borderRadius: "var(--shape-borderRadius)",
                             textTransform: 'none',
                             fontWeight: 700,
                             padding: '8px 20px',
-                            color: '#1C252E',
+                            color: 'var(--palette-text-primary)',
                             borderColor: 'rgba(145, 158, 171, 0.32)',
                             '&:hover': {
                                 bgcolor: 'rgba(145, 158, 171, 0.08)',
-                                borderColor: '#1C252E',
+                                borderColor: 'var(--palette-text-primary)',
                             }
                         }}
                     >
@@ -203,15 +203,15 @@ export const AttendanceListPage = () => {
                         onClick={handleGenerate}
                         variant="contained"
                         sx={{
-                            borderRadius: '8px',
+                            borderRadius: "var(--shape-borderRadius)",
                             textTransform: 'none',
                             fontWeight: 700,
                             padding: '8px 20px',
-                            bgcolor: '#1C252E',
+                            bgcolor: 'var(--palette-text-primary)',
                             boxShadow: 'none',
                             '&:hover': {
-                                bgcolor: '#454F5B',
-                                boxShadow: '0 8px 16px 0 rgba(145 158 171 / 16%)',
+                                bgcolor: "var(--palette-grey-700)",
+                                boxShadow: "var(--customShadows-z8)",
                             }
                         }}
                     >
@@ -222,4 +222,8 @@ export const AttendanceListPage = () => {
         </Box>
     );
 };
+
+
+
+
 

@@ -63,7 +63,7 @@ export const getAttendanceColumns = (onApprove: (id: string) => void, onEdit: (i
         width: 130,
         renderCell: (params) => {
             const statusMap: any = {
-                draft: { label: 'Bản nháp', color: 'default', bgcolor: 'rgba(145, 158, 171, 0.16)', textColor: '#637381' },
+                draft: { label: 'Bản nháp', color: 'default', bgcolor: 'rgba(145, 158, 171, 0.16)', textColor: 'var(--palette-text-secondary)' },
                 approved: { label: 'Đã duyệt', color: 'info', bgcolor: 'rgba(0, 184, 217, 0.16)', textColor: '#006C9C' },
                 paid: { label: 'Đã chi', color: 'success', bgcolor: 'rgba(34, 197, 94, 0.16)', textColor: '#118D57' },
             };
@@ -130,3 +130,7 @@ export const getAttendanceColumns = (onApprove: (id: string) => void, onEdit: (i
         }
     }
 ];
+
+
+
+

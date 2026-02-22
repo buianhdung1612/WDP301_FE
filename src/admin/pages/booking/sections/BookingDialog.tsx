@@ -80,7 +80,7 @@ export const BookingDialog = ({ open, onClose }: BookingDialogProps) => {
     const commonInputStyles = {
         '& .MuiOutlinedInput-root': {
             fontSize: '0.875rem',
-            borderRadius: '8px',
+            borderRadius: "var(--shape-borderRadius)",
             '& fieldset': { borderColor: 'rgba(145, 158, 171, 0.2)' },
             '&:hover fieldset': { borderColor: COLORS.primary },
             '&.Mui-focused fieldset': { borderColor: COLORS.primary },
@@ -88,7 +88,7 @@ export const BookingDialog = ({ open, onClose }: BookingDialogProps) => {
         '& .MuiInputLabel-root': {
             fontSize: '0.875rem',
             fontWeight: 600,
-            color: '#637381',
+            color: 'var(--palette-text-secondary)',
             '&.Mui-focused': { color: COLORS.primary }
         }
     };
@@ -114,7 +114,7 @@ export const BookingDialog = ({ open, onClose }: BookingDialogProps) => {
             fullWidth
             maxWidth="md"
             PaperProps={{
-                sx: { borderRadius: '16px', backgroundImage: 'none', p: 1 }
+                sx: { borderRadius: "var(--shape-borderRadius-lg)", backgroundImage: 'none', p: 1 }
             }}
         >
             <DialogTitle sx={{ fontWeight: 700, fontSize: '1.125rem', p: '1.5rem 1.5rem 1rem', color: COLORS.primary }}>
@@ -191,11 +191,11 @@ export const BookingDialog = ({ open, onClose }: BookingDialogProps) => {
                     onClick={onClose}
                     variant="outlined"
                     sx={{
-                        borderRadius: '8px',
+                        borderRadius: "var(--shape-borderRadius)",
                         textTransform: 'none',
                         fontWeight: 700,
                         fontSize: '0.875rem',
-                        padding: '6px 16px',
+                        padding: "var(--shape-borderRadius-sm) calc(2 * var(--spacing))",
                         color: COLORS.primary,
                         borderColor: COLORS.borderMedium,
                         '&:hover': { bgcolor: 'rgba(145, 158, 171, 0.08)', borderColor: COLORS.primary }
@@ -209,15 +209,15 @@ export const BookingDialog = ({ open, onClose }: BookingDialogProps) => {
                     disabled={isCreating}
                     sx={{
                         bgcolor: COLORS.primary,
-                        color: '#fff',
+                        color: "var(--palette-common-white)",
                         minHeight: "2.5rem",
                         px: 3,
-                        borderRadius: '8px',
+                        borderRadius: "var(--shape-borderRadius)",
                         fontSize: '0.875rem',
                         fontWeight: 700,
                         textTransform: 'none',
                         boxShadow: 'none',
-                        '&:hover': { bgcolor: '#454F5B' }
+                        '&:hover': { bgcolor: "var(--palette-grey-700)" }
                     }}
                 >
                     {isCreating ? t("admin.common.processing") : t("admin.common.add")}
@@ -226,3 +226,7 @@ export const BookingDialog = ({ open, onClose }: BookingDialogProps) => {
         </Dialog>
     );
 };
+
+
+
+

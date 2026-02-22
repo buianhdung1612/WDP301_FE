@@ -50,3 +50,6 @@ export const BlogCategoryList = () => {
         </Card>
     )
 }
+
+
+

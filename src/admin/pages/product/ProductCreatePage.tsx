@@ -90,20 +90,20 @@ export const ProductCreatePage = () => {
                     root: {
                         backgroundImage: "none !important",
                         backdropFilter: "none !important",
-                        backgroundColor: "#fff !important",
-                        boxShadow: "0 0 2px 0 #919eab33, 0 12px 24px -4px #919eab1f",
-                        borderRadius: "16px",
-                        color: "#1C252E",
+                        backgroundColor: "var(--palette-background-paper) !important",
+                        boxShadow: "var(--customShadows-card)",
+                        borderRadius: "var(--shape-borderRadius-lg)",
+                        color: "var(--palette-text-primary)",
                     },
                 }
             },
             MuiTableHead: {
                 styleOverrides: {
                     root: {
-                        backgroundColor: "#F4F6F8",
+                        backgroundColor: "var(--palette-background-neutral)",
                         "& .MuiTableCell-root": {
                             fontWeight: 600,
-                            color: "#637381",
+                            color: "var(--palette-text-secondary)",
                             fontSize: "1rem",
                         }
                     }
@@ -279,7 +279,7 @@ export const ProductCreatePage = () => {
 
     return (
         <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
+            <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
                     <Title title={t('admin.product.title.create')} />
                     <Breadcrumb
@@ -294,8 +294,8 @@ export const ProductCreatePage = () => {
             <ThemeProvider theme={localTheme}>
                 <form onSubmit={handleSubmit(onSubmit, onError)}>
                     <Stack sx={{
-                        margin: "0px 120px",
-                        gap: "40px",
+                        margin: "0px calc(15 * var(--spacing))",
+                        gap: "calc(5 * var(--spacing))",
                         pb: 10
                     }}>
                         <CollapsibleCard
@@ -304,7 +304,7 @@ export const ProductCreatePage = () => {
                             expanded={expandedDetail}
                             onToggle={toggle(setExpandedDetail)}
                         >
-                            <Stack p="24px" gap="24px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Controller
                                     name="name"
                                     control={control}
@@ -357,7 +357,7 @@ export const ProductCreatePage = () => {
                             expanded={expandedExtra}
                             onToggle={toggle(setExpandedExtra)}
                         >
-                            <Stack p="24px" gap="24px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <CategoryTreeSelectGeneric
                                     multiple
                                     name="category"
@@ -369,7 +369,7 @@ export const ProductCreatePage = () => {
                                     sx={{
                                         display: "grid",
                                         gridTemplateColumns: "repeat(2, 1fr)",
-                                        gap: "24px 16px",
+                                        gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))",
                                     }}
                                 >
                                     <Controller
@@ -377,7 +377,7 @@ export const ProductCreatePage = () => {
                                         control={control}
                                         render={({ field }) => (
                                             <FormControl>
-                                                <InputLabel id="status-select-label" sx={{ color: "#637381" }}>{t('admin.common.status')}</InputLabel>
+                                                <InputLabel id="status-select-label" sx={{ color: "var(--palette-text-secondary)" }}>{t('admin.common.status')}</InputLabel>
                                                 <Select
                                                     {...field}
                                                     labelId="status-select-label"
@@ -414,8 +414,8 @@ export const ProductCreatePage = () => {
                             expanded={expandedPrice}
                             onToggle={toggle(setExpandedPrice)}
                         >
-                            <Stack p="24px" gap="24px">
-                                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
+                                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: "calc(3 * var(--spacing))" }}>
                                     <Controller
                                         name="priceOld"
                                         control={control}
@@ -466,7 +466,7 @@ export const ProductCreatePage = () => {
                             expanded={expandedVariants}
                             onToggle={toggle(setExpandedVariants)}
                         >
-                            <Stack p="24px" gap="24px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Box>
                                     <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>Danh sách thuộc tính</Typography>
                                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
@@ -489,7 +489,7 @@ export const ProductCreatePage = () => {
                                     <Button
                                         variant="outlined"
                                         size="large"
-                                        sx={{ mt: 2, textTransform: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '0.875rem' }}
+                                        sx={{ mt: 2, textTransform: 'none', borderRadius: "var(--shape-borderRadius)", fontWeight: 600, fontSize: '0.875rem' }}
                                         onClick={generateVariants}
                                     >
                                         Tạo biến thể
@@ -501,7 +501,7 @@ export const ProductCreatePage = () => {
                                         <Divider />
                                         <Box>
                                             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>Danh sách biến thể</Typography>
-                                            <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #919eab33', borderRadius: '16px', overflow: 'hidden' }}>
+                                            <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid var(--palette-text-disabled)33', borderRadius: "var(--shape-borderRadius-lg)", overflow: 'hidden' }}>
                                                 <Table>
                                                     <TableHead>
                                                         <TableRow>
@@ -551,7 +551,7 @@ export const ProductCreatePage = () => {
                             </Stack>
                         </CollapsibleCard>
 
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: "16px" }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: "calc(2 * var(--spacing))" }}>
                             <LoadingButton
                                 type="submit"
                                 loading={isPending}
@@ -565,3 +565,6 @@ export const ProductCreatePage = () => {
         </>
     )
 }
+
+
+

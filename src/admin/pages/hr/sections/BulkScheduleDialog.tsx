@@ -103,13 +103,13 @@ export const BulkScheduleDialog = ({
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
                     Phân ca hàng loạt
                 </Typography>
-                <IconButton onClick={onClose} size="small" sx={{ color: '#637381' }}>
+                <IconButton onClick={onClose} size="small" sx={{ color: 'var(--palette-text-secondary)' }}>
                     <CloseIcon />
                 </IconButton>
             </DialogTitle>
             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    <DialogContent sx={{ bgcolor: '#F4F6F8 !important', py: '24px !important' }}>
+                    <DialogContent sx={{ bgcolor: 'var(--palette-background-neutral) !important', py: '24px !important' }}>
                         <Grid container spacing={2.5}>
                             <Grid size={{ xs: 12 }}>
                                 <Controller
@@ -132,7 +132,7 @@ export const BulkScheduleDialog = ({
                                                         .map((a: any) => a.fullName)
                                                         .join(', ')
                                             }}
-                                            sx={{ bgcolor: '#fff', borderRadius: '8px' }}
+                                            sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }}
                                         >
                                             {filteredAccounts.map((account: any) => {
                                                 const isBusy = busyStaffIds.includes(account._id);
@@ -155,7 +155,7 @@ export const BulkScheduleDialog = ({
                                                             <ListItemText primary={`${account.fullName} (${account.email})`} />
                                                         </Box>
                                                         {isBusy && (
-                                                            <Typography variant="caption" sx={{ color: '#FF5630', fontWeight: 700, ml: 1 }}>
+                                                            <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 700, ml: 1 }}>
                                                                 Bận {watchOverwrite ? '(Có thể ghi đè)' : ''}
                                                             </Typography>
                                                         )}
@@ -184,7 +184,7 @@ export const BulkScheduleDialog = ({
                                                 label="Ca làm việc"
                                                 error={!!error}
                                                 helperText={error?.message}
-                                                sx={{ bgcolor: '#fff', borderRadius: '8px' }}
+                                                sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }}
                                             >
                                                 {filteredShifts.map((shift: any) => (
                                                     <MenuItem key={shift._id} value={shift._id}>
@@ -212,8 +212,8 @@ export const BulkScheduleDialog = ({
                                                 textField: {
                                                     sx: {
                                                         width: '100%',
-                                                        bgcolor: '#fff',
-                                                        borderRadius: '8px'
+                                                        bgcolor: "var(--palette-background-paper)",
+                                                        borderRadius: "var(--shape-borderRadius)"
                                                     }
                                                 }
                                             }}
@@ -234,8 +234,8 @@ export const BulkScheduleDialog = ({
                                                 textField: {
                                                     sx: {
                                                         width: '100%',
-                                                        bgcolor: '#fff',
-                                                        borderRadius: '8px'
+                                                        bgcolor: "var(--palette-background-paper)",
+                                                        borderRadius: "var(--shape-borderRadius)"
                                                     }
                                                 }
                                             }}
@@ -257,7 +257,7 @@ export const BulkScheduleDialog = ({
                                                 gap: 1,
                                                 p: 1.5,
                                                 bgcolor: field.value ? alpha('#FFAB00', 0.08) : 'transparent',
-                                                borderRadius: '12px',
+                                                borderRadius: "var(--shape-borderRadius-md)",
                                                 border: '1px solid',
                                                 borderColor: field.value ? '#FFAB00' : alpha('#919EAB', 0.2),
                                                 cursor: 'pointer',
@@ -270,10 +270,10 @@ export const BulkScheduleDialog = ({
                                                 sx={{ p: 0, color: '#FFAB00', '&.Mui-checked': { color: '#FFAB00' } }}
                                             />
                                             <Box>
-                                                <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: field.value ? '#B76E00' : '#1C252E' }}>
+                                                <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: field.value ? '#B76E00' : 'var(--palette-text-primary)' }}>
                                                     Ghi đè lịch cũ
                                                 </Typography>
-                                                <Typography sx={{ fontSize: '0.75rem', color: field.value ? '#B76E00' : '#637381' }}>
+                                                <Typography sx={{ fontSize: '0.75rem', color: field.value ? '#B76E00' : 'var(--palette-text-secondary)' }}>
                                                     Nếu nhân viên đã có lịch trong tầm ngày này, hệ thống sẽ tự động đổi sang ca mới.
                                                 </Typography>
                                             </Box>
@@ -288,15 +288,15 @@ export const BulkScheduleDialog = ({
                             onClick={onClose}
                             variant="outlined"
                             sx={{
-                                borderRadius: '8px',
+                                borderRadius: "var(--shape-borderRadius)",
                                 textTransform: 'none',
                                 fontWeight: 700,
                                 padding: '8px 20px',
-                                color: '#1C252E',
+                                color: 'var(--palette-text-primary)',
                                 borderColor: 'rgba(145, 158, 171, 0.32)',
                                 '&:hover': {
                                     bgcolor: 'rgba(145, 158, 171, 0.08)',
-                                    borderColor: '#1C252E',
+                                    borderColor: 'var(--palette-text-primary)',
                                 }
                             }}
                         >
@@ -307,15 +307,15 @@ export const BulkScheduleDialog = ({
                             variant="contained"
                             disabled={loading}
                             sx={{
-                                borderRadius: '8px',
+                                borderRadius: "var(--shape-borderRadius)",
                                 textTransform: 'none',
                                 fontWeight: 700,
                                 padding: '8px 20px',
-                                bgcolor: '#1C252E',
+                                bgcolor: 'var(--palette-text-primary)',
                                 boxShadow: 'none',
                                 '&:hover': {
-                                    bgcolor: '#454F5B',
-                                    boxShadow: '0 8px 16px 0 rgba(145 158 171 / 16%)',
+                                    bgcolor: "var(--palette-grey-700)",
+                                    boxShadow: "var(--customShadows-z8)",
                                 }
                             }}
                         >
@@ -327,3 +327,7 @@ export const BulkScheduleDialog = ({
         </Dialog>
     );
 };
+
+
+
+
