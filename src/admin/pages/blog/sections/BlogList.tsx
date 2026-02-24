@@ -34,9 +34,9 @@ export const BlogList = ({ blogs = [], isLoading = false }: BlogListProps) => {
     const navigate = useNavigate();
     const { mutate: deleteBlog } = useDeleteBlog();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [selectedBlogId, setSelectedBlogId] = useState<number | null>(null);
+    const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null);
 
-    const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, id: number) => {
+    const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, id: string) => {
         setAnchorEl(event.currentTarget);
         setSelectedBlogId(id);
     };

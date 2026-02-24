@@ -61,7 +61,6 @@ export const BookingEditPage = () => {
         userId: "",
         petIds: [] as string[],
         serviceId: "",
-        staffId: "",
         staffIds: [] as string[],
         petStaffMap: [] as { petId: string, staffId: string }[],
         date: dayjs(),
@@ -80,8 +79,7 @@ export const BookingEditPage = () => {
                 userId: booking.userId?._id || "",
                 petIds: booking.petIds?.map((p: any) => p._id) || [],
                 serviceId: booking.serviceId?._id || "",
-                staffId: booking.staffId?._id || "",
-                staffIds: booking.staffIds?.map((s: any) => s._id) || (booking.staffId?._id ? [booking.staffId._id] : []),
+                staffIds: booking.staffIds?.map((s: any) => s._id) || [],
                 petStaffMap: booking.petStaffMap || [],
                 date: dayjs(booking.start),
                 startTime: dayjs(booking.start),
@@ -117,7 +115,7 @@ export const BookingEditPage = () => {
 
         return staffList.reduce((acc: any, staff: any) => {
             const staffSchedules = schedules.filter((s: any) => s.staffId?._id === staff._id);
-            const staffBookings = bookings.filter((b: any) => b.staffId?._id === staff._id && b._id !== id);
+            const staffBookings = bookings.filter((b: any) => b.staffIds?.some((s: any) => (s._id || s) === staff._id) && b._id !== id);
 
             const hasShift = staffSchedules.some((s: any) => {
                 if (!s.shiftId) return false;
@@ -183,23 +181,14 @@ export const BookingEditPage = () => {
         }
     }, [formData.serviceId, formData.startTime, formData.petStaffMap, selectedService, formData.endTime, isReadOnly]);
 
+    // Use staffIds[0] logic if needed for single staff role checks
     useEffect(() => {
         if (isStaff && !isReadOnly) {
-            if (formData.staffId !== user?.id) {
-                setFormData(prev => ({ ...prev, staffId: user?.id || "" }));
+            if (!formData.staffIds.includes(user?.id || "")) {
+                setFormData(prev => ({ ...prev, staffIds: [user?.id || ""] }));
             }
-            return;
         }
-
-        if (formData.staffId && staffList.length > 0 && !isReadOnly) {
-            const isStaffValid = staffList.some((s: any) => s._id === formData.staffId);
-            if (!isStaffValid && formData.staffId !== "") {
-                setFormData(prev => ({ ...prev, staffId: "" }));
-            }
-        } else if (!formData.serviceId && formData.staffId !== "" && !isReadOnly) {
-            setFormData(prev => ({ ...prev, staffId: "" }));
-        }
-    }, [staffList, formData.serviceId, formData.staffId, isStaff, user?.id, isReadOnly]);
+    }, [formData.serviceId, formData.staffIds, isStaff, user?.id, isReadOnly]);
 
     // Tự động phân bổ nhân viên cho thú cưng (Round-robin)
     useEffect(() => {
@@ -505,7 +494,7 @@ export const BookingEditPage = () => {
                                                 toast.error(`Số lượng nhân viên (${val.length}) không được vượt quá số lượng thú cưng (${formData.petIds.length}).`);
                                                 return;
                                             }
-                                            setFormData({ ...formData, staffIds: val, staffId: val[0] || "" });
+                                            setFormData({ ...formData, staffIds: val });
                                         }}
                                         disabled={isReadOnly || !formData.serviceId || formData.petIds.length === 0}
                                         sx={{ width: '100%' }}
@@ -619,8 +608,7 @@ export const BookingEditPage = () => {
                                                             setFormData(prev => ({
                                                                 ...prev,
                                                                 petStaffMap: res.data.petStaffMap,
-                                                                staffIds: res.data.staffIds,
-                                                                staffId: res.data.staffIds[0] || ""
+                                                                staffIds: res.data.staffIds
                                                             }));
                                                             toast.success(hasManualSelection
                                                                 ? "Đã phân bổ xoay vòng trong danh sách nhân viên bạn chọn!"

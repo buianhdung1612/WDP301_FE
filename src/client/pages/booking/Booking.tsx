@@ -159,7 +159,8 @@ export const BookingPage = () => {
                 const res = await getAvailableTimeSlots(
                     selectedDate,
                     selectedServiceId,
-                    selectedPetIds.length || 1
+                    selectedPetIds.length || 1,
+                    selectedPetIds
                 );
                 if (res.code === 200 && res.data) {
                     setAvailableSlots(res.data);
@@ -467,7 +468,12 @@ export const BookingPage = () => {
                                                     return (
                                                         <Tooltip
                                                             key={idx}
-                                                            title={isPastTime ? "Giờ này đã trôi qua" : (isFull ? "Tất cả nhân viên đã bận" : isClosed ? "Spa không có nhân viên trực" : "")}
+                                                            title={
+                                                                isPastTime ? "Giờ này đã trôi qua" :
+                                                                    (slot.status === "pet_busy" ? "Một trong các thú cưng bạn chọn đã có lịch trong khung giờ này" :
+                                                                        (isFull ? "Tất cả nhân viên đã bận" :
+                                                                            isClosed ? "Spa không có nhân viên trực" : ""))
+                                                            }
                                                             arrow
                                                         >
                                                             <button
@@ -482,8 +488,8 @@ export const BookingPage = () => {
                                                             >
                                                                 {slot.time}
                                                                 {!isAvailable && (
-                                                                    <span className="text-[8px] font-medium uppercase mt-0.5 opacity-80">
-                                                                        {isPastTime ? "Đã qua" : (isFull ? "Hết chỗ" : "Đóng cửa")}
+                                                                    <span className="text-[8px] font-medium uppercase mt-0.5 opacity-80 text-center px-1">
+                                                                        {isPastTime ? "Đã qua" : (slot.status === "pet_busy" ? "Thú cưng bận" : (isFull ? "Hết chỗ" : "Đóng cửa"))}
                                                                     </span>
                                                                 )}
                                                                 {isAvailable && slot.freeStaff <= 2 && (
@@ -536,7 +542,7 @@ export const BookingPage = () => {
 
                         <div className="space-y-6">
                             <div className="bg-[#FAF8F6] p-10 rounded-[40px] border-2 border-dashed border-[#dcd1c3] shadow-inner">
-                                <h4 className="text-[22px] font-third text-[#181818] mb-8 text-center underline">Tóm tắt dịch vụ</h4>
+                                <h4 className="text-[1.5rem] font-third text-client-secondary group-hover:text-client-primary transition-colors duration-300">Tóm tắt dịch vụ</h4>
                                 <div className="space-y-6">
                                     <div className="flex justify-between items-start text-[16px]">
                                         <span className="text-gray-500">Dịch vụ:</span>
@@ -620,7 +626,7 @@ export const BookingPage = () => {
                         <motion.p
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="uppercase text-client-primary text-[17px] font-bold mb-4 tracking-widest"
+                            className="uppercase text-client-primary text-[1rem] font-bold mb-4 tracking-widest"
                         >
                             Dịch vụ cao cấp
                         </motion.p>
@@ -628,7 +634,7 @@ export const BookingPage = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 }}
-                            className="text-[57px] lg:text-[72px] text-[#181818] leading-[1.1] font-third mb-8"
+                            className="text-[2rem] lg:text-[2.5rem] text-[#181818] leading-[1.1] font-third mb-8"
                         >
                             Hãy để chúng tôi <br /> chăm sóc bé cưng
                         </motion.h1>
@@ -636,7 +642,7 @@ export const BookingPage = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="text-[#505050] font-medium text-[20px] leading-relaxed max-w-[550px]"
+                            className="text-[#505050] font-medium text-[1.125rem] leading-relaxed max-w-[550px]"
                         >
                             Đội ngũ chuyên viên tận tâm, không gian Spa hiện đại – mang lại trải nghiệm thư giãn hoàn hảo nhất cho mọi thú cưng.
                         </motion.p>
@@ -661,8 +667,8 @@ export const BookingPage = () => {
                         <div className="bg-[#102937] p-10 lg:p-14 text-white">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
                                 <div>
-                                    <span className="text-gray-400 text-[14px] uppercase font-bold tracking-widest mb-2 block">Đặt lịch hẹn</span>
-                                    <h2 className="text-[36px] font-third">Bước {currentStep}/4: {STEPS[currentStep - 1].title}</h2>
+                                    <span className="text-gray-400 text-[0.875rem] uppercase font-bold tracking-widest mb-2 block">Đặt lịch hẹn</span>
+                                    <h2 className="text-[1.5rem] font-third">Bước {currentStep}/4: {STEPS[currentStep - 1].title}</h2>
                                 </div>
                                 <div className="flex gap-4">
                                     {STEPS.map((s, idx) => (

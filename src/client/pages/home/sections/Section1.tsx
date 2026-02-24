@@ -7,8 +7,8 @@ export const Section1 = () => {
             <section className="px-[30px] pt-[120px] bg-[linear-gradient(-90deg,#FF6262_10%,#FF9466_100%)] section-1">
                 <div className="app-container flex gap-[30px]">
                     <section className="text-white pl-[80px] w-[50%] relative section-1-left">
-                        <p className="uppercase mb-[10px]">Kết Nối Yêu Thương Cùng Thú Cưng</p>
-                        <h1 className="font-secondary text-[63px] 2xl:text-[57px] leading-[1.2] mb-[17px]">
+                        <p className="uppercase mb-[10px] text-[0.875rem] font-bold">Kết Nối Yêu Thương Cùng Thú Cưng</p>
+                        <h1 className="font-secondary text-[2.5rem] leading-[1.2] mb-[17px]">
                             Khởi đầu hành trình của mỗi thú cưng với tình yêu thương.
                         </h1>
                         <p className="pr-[20%] mb-[40px]">

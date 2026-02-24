@@ -13,11 +13,6 @@ export const MenuBar = () => {
             img: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/Menu-img-1.png",
         },
         {
-            label: "Đặt lịch",
-            to: "/services/booking",
-            img: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/Menu-img-9.png",
-        },
-        {
             label: "Bài viết",
             to: "/bai-viet",
             img: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/07/Menu-img-12.png",

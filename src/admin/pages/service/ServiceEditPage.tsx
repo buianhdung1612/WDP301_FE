@@ -17,6 +17,7 @@ import { SwitchButton } from "../../components/ui/SwitchButton";
 import { CategoryParentSelect } from "../../components/ui/CategoryTreeSelect";
 import { Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import { useParams, useNavigate } from "react-router-dom";
+import { UploadFiles } from "../../components/ui/UploadFiles";
 
 const PET_TYPES = ["DOG", "CAT"];
 const PRICING_TYPES = [
@@ -62,6 +63,7 @@ export const ServiceEditPage = () => {
             maxDuration: 0,
             surchargeType: "none",
             surchargeValue: 0,
+            images: [],
         },
     });
 
@@ -89,6 +91,7 @@ export const ServiceEditPage = () => {
                 maxDuration: service.maxDuration || 0,
                 surchargeType: service.surchargeType || "none",
                 surchargeValue: service.surchargeValue || 0,
+                images: service.images || [],
             });
         }
     }, [service, reset]);
@@ -240,6 +243,18 @@ export const ServiceEditPage = () => {
                                         )}
                                     />
                                 </Box>
+
+                                <Controller
+                                    name="images"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <UploadFiles
+                                            files={field.value as any || []}
+                                            onFilesChange={field.onChange}
+                                        />
+                                    )}
+                                />
+
                                 <Controller
                                     name="description"
                                     control={control}

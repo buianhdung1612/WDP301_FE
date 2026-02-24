@@ -24,7 +24,7 @@ export const useBlogs = () => {
                 excerpt: item.description,
                 featuredImage: item.avatar,
                 viewCount: item.view || 0,
-                status: item.status || 'draft',
+                status: (item.status || 'draft').toLowerCase(),
             }));
         },
     });
@@ -69,7 +69,7 @@ export const useBlogDetail = (id?: string | number) => {
                     title: data.name,
                     excerpt: data.description,
                     featuredImage: data.avatar,
-                    status: data.status || 'draft',
+                    status: (data.status || 'draft').toLowerCase(),
                     category: data.category || [],
                 };
             }

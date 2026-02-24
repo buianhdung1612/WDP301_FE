@@ -17,21 +17,9 @@ export const getServiceTheme = (outerTheme: Theme) => createTheme(outerTheme, {
         MuiOutlinedInput: {
             styleOverrides: {
                 root: {
-                    color: "var(--palette-text-primary)",
-                    borderRadius: "var(--shape-borderRadius)",
-                    fontSize: "0.9375rem",
-                    '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: "var(--palette-text-disabled)33",
-                    },
-                },
-                input: {
-                    padding: "16px 14px",
+                    fontSize: "1rem",
                 }
             }
         },
     }
 });
-
-
-
-

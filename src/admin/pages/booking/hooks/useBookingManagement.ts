@@ -64,8 +64,8 @@ export const useUpdateBookingStatus = () => {
 export const useAssignStaff = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ bookingId, staffId }: { bookingId: string; staffId: string }) =>
-            assignStaffToBooking(bookingId, staffId),
+        mutationFn: ({ bookingId, ...data }: { bookingId: string; staffId?: string; staffIds?: string[] }) =>
+            assignStaffToBooking(bookingId, data),
         onSuccess: (_data, variables) => {
             queryClient.invalidateQueries({ queryKey: ["bookings"] });
             queryClient.invalidateQueries({ queryKey: ["booking", variables.bookingId] });
@@ -134,9 +134,10 @@ export const useUpdateBooking = () => {
 export const useAutoAssignBookings = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (date: string) => autoAssignBookings(date),
-        onSuccess: () => {
+        mutationFn: (bookingId: string) => autoAssignBookings(bookingId),
+        onSuccess: (_data, bookingId) => {
             queryClient.invalidateQueries({ queryKey: ["bookings"] });
+            queryClient.invalidateQueries({ queryKey: ["booking", bookingId] });
         },
     });
 };

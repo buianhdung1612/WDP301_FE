@@ -276,7 +276,7 @@ export const BookingDetailPage = () => {
                                                 const staffId = mapping?.staffId?._id || mapping?.staffId;
                                                 const assignedStaff = (typeof mapping?.staffId === 'object' && mapping.staffId?.fullName)
                                                     ? mapping.staffId
-                                                    : (booking.staffIds?.find((s: any) => (s._id || s) === staffId) || (booking.staffId?._id === staffId || booking.staffId === staffId ? booking.staffId : null));
+                                                    : (booking.staffIds?.find((s: any) => (s._id || s) === staffId) || null);
 
                                                 if (!assignedStaff) return null;
 

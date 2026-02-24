@@ -36,6 +36,7 @@ export const ServiceList = () => {
                     pagination
                     pageSizeOptions={[5, 10, 20]}
                     initialState={columnsInitialState}
+                    getRowHeight={() => 'auto'}
                     checkboxSelection
                     disableRowSelectionOnClick
                     sx={dataGridStyles}

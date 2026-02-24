@@ -70,6 +70,7 @@ export const BlogEditPage = () => {
     const onSubmit = (data: CreateBlogFormValues) => {
         const payload = {
             ...data,
+            slug: detailRes?.slug,
             category: JSON.stringify(data.category)
         };
 

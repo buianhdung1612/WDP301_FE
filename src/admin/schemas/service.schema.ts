@@ -18,6 +18,7 @@ const baseServiceSchema = z.object({
     maxDuration: z.number().min(0, "Thời lượng tối đa không được âm"),
     surchargeType: z.enum(["none", "fixed", "per-minute"]),
     surchargeValue: z.number().min(0, "Giá trị phụ thu không được âm"),
+    images: z.array(z.string()).optional(),
 });
 
 export type ServiceFormValues = z.infer<typeof baseServiceSchema>;

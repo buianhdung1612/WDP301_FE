@@ -21,19 +21,19 @@ export const SectionHeader = ({
         <div className={`mb-10 ${align === "center" ? "text-center" : "text-left"}`}>
             {subtitle && (
                 <p
-                    className={`uppercase text-client-primary mb-[15px] ${widthSubTitle ?? ""}`}
+                    className={`uppercase text-client-primary text-[0.875rem] font-bold mb-[15px] ${widthSubTitle ?? ""}`}
                 >
                     {subtitle}
                 </p>
             )}
             <h2
-                className={`text-[50px] 2xl:text-[45px] 2xl:font-[500] leading-[1.2] font-secondary mb-[20px] ${widthTitle ?? ""}`}
+                className={`text-[2rem] leading-[1.2] font-secondary mb-[20px] ${widthTitle ?? ""}`}
             >
                 {title}
             </h2>
             {desc && (
                 <p
-                    className={`text-[#505050] font-[500] inline-block mb-[70px] ${widthDesc ?? ""}`}
+                    className={`text-[#505050] text-[1rem] font-[500] inline-block mb-[70px] ${widthDesc ?? ""}`}
                 >
                     {desc}
                 </p>

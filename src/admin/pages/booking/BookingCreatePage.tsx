@@ -63,7 +63,6 @@ export const BookingCreatePage = () => {
         userId: "",
         petIds: [] as string[],
         serviceId: "",
-        staffId: user?.id || "",
         staffIds: (user?.roles?.some((role: any) => role.isStaff)) ? [user?.id || ""] : [] as string[],
         petStaffMap: [] as { petId: string, staffId: string }[],
         date: dayjs(),
@@ -95,7 +94,7 @@ export const BookingCreatePage = () => {
 
         return staffList.reduce((acc: any, staff: any) => {
             const staffSchedules = schedules.filter((s: any) => s.staffId?._id === staff._id);
-            const staffBookings = bookings.filter((b: any) => b.staffId?._id === staff._id);
+            const staffBookings = bookings.filter((b: any) => b.staffIds?.some((s: any) => (s._id || s) === staff._id));
 
             // Check if staff has a shift covering the entire duration
             const hasShift = staffSchedules.some((s: any) => {
@@ -163,23 +162,14 @@ export const BookingCreatePage = () => {
     }, [formData.serviceId, formData.startTime, formData.petStaffMap, selectedService, formData.endTime]);
 
     // Reset staffId if it's not in the new staff list
+    // Use staffIds[0] logic if needed for single staff role checks
     useEffect(() => {
         if (isStaff) {
-            if (formData.staffId !== user?.id) {
-                setFormData(prev => ({ ...prev, staffId: user?.id || "" }));
+            if (!formData.staffIds.includes(user?.id || "")) {
+                setFormData(prev => ({ ...prev, staffIds: [user?.id || ""] }));
             }
-            return;
         }
-
-        if (formData.staffId && staffList.length > 0) {
-            const isStaffValid = staffList.some((s: any) => s._id === formData.staffId);
-            if (!isStaffValid && formData.staffId !== "") {
-                setFormData(prev => ({ ...prev, staffId: "" }));
-            }
-        } else if (!formData.serviceId && formData.staffId !== "") {
-            setFormData(prev => ({ ...prev, staffId: "" }));
-        }
-    }, [staffList, formData.serviceId, formData.staffId, isStaff, user?.id]);
+    }, [formData.serviceId, formData.staffIds, isStaff, user?.id]);
 
     // Tự động phân bổ nhân viên cho thú cưng (Round-robin)
     useEffect(() => {
@@ -399,7 +389,6 @@ export const BookingCreatePage = () => {
             userId: formData.userId,
             petIds: formData.petIds,
             serviceId: formData.serviceId,
-            staffId: formData.staffId,
             staffIds: formData.staffIds,
             petStaffMap: formData.petStaffMap,
             start: startDateTime.toISOString(),
@@ -541,7 +530,7 @@ export const BookingCreatePage = () => {
                                                 toast.error(`Bạn chỉ chọn ${formData.petIds.length} thú cưng, không thể chọn đến ${val.length} nhân viên. Vui lòng bỏ bớt hoặc thêm thú cưng.`);
                                                 return;
                                             }
-                                            setFormData({ ...formData, staffIds: val, staffId: val[0] || "" });
+                                            setFormData({ ...formData, staffIds: val });
                                         }}
                                         sx={{ width: '100%' }}
                                         disabled={!formData.serviceId || formData.petIds.length === 0}
@@ -654,8 +643,7 @@ export const BookingCreatePage = () => {
                                                         setFormData(prev => ({
                                                             ...prev,
                                                             petStaffMap: res.data.petStaffMap,
-                                                            staffIds: res.data.staffIds,
-                                                            staffId: res.data.staffIds[0] || ""
+                                                            staffIds: res.data.staffIds
                                                         }));
                                                         toast.success(hasManualSelection
                                                             ? "Đã phân bổ xoay vòng trong danh sách nhân viên bạn chọn!"

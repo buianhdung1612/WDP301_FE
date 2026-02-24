@@ -61,7 +61,7 @@ export const BookingConfigPage = () => {
                         p: 4,
                         borderRadius: '20px',
                         boxShadow: "var(--customShadows-card)",
-                        border: `1px solid ${rgba(145, 158, 171, 0.12)}`
+                        border: `1px solid ${alpha('#919EAB', 0.12)}`
                     }}>
                         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 4 }}>
                             <Icon icon="solar:settings-bold-duotone" width={24} color={COLORS.primary} />
@@ -124,7 +124,7 @@ export const BookingConfigPage = () => {
                         p: 4,
                         borderRadius: '20px',
                         boxShadow: "var(--customShadows-card)",
-                        border: `1px solid ${rgba(145, 158, 171, 0.12)}`
+                        border: `1px solid ${alpha('#919EAB', 0.12)}`
                     }}>
                         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 4 }}>
                             <Icon icon="solar:Bell-bold-duotone" width={24} color={COLORS.primary} />

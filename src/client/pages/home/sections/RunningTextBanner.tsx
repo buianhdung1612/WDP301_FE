@@ -17,11 +17,11 @@ export const RunningTextBanner = () => {
         let textClasses = "font-secondary capitalize px-[15px] transition-all duration-300";
 
         if (mod === 0) {
-            textClasses += " text-[33px] text-transparent font-[400] [-webkit-text-stroke:1px_#fff]";
+            textClasses += " text-[2rem] text-transparent font-[400] [-webkit-text-stroke:1px_#fff]";
         } else if (mod === 1) {
-            textClasses += " text-[41px] font-[600] text-white";
+            textClasses += " text-[2.5rem] font-[600] text-white";
         } else { // mod === 2
-            textClasses += " text-[40px] font-[500] text-white";
+            textClasses += " text-[2.5rem] font-[500] text-white";
         }
 
         return (

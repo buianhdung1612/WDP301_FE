@@ -1,4 +1,4 @@
-import { Box, Link, ListItemText, Chip } from "@mui/material";
+import { Box, ListItemText, Chip, Avatar } from "@mui/material";
 import { GridActionsCell, GridActionsCellItem, GridRenderCellParams } from "@mui/x-data-grid";
 import { DeleteIcon, EditIcon, EyeIcon } from "../../../assets/icons/index";
 import { COLORS } from "../configs/constants";
@@ -8,37 +8,62 @@ import { prefixAdmin } from "../../../constants/routes";
 import { toast } from "react-toastify";
 
 export const RenderTitleCell = (params: GridRenderCellParams) => {
-    const { name, _id } = params.row;
+    const { name, _id, images } = params.row;
     const navigate = useNavigate();
+    const thumbnail = images && images.length > 0 ? images[0] : "";
 
     return (
-        <ListItemText
-            primary={
-                <Link
-                    href={`/${prefixAdmin}/service/edit/${_id}`}
-                    onClick={(e) => {
-                        e.preventDefault();
-                        navigate(`/${prefixAdmin}/service/edit/${_id}`);
-                    }}
-                    underline="hover"
-                    sx={{
-                        color: COLORS.primary,
-                        fontWeight: 600,
-                        fontSize: '0.8125rem',
-                    }}
-                >
-                    {name}
-                </Link>
-            }
-            slotProps={{
-                primary: {
-                    component: 'span',
-                    variant: 'body1',
-                    noWrap: true,
-                },
-            }}
-            sx={{ m: 0 }}
-        />
+        <Box
+            sx={{
+                display: 'flex',
+                alignItems: 'center',
+                py: "calc(2 * var(--spacing))",
+                gap: "calc(2 * var(--spacing))",
+                width: "100%",
+            }}>
+
+            <Avatar
+                alt={name}
+                src={thumbnail}
+                variant="rounded"
+                sx={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "var(--shape-borderRadius-md)",
+                    backgroundColor: 'var(--palette-background-neutral)'
+                }}
+            />
+
+            <ListItemText
+                primary={
+                    <Box
+                        onClick={() => navigate(`/${prefixAdmin}/service/edit/${_id}`)}
+                        className="product-title"
+                        sx={{
+                            color: COLORS.primary,
+                            fontWeight: 600,
+                            fontSize: '0.8125rem',
+                            transition: 'color 0.2s',
+                            cursor: 'pointer',
+                            '&:hover': {
+                                color: 'var(--palette-primary-main)',
+                                textDecoration: 'underline'
+                            }
+                        }}
+                    >
+                        {name}
+                    </Box>
+                }
+                slotProps={{
+                    primary: {
+                        component: 'span',
+                        variant: 'body1',
+                        noWrap: true,
+                    },
+                }}
+                sx={{ m: 0 }}
+            />
+        </Box>
     );
 }
 

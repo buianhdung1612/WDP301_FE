@@ -1,72 +1,50 @@
-import StarIcon from "@mui/icons-material/Star";
-import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { Link } from "react-router-dom";
-import type { Product } from "../../../types/products.type";
+import dayjs from "dayjs";
 
-export const BlogCard = ({ product }: { product: Product }) => {
+interface BlogCardProps {
+    blog: any;
+}
+
+export const BlogCard = ({ blog }: BlogCardProps) => {
+    const detailUrl = `/blog/detail/${blog.slug}`;
+    const formattedDate = dayjs(blog.publishAt || blog.createdAt).format('DD [T]M');
+
     return (
         <div className="bg-[#e67e2026] rounded-[20px] overflow-hidden product-item transition-all duration-300 ease-linear hover:bg-client-primary group">
-            <div className="p-[15px]">
-                <Link to={product.url} className="block relative rounded-[20px] overflow-hidden aspect-[327/343]">
-                    {/*Primary Image */}
+            <div className="p-[20px]">
+                <Link to={detailUrl} className="block relative rounded-[20px] overflow-hidden aspect-[1520/800]">
                     <img
-                        className="primary-image-item w-full h-full object-cover rounded-[20px] transition-opacity duration-700 opacity-100 cursor-pointer absolute top-0 left-0"
-                        src={product.primaryImage}
-                        alt={product.title}
+                        className="primary-image z-[10]-item w-full h-full object-cover rounded-[20px] transition-opacity duration-700 opacity-100 cursor-pointer"
+                        src={blog.featuredImage || blog.avatar || "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/06/Aristocraticpet.jpg"}
+                        alt={blog.title || blog.name}
                     />
-                    {/* Secondary Image */}
-                    <img
-                        className="secondary-image-item w-full h-full object-cover rounded-[20px] transition-opacity duration-700 opacity-0 cursor-pointer absolute top-0 left-0"
-                        src={product.secondaryImage}
-                        alt={product.title}
-                    />
-                    {product.isSale && (
-                        <div className="px-[10px] absolute right-[20px] top-[20px] inline-flex text-[12px] uppercase tracking-normal text-white bg-client-primary rounded-[30px] min-h-[25px] min-w-[50px] items-center justify-center">
-                            SALE
-                        </div>
-                    )}
+                    <div className="date-blog absolute z-[20] top-[5%] left-[2%] bg-client-primary transition-default py-[10px] px-[16px] text-[1.125rem] leading-[1.2] text-white w-[65px] font-secondary text-center group-hover:bg-[#F7F3EB] group-hover:text-client-secondary">
+                        {formattedDate}
+                    </div>
                 </Link>
             </div>
 
-            <div className="grid grid-cols-[1fr_auto] gap-[20px]">
-                <div className="pl-[30px]">
-                    {/* Rating */}
-                    <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => (
-                            <StarIcon
-                                key={i}
-                                sx={{
-                                    fontSize: "20px !important",
-                                    color: i < product.rating ? "#ffbb00 !important" : "#ccc !important",
-                                }}
-                            />
-                        ))}
-                    </div>
-
-                    {/* Title */}
+            <div className="grid grid-cols-[1fr_auto] gap-[10px]">
+                <div className="pl-[25px]">
                     <Link
-                        to={product.url}
-                        className="inline-block text-client-secondary text-[24px] 2xl:text-[23px] line-clamp-1 font-secondary leading-[1.8] transition-all duration-[350ms] ease-in-out my-[10px] group-hover:text-white hover:opacity-70"
+                        to={detailUrl}
+                        className="inline-block text-client-secondary text-[1.375rem] font-secondary leading-[1.4] transition-default ease-in-out group-hover:text-white hover:opacity-90 mb-[10px] line-clamp-1"
                     >
-                        {product.title}
+                        {blog.title || blog.name}
                     </Link>
-
-                    {/* Price */}
-                    <p className="text-client-secondary group-hover:text-white transition-default">
-                        {product.price}
+                    <p className="line-clamp-2 text-client-text group-hover:text-white transition-default ease-in-out">
+                        {blog.description || blog.excerpt}
                     </p>
                 </div>
 
-                {/* Cart Button */}
+                {/* Button */}
                 <div className="mt-[15px]">
                     <div className="mt-[53px]">
-                        <div className="w-[61px] h-[61px] pt-[10px] pr-[1px] pb-[1px] pl-[10px] relative rounded-tl-[30px] bg-white cart-button">
-                            <div className="w-[50px] h-[50px] rounded-full bg-client-primary flex items-center justify-center duration-[375ms] ease-[cubic-bezier(0.7,0,0.3,1)] group-hover:bg-client-secondary">
-                                <ShoppingCartOutlinedIcon
-                                    className="text-white"
-                                    sx={{ fontSize: "40px" }}
-                                />
-                            </div>
+                        <div className="w-[70px] h-[70px] pt-[10px] pl-[10px] relative rounded-tl-[30px] bg-white cart-button">
+                            <Link to={detailUrl} className="w-[60px] h-[60px] rounded-full bg-client-primary text-white flex items-center justify-center duration-[375ms] ease-[cubic-bezier(0.7,0,0.3,1)] group-hover:bg-client-secondary">
+                                <button className="button-watch-more-section-2 w-[50%] cursor-pointer aspect-square flex items-center justify-center  rounded-full">
+                                </button>
+                            </Link>
                         </div>
                     </div>
                 </div>

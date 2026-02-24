@@ -6,3 +6,8 @@ export const getServices = async (params?: any) => {
     const response = await apiApp.get(BASE_URL, { params });
     return response.data;
 };
+
+export const getServiceBySlug = async (slug: string) => {
+    const response = await apiApp.get(`${BASE_URL}/slug/${slug}`);
+    return response.data;
+};

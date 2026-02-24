@@ -1,116 +1,72 @@
-import { Link } from "react-router-dom"
-import { useServices } from "../../../../admin/pages/service/hooks/useService";
+import { useServices } from "../../../hooks/useService";
+import { Skeleton } from "@mui/material";
+import { motion } from "framer-motion";
+import { AppCard } from "../../../components/ui/AppCard";
 
-export const Section2 = () => {
-    const { data: services = [] } = useServices({ limit: 3 });
+interface Section2Props {
+    petType: string;
+}
 
-    const service1 = services[0];
-    const service2 = services[1];
-    const service3 = services[2];
+export const Section2 = ({ petType }: Section2Props) => {
+    const { data: services = [], isLoading } = useServices({ petTypes: petType });
 
-    return (
-        <div className="bg-[#F6F2ED] relative">
-            <img src="https://wordpress.themehour.net/babet/wp-content/uploads/2025/10/shape1-17.png" alt="" className="absolute top-[20%] left-[5%] animation-shake" width={76} height={57} />
-            <img src="https://wordpress.themehour.net/babet/wp-content/uploads/2025/10/shape1-12.png" alt="" className="absolute top-[20%] right-[5%] animation-shake" width={64} height={70} />
-            <img src="https://wordpress.themehour.net/babet/wp-content/uploads/2025/10/shape1-6.png" alt="" className="absolute bottom-[27%] left-[5%] animation-heartbeat" width={66} height={67} />
-            <img src="https://wordpress.themehour.net/babet/wp-content/uploads/2025/10/shape1-5.png" alt="" className="absolute top-[65%] right-[5%] animation-jumpReverseAni" width={65} height={76} />
-            <img src="https://wordpress.themehour.net/babet/wp-content/uploads/2025/09/shape1-24.png" alt="" className="absolute bottom-[0.1%] left-[-1%] animation-moving" width={386} height={184} />
-            <div className="app-container mx-auto py-[120px] flex flex-wrap justify-center">
-                <div className="text-[#F8721F] font-[700] inline-flex items-center service-sub-title py-[11px] mb-[24px]">
-                    <img
-                        src="https://wordpress.themehour.net/babet/wp-content/uploads/2025/08/subtitle-icon.svg"
-                        alt=""
-                        width={31}
-                        height={24}
-                    />
-                    <div className="ml-[10px]">cam kết</div>
-                </div>
-                <h2 className="w-full text-center font-secondary text-[45px] mb-[15px]">Trái tim trung thành – Mái ấm trọn đời.</h2>
-                <p className="text-[#6C6D71] mb-[18px] font-[500] text-[18px]">Dịch vụ chăm sóc toàn diện, mang đến trải nghiệm nghỉ dưỡng thoải mái và an toàn nhất cho thú cưng của bạn.</p>
-                <div className="flex w-full items-center">
-                    <div className="w-[50%] p-[46px] relative">
-                        <div className="mt-[30px]">
-                            <div className="mb-[25px] overflow-hidden rounded-[16px]">
-                                <img
-                                    src={service1?.thumbnail || "https://wordpress.themehour.net/babet/wp-content/uploads/2025/09/pricing-1-1.jpg"}
-                                    alt=""
-                                    className="rounded-[16px] hover:scale-[1.05] transition-all duration-[400ms] object-cover"
-                                />
-                            </div>
-                            <div className="w-[65%]">
-                                <h3 className="text-[24px] font-[700] text-[#02000F] mb-[5px]">{service1?.name || "Khách sạn cho chó"}</h3>
-                                <p className="mb-[5px] text-[20px] text-[#02000F]">Chỉ từ <span className="ml-[5px]">{(service1?.basePrice || 100000).toLocaleString()}đ</span></p>
-                                <div
-                                    className="text-[#6C6D71] font-[500] line-clamp-2"
-                                    dangerouslySetInnerHTML={{ __html: service1?.description || "Không gian nghỉ dưỡng lý tưởng giúp cún cưng thư giãn, vui chơi và được chăm sóc chu đáo." }}
-                                />
-                            </div>
-                            <Link
-                                to="/services/booking"
-                                className="service-book-now"
-                            >
-                                Đặt ngay
-                            </Link>
-                        </div>
-                    </div>
-                    <div className="w-[50%] p-[46px]">
-                        <div className="flex gap-[20px] relative mb-[84px]">
-                            <div className="overflow-hidden rounded-[16px] w-[132px] h-[140px]">
-                                <img
-                                    src={service2?.thumbnail || "https://wordpress.themehour.net/babet/wp-content/uploads/2025/09/pricing-1-2.jpg"}
-                                    alt=""
-                                    className="rounded-[16px] hover:scale-[1.05] transition-all duration-[400ms] w-full h-full object-cover"
-                                    width={132}
-                                    height={140}
-                                />
-                            </div>
-                            <div className="flex-1">
-                                <div className="w-[90%]">
-                                    <h3 className="text-[24px] font-[700] text-[#02000F] mb-[5px]">{service2?.name || "Khách sạn cho mèo"}</h3>
-                                    <p className="mb-[5px] text-[20px] text-[#02000F]">Chỉ từ {(service2?.basePrice || 100000).toLocaleString()}đ</p>
-                                    <div
-                                        className="text-[#6C6D71] font-[500] line-clamp-2"
-                                        dangerouslySetInnerHTML={{ __html: service2?.description || "Dịch vụ lưu trú dành riêng cho mèo, đảm bảo sạch sẽ, riêng tư và được chăm sóc chu đáo từng giờ." }}
-                                    />
-                                </div>
-                                <Link
-                                    to="/services/booking"
-                                    className="service-book-now service-book-now-small"
-                                >
-                                    Đặt ngay
-                                </Link>
-                            </div>
-                        </div>
-                        <div className="flex gap-[20px] relative">
-                            <div className="overflow-hidden rounded-[16px] w-[132px] h-[140px]">
-                                <img
-                                    src={service3?.thumbnail || "https://i.imgur.com/2wrEgDa.jpeg"}
-                                    alt=""
-                                    className="rounded-[16px] hover:scale-[1.05] transition-all duration-[400ms] w-full h-full object-cover"
-                                    width={132}
-                                    height={140}
-                                />
-                            </div>
-                            <div className="flex-1">
-                                <div className="w-[90%]">
-                                    <h3 className="text-[24px] font-[700] text-[#02000F] mb-[5px]">{service3?.name || "Spa & Chăm sóc thú cưng"}</h3>
-                                    <p className="mb-[5px] text-[20px] text-[#02000F]">Chỉ từ {(service3?.basePrice || 100000).toLocaleString()}đ</p>
-                                    <div
-                                        className="text-[#6C6D71] font-[500] line-clamp-2"
-                                        dangerouslySetInnerHTML={{ __html: service3?.description || "Dịch vụ lưu trú dành riêng cho mèo, đảm bảo sạch sẽ, riêng tư và được chăm sóc chu đáo từng giờ." }}
-                                    />
-                                </div>
-                                <Link
-                                    to="/services/booking"
-                                    className="service-book-now service-book-now-small"
-                                >
-                                    Đặt ngay
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
+    if (isLoading) {
+        return (
+            <div className="app-container mx-auto py-[100px]">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[40px]">
+                    {[...Array(6)].map((_, i) => (
+                        <Skeleton key={i} variant="rectangular" height={400} sx={{ borderRadius: '24px' }} />
+                    ))}
                 </div>
             </div>
+        );
+    }
+
+    return (
+        <div className="bg-white relative">
+            <div className="app-container mx-auto py-[60px] pb-[120px]">
+                <div className="text-center mb-[60px]">
+                    <div className="text-client-primary font-[700] inline-flex items-center service-sub-title py-[11px] mb-[24px]">
+                        <img
+                            src="https://wordpress.themehour.net/babet/wp-content/uploads/2025/08/subtitle-icon.svg"
+                            alt=""
+                            width={31}
+                            height={24}
+                        />
+                        <div className="ml-[10px] uppercase tracking-widest text-[14px]">Trải nghiệm tốt nhất</div>
+                    </div>
+                    <h2 className="w-full text-center font-secondary text-[45px] mb-[15px] text-client-secondary">
+                        Dịch vụ dành riêng cho {petType === "DOG" ? "Cún cưng" : "Mèo cưng"}
+                    </h2>
+                    <p className="text-[#6C6D71] mb-[18px] font-[500] text-[18px] max-w-[800px] mx-auto">
+                        Mỗi bé thú cưng đều xứng đáng được chăm sóc theo cách đặc biệt nhất. Chúng mình cam kết mang đến sự thoải mái và an toàn tuyệt đối.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-[30px] relative">
+                    {services.map((service: any, index: number) => (
+                        <motion.div
+                            key={service._id}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                            viewport={{ once: true }}
+                        >
+                            <AppCard data={service} type="service" />
+                        </motion.div>
+                    ))}
+                </div>
+
+                {services.length === 0 && (
+                    <div className="text-center py-20 bg-gray-50 rounded-[40px] border-2 border-dashed border-gray-200">
+                        <p className="text-gray-400 italic font-medium">Hiện tại chưa có dịch vụ nào cho phân loại này ạ...</p>
+                    </div>
+                )}
+            </div>
+
+            {/* Shapes */}
+            <img src="https://wordpress.themehour.net/babet/wp-content/uploads/2025/10/shape1-17.png" alt="" className="absolute top-[10%] left-[2%] animation-shake opacity-30" width={60} />
+            <img src="https://wordpress.themehour.net/babet/wp-content/uploads/2025/10/shape1-5.png" alt="" className="absolute bottom-[10%] right-[2%] animation-jumpReverseAni opacity-30" width={60} />
         </div>
     )
 }

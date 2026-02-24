@@ -125,13 +125,13 @@ export const RenderCreatedAtCell = ({ value }: RenderCreatedAtCellProps) => {
 }
 
 export const RenderStatusCell = (params: GridRenderCellParams) => {
-    const status = params.row.status;
+    const status = params.row.status?.toUpperCase();
 
     let label = "Bản nháp";
     let bg = "var(--palette-text-disabled)29";
     let text = "var(--palette-text-secondary)";
 
-    if (status === "PUBLISHED") {
+    if (status === "PUBLISHED" || status === "Xuất bản") {
         label = "Xuất bản";
         bg = "var(--palette-info-lighter)";
         text = "var(--palette-info-dark)";

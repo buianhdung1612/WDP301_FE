@@ -14,59 +14,12 @@ export const getProductCategoryTheme = (outerTheme: Theme) => createTheme(outerT
                 },
             }
         },
-        MuiFormLabel: {
-            styleOverrides: {
-                root: {
-                    color: "var(--palette-text-disabled)",
-                    fontSize: "0.9375rem",
-                    '&.Mui-focused': {
-                        color: "var(--palette-text-primary)",
-                        fontWeight: "600",
-                        fontSize: "0.9375rem"
-                    }
-                }
-            }
-        },
         MuiOutlinedInput: {
             styleOverrides: {
                 root: {
-                    color: "var(--palette-text-primary)",
-                    borderRadius: "var(--shape-borderRadius)",
-                    fontSize: "0.9375rem",
-                    '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: "var(--palette-text-disabled)33",
-                        transition: 'border-color 0.2s',
-                    },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: "var(--palette-text-primary)",
-                    },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: "var(--palette-text-primary)",
-                        borderWidth: "2px",
-                    },
-
-                },
-                input: {
-                    padding: "16px 14px",
+                    fontSize: "1rem",
                 }
             }
         },
-        MuiAutocomplete: {
-            styleOverrides: {
-                listbox: {
-                    padding: 0,
-                },
-                option: {
-                    fontSize: '0.875rem',
-                    padding: '6px',
-                    marginBottom: '4px',
-                    borderRadius: "var(--shape-borderRadius-sm)",
-
-                },
-            },
-        },
     }
 });
-
-
-

@@ -58,9 +58,9 @@ export const BlogListPage = () => {
     const counts = useMemo(() => {
         return {
             all: allBlogs.length,
-            published: allBlogs.filter((b: any) => b.status === 'published').length,
-            draft: allBlogs.filter((b: any) => b.status === 'draft').length,
-            archived: allBlogs.filter((b: any) => b.status === 'archived').length,
+            published: allBlogs.filter((b: any) => b.status?.toLowerCase() === 'published').length,
+            draft: allBlogs.filter((b: any) => b.status?.toLowerCase() === 'draft').length,
+            archived: allBlogs.filter((b: any) => b.status?.toLowerCase() === 'archived').length,
         };
     }, [allBlogs]);
 

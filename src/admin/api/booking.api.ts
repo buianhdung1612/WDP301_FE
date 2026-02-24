@@ -48,8 +48,8 @@ export const cancelBooking = (id: string, reason?: string) => {
 };
 export const completeBooking = (id: string) => updateBookingStatus(id, 'completed');
 
-export const assignStaffToBooking = async (bookingId: string, staffId: string) => {
-    const response = await apiApp.patch(`${BASE_URL}/${bookingId}/assign-staff`, { staffId }, withAuth());
+export const assignStaffToBooking = async (bookingId: string, data: { staffId?: string, staffIds?: string[] }) => {
+    const response = await apiApp.patch(`${BASE_URL}/${bookingId}/assign-staff`, data, withAuth());
     return response.data;
 };
 
@@ -58,7 +58,7 @@ export const startBooking = async (id: string, petId?: string) => {
     return response.data;
 };
 
-export const rescheduleBooking = async (id: string, data: { start: string, end: string, staffId?: string }) => {
+export const rescheduleBooking = async (id: string, data: { start: string, end: string, staffId?: string, staffIds?: string[] }) => {
     const response = await apiApp.patch(`${BASE_URL}/${id}/reschedule`, data, withAuth());
     return response.data;
 };
@@ -85,8 +85,8 @@ export const exportStaffSchedule = async (date: string) => {
     return response.data;
 };
 
-export const autoAssignBookings = async (date: string) => {
-    const response = await apiApp.post(`${BASE_URL}/auto-assign`, { date }, withAuth());
+export const autoAssignBookings = async (bookingId: string) => {
+    const response = await apiApp.post(`${BASE_URL}/auto-assign`, { bookingId }, withAuth());
     return response.data;
 };
 

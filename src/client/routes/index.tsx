@@ -8,8 +8,8 @@ import { LoginPage } from "../pages/auth/Login";
 import { ForgotPasswordPage } from "../pages/auth/ForgotPassword";
 import { OTPPasswordPage } from "../pages/auth/OTPPassword";
 import { ResetPasswordPage } from "../pages/auth/ResetPassword";
-import { BookingPage } from "../pages/booking/Booking";
 import { ServicePage } from "../pages/service/Service";
+import { ServiceDetailPage } from "../pages/service/ServiceDetail";
 import { CartPage } from "../pages/cart/Cart";
 import { CheckoutPage } from "../pages/checkout/Checkout";
 import { CheckSuccessPage } from "../pages/checkout/CheckoutSuccess";
@@ -42,10 +42,10 @@ export const ClientRoutes: RouteObject[] = [
     { path: "/checkout", element: <CheckoutPage /> },
     { path: "/order/success", element: <CheckSuccessPage /> },
     { path: "/services", element: <ServicePage /> },
+    { path: "/services/:slug", element: <ServiceDetailPage /> },
     {
         element: <AuthGuard />,
         children: [
-            { path: "/services/booking", element: <BookingPage /> },
             { path: "/services/booking/success", element: <BookingSuccessPage /> },
         ]
     },

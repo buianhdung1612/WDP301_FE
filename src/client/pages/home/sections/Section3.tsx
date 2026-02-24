@@ -77,7 +77,7 @@ export const Section3 = () => {
                                 hoverBackground="group-hover:bg-client-secondary"
                                 svgColor="text-client-primary"
                                 hoverSvgColor="group-hover:text-client-secondary"
-                                url="/services/booking"
+                                url="/services"
                             />
                         </div>
                     </div>

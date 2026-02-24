@@ -72,7 +72,7 @@ export const BlogDetailPage = () => {
         }
 
         // Gọi API update status
-        updateBlog({ id: Number(id), data: { status: value } }, {
+        updateBlog({ id: id!, data: { status: value } }, {
             onSuccess: (res) => {
                 if (res.success) {
                     toast.success("Cập nhật trạng thái thành công");

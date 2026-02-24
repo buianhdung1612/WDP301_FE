@@ -13,7 +13,7 @@ export const ProductGallery = ({ images }: ProductGalleryProps) => {
     const displayImages = images?.length > 0 ? images : ['https://via.placeholder.com/1000x1048?text=No+Image'];
 
     return (
-        <div className="flex w-full gap-[20px] 2xl:gap-[12px] sticky top-0 h-[603px] 2xl:h-[522.75px]">
+        <div className="flex w-full gap-[20px] 2xl:gap-[12px] sticky top-[20px] h-[603px] 2xl:h-[522.75px]">
             <div className={`w-[135.5px] 2xl:w-[115.125px] h-full`}>
                 <Swiper
                     onSwiper={setThumbsSwiper}

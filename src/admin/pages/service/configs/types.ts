@@ -10,6 +10,7 @@ export interface IService {
     basePrice?: number;
     priceList?: Array<{ label: string; value: number }>;
     status: 'active' | 'inactive';
+    images?: string[];
     createdAt: Date;
 }
 

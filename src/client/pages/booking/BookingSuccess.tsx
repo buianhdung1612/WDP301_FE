@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { CheckCircle, Calendar, ArrowRight, Home, History } from "lucide-react";
+import { CheckCircle, Home, History } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FooterSub } from "../../components/layouts/FooterSub";
 
@@ -21,7 +21,7 @@ export const BookingSuccessPage = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="text-[32px] md:text-[40px] font-black text-[#181818] mb-4"
+                        className="text-[2rem] lg:text-[2.5rem] font-black text-[#181818] mb-4"
                     >
                         Đặt lịch thành công!
                     </motion.h1>
@@ -30,7 +30,7 @@ export const BookingSuccessPage = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="text-[16px] text-gray-500 mb-12 font-medium"
+                        className="text-[1rem] text-gray-500 mb-12 font-medium"
                     >
                         Cảm ơn bạn đã tin tưởng TeddyPet. Lịch hẹn của bạn đã được ghi nhận vào hệ thống.
                         Chúng mình sẽ sớm kiểm tra và sẵn sàng đón chờ bé yêu nha!
@@ -65,8 +65,8 @@ export const BookingSuccessPage = () => {
                         className="mt-20 p-8 bg-client-primary/5 rounded-[40px] border-2 border-dashed border-client-primary/20 relative overflow-hidden group"
                     >
                         <div className="relative z-10">
-                            <h4 className="text-[18px] font-bold text-client-primary mb-2">Bạn có biết?</h4>
-                            <p className="text-[14px] text-client-secondary font-medium">
+                            <h4 className="text-[1.125rem] font-bold text-client-primary mb-2">Bạn có biết?</h4>
+                            <p className="text-[0.875rem] text-client-secondary font-medium">
                                 Bạn có thể theo dõi trạng thái lịch hẹn và nhận thông báo nhắc lịch ngay tại Dashboard của mình đó!
                             </p>
                         </div>
