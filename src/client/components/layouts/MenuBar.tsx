@@ -63,7 +63,7 @@ export const MenuBar = () => {
             >
               <NavLink to={item.to} className="flex items-center gap-[10px]">
                 {item.icon ? (
-                  <item.icon size={24} className="text-client-secondary" />
+                  <item.icon size={24} className="text-[#f4a623]" />
                 ) : (
                   <img
                     src={item.img}

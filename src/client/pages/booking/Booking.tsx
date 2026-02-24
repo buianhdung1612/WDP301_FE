@@ -110,7 +110,7 @@ export const BookingPage = () => {
                         <p className="uppercase text-client-secondary text-[1.7rem] font-[700] mb-[15px]">
                             Dịch vụ cao cấp
                         </p>
-                        <h2 className="text-[5.7rem] 2xl:text-[5.7rem] 2xl:font-[500] text-[#181818] leading-[1.2] font-third mb-[20px]">
+                        <h2 className="text-[5.7rem] 2xl:text-[5.7rem] 2xl:font-[500] text-[#181818] leading-[1.2] font-secondary mb-[20px]">
                             Hãy để chúng tôi chăm sóc bé cưng của bạn
                         </h2>
                         <p className="text-[#505050] font-[500] text-[1.8rem] inline-block mt-[15px]">
@@ -130,7 +130,7 @@ export const BookingPage = () => {
             <div className="app-container flex py-[80px] flex-col lg:flex-row gap-[40px]">
                 {/* Left Side: Contact Info (Original Style) */}
                 <div className="w-full lg:w-[45%] px-[20px]">
-                    <h2 className="text-[4rem] font-third text-[#181818] mb-[50px]">
+                    <h2 className="text-[4rem] font-secondary text-[#181818] mb-[50px]">
                         Liên hệ chúng tôi
                     </h2>
 
@@ -174,7 +174,7 @@ export const BookingPage = () => {
                 {/* Right Side: Enhanced Booking Form (Same Frame) */}
                 <div className="w-full lg:w-[55%] px-[20px] py-[20px]">
                     <form onSubmit={handleSubmit} className="p-[35px] md:p-[45px] bg-[#e67e2015] border border-[#e67e2030] rounded-[50px] shadow-sm py-[20px]">
-                        <h3 className="text-[3rem] font-third text-[#181818] mb-[35px] text-center">Đặt lịch ngay</h3>
+                        <h3 className="text-[3rem] font-secondary text-[#181818] mb-[35px] text-center">Đặt lịch ngay</h3>
 
                         <div className="space-y-[25px]">
                             {/* Personal Info */}
@@ -216,7 +216,7 @@ export const BookingPage = () => {
                                         {!isLoadingPets && myPets.length === 0 && (
                                             <div className="col-span-2 text-center text-[1.4rem] text-[#637381] py-4 bg-white rounded-[25px] border border-dashed border-gray-300">
                                                 Bạn chưa có thú cưng nào.
-                                                <Link to="/ca-nhan/thu-cung" className="text-client-secondary font-bold ml-1 hover:underline">
+                                                <Link to="/dashboard/pets" className="text-client-secondary font-bold ml-1 hover:underline">
                                                     Thêm mới ngay
                                                 </Link>
                                             </div>

@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { getMyPets } from "../api/pet.api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createMyPet, getMyPets, PetPayload, updateMyPet } from "../api/pet.api";
 
 export const useMyPets = (enabled = true) => {
     return useQuery({
@@ -12,5 +12,31 @@ export const useMyPets = (enabled = true) => {
         // Only fetch if we have a token? Usually handled by axios interceptor or global error handler
         // But good to keep in mind
         retry: 1
+    });
+};
+
+export const useCreateMyPet = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (data: PetPayload) => {
+            const response = await createMyPet(data);
+            return response.data?.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["my-pets"] });
+        }
+    });
+};
+
+export const useUpdateMyPet = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ id, data }: { id: string; data: Partial<PetPayload> }) => {
+            const response = await updateMyPet(id, data);
+            return response.data?.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["my-pets"] });
+        }
     });
 };

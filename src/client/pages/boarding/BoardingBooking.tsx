@@ -138,7 +138,7 @@ export const BoardingBookingPage = () => {
         <div className="app-container py-[60px]">
           <div className="flex flex-col lg:flex-row items-center gap-[30px]">
             <div className="w-full lg:w-[55%]">
-              <div className="text-[4.2rem] font-third text-[#181818] leading-[1.1]">Khách sạn thú cưng</div>
+              <div className="text-[4.2rem] font-secondary text-[#181818] leading-[1.1]">Khách sạn thú cưng</div>
               <p className="text-[1.7rem] text-[#505050] mt-[12px]">
                 Trải nghiệm lưu trú an toàn, sạch sẽ và chuyên nghiệp.
               </p>
@@ -222,7 +222,7 @@ export const BoardingBookingPage = () => {
                 {isLoadingPets && <div className="text-[1.3rem] text-[#637381]">Đang tải thú cưng...</div>}
                 {!isLoadingPets && myPets.length === 0 && (
                   <div className="text-[1.3rem] text-[#637381]">
-                    Bạn chưa có thú cưng nào. <Link to="/ca-nhan/thu-cung" className="text-client-secondary font-bold">Thêm mới</Link>
+                    Bạn chưa có thú cưng nào. <Link to="/dashboard/pets" className="text-client-secondary font-bold">Thêm mới</Link>
                   </div>
                 )}
                 {myPets.map((pet: any) => (
