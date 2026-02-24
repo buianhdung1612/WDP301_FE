@@ -103,50 +103,25 @@ export const BookingPage = () => {
         });
     }, [allServices]);
 
-    // Derive unique categories for services
-    const serviceCategories = useMemo(() => {
-        const cats = services.map(s => s.categoryId?.name).filter(Boolean);
-        return ["Tất cả", ...Array.from(new Set(cats))];
-    }, [services]);
+    const [selectedService, setSelectedService] = useState<string | null>(null);
+    const [selectedTime, setSelectedTime] = useState<string | null>(null);
+    const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
+    const [customerName, setCustomerName] = useState("");
+    const [customerPhone, setCustomerPhone] = useState("");
+    const [customerEmail, setCustomerEmail] = useState("");
+    const [notes, setNotes] = useState("");
+    const { mutateAsync: createBookingMutation } = useCreateBooking();
+    const { data: timeSlots = [], isLoading: isLoadingSlots } = useTimeSlots(selectedDate, selectedService || "");
+        const { user } = useAuthStore();
+    const { data: myPets = [], isLoading: isLoadingPets } = useMyPets(!!user);
+    const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
 
-    const filteredServices = useMemo(() => {
-        if (activeServiceCategory === "Tất cả") return services;
-        return services.filter(s => s.categoryId?.name === activeServiceCategory);
-    }, [services, activeServiceCategory]);
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-    const selectedService = useMemo(() =>
-        services.find(s => s._id === selectedServiceId),
-        [services, selectedServiceId]);
-
-    // Fetch pets
-    const fetchPets = async () => {
-        if (!user) return;
-        setLoadingPets(true);
-        try {
-            const res = await getMyPets();
-            if (res.code === 200) {
-                setPets(res.data);
-            } else {
-                console.error("Error fetching pets:", res.message);
-                if (res.code === "error") {
-                    toast.warn("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại!");
-                }
-            }
-        } catch (error: any) {
-            console.error("Error fetching pets:", error);
-        } finally {
-            setLoadingPets(false);
-        }
-    };
-
-    useEffect(() => {
-        if (isHydrated && user) fetchPets();
-    }, [user, isHydrated]);
-
-    const handlePetCreateSuccess = (newPet: any) => {
-        fetchPets();
-        if (newPet && newPet._id) {
-            setSelectedPetIds(prev => [...prev, newPet._id]);
+        if (!selectedService || !selectedTime) {
+            toast.error("Vui lòng chọn đầy đủ dịch vụ và thời gian!");
+            return;
         }
     };
 
@@ -280,29 +255,48 @@ export const BookingPage = () => {
             toast.error(error.response?.data?.message || "Lỗi khi đặt lịch!");
         }
     };
+    return (
+        <div className="bg-[#fcfcfc]">
+            {/* --- HERO SECTION (Restored to Original) --- */}
+            <div className="relative">
+                <div className="app-container flex py-[100px] bg-white">
+                    <div className="px-[20px] w-[42%] z-[10]">
+                        <p className="uppercase text-client-secondary text-[1.7rem] font-[700] mb-[15px]">
+                            Dịch vụ cao cấp
+                        </p>
+                        <h2 className="text-[5.7rem] 2xl:text-[5.7rem] 2xl:font-[500] text-[#181818] leading-[1.2] font-secondary mb-[20px]">
+                            Hãy để chúng tôi chăm sóc bé cưng của bạn
+                        </h2>
+                        <p className="text-[#505050] font-[500] text-[1.8rem] inline-block mt-[15px]">
+                            Hãy mang bé cưng đến với chúng tôi – nơi đội ngũ chuyên viên sẽ
+                            chăm sóc tận tâm và chuyên nghiệp nhất.
+                        </p>
+                    </div>
+                </div>
+                <img
+                    className="absolute right-[0%] max-w-[58%] top-[-20%] 2xl:top-[-17%]"
+                    src="https://pawsitive.bold-themes.com/coco/wp-content/uploads/sites/3/2019/08/hero_image_13-1.png"
+                    alt="Pawsitive Mascot"
+                />
+            </div>
 
-    const renderStepContent = () => {
-        switch (currentStep) {
-            case 1:
-                return (
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="flex flex-col gap-6"
-                    >
-                        <div className="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar border-b border-gray-100">
-                            {serviceCategories.map((cat: any) => (
-                                <button
-                                    key={cat}
-                                    onClick={() => setActiveServiceCategory(cat)}
-                                    className={`px-6 py-2.5 rounded-full text-[14px] font-bold whitespace-nowrap transition-all duration-300 ${activeServiceCategory === cat
-                                        ? "bg-client-primary text-white shadow-md"
-                                        : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                                        }`}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
+            {/* --- BOOKING & CONTACT SECTION --- */}
+            <div className="app-container flex py-[80px] flex-col lg:flex-row gap-[40px]">
+                {/* Left Side: Contact Info (Original Style) */}
+                <div className="w-full lg:w-[45%] px-[20px]">
+                    <h2 className="text-[4rem] font-secondary text-[#181818] mb-[50px]">
+                        Liên hệ chúng tôi
+                    </h2>
+
+                    <div className="space-y-[40px]">
+                        <div className="flex gap-[16px] group">
+                            <div className="w-[50px] h-[50px] text-[#181818] flex items-center justify-center shadow-[0_0_72px_#afe2e5_inset] rounded-full shrink-0 group-hover:scale-110 transition-transform">
+                                <EditLocationAltIcon style={{ fontSize: "2.4rem" }} />
+                            </div>
+                            <div>
+                                <div className="text-[2rem] font-[700] mb-[5px] group-hover:text-client-secondary transition-colors">Địa điểm</div>
+                                <p className="text-[1.6rem] text-[#505050]">64 Ung Văn Khiêm, Pleiku, Gia Lai</p>
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -333,52 +327,17 @@ export const BookingPage = () => {
                                 </div>
                             ))}
                         </div>
-                    </motion.div>
-                );
-            case 2:
-                return (
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="space-y-8"
-                    >
-                        {loadingPets ? (
-                            <div className="text-center py-20 text-[16px] text-gray-500">Đang tải danh sách bé cưng...</div>
-                        ) : (
-                            <div className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {pets.map((pet) => (
-                                        <div
-                                            key={pet._id}
-                                            onClick={() => handlePetToggle(pet._id)}
-                                            className={`p-4 rounded-[20px] border-2 cursor-pointer transition-all flex items-center gap-4 ${selectedPetIds.includes(pet._id)
-                                                ? "border-client-primary bg-client-primary/5 shadow-sm"
-                                                : "border-gray-50 hover:border-client-primary/30"
-                                                }`}
-                                        >
-                                            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0">
-                                                {pet.avatar ? (
-                                                    <img src={pet.avatar} alt={pet.name} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="w-full h-full bg-gray-50 flex items-center justify-center text-gray-300">
-                                                        <Camera className="w-6 h-6 opacity-50" />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <h4 className="text-[16px] font-bold text-[#181818] truncate">{pet.name}</h4>
-                                                <p className="text-[12px] text-gray-500 capitalize truncate">
-                                                    {pet.type === 'dog' ? 'Chú cún' : 'Bé mèo'} • {pet.breed || 'Cưng'}
-                                                </p>
-                                            </div>
-                                            {selectedPetIds.includes(pet._id) && (
-                                                <div className="w-6 h-6 rounded-full bg-client-primary flex items-center justify-center text-white shrink-0">
-                                                    <CheckCircleIcon style={{ fontSize: "16px" }} />
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
+                    </div>
+
+                    <div className="mt-[60px] hidden md:block">
+                        <img src="https://pawsitive.bold-themes.com/coco/wp-content/uploads/sites/3/2019/07/text_04.png" alt="" width={330} />
+                    </div>
+                </div>
+
+                {/* Right Side: Enhanced Booking Form (Same Frame) */}
+                <div className="w-full lg:w-[55%] px-[20px] py-[20px]">
+                    <form onSubmit={handleSubmit} className="p-[35px] md:p-[45px] bg-[#e67e2015] border border-[#e67e2030] rounded-[50px] shadow-sm py-[20px]">
+                        <h3 className="text-[3rem] font-secondary text-[#181818] mb-[35px] text-center">Đặt lịch ngay</h3>
 
                                 <button
                                     onClick={() => setIsPetModalOpen(true)}
@@ -454,47 +413,20 @@ export const BookingPage = () => {
                                             })}
                                         </div>
 
-                                        {filteredSlotsBySession.length > 0 ? (
-                                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                                                {filteredSlotsBySession.map((slot, idx) => {
-                                                    const isPastTime = selectedDate === dayjs().format("YYYY-MM-DD") &&
-                                                        dayjs(`${selectedDate} ${slot.time}`, "YYYY-MM-DD HH:mm").isBefore(dayjs());
-                                                    const isAvailable = slot.status === "available" && !isPastTime;
-                                                    const isFull = slot.status === "full";
-                                                    const isClosed = slot.status === "closed";
-                                                    const isSelected = selectedTimeSlot?.time === slot.time;
-
-                                                    return (
-                                                        <Tooltip
-                                                            key={idx}
-                                                            title={isPastTime ? "Giờ này đã trôi qua" : (isFull ? "Tất cả nhân viên đã bận" : isClosed ? "Spa không có nhân viên trực" : "")}
-                                                            arrow
-                                                        >
-                                                            <button
-                                                                disabled={!isAvailable}
-                                                                onClick={() => setSelectedTimeSlot(slot)}
-                                                                className={`relative py-3 rounded-xl text-[14px] font-bold transition-all border-2 flex flex-col items-center justify-center overflow-hidden ${isSelected
-                                                                    ? "bg-client-primary border-client-primary text-white shadow-md scale-105 z-10"
-                                                                    : isAvailable
-                                                                        ? "border-gray-100 hover:border-client-primary text-gray-700 hover:bg-client-primary/5"
-                                                                        : "border-transparent bg-gray-50 text-gray-300 cursor-not-allowed opacity-60"
-                                                                    }`}
-                                                            >
-                                                                {slot.time}
-                                                                {!isAvailable && (
-                                                                    <span className="text-[8px] font-medium uppercase mt-0.5 opacity-80">
-                                                                        {isPastTime ? "Đã qua" : (isFull ? "Hết chỗ" : "Đóng cửa")}
-                                                                    </span>
-                                                                )}
-                                                                {isAvailable && slot.freeStaff <= 2 && (
-                                                                    <span className="text-[8px] font-medium uppercase mt-0.5 text-orange-400">
-                                                                        Sắp hết
-                                                                    </span>
-                                                                )}
-                                                            </button>
-                                                        </Tooltip>
-                                                    );
-                                                })}
+                            {/* Pet Selection (Only if Logged In) */}
+                            {user && (
+                                <div>
+                                    <label className="block text-[1.6rem] font-bold text-[#181818] mb-[15px] ml-[10px]">
+                                        Chọn thú cưng:
+                                    </label>
+                                    <div className="grid grid-cols-2 gap-[10px] relative min-h-[50px]">
+                                        {isLoadingPets && <div className="text-center py-4 w-full col-span-2">Đang tải thú cưng...</div>}
+                                        {!isLoadingPets && myPets.length === 0 && (
+                                            <div className="col-span-2 text-center text-[1.4rem] text-[#637381] py-4 bg-white rounded-[25px] border border-dashed border-gray-300">
+                                                Bạn chưa có thú cưng nào.
+                                                <Link to="/dashboard/pets" className="text-client-secondary font-bold ml-1 hover:underline">
+                                                    Thêm mới ngay
+                                                </Link>
                                             </div>
                                         ) : (
                                             <div className="text-center py-10 text-gray-400 italic">Không có khung giờ nào khả dụng trong buổi này ạ!</div>

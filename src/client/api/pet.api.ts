@@ -1,48 +1,41 @@
-import { apiApp } from "../../api/index";
+import { apiApp } from "../../api";
 
-const API_PET = "/api/v1/client/pet/my-pets";
+export interface Pet {
+    _id: string;
+    name: string;
+    type: "dog" | "cat";
+    breed?: string;
+    weight?: number;
+    age?: number;
+    color?: string;
+    gender?: "male" | "female" | "unknown";
+    notes?: string;
+    avatar?: string;
+    healthStatus?: "accepted" | "rejected";
+    status: string;
+}
 
-export const getMyPets = async () => {
-    try {
-        const response = await apiApp.get(API_PET);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+export interface PetPayload {
+    name: string;
+    type: "dog" | "cat";
+    breed?: string;
+    weight?: number;
+    age?: number;
+    color?: string;
+    gender?: "male" | "female" | "unknown";
+    healthStatus?: "accepted" | "rejected";
+    notes?: string;
+    avatar?: string;
+}
+
+export const getMyPets = () => {
+    return apiApp.get("/api/v1/client/pet/my-pets");
 };
 
-export const createPet = async (data: any) => {
-    try {
-        const response = await apiApp.post(API_PET, data);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+export const createMyPet = (data: PetPayload) => {
+    return apiApp.post("/api/v1/client/pet/my-pets", data);
 };
 
-export const getPetDetail = async (id: string) => {
-    try {
-        const response = await apiApp.get(`${API_PET}/${id}`);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
-};
-
-export const updatePet = async (id: string, data: any) => {
-    try {
-        const response = await apiApp.patch(`${API_PET}/${id}`, data);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
-};
-
-export const deletePet = async (id: string) => {
-    try {
-        const response = await apiApp.delete(`${API_PET}/${id}`);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+export const updateMyPet = (id: string, data: Partial<PetPayload>) => {
+    return apiApp.patch(`/api/v1/client/pet/my-pets/${id}`, data);
 };
