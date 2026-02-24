@@ -56,7 +56,7 @@ const products: Product[] = [
 export const NewProduct = () => {
     return (
         <div className="mt-[40px] 2xl:mt-[30px] text-center">
-            <h3 className="mb-[50px] font-secondary text-[3rem] 2xl:text-[2.8rem]">
+            <h3 className="mb-[50px] font-secondary text-[30px] 2xl:text-[28px]">
                 Mới trong cửa hàng
             </h3>
 
@@ -74,7 +74,7 @@ export const NewProduct = () => {
                         </div>
 
                         <div className="text-center">
-                            <Link to={item.url} className="block mt-[20px] mb-[18px] text-[2rem] font-secondary text-client-secondary hover:text-client-primary transition-default">
+                            <Link to={item.url} className="block mt-[20px] mb-[18px] text-[20px] font-secondary text-client-secondary hover:text-client-primary transition-default">
                                 {item.title}
                             </Link>
                             <p className="text-client-secondary mb-[14px]">
@@ -85,7 +85,7 @@ export const NewProduct = () => {
                                     <StarIcon
                                         key={i}
                                         sx={{
-                                            fontSize: "2.3rem !important",
+                                            fontSize: "23px !important",
                                             color:
                                                 i < item.rating
                                                     ? "#ffbb00 !important"

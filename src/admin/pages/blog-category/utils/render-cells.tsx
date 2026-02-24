@@ -24,8 +24,8 @@ export const RenderTitleCell = (params: GridRenderCellParams) => {
             sx={{
                 display: 'flex',
                 alignItems: 'center',
-                py: "16px",
-                gap: "16px",
+                py: "calc(2 * var(--spacing))",
+                gap: "calc(2 * var(--spacing))",
                 width: "100%",
             }}>
 
@@ -36,8 +36,8 @@ export const RenderTitleCell = (params: GridRenderCellParams) => {
                 sx={{
                     width: "64px",
                     height: "64px",
-                    borderRadius: '12px',
-                    backgroundColor: '#F4F6F8'
+                    borderRadius: "var(--shape-borderRadius-md)",
+                    backgroundColor: 'var(--palette-background-neutral)'
                 }}
             />
 
@@ -54,7 +54,7 @@ export const RenderTitleCell = (params: GridRenderCellParams) => {
                         sx={{
                             color: COLORS.primary,
                             fontWeight: 600,
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             transition: 'color 0.2s',
                         }}
                     >
@@ -96,7 +96,7 @@ export const RenderCreatedAtCell = ({ value }: RenderCreatedAtCellProps) => {
 
             <span
                 style={{
-                    fontSize: "1.4rem",
+                    fontSize: "0.875rem",
                     color: COLORS.primary,
                     transition: 'color 0.2s',
                     textTransform: 'capitalize'
@@ -108,7 +108,7 @@ export const RenderCreatedAtCell = ({ value }: RenderCreatedAtCellProps) => {
                 className="date-text"
                 component='span'
                 sx={{
-                    fontSize: "1.2rem",
+                    fontSize: "0.75rem",
                     color: COLORS.secondary,
                     textTransform: 'lowercase'
                 }}
@@ -125,22 +125,22 @@ export const RenderStatusCell = (params: GridRenderCellParams) => {
     const status = params.row.status;
 
     let label = "Hoạt động";
-    let bg = "#00B8D929";
-    let text = "#006C9C";
+    let bg = "var(--palette-info-lighter)";
+    let text = "var(--palette-info-dark)";
 
     if (status === 'active') {
         label = "Hoạt động";
-        bg = "#00B8D929";
-        text = "#006C9C";
+        bg = "var(--palette-info-lighter)";
+        text = "var(--palette-info-dark)";
     } else {
         label = "Tạm dừng";
-        bg = "#EF444429";
-        text = "#B91C1C";
+        bg = "var(--palette-error-lighter)";
+        text = "var(--palette-error-dark)";
     }
 
     return (
         <span
-            className="inline-flex items-center justify-center leading-1.5 min-w-[2.4rem] h-[2.4rem] text-[1.2rem] px-[6px] font-[700] rounded-[6px]"
+            className="inline-flex items-center justify-center leading-1.5 min-w-[1.5rem] h-[1.5rem] text-[0.75rem] px-[6px] font-[700] rounded-[6px]"
             style={{
                 backgroundColor: bg,
                 color: text,
@@ -184,7 +184,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                 {...({
                     sx: {
                         '& .MuiTypography-root': {
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             fontWeight: "600"
                         },
                     },
@@ -198,7 +198,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                 {...({
                     sx: {
                         '& .MuiTypography-root': {
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             fontWeight: "600"
                         },
                     },
@@ -212,9 +212,9 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                 {...({
                     sx: {
                         '& .MuiTypography-root': {
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             fontWeight: "600",
-                            color: "#FF5630"
+                            color: "var(--palette-error-main)"
                         },
                     },
                 } as any)}
@@ -223,3 +223,8 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
         </GridActionsCell>
     );
 }
+
+
+
+
+

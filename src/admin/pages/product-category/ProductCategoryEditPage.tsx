@@ -1,4 +1,4 @@
-import { Box, Stack, TextField, ThemeProvider, useTheme, Button, CircularProgress } from "@mui/material";
+import { Box, Stack, TextField, ThemeProvider, useTheme, CircularProgress } from "@mui/material";
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { Title } from "../../components/ui/Title";
 import { Tiptap } from "../../components/layouts/titap/Tiptap";
@@ -13,6 +13,7 @@ import { getProductCategoryTheme } from "./configs/theme";
 import { prefixAdmin } from "../../constants/routes";
 import { FormUploadSingleFile } from "../../components/upload/FormUploadSingleFile";
 import { toast } from "react-toastify";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 import { CategoryParentSelect } from "../../components/ui/CategoryTreeSelect";
 import { useParams } from "react-router-dom";
 
@@ -96,7 +97,7 @@ export const ProductCategoryEditPage = () => {
 
     return (
         <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
+            <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
                     <Title title="Chỉnh sửa danh mục sản phẩm" />
                     <Breadcrumb
@@ -111,15 +112,15 @@ export const ProductCategoryEditPage = () => {
 
             <ThemeProvider theme={localTheme}>
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    <Stack sx={{ margin: "0px 120px", gap: "40px" }}>
+                    <Stack sx={{ margin: "0px calc(15 * var(--spacing))", gap: "calc(5 * var(--spacing))" }}>
                         <CollapsibleCard
                             title="Chi tiết"
                             subheader="Cập nhật tiêu đề, mô tả và hình ảnh danh mục"
                             expanded={expandedDetail}
                             onToggle={toggle(setExpandedDetail)}
                         >
-                            <Stack p="24px" gap="24px">
-                                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px 16px" }}>
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
+                                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))" }}>
                                     <Controller
                                         name="name"
                                         control={control}
@@ -158,7 +159,7 @@ export const ProductCategoryEditPage = () => {
                             </Stack>
                         </CollapsibleCard>
 
-                        <Box gap="24px" sx={{ display: "flex", alignItems: "center" }}>
+                        <Box gap="calc(3 * var(--spacing))" sx={{ display: "flex", alignItems: "center" }}>
                             <SwitchButton
                                 control={control}
                                 name="status"
@@ -166,28 +167,13 @@ export const ProductCategoryEditPage = () => {
                                 uncheckedValue="inactive"
                             />
 
-                            <Button
+                            <LoadingButton
                                 type="submit"
-                                disabled={isUpdating}
-                                sx={{
-                                    background: '#1C252E',
-                                    minHeight: "4.8rem",
-                                    minWidth: "6.4rem",
-                                    fontWeight: 700,
-                                    fontSize: "1.4rem",
-                                    padding: "8px 16px",
-                                    borderRadius: "8px",
-                                    textTransform: "none",
-                                    boxShadow: "none",
-                                    "&:hover": {
-                                        background: "#454F5B",
-                                        boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
-                                    }
-                                }}
-                                variant="contained"
-                            >
-                                {isUpdating ? 'Đang cập nhật...' : 'Cập nhật danh mục'}
-                            </Button>
+                                loading={isUpdating}
+                                label="Cập nhật danh mục"
+                                loadingLabel="Đang cập nhật..."
+                                sx={{ minHeight: "3rem", minWidth: "4rem" }}
+                            />
                         </Box>
                     </Stack>
                 </form>
@@ -195,3 +181,7 @@ export const ProductCategoryEditPage = () => {
         </>
     );
 };
+
+
+
+

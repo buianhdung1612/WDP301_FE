@@ -19,8 +19,8 @@ export const RenderProductCell = (params: GridRenderCellParams) => {
             sx={{
                 display: 'flex',
                 alignItems: 'center',
-                py: "16px",
-                gap: "16px",
+                py: "calc(2 * var(--spacing))",
+                gap: "calc(2 * var(--spacing))",
                 width: "100%",
             }}>
 
@@ -31,8 +31,8 @@ export const RenderProductCell = (params: GridRenderCellParams) => {
                 sx={{
                     width: "64px",
                     height: "64px",
-                    borderRadius: '12px',
-                    backgroundColor: '#F4F6F8'
+                    borderRadius: "var(--shape-borderRadius-md)",
+                    backgroundColor: 'var(--palette-background-neutral)'
                 }}
             />
 
@@ -44,11 +44,11 @@ export const RenderProductCell = (params: GridRenderCellParams) => {
                         sx={{
                             color: COLORS.primary,
                             fontWeight: 600,
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             transition: 'color 0.2s',
                             cursor: 'pointer',
                             '&:hover': {
-                                color: '#00A76F',
+                                color: 'var(--palette-primary-main)',
                                 textDecoration: 'underline'
                             }
                         }}
@@ -66,7 +66,7 @@ export const RenderProductCell = (params: GridRenderCellParams) => {
                     secondary: {
                         component: 'span',
                         variant: 'body2',
-                        sx: { color: '#919EAB', fontSize: "1.3rem" }
+                        sx: { color: 'var(--palette-text-disabled)', fontSize: "0.8125rem" }
                     }
                 }}
                 sx={{ m: 0 }}
@@ -90,22 +90,22 @@ export const RenderCreatedAtCell = (params: GridRenderCellParams) => {
 
             <span
                 style={{
-                    fontSize: "1.4rem",
+                    fontSize: "0.875rem",
                     color: COLORS.primary,
                     transition: 'color 0.2s',
                 }}>
-                {dayjs(date).format('DD MMM YYYY')}
+                {dayjs(date).format('DD/MM/YYYY')}
             </span>
 
             <Box
                 className="date-text"
                 component='span'
                 sx={{
-                    fontSize: "1.2rem",
+                    fontSize: "0.75rem",
                     color: COLORS.secondary
                 }}
             >
-                {dayjs(date).format('hh:mm a')}
+                {dayjs(date).format('HH:mm')}
             </Box>
         </Box >
     );
@@ -145,8 +145,8 @@ export const RenderStockCell = (params: GridRenderCellParams) => {
                 justifyContent: 'center',
                 height: '100%',
                 width: '100%',
-                fontSize: "1.2rem",
-                color: "#637381"
+                fontSize: "0.75rem",
+                color: "var(--palette-text-secondary)"
             }}
         >
             <LinearProgress
@@ -155,12 +155,12 @@ export const RenderStockCell = (params: GridRenderCellParams) => {
                 sx={{
                     width: "80px",
                     height: "6px",
-                    borderRadius: "16px",
+                    borderRadius: "var(--shape-borderRadius-lg)",
                     marginBottom: "8px",
                     backgroundColor: bgColor,
                     "& .MuiLinearProgress-bar": {
                         backgroundColor: color,
-                        borderRadius: "16px",
+                        borderRadius: "var(--shape-borderRadius-lg)",
                     },
                 }}
             />
@@ -175,22 +175,22 @@ export const RenderStatusCell = (params: GridRenderCellParams) => {
     const status = params.row.status;
 
     let label = t("admin.product.status.draft");
-    let bg = "#919EAB29";
-    let text = "#1c252e";
+    let bg = "var(--palette-text-disabled)29";
+    let text = "var(--palette-text-primary)";
 
     if (status === "active") {
         label = t("admin.product.status.active");
-        bg = "#00B8D929";
-        text = "#006C9C";
+        bg = "var(--palette-info-lighter)";
+        text = "var(--palette-info-dark)";
     } else if (status === "inactive") {
         label = t("admin.product.status.inactive");
-        bg = "#EF444429";
-        text = "#B91C1C";
+        bg = "var(--palette-error-lighter)";
+        text = "var(--palette-error-dark)";
     }
 
     return (
         <span
-            className="inline-flex items-center justify-center leading-1.5 min-w-[2.4rem] h-[2.4rem] text-[1.2rem] px-[6px] font-[700] rounded-[6px]"
+            className="inline-flex items-center justify-center leading-1.5 min-w-[1.5rem] h-[1.5rem] text-[0.75rem] px-[6px] font-[700] rounded-[6px]"
             style={{
                 backgroundColor: bg,
                 color: text,
@@ -235,7 +235,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                 {...({
                     sx: {
                         '& .MuiTypography-root': {
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             fontWeight: "600"
                         },
                     },
@@ -249,7 +249,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                 {...({
                     sx: {
                         '& .MuiTypography-root': {
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             fontWeight: "600"
                         },
                     },
@@ -264,9 +264,9 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                 {...({
                     sx: {
                         '& .MuiTypography-root': {
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             fontWeight: "600",
-                            color: "#FF5630"
+                            color: "var(--palette-error-main)"
                         },
                     },
                 } as any)}
@@ -274,3 +274,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
         </GridActionsCell>
     );
 }
+
+
+
+

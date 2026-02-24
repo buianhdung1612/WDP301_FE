@@ -11,13 +11,13 @@ export const AccountAdminListPage = () => {
 
     return (
         <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
+            <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
-                    <Title title="Danh sách tài khoản quản trị" />
+                    <Title title="Danh sách quản trị viên" />
                     <Breadcrumb
                         items={[
                             { label: "Dashboard", to: "/" },
-                            { label: "Tài khoản", to: `/${prefixAdmin}/account-admin/list` },
+                            { label: "Quản trị viên", to: `/${prefixAdmin}/account-admin/list` },
                             { label: "Danh sách" }
                         ]}
                     />
@@ -25,18 +25,18 @@ export const AccountAdminListPage = () => {
                 <Button
                     onClick={() => navigate(`/${prefixAdmin}/account-admin/create`)}
                     sx={{
-                        background: '#1C252E',
-                        minHeight: "3.6rem",
-                        minWidth: "6.4rem",
+                        background: 'var(--palette-text-primary)',
+                        minHeight: "2.25rem",
+                        minWidth: "4rem",
                         fontWeight: 700,
-                        fontSize: "1.4rem",
+                        fontSize: "0.875rem",
                         padding: "6px 12px",
-                        borderRadius: "8px",
+                        borderRadius: "var(--shape-borderRadius)",
                         textTransform: "none",
                         boxShadow: "none",
                         "&:hover": {
-                            background: "#454F5B",
-                            boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
+                            background: "var(--palette-grey-700)",
+                            boxShadow: "var(--customShadows-z8)"
                         }
                     }}
                     variant="contained"
@@ -49,3 +49,7 @@ export const AccountAdminListPage = () => {
         </>
     );
 };
+
+
+
+

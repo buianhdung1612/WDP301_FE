@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { register as registerApi } from "../../api/auth.api";
 import { toast } from "react-toastify";
-import { useAuthStore } from "../../../stores/useAuthStore";
 
 const breadcrumbs = [
     { label: "Trang chủ", to: "/" },
@@ -46,7 +45,6 @@ type RegisterFormData = z.infer<typeof schema>;
 
 export const RegisterPage = () => {
     const navigate = useNavigate();
-    const loginStore = useAuthStore((state) => state.login);
 
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterFormData>({
         resolver: zodResolver(schema)
@@ -89,7 +87,7 @@ export const RegisterPage = () => {
                     </div>
                     <div className="flex-1">
                         <div className="py-[30px] pr-[20px]">
-                            <h2 className="text-center font-secondary text-[4rem] 2xl:text-[3.5rem] text-white mt-[24px] mb-[12px]">Đăng ký</h2>
+                            <h2 className="text-center font-secondary text-[40px] 2xl:text-[35px] text-white mt-[24px] mb-[12px]">Đăng ký</h2>
                             <p className="text-center text-white">Bạn chưa có tài khoản?</p>
                             <form onSubmit={handleSubmit(onSubmit)} className="mt-[30px] w-full flex flex-col gap-[12px]">
                                 <Input
@@ -127,7 +125,7 @@ export const RegisterPage = () => {
                                 />
                                 <button
                                     disabled={isSubmitting}
-                                    className="w-full mt-[10px] mb-[20px] py-[16px] px-[30px] bg-client-secondary text-white font-secondary text-[1.8rem] rounded-[40px] transition-default cursor-pointer hover:bg-white hover:text-client-secondary disabled:opacity-50"
+                                    className="w-full mt-[10px] mb-[20px] py-[16px] px-[30px] bg-client-secondary text-white font-secondary text-[18px] rounded-[40px] transition-default cursor-pointer hover:bg-white hover:text-client-secondary disabled:opacity-50"
                                 >
                                     {isSubmitting ? "Đang xử lý..." : "Đăng ký"}
                                 </button>

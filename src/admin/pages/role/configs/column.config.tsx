@@ -6,7 +6,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import { COLORS } from './constants';
-import { SKILLS } from '../../../constants/roles';
 
 export const getColumnsConfig = (
     onEdit: (id: string) => void,
@@ -20,7 +19,7 @@ export const getColumnsConfig = (
             headerAlign: 'center',
             renderCell: (params: GridRenderCellParams) => {
                 const index = params.api.getAllRowIds().indexOf(params.id) + 1;
-                return <Box sx={{ fontSize: '1.4rem' }}>{index}</Box>;
+                return <Box sx={{ fontSize: '0.875rem' }}>{index}</Box>;
             },
         },
         {
@@ -30,7 +29,7 @@ export const getColumnsConfig = (
             minWidth: 220,
             renderCell: (params: GridRenderCellParams) => (
                 <Stack spacing={0.5} sx={{ py: 1 }}>
-                    <Typography sx={{ fontWeight: 600, fontSize: '1.4rem', color: COLORS.primary }}>
+                    <Typography sx={{ fontWeight: 600, fontSize: '0.875rem', color: COLORS.primary }}>
                         {params.value}
                     </Typography>
                     {params.row.isStaff && (
@@ -38,10 +37,10 @@ export const getColumnsConfig = (
                             display: 'inline-flex',
                             px: 1,
                             py: 0.2,
-                            fontSize: '1.1rem',
+                            fontSize: '0.6875rem',
                             bgcolor: 'rgba(0, 167, 111, 0.16)',
                             color: 'rgb(0, 120, 103)',
-                            borderRadius: '6px',
+                            borderRadius: "var(--shape-borderRadius-sm)",
                             fontWeight: 700,
                             width: 'fit-content'
                         }}>
@@ -52,35 +51,18 @@ export const getColumnsConfig = (
             ),
         },
         {
-            field: 'skillSet',
-            headerName: 'Kỹ năng chuyên môn',
-            flex: 1.2,
-            minWidth: 250,
+            field: 'departmentId',
+            headerName: 'Phòng ban',
+            flex: 1,
+            minWidth: 150,
             renderCell: (params: GridRenderCellParams) => {
-                const skills = params.value || [];
-                if (skills.length === 0) return <Typography sx={{ fontSize: '1.4rem', color: COLORS.disabled }}>-</Typography>;
+                const dept = params.value;
+                if (!dept) return <Typography sx={{ fontSize: '0.875rem', color: COLORS.disabled }}>-</Typography>;
 
                 return (
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, py: 1 }}>
-                        {skills.map((skillId: string) => {
-                            const skillName = SKILLS.find(s => s.id === skillId)?.name || skillId;
-                            return (
-                                <Chip
-                                    key={skillId}
-                                    label={skillName}
-                                    size="small"
-                                    sx={{
-                                        fontSize: '1.1rem',
-                                        height: '20px',
-                                        bgcolor: '#F4F6F8',
-                                        color: '#637381',
-                                        fontWeight: 600,
-                                        border: '1px solid #919eab33'
-                                    }}
-                                />
-                            );
-                        })}
-                    </Box>
+                    <Typography sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+                        {typeof dept === 'string' ? dept : dept.name}
+                    </Typography>
                 );
             }
         },
@@ -97,7 +79,7 @@ export const getColumnsConfig = (
                             bgcolor: isActive ? 'rgba(0, 167, 111, 0.16)' : 'rgba(255, 86, 48, 0.16)',
                             color: isActive ? 'rgb(0, 120, 103)' : 'rgb(183, 29, 71)',
                             fontWeight: 700,
-                            fontSize: '1.2rem',
+                            fontSize: '0.75rem',
                             height: '24px',
                             '& .MuiChip-label': { px: 1 }
                         }}
@@ -117,30 +99,30 @@ export const getColumnsConfig = (
             renderCell: (params: GridRenderCellParams) => (
                 <GridActionsCell {...params}>
                     <GridActionsCellItem
-                        icon={<EditIcon sx={{ fontSize: '2rem' }} />}
+                        icon={<EditIcon sx={{ fontSize: '1.25rem' }} />}
                         label="Chỉnh sửa"
                         onClick={() => onEdit(params.row._id)}
                         showInMenu
                         {...({
                             sx: {
                                 '& .MuiTypography-root': {
-                                    fontSize: '1.3rem',
+                                    fontSize: '0.8125rem',
                                     fontWeight: "600"
                                 },
                             },
                         } as any)}
                     />
                     <GridActionsCellItem
-                        icon={<DeleteIcon sx={{ fontSize: '2rem', color: '#FF5630' }} />}
+                        icon={<DeleteIcon sx={{ fontSize: '1.25rem', color: 'var(--palette-error-main)' }} />}
                         label="Xóa"
                         onClick={() => onDelete(params.row._id)}
                         showInMenu
                         {...({
                             sx: {
                                 '& .MuiTypography-root': {
-                                    fontSize: '1.3rem',
+                                    fontSize: '0.8125rem',
                                     fontWeight: "600",
-                                    color: "#FF5630"
+                                    color: "var(--palette-error-main)"
                                 },
                             },
                         } as any)}
@@ -157,3 +139,7 @@ export const columnsInitialState = {
         },
     },
 };
+
+
+
+

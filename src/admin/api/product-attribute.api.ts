@@ -7,7 +7,7 @@ const BASE_URL = `/api/v1/${prefixAdmin}/product/attribute`;
 
 /** Header auth dùng chung */
 const withAuth = () => {
-    const token = Cookies.get('token');
+    const token = Cookies.get("tokenAdmin");
 
     return {
         headers: {

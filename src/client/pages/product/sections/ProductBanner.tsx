@@ -23,7 +23,7 @@ export const ProductBanner = memo(({ pageTitle, breadcrumbs, url, className }: P
         >
             <div className="text-center relative z-[2]">
                 {/* Tiêu đề trang */}
-                <h1 className="text-[6rem] font-secondary text-white mb-[5px]">{pageTitle}</h1>
+                <h1 className="text-[60px] font-secondary text-white mb-[5px]">{pageTitle}</h1>
 
                 {/* Breadcrumb */}
                 <nav className="text-white flex justify-center flex-wrap items-center gap-[5px]" aria-label="breadcrumb">
@@ -43,7 +43,7 @@ export const ProductBanner = memo(({ pageTitle, breadcrumbs, url, className }: P
                                 )}
 
                                 {!isLast && (
-                                    <RemoveIcon className="text-white" style={{ fontSize: "1.6rem" }} />
+                                    <RemoveIcon className="text-white" style={{ fontSize: "10px" }} />
                                 )}
                             </React.Fragment>
                         );

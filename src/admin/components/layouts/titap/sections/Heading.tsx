@@ -17,13 +17,13 @@ const BLOCK_STYLE: Record<
     BlockType,
     { fontSize: string; fontWeight: number }
 > = {
-    paragraph: { fontSize: "1.4rem", fontWeight: 400 },
-    h1: { fontSize: "1.7rem", fontWeight: 700 },
-    h2: { fontSize: "1.6rem", fontWeight: 700 },
-    h3: { fontSize: "1.5rem", fontWeight: 700 },
-    h4: { fontSize: "1.4rem", fontWeight: 700 },
-    h5: { fontSize: "1.3rem", fontWeight: 700 },
-    h6: { fontSize: "1.2rem", fontWeight: 700 },
+    paragraph: { fontSize: "0.875rem", fontWeight: 400 },
+    h1: { fontSize: "1.0625rem", fontWeight: 700 },
+    h2: { fontSize: "1rem", fontWeight: 700 },
+    h3: { fontSize: "0.9375rem", fontWeight: 700 },
+    h4: { fontSize: "0.875rem", fontWeight: 700 },
+    h5: { fontSize: "0.8125rem", fontWeight: 700 },
+    h6: { fontSize: "0.75rem", fontWeight: 700 },
 };
 
 export const Heading = memo(({ editor }: { editor: Editor | null }) => {
@@ -78,7 +78,7 @@ export const Heading = memo(({ editor }: { editor: Editor | null }) => {
                     borderRadius: "6px",
                     width: "120px",
                     height: "32px",
-                    fontSize: "1.4rem",
+                    fontSize: "0.875rem",
                     fontWeight: 500,
                     border: "1px solid #919eab33",
                     justifyContent: "space-between",

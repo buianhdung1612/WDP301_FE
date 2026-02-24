@@ -42,13 +42,13 @@ export const ProfilePage = () => {
                 className="bg-top"
             />
 
-            <div className="mt-[-150px] mb-[100px] w-[1600px] mx-auto flex">
+            <div className="mt-[-150px] mb-[100px] app-container flex">
                 <div className="w-[25%] px-[12px]">
                     <Sidebar />
                 </div>
                 <div className="w-[75%] px-[12px]">
                     <div className="mt-[100px] p-[35px] bg-white shadow-[0px_8px_24px_#959da533] rounded-[12px]">
-                        <h3 className="text-[2.4rem] font-[600] text-client-secondary mb-[25px] flex items-center justify-between">
+                        <h3 className="text-[24px] font-[600] text-client-secondary mb-[25px] flex items-center justify-between">
                             Thông tin cá nhân
                             <Link className="relative overflow-hidden group bg-client-primary rounded-[8px] px-[25px] py-[12px] font-[500] text-[1.4rem] text-white" to="/dashboard/profile/edit">
                                 <span className="relative z-10">Chỉnh sửa</span>

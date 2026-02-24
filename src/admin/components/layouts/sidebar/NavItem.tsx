@@ -4,14 +4,25 @@ import { ListItemIcon, Collapse, ButtonBase, Popover, Paper } from '@mui/materia
 import { Link, useLocation } from "react-router-dom";
 import { ArrowIcon } from "../../../assets/icons";
 import { useSidebar } from "../../../context/sidebar/useSidebar";
+import { useAuthStore } from "../../../../stores/useAuthStore";
 
 export const NavItem = memo(({ item }: { item: any }) => {
     const { t } = useTranslation();
     const { pathname } = useLocation();
     const { isOpen } = useSidebar();
-    const hasChildren = item.children && item.children.length > 0;
+    const { user } = useAuthStore();
+    const permissions = user?.permissions || [];
+    const isStaff = user?.roles?.some((role: any) => role.isStaff);
 
-    const isChildActive = hasChildren ? item.children.some((c: any) => pathname === c.path) : false;
+    const filteredChildren = (item.children || []).filter((child: any) => {
+        if (child.hideIfStaff && isStaff) return false;
+        if (!child.permission) return true;
+        return permissions.includes(child.permission);
+    });
+
+    const hasChildren = filteredChildren.length > 0;
+
+    const isChildActive = hasChildren ? filteredChildren.some((c: any) => pathname === c.path) : false;
     const isActive = pathname === item.path;
 
     const isParentHighlighted = isActive || isChildActive;
@@ -79,13 +90,13 @@ export const NavItem = memo(({ item }: { item: any }) => {
                     </ListItemIcon>
                 )}
 
-                {isOpen && <span className="flex-1 text-[1.4rem] text-left">{t(item.tKey || item.label)}</span>}
-                {!isOpen && <span className="text-[1rem] font-[600] text-center" style={{ wordBreak: 'break-word', maxWidth: '60px', lineHeight: '1.2' }}>{t(item.tKey || item.label)}</span>}
+                {isOpen && <span className="flex-1 text-[0.875rem] text-left">{t(item.tKey || item.label)}</span>}
+                {!isOpen && <span className="text-[0.625rem] font-[600] text-center" style={{ wordBreak: 'break-word', maxWidth: '60px', lineHeight: '1.2' }}>{t(item.tKey || item.label)}</span>}
 
                 {hasChildren && isOpen && (
                     <ArrowIcon
                         sx={{
-                            fontSize: "1.6rem",
+                            fontSize: "1rem",
                             transition: "transform 200ms",
                             transform: open ? "rotate(0deg)" : "rotate(-90deg)",
                             opacity: isParentHighlighted ? 1 : 0.8,
@@ -136,7 +147,7 @@ export const NavItem = memo(({ item }: { item: any }) => {
                                 borderRadius: "10px",
                             }}>
                             <ul className="flex flex-col gap-[4px]">
-                                {item.children
+                                {filteredChildren
                                     .filter((child: any) => !child.hidden)
                                     .map((child: any) => {
                                         const isSubActive = pathname.startsWith(child.path);
@@ -145,7 +156,7 @@ export const NavItem = memo(({ item }: { item: any }) => {
                                             <li key={child.id}>
                                                 <Link
                                                     to={child.path}
-                                                    className={`rounded-[8px] inline-flex items-center py-[4px] px-[8px] w-full min-h-[36px] text-[1.4rem] transition-colors
+                                                    className={`rounded-[8px] inline-flex items-center py-[4px] px-[8px] w-full min-h-[36px] text-[0.875rem] transition-colors
                       ${isSubActive
                                                             ? 'text-[#1C252E] font-[600] bg-[#919eab14]'
                                                             : 'text-[#637381] hover:bg-[#919eab14] hover:text-[#1C252E]'
@@ -166,7 +177,7 @@ export const NavItem = memo(({ item }: { item: any }) => {
             {hasChildren && isOpen && (
                 <Collapse in={open} timeout="auto" unmountOnExit sx={{ pl: "24px" }}>
                     <ul className="relative pl-[12px] pt-[4px] flex flex-col gap-[4px] before:absolute before:top-0 before:left-0 before:bottom-[20px] before:w-[2px] before:content-[''] before:bg-[#EDEFF2]">
-                        {item.children
+                        {filteredChildren
                             .filter((child: any) => !child.hidden)
                             .map((child: any) => {
                                 const isSubActive = pathname.startsWith(child.path);
@@ -175,7 +186,7 @@ export const NavItem = memo(({ item }: { item: any }) => {
                                     <li key={child.id}>
                                         <Link
                                             to={child.path}
-                                            className={`sidebar-item-before rounded-[8px] inline-flex items-center py-[4px] pr-[8px] pl-[12px] w-full min-h-[36px] text-[1.4rem]
+                                            className={`sidebar-item-before rounded-[8px] inline-flex items-center py-[4px] pr-[8px] pl-[12px] w-full min-h-[36px] text-[0.875rem]
               ${isSubActive
                                                     ? 'text-[#1C252E] font-[600] bg-[#919eab14]'
                                                     : 'text-[#637381] hover:bg-[#919eab14] hover:text-[#1C252E]'

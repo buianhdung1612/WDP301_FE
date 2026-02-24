@@ -27,13 +27,13 @@ type BlogStatus = "published" | "draft" | "archived"
 
 const getItemStyle = (current: BlogStatus, value: BlogStatus) => ({
     mb: "4px",
-    borderRadius: "8px",
+    borderRadius: "var(--shape-borderRadius)",
     fontWeight: current === value ? 600 : 400,
     backgroundColor:
         current === value
             ? "rgba(145 158 171 / 16%)"
             : "transparent",
-    gap: "16px",
+    gap: "calc(2 * var(--spacing))",
     "&:hover": {
         backgroundColor: "rgba(145 158 171 / 24%)"
     }
@@ -114,10 +114,10 @@ export const BlogDetailPage = () => {
                         sx={{
                             fontWeight: 700,
                             textTransform: "none",
-                            fontSize: "1.3rem",
-                            borderRadius: "8px",
+                            fontSize: "0.8125rem",
+                            borderRadius: "var(--shape-borderRadius)",
                             "&:hover": {
-                                backgroundColor: "#919eab14"
+                                backgroundColor: "var(--palette-text-disabled)14"
                             }
                         }}
                     >
@@ -138,7 +138,7 @@ export const BlogDetailPage = () => {
 
                         <Tooltip title="Chỉnh sửa">
                             <IconButton onClick={() => navigate(`/${prefixAdmin}/blog/edit/${blog.id}`)}>
-                                <EditIcon sx={{ mr: 0, color: "#637381" }} />
+                                <EditIcon sx={{ mr: 0, color: "var(--palette-text-secondary)" }} />
                             </IconButton>
                         </Tooltip>
 
@@ -152,15 +152,14 @@ export const BlogDetailPage = () => {
                             sx={{
                                 textTransform: "none",
                                 fontWeight: 700,
-                                fontSize: "1.3rem",
-                                backgroundColor: "#1C252E",
-                                color: "#fff",
-                                borderRadius: "8px",
+                                fontSize: "0.8125rem",
+                                backgroundColor: "var(--palette-text-primary)",
+                                color: "var(--palette-common-white)",
+                                borderRadius: "var(--shape-borderRadius)",
                                 padding: "6px 12px",
                                 "&:hover": {
-                                    backgroundColor: "#454F5B",
-                                    boxShadow:
-                                        "0 8px 16px 0 rgba(145 158 171 / 16%)"
+                                    backgroundColor: "var(--palette-grey-700)",
+                                    boxShadow: "var(--customShadows-z8)"
                                 }
                             }}
                         >
@@ -187,7 +186,7 @@ export const BlogDetailPage = () => {
                                     overflow: "visible",
                                     mt: 1,
                                     '& .MuiMenuItem-root': {
-                                        fontSize: '1.4rem'
+                                        fontSize: '0.875rem'
                                     }
                                 }
                             }
@@ -206,7 +205,7 @@ export const BlogDetailPage = () => {
                             sx={getItemStyle(status, "published")}
                             onClick={() => handleChangeStatus("published")}
                         >
-                            <UploadIcon sx={{ fontSize: "2rem" }} />
+                            <UploadIcon sx={{ fontSize: "1.25rem" }} />
                             Xuất bản
                         </MenuItem>
 
@@ -244,10 +243,10 @@ export const BlogDetailPage = () => {
             >
                 <Container sx={{ height: "100%", position: "relative" }}>
                     <Stack sx={{ height: '100%', justifyContent: 'flex-end', pb: '80px' }}>
-                        <Typography sx={{ fontSize: "3rem", maxWidth: "720px", fontWeight: "700", zIndex: "9", color: "#fff", lineHeight: "1.5" }}>
+                        <Typography sx={{ fontSize: "1.875rem", maxWidth: "720px", fontWeight: "700", zIndex: "9", color: "var(--palette-common-white)", lineHeight: "1.5" }}>
                             {blog.title}
                         </Typography>
-                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 2, color: '#fff', opacity: 0.8, fontSize: '1.4rem' }}>
+                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 2, color: "var(--palette-common-white)", opacity: 0.8, fontSize: '0.875rem' }}>
                             <Box component="span">
                                 {dayjs(blog.createdAt).locale('vi').format('DD MMM YYYY, HH:mm')}
                             </Box>
@@ -268,24 +267,24 @@ export const BlogDetailPage = () => {
                                 '& .MuiFab-root': {
                                     width: "48px",
                                     height: "48px",
-                                    backgroundColor: "#00A76F",
+                                    backgroundColor: "var(--palette-primary-main)",
 
                                     '& .MuiSvgIcon-root': {
-                                        color: "#fff",
-                                        width: "2rem",
-                                        height: "2rem"
+                                        color: "var(--palette-common-white)",
+                                        width: "1.25rem",
+                                        height: "1.25rem"
                                     }
                                 },
                                 '& .MuiSpeedDialAction-fab': {
-                                    width: "4rem",
-                                    height: "4rem",
-                                    boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)",
-                                    backgroundColor: "#FFFFFF",
+                                    width: "2.5rem",
+                                    height: "2.5rem",
+                                    boxShadow: "var(--customShadows-z8)",
+                                    backgroundColor: "var(--palette-background-paper)",
                                     m: "8px",
 
                                     '& svg': {
-                                        width: "2rem",
-                                        height: "2rem"
+                                        width: "1.25rem",
+                                        height: "1.25rem"
                                     }
                                 }
                             }}
@@ -315,27 +314,27 @@ export const BlogDetailPage = () => {
 
             {/* Content */}
             <Container maxWidth="md" sx={{ mt: 8, mb: 10 }}>
-                <Typography variant="h6" sx={{ mb: 3, fontStyle: 'italic', opacity: 0.8, color: '#637381' }}>
+                <Typography variant="h6" sx={{ mb: 3, fontStyle: 'italic', opacity: 0.8, color: 'var(--palette-text-secondary)' }}>
                     {blog.excerpt || blog.metaDescription}
                 </Typography>
 
                 <Divider sx={{ mb: 4 }} />
 
                 <Box className="prose lg:prose-xl" sx={{
-                    color: '#212B36',
-                    '& img': { borderRadius: '12px', my: 3 },
-                    '& p': { mb: 2, fontSize: '1.6rem', lineHeight: 1.8 },
-                    '& h2': { fontSize: '2.4rem', fontWeight: 700, mt: 4, mb: 2 },
-                    '& h3': { fontSize: '2rem', fontWeight: 700, mt: 3, mb: 2 },
+                    color: 'var(--palette-text-primary)',
+                    '& img': { borderRadius: "var(--shape-borderRadius-md)", my: 3 },
+                    '& p': { mb: 2, fontSize: '1rem', lineHeight: 1.8 },
+                    '& h2': { fontSize: '1.5rem', fontWeight: 700, mt: 4, mb: 2 },
+                    '& h3': { fontSize: '1.25rem', fontWeight: 700, mt: 3, mb: 2 },
                     '& ul, & ol': { pl: 3, mb: 2 },
-                    '& li': { mb: 1, fontSize: '1.6rem' },
+                    '& li': { mb: 1, fontSize: '1rem' },
                 }}>
                     <div dangerouslySetInnerHTML={{ __html: blog.content }} />
                 </Box>
 
                 <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mt: 5 }}>
                     {blog.tags?.map((tag: any) => (
-                        <Chip key={tag.tagId} label={`Tag ${tag.tagId}`} sx={{ borderRadius: '8px' }} />
+                        <Chip key={tag.tagId} label={`Tag ${tag.tagId}`} sx={{ borderRadius: "var(--shape-borderRadius)" }} />
                     ))}
                 </Stack>
             </Container>
@@ -343,3 +342,7 @@ export const BlogDetailPage = () => {
 
     )
 }
+
+
+
+

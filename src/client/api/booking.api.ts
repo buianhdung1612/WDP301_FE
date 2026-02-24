@@ -1,23 +1,53 @@
-import axios from "axios";
+import { apiApp } from "../../api/index";
 
-export interface CreateBookingPayload {
-  serviceId: string;
-  slotId: string; // hoặc time + date nếu BE xử lý
-  petIds: string[]; // tạm thời có thể []
-  customerName: string;
-  customerPhone: string;
-  customerEmail?: string;
-  notes?: string;
-}
+const API_BOOKING = "/api/v1/client/booking";
 
-export const createBooking = (data: CreateBookingPayload) => {
-  return axios.post("/api/v1/client/booking/bookings", data, {
-    withCredentials: true // để gửi cookie nếu user đã login
-  });
+export const getAvailableTimeSlots = async (date: string, serviceId?: string, count: number = 1) => {
+    try {
+        const response = await apiApp.get(`${API_BOOKING}/time-slots`, {
+            params: { date, serviceId, count }
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
 };
 
-export const getTimeSlots = (date: string, serviceId: string) => {
-  return axios.get("/api/v1/client/time-slots", {
-    params: { date, serviceId }
-  });
+export const createBooking = async (data: any) => {
+    try {
+        const response = await apiApp.post(`${API_BOOKING}/bookings`, data);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getMyBookings = async () => {
+    try {
+        const response = await apiApp.get(`${API_BOOKING}/bookings`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getMyBooking = async (id: string) => {
+    try {
+        const response = await apiApp.get(`${API_BOOKING}/bookings/${id}`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const exportBookingPdf = async (bookingCode: string, phone: string) => {
+    try {
+        const response = await apiApp.get(`${API_BOOKING}/export-pdf`, {
+            params: { bookingCode, phone },
+            responseType: 'blob'
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
 };

@@ -26,7 +26,7 @@ export const ProductAsideList = memo(({ categories }: ProductAsideListProps) => 
                         flex items-center text-client-secondary transition-default 
                         group-hover:bg-client-secondary group-hover:text-white"
                     >
-                        <PetsIcon sx={{ fontSize: "2rem", marginRight: "10px" }} />
+                        <PetsIcon sx={{ fontSize: "20px", marginRight: "10px" }} />
                         {cat.name}
                     </Link>
                     <span className="absolute right-[30px] top-[50%] translate-y-[-50%] text-client-text group-hover:text-white transition-default">

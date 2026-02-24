@@ -68,3 +68,43 @@ export const useDeleteProduct = () => {
     });
 };
 
+
+// --- AGE RANGES (Placeholders to fix compilation errors) ---
+export const useProductAgeRanges = () => {
+    return useQuery({
+        queryKey: ['product-age-ranges'],
+        queryFn: async () => ({ data: [] }),
+        select: (res: any) => res.data || [],
+    });
+};
+
+export const useProductAgeRangeDetail = (id?: string | number) => {
+    return useQuery({
+        queryKey: ['product-age-range', id],
+        queryFn: async () => ({ data: null }),
+        enabled: !!id,
+        select: (res: any) => res.data,
+    });
+};
+
+export const useCreateProductAgeRange = () => {
+    return useMutation({
+        mutationFn: async (data: any) => ({ success: true, data, message: "Success" }),
+    });
+};
+
+export const useUpdateProductAgeRange = () => {
+    return useMutation({
+        mutationFn: async ({ id, data }: { id: string | number; data: any }) => ({ success: true, id, data, message: "Success" }),
+    });
+};
+
+export const useDeleteProductAgeRange = () => {
+    return useMutation({
+        mutationFn: async (id: string | number) => ({ success: true, id, message: "Success" }),
+    });
+};
+
+
+
+

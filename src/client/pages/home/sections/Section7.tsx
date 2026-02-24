@@ -71,7 +71,7 @@ export const Section7 = () => {
                         }}
                     >
                         <SaleOff content="20% OFF" backgroundColor="bg-[#FFF3E2]" textColor="text-client-secondary" />
-                        <h2 className="text-white text-[4rem] leading-[1.2] font-secondary relative">Điểm Đến Cao Cấp Cho Người Yêu Thú Cưng</h2>
+                        <h2 className="text-white text-[40px] leading-[1.2] font-secondary relative">Điểm Đến Cao Cấp Cho Người Yêu Thú Cưng</h2>
                         <div className="relative">
                             <Button
                                 content="Xem tất cả sản phẩm"

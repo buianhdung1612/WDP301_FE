@@ -88,13 +88,13 @@ export const OrderHistoryPage = () => {
                 className="bg-top"
             />
 
-            <div className="mt-[-150px] mb-[100px] w-[1600px] mx-auto flex items-stretch">
+            <div className="mt-[-150px] mb-[100px] app-container flex items-stretch">
                 <div className="w-[25%] px-[12px] flex">
                     <Sidebar />
                 </div>
                 <div className="w-[75%] px-[12px]">
                     <div className="mt-[100px] p-[35px] bg-white shadow-[0px_8px_24px_#959da533] rounded-[12px]">
-                        <h3 className="text-[2.4rem] font-[600] text-client-secondary mb-[25px]">
+                        <h3 className="text-[24px] font-[600] text-client-secondary mb-[25px]">
                             Lịch sử đơn hàng
                         </h3>
 
@@ -102,36 +102,36 @@ export const OrderHistoryPage = () => {
                             <table className="w-full text-left border-collapse">
                                 <thead className="bg-[#F9F9F9] border-b border-[#eee]">
                                     <tr>
-                                        <th className="p-[20px] text-[1.6rem] font-[600] text-client-secondary">Mã đơn hàng</th>
-                                        <th className="p-[20px] text-[1.6rem] font-[600] text-client-secondary">Ngày</th>
-                                        <th className="p-[20px] text-[1.6rem] font-[600] text-client-secondary">Trạng thái</th>
-                                        <th className="p-[20px] text-[1.6rem] font-[600] text-client-secondary">Thanh toán</th>
-                                        <th className="p-[20px] text-[1.6rem] font-[600] text-client-secondary">Tổng</th>
-                                        <th className="p-[20px] text-[1.6rem] font-[600] text-client-secondary">Hành động</th>
+                                        <th className="p-[20px] text-[16px] font-[600] text-client-secondary">Mã đơn hàng</th>
+                                        <th className="p-[20px] text-[16px] font-[600] text-client-secondary">Ngày</th>
+                                        <th className="p-[20px] text-[16px] font-[600] text-client-secondary">Trạng thái</th>
+                                        <th className="p-[20px] text-[16px] font-[600] text-client-secondary">Thanh toán</th>
+                                        <th className="p-[20px] text-[16px] font-[600] text-client-secondary">Tổng</th>
+                                        <th className="p-[20px] text-[16px] font-[600] text-client-secondary">Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-[#eee]">
                                     {loading ? (
-                                        <tr><td colSpan={6} className="p-[20px] text-center text-[1.6rem]">Đang tải...</td></tr>
+                                        <tr><td colSpan={6} className="p-[20px] text-center text-[16px]">Đang tải...</td></tr>
                                     ) : orders.length === 0 ? (
-                                        <tr><td colSpan={6} className="p-[20px] text-center text-[1.6rem]">Chưa có đơn hàng nào</td></tr>
+                                        <tr><td colSpan={6} className="p-[20px] text-center text-[16px]">Chưa có đơn hàng nào</td></tr>
                                     ) : (
                                         orders.map((order, idx) => (
                                             <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                                                <td className="p-[20px] text-[1.5rem] text-[#7d7b7b]">#{order.code}</td>
-                                                <td className="p-[20px] text-[1.5rem] text-[#7d7b7b]">{dayjs(order.createdAt).format("DD/MM/YYYY")}</td>
-                                                <td className={`p-[20px] text-[1.5rem] font-[500] ${getStatusColor(order.orderStatus || "pending")}`}>{getStatusText(order.orderStatus || "pending")}</td>
-                                                <td className={`p-[20px] text-[1.5rem] font-[500] ${getStatusColor(order.paymentStatus || "unpaid")}`}>
+                                                <td className="p-[20px] text-[15px] text-[#7d7b7b]">#{order.code}</td>
+                                                <td className="p-[20px] text-[15px] text-[#7d7b7b]">{dayjs(order.createdAt).format("DD/MM/YYYY")}</td>
+                                                <td className={`p-[20px] text-[15px] font-[500] ${getStatusColor(order.orderStatus || "pending")}`}>{getStatusText(order.orderStatus || "pending")}</td>
+                                                <td className={`p-[20px] text-[15px] font-[500] ${getStatusColor(order.paymentStatus || "unpaid")}`}>
                                                     {getStatusText(order.paymentStatus || "unpaid")} <span className="text-[#7d7b7b] font-[400]">({getPaymentMethodText(order.paymentMethod)})</span>
                                                 </td>
-                                                <td className="p-[20px] text-[1.5rem] text-[#7d7b7b] font-[500]">{formatCurrency(order.total)}</td>
+                                                <td className="p-[20px] text-[15px] text-[#7d7b7b] font-[500]">{formatCurrency(order.total)}</td>
                                                 <td className="p-[20px]">
                                                     <div className="flex flex-col gap-[8px]">
                                                         <Link
                                                             to={`/dashboard/order/detail/${order._id}`}
-                                                            className="flex items-center gap-[6px] text-[1.4rem] text-[#7d7b7b] hover:text-client-primary transition-default"
+                                                            className="flex items-center gap-[6px] text-[14px] text-[#7d7b7b] hover:text-client-primary transition-default"
                                                         >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-[1.8rem] h-[1.8rem]">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-[18px] h-[18px]">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.644C3.412 8.1 7.288 5 12 5c4.711 0 8.58 3.1 9.964 6.678a1.012 1.012 0 0 1 0 .644C20.58 15.9 16.711 19 12 19c-4.712 0-8.58-3.1-9.964-6.678Z" />
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                                             </svg>

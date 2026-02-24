@@ -51,7 +51,7 @@ export const LoginPage = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#fafafa] py-[50px]">
             <div className="bg-[#e67e2026] p-[70px] 2xl:p-[50px] rounded-[20px] max-w-[615px] w-full mx-[20px]">
-                <h2 className="text-[4rem] text-client-secondary font-[700] text-center mb-[12px]">
+                <h2 className="text-[40px] text-client-secondary font-[700] text-center mb-[12px]">
                     Đăng nhập
                 </h2>
                 <p className="text-client-text text-center mb-[40px]">
@@ -60,7 +60,7 @@ export const LoginPage = () => {
 
                 {/* Ẩn đăng nhập Google/Facebook theo yêu cầu */}
                 {/* 
-                <div className="m-[10px] py-[10px] px-[40px] text-[#000] rounded-[20px] border border-client-secondary text-[1.4rem] font-[500] text-center shadow-[0_0_0px_#ff6262] hover:text-white hover:bg-client-secondary transition-default cursor-pointer">
+                <div className="m-[10px] py-[10px] px-[40px] text-[#000] rounded-[20px] border border-client-secondary text-[14px] font-[500] text-center shadow-[0_0_0px_#ff6262] hover:text-white hover:bg-client-secondary transition-default cursor-pointer">
                     Google
                 </div>
                 <p className="mt-[30px] mb-[40px] text-client-text text-center">Hoặc đăng nhập với</p> 
@@ -90,7 +90,7 @@ export const LoginPage = () => {
                     </button>
                 </form>
 
-                <Link to="/auth/forgot-password" className="block text-center text-client-secondary underline decoration-transparent hover:decoration-client-primary hover:text-client-primary transition-all duration-300 ease-linear text-[1.4rem]">Quên mật khẩu?</Link>
+                <Link to="/auth/forgot-password" className="block text-center text-client-secondary underline decoration-transparent hover:decoration-client-primary hover:text-client-primary transition-all duration-300 ease-linear text-[14px]">Quên mật khẩu?</Link>
 
                 <p className="text-center text-client-text mt-[10px]">Bạn chưa có tài khoản? <Link className="underline decoration-transparent hover:decoration-client-text transition-all duration-300 ease-linear font-bold text-client-secondary" to={"/auth/register"}>Đăng ký ngay</Link></p>
             </div>

@@ -7,21 +7,21 @@ export const getServiceTheme = (outerTheme: Theme) => createTheme(outerTheme, {
                 root: {
                     backgroundImage: "none !important",
                     backdropFilter: "none !important",
-                    backgroundColor: "#fff !important",
-                    boxShadow: "0 0 2px 0 #919eab33, 0 12px 24px -4px #919eab1f",
-                    borderRadius: "16px",
-                    color: "#1C252E",
+                    backgroundColor: "var(--palette-background-paper) !important",
+                    boxShadow: "var(--customShadows-card)",
+                    borderRadius: "var(--shape-borderRadius-lg)",
+                    color: "var(--palette-text-primary)",
                 },
             }
         },
         MuiOutlinedInput: {
             styleOverrides: {
                 root: {
-                    color: "#1C252E",
-                    borderRadius: "8px",
-                    fontSize: "1.5rem",
+                    color: "var(--palette-text-primary)",
+                    borderRadius: "var(--shape-borderRadius)",
+                    fontSize: "0.9375rem",
                     '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: "#919eab33",
+                        borderColor: "var(--palette-text-disabled)33",
                     },
                 },
                 input: {
@@ -31,3 +31,7 @@ export const getServiceTheme = (outerTheme: Theme) => createTheme(outerTheme, {
         },
     }
 });
+
+
+
+

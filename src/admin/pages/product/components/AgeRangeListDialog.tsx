@@ -66,7 +66,7 @@ export const AgeRangeListDialog = ({ open, onClose }: AgeRangeListDialogProps) =
                 fullWidth
                 slotProps={{
                     paper: {
-                        sx: { borderRadius: "16px", padding: "16px", minHeight: "400px" }
+                        sx: { borderRadius: "var(--shape-borderRadius-lg)", padding: "16px", minHeight: "400px" }
                     }
                 }}
             >
@@ -74,13 +74,13 @@ export const AgeRangeListDialog = ({ open, onClose }: AgeRangeListDialogProps) =
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    fontSize: '1.8rem',
+                    fontSize: '1.125rem',
                     fontWeight: 700,
                     padding: "8px 8px 16px 8px"
                 }}>
                     {t("admin.product.age_range.title")}
                     <Tooltip title={t("admin.common.close")}>
-                        <IconButton onClick={onClose} size="small" sx={{ '&:hover': { backgroundColor: '#f4f6f8' } }}>
+                        <IconButton onClick={onClose} size="small" sx={{ '&:hover': { backgroundColor: 'var(--palette-background-neutral)' } }}>
                             <CloseIcon />
                         </IconButton>
                     </Tooltip>
@@ -92,17 +92,17 @@ export const AgeRangeListDialog = ({ open, onClose }: AgeRangeListDialogProps) =
                             variant="contained"
                             onClick={handleCreate}
                             sx={{
-                                background: '#1C252E',
-                                minHeight: "3.6rem",
+                                background: 'var(--palette-text-primary)',
+                                minHeight: "2.25rem",
                                 fontWeight: 700,
-                                fontSize: "1.4rem",
-                                padding: "6px 16px",
-                                borderRadius: "8px",
+                                fontSize: "0.875rem",
+                                padding: "var(--shape-borderRadius-sm) calc(2 * var(--spacing))",
+                                borderRadius: "var(--shape-borderRadius)",
                                 textTransform: "none",
                                 boxShadow: "none",
                                 "&:hover": {
-                                    background: "#454F5B",
-                                    boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
+                                    background: "var(--palette-grey-700)",
+                                    boxShadow: "var(--customShadows-z8)"
                                 }
                             }}
                         >
@@ -116,7 +116,7 @@ export const AgeRangeListDialog = ({ open, onClose }: AgeRangeListDialogProps) =
                                 <CircularProgress />
                             </Box>
                         ) : ageRanges.length === 0 ? (
-                            <Typography sx={{ textAlign: 'center', color: '#919EAB', py: 4, fontSize: '1.4rem' }}>
+                            <Typography sx={{ textAlign: 'center', color: 'var(--palette-text-disabled)', py: 4, fontSize: '0.875rem' }}>
                                 {t("admin.product.age_range.no_data")}
                             </Typography>
                         ) : (
@@ -125,9 +125,9 @@ export const AgeRangeListDialog = ({ open, onClose }: AgeRangeListDialogProps) =
                                     <ListItem
                                         key={item.ageRangeId}
                                         sx={{
-                                            borderBottom: '1px solid #919eab29',
-                                            borderRadius: '8px',
-                                            '&:hover': { backgroundColor: '#919eab29' }
+                                            borderBottom: '1px solid var(--palette-text-disabled)29',
+                                            borderRadius: "var(--shape-borderRadius)",
+                                            '&:hover': { backgroundColor: 'var(--palette-text-disabled)29' }
                                         }}
                                         secondaryAction={
                                             <Stack direction="row" spacing={0.5}>
@@ -139,7 +139,7 @@ export const AgeRangeListDialog = ({ open, onClose }: AgeRangeListDialogProps) =
                                                             '&:hover': { backgroundColor: 'rgba(99, 115, 129, 0.08)' }
                                                         }}
                                                     >
-                                                        <EditIcon sx={{ fontSize: '1.8rem', color: '#637381' }} />
+                                                        <EditIcon sx={{ fontSize: '1.125rem', color: 'var(--palette-text-secondary)' }} />
                                                     </IconButton>
                                                 </Tooltip>
                                                 <Tooltip title={t("admin.common.delete")}>
@@ -150,7 +150,7 @@ export const AgeRangeListDialog = ({ open, onClose }: AgeRangeListDialogProps) =
                                                             '&:hover': { backgroundColor: 'rgba(255, 86, 48, 0.08)' }
                                                         }}
                                                     >
-                                                        <DeleteIcon sx={{ fontSize: '1.8rem', color: '#FF5630' }} />
+                                                        <DeleteIcon sx={{ fontSize: '1.125rem', color: 'var(--palette-error-main)' }} />
                                                     </IconButton>
                                                 </Tooltip>
                                             </Stack>
@@ -159,8 +159,8 @@ export const AgeRangeListDialog = ({ open, onClose }: AgeRangeListDialogProps) =
                                         <ListItemText
                                             primary={item.name}
                                             secondary={item.description}
-                                            primaryTypographyProps={{ fontSize: '1.5rem', fontWeight: 600, color: '#212B36' }}
-                                            secondaryTypographyProps={{ fontSize: '1.3rem' }}
+                                            primaryTypographyProps={{ fontSize: '0.9375rem', fontWeight: 600, color: 'var(--palette-text-primary)' }}
+                                            secondaryTypographyProps={{ fontSize: '0.8125rem' }}
                                         />
                                     </ListItem>
                                 ))}
@@ -180,3 +180,7 @@ export const AgeRangeListDialog = ({ open, onClose }: AgeRangeListDialogProps) =
         </>
     );
 };
+
+
+
+

@@ -1,4 +1,3 @@
-import Button from "@mui/material/Button";
 import AddIcon from '@mui/icons-material/Add';
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { ProductList } from "./sections/ProductList";
@@ -6,6 +5,7 @@ import { Title } from "../../components/ui/Title";
 import { prefixAdmin } from "../../constants/routes";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 
 export const ProductListPage = () => {
     const { t } = useTranslation();
@@ -13,7 +13,7 @@ export const ProductListPage = () => {
 
     return (
         <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
+            <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
                     <Title title={t("admin.product.title.list")} />
                     <Breadcrumb
@@ -24,30 +24,20 @@ export const ProductListPage = () => {
                         ]}
                     />
                 </div>
-                <Button
+                <LoadingButton
                     onClick={() => navigate(`/${prefixAdmin}/product/create`)}
-                    sx={{
-                        background: '#1C252E',
-                        minHeight: "3.6rem",
-                        minWidth: "6.4rem",
-                        fontWeight: 700,
-                        fontSize: "1.4rem",
-                        padding: "6px 12px",
-                        borderRadius: "8px",
-                        textTransform: "none",
-                        boxShadow: "none",
-                        "&:hover": {
-                            background: "#454F5B",
-                            boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
-                        }
-                    }}
-                    variant="contained"
+                    label={t("admin.product.title.create")}
                     startIcon={<AddIcon />}
-                >
-                    {t("admin.product.title.create")}
-                </Button>
+                    sx={{
+                        minHeight: "2.25rem",
+                        padding: "var(--shape-borderRadius-sm) calc(2 * var(--spacing))",
+                    }}
+                />
             </div>
             <ProductList />
         </>
     )
 }
+
+
+

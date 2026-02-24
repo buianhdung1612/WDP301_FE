@@ -17,11 +17,11 @@ export const ServiceCard = ({ image, title, description, link }: ServiceCardProp
                         height={70}
                         src={image}
                         alt={title}
-                        className="2xl:w-[6.5rem] aspect-square"
+                        className="2xl:w-[65px] aspect-square"
                     />
                 </div>
                 <h3 className="mb-[15px] mt-[15px]">
-                    <Link to={link} className="text-client-secondary text-[2.5rem] 2xl:text-[2.2rem] font-secondary line-clamp-1">
+                    <Link to={link} className="text-client-secondary text-[40px] 2xl:text-[22px] font-secondary line-clamp-1">
                         {title}
                     </Link>
                 </h3>

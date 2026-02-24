@@ -67,7 +67,7 @@ export const TopBar = () => {
 
                     </div>
                     <Link to={"/"} className="flex items-center text-white hover:text-[#FFFFFFBF] transition-[color] duration-300">
-                        <MailSolid className="w-[1.7rem] h-[1.7rem] mr-[10px] text-white" />
+                        <MailSolid className="w-[17px] h-[17px] mr-[10px] text-white" />
                         <span>teddypet@gmail.com</span>
                     </Link>
                 </div>

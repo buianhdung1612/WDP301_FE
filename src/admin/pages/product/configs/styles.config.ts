@@ -13,7 +13,7 @@ export const dataGridStyles: SxProps<Theme> = {
         background: COLORS.backgroundLight,
         '& .MuiDataGrid-columnHeader': {
             color: COLORS.secondary,
-            fontSize: "1.4rem",
+            fontSize: "0.875rem",
             border: "none",
             borderBottom: `1px solid ${COLORS.border}`,
             backgroundColor: COLORS.backgroundLight
@@ -25,14 +25,14 @@ export const dataGridStyles: SxProps<Theme> = {
 
         '& .MuiDataGrid-menuIcon': {
             '& .MuiButtonBase-root': {
-                color: "#637381",
+                color: "var(--palette-text-secondary)",
                 rotate: '90deg'
             }
 
         },
 
         '& .MuiButtonBase-root': {
-            fontSize: "1.8rem"
+            fontSize: "1.125rem"
         }
     },
 
@@ -40,19 +40,19 @@ export const dataGridStyles: SxProps<Theme> = {
     '& .MuiDataGrid-footerContainer': {
         borderTop: "1px dashed",
         minHeight: "auto",
-        fontSize: "1.4rem",
+        fontSize: "0.875rem",
         color: "inherit",
 
         '& .MuiTablePagination-selectLabel': {
-            fontSize: "1.4rem",
+            fontSize: "0.875rem",
             color: "inherit",
             marginBottom: "-2px"
         },
 
         '& .MuiSelect-select': {
             minHeight: "21.5625px",
-            lineHeight: "2.4rem",
-            fontSize: "1.5rem",
+            lineHeight: "1.5rem",
+            fontSize: "0.9375rem",
         },
 
         '& .MuiSelect-icon': {
@@ -60,7 +60,7 @@ export const dataGridStyles: SxProps<Theme> = {
         },
 
         '& .MuiTablePagination-displayedRows': {
-            fontSize: "1.4rem",
+            fontSize: "0.875rem",
             color: "inherit"
         },
 
@@ -71,8 +71,8 @@ export const dataGridStyles: SxProps<Theme> = {
                 padding: "5px",
 
                 '& .MuiSvgIcon-root': {
-                    width: "2.4rem",
-                    height: "2.4rem",
+                    width: "1.5rem",
+                    height: "1.5rem",
                 }
             }
         },
@@ -85,7 +85,7 @@ export const dataGridStyles: SxProps<Theme> = {
     // CELL
     '& .MuiDataGrid-cell': {
         color: 'inherit',
-        fontSize: "1.4rem",
+        fontSize: "0.875rem",
         display: 'flex',
         alignItems: 'center',
         borderRightStyle: "dashed"
@@ -152,11 +152,11 @@ export const dataGridStyles: SxProps<Theme> = {
     },
 
     '& .MuiDataGrid-actionsCell .MuiIconButton-root': {
-        color: '#637381',
+        color: 'var(--palette-text-secondary)',
     },
 
     '& .MuiDataGrid-actionsCell .MuiSvgIcon-root': {
-        fontSize: '2rem',
+        fontSize: '1.25rem',
     },
 
     '&.MuiDataGrid-root': {
@@ -165,7 +165,7 @@ export const dataGridStyles: SxProps<Theme> = {
         overflow: 'auto',
 
         '& .MuiDataGrid-overlay': {
-            fontSize: '1.8rem',
+            fontSize: '1.125rem',
             color: COLORS.secondary,
         },
     },
@@ -174,7 +174,7 @@ export const dataGridStyles: SxProps<Theme> = {
 export const toolbarStyles = {
     root: {
         padding: '16px',
-        gap: '16px',
+        gap: "calc(2 * var(--spacing))",
         display: 'flex',
         justifyContent: 'space-between',
         minHeight: 'auto',
@@ -185,7 +185,7 @@ export const toolbarStyles = {
 export const dataGridCardStyles = {
     background: COLORS.background,
     color: COLORS.primary,
-    borderRadius: '16px',
+    borderRadius: 'var(--shape-borderRadius-lg)',
     height: '640px',
     display: 'flex',
     flexDirection: 'column' as const,
@@ -218,10 +218,10 @@ export const columnsPanelStyles: SxProps<Theme> = {
         borderBottom: `1px solid ${COLORS.border}`,
     },
     '& .MuiDataGrid-columnsManagementSearchInput .MuiOutlinedInput-root': {
-        fontSize: '1.6rem',
+        fontSize: '1rem',
         padding: '0 14px',
         color: COLORS.primary,
-        borderRadius: '8px',
+        borderRadius: "var(--shape-borderRadius)",
         lineHeight: '24px',
         height: '56px',
     },
@@ -236,7 +236,7 @@ export const columnsPanelStyles: SxProps<Theme> = {
         borderWidth: '2px',
     },
     '& .MuiDataGrid-columnsManagementSearchInput .MuiSvgIcon-root': {
-        fontSize: '2rem',
+        fontSize: '1.25rem',
         color: COLORS.secondary,
     },
     '& .MuiDataGrid-columnsManagement': {
@@ -246,16 +246,16 @@ export const columnsPanelStyles: SxProps<Theme> = {
         gap: '4px',
     },
     '& .MuiTypography-root': {
-        fontSize: '1.4rem !important',
+        fontSize: '0.875rem !important',
     },
     '& .MuiDataGrid-columnsManagementFooter': {
         padding: '12px 8px 12px 12px',
         '& .MuiButton-text': {
             padding: '6px 8px',
             fontWeight: '700',
-            fontSize: '1.4rem',
+            fontSize: '0.875rem',
             textTransform: 'none',
-            borderRadius: '8px',
+            borderRadius: "var(--shape-borderRadius)",
             color: COLORS.primary,
             '&:hover': {
                 background: COLORS.borderHover,
@@ -277,14 +277,14 @@ export const filterPanelStyles: SxProps<Theme> = {
     },
     '& .MuiButtonBase-root': {
         color: COLORS.secondary,
-        fontSize: '1.8rem',
+        fontSize: '1.125rem',
         borderRadius: '50%',
         backgroundColor: COLORS.borderHover,
         padding: '5px',
     },
     '& .MuiFormLabel-root': {
         color: COLORS.secondary,
-        fontSize: '1.6rem',
+        fontSize: '1rem',
         fontWeight: '600',
         '&.Mui-focused': {
             color: COLORS.primary,
@@ -292,7 +292,12 @@ export const filterPanelStyles: SxProps<Theme> = {
     },
     '& .MuiInputBase-root': {
         color: COLORS.primary,
-        fontSize: '1.6rem',
-        borderRadius: '8px',
+        fontSize: '1rem',
+        borderRadius: "var(--shape-borderRadius)",
     },
 };
+
+
+
+
+

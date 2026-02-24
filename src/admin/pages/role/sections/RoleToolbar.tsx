@@ -9,7 +9,7 @@ export const RoleToolbar = () => {
     return (
         <Toolbar sx={{
             ...toolbarStyles.root,
-            borderBottom: '1px dashed #919eab33',
+            borderBottom: '1px dashed var(--palette-text-disabled)33',
             mb: 1
         }}>
             <Box sx={{ display: 'flex', gap: 2, w: 'full', alignItems: 'center', width: '100%' }}>
@@ -29,3 +29,7 @@ export const RoleToolbar = () => {
         </Toolbar>
     );
 };
+
+
+
+

@@ -27,6 +27,7 @@ import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { getProductAttributeTheme } from "./configs/theme";
 import { prefixAdmin } from "../../constants/routes";
 import { toast } from "react-toastify";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 import { z } from "zod";
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -147,7 +148,7 @@ export const ProductAttributeEditPage = () => {
 
     return (
         <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
+            <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
                     <Title title="Chỉnh sửa thuộc tính" />
                     <Breadcrumb
@@ -162,8 +163,8 @@ export const ProductAttributeEditPage = () => {
             <ThemeProvider theme={localTheme}>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <Stack sx={{
-                        margin: "0px 120px",
-                        gap: "40px"
+                        margin: "0px calc(15 * var(--spacing))",
+                        gap: "calc(5 * var(--spacing))"
                     }}>
                         {/* Thông tin cơ bản */}
                         <CollapsibleCard
@@ -172,12 +173,12 @@ export const ProductAttributeEditPage = () => {
                             expanded={expandedDetail}
                             onToggle={toggle(setExpandedDetail)}
                         >
-                            <Stack p="24px" gap="24px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Box
                                     sx={{
                                         display: "grid",
                                         gridTemplateColumns: "repeat(2, 1fr)",
-                                        gap: "24px 16px",
+                                        gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))",
                                     }}
                                 >
                                     <Controller
@@ -213,7 +214,7 @@ export const ProductAttributeEditPage = () => {
                                                         <MenuItem
                                                             key={type.value}
                                                             value={type.value}
-                                                            sx={{ fontSize: '1.4rem' }}
+                                                            sx={{ fontSize: '0.875rem' }}
                                                         >
                                                             {type.label}
                                                         </MenuItem>
@@ -223,7 +224,7 @@ export const ProductAttributeEditPage = () => {
                                                     <Typography
                                                         sx={{
                                                             color: '#d32f2f',
-                                                            fontSize: '1.2rem',
+                                                            fontSize: '0.75rem',
                                                             mt: 0.5,
                                                             ml: 1.75
                                                         }}
@@ -245,14 +246,14 @@ export const ProductAttributeEditPage = () => {
                             expanded={expandedValues}
                             onToggle={toggle(setExpandedValues)}
                         >
-                            <Stack p="24px" gap="16px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(2 * var(--spacing))">
                                 {fields.map((field, index) => (
                                     <Box
                                         key={field.id}
                                         sx={{
                                             display: "flex",
                                             alignItems: "center",
-                                            gap: "16px",
+                                            gap: "calc(2 * var(--spacing))",
                                         }}
                                     >
                                         <Controller
@@ -296,9 +297,9 @@ export const ProductAttributeEditPage = () => {
                                                                 sx={{
                                                                     width: 40,
                                                                     height: 40,
-                                                                    borderRadius: '8px',
-                                                                    border: '1px solid #919eab33',
-                                                                    backgroundColor: isValidHex ? colorValue : '#f4f6f8',
+                                                                    borderRadius: "var(--shape-borderRadius)",
+                                                                    border: '1px solid var(--palette-text-disabled)33',
+                                                                    backgroundColor: isValidHex ? colorValue : 'var(--palette-background-neutral)',
                                                                     display: 'flex',
                                                                     alignItems: 'center',
                                                                     justifyContent: 'center',
@@ -349,7 +350,7 @@ export const ProductAttributeEditPage = () => {
                                             onClick={() => remove(index)}
                                             disabled={fields.length === 1}
                                             sx={{
-                                                color: fields.length === 1 ? '#919EAB' : '#FF5630',
+                                                color: fields.length === 1 ? 'var(--palette-text-disabled)' : 'var(--palette-error-main)',
                                                 '&:hover': {
                                                     backgroundColor: 'rgba(255, 86, 48, 0.08)'
                                                 }
@@ -366,8 +367,8 @@ export const ProductAttributeEditPage = () => {
                                     startIcon={<AddIcon />}
                                     sx={{
                                         alignSelf: 'flex-start',
-                                        color: '#00A76F',
-                                        fontSize: '1.4rem',
+                                        color: 'var(--palette-primary-main)',
+                                        fontSize: '0.875rem',
                                         fontWeight: 600,
                                         textTransform: 'none',
                                         '&:hover': {
@@ -382,29 +383,14 @@ export const ProductAttributeEditPage = () => {
 
 
                         {/* Submit button */}
-                        <Box gap="24px" sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
-                            <Button
+                        <Box gap="calc(3 * var(--spacing))" sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+                            <LoadingButton
                                 type="submit"
-                                disabled={isPending}
-                                sx={{
-                                    background: '#1C252E',
-                                    minHeight: "4.8rem",
-                                    minWidth: "6.4rem",
-                                    fontWeight: 700,
-                                    fontSize: "1.4rem",
-                                    padding: "8px 22px",
-                                    borderRadius: "8px",
-                                    textTransform: "none",
-                                    boxShadow: "none",
-                                    "&:hover": {
-                                        background: "#454F5B",
-                                        boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
-                                    }
-                                }}
-                                variant="contained"
-                            >
-                                {isPending ? "Đang cập nhật..." : "Cập nhật thuộc tính"}
-                            </Button>
+                                loading={isPending}
+                                label="Cập nhật thuộc tính"
+                                loadingLabel="Đang cập nhật..."
+                                sx={{ minHeight: "3rem", minWidth: "4rem", padding: "8px 22px" }}
+                            />
                         </Box>
                     </Stack>
                 </form>
@@ -412,3 +398,7 @@ export const ProductAttributeEditPage = () => {
         </>
     )
 }
+
+
+
+

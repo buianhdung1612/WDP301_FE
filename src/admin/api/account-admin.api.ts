@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 const BASE_URL = "/api/v1/admin/account-admin";
 
 const withAuth = () => {
-    const token = Cookies.get("token");
+    const token = Cookies.get("tokenAdmin");
     return {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -14,6 +14,11 @@ const withAuth = () => {
 
 export const getAccounts = async (params?: any) => {
     const response = await apiApp.get(`${BASE_URL}/list`, { ...withAuth(), params });
+    return response.data;
+};
+
+export const getStaffByService = async (serviceId: string) => {
+    const response = await apiApp.get(`${BASE_URL}/staff-by-service`, { ...withAuth(), params: { serviceId } });
     return response.data;
 };
 

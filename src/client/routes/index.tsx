@@ -43,7 +43,14 @@ export const ClientRoutes: RouteObject[] = [
     { path: "/cart", element: <CartPage /> },
     { path: "/checkout", element: <CheckoutPage /> },
     { path: "/order/success", element: <CheckSuccessPage /> },
-    { path: "/dich-vu", element: <ServicePage /> },
+    { path: "/services", element: <ServicePage /> },
+    {
+        element: <AuthGuard />,
+        children: [
+            { path: "/services/booking", element: <BookingPage /> },
+            { path: "/services/booking/success", element: <BookingSuccessPage /> },
+        ]
+    },
     { path: "/auth/register", element: <RegisterPage /> },
     { path: "/auth/login", element: <LoginPage /> },
     { path: "/auth/forgot-password", element: <ForgotPasswordPage /> },

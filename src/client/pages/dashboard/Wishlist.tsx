@@ -82,13 +82,13 @@ export const WishlistPage = () => {
                 className="bg-top"
             />
 
-            <div className="mt-[-150px] mb-[100px] w-[1600px] mx-auto flex items-stretch">
+            <div className="mt-[-150px] mb-[100px] app-container flex items-stretch">
                 <div className="w-[25%] px-[12px] flex">
                     <Sidebar />
                 </div>
                 <div className="w-[75%] px-[12px]">
                     <div className="mt-[100px] p-[35px] bg-white shadow-[0px_8px_24px_#959da533] rounded-[12px]">
-                        <h3 className="text-[2.4rem] font-[600] text-client-secondary mb-[30px] flex items-center justify-between">
+                        <h3 className="text-[15px] font-[600] text-client-secondary mb-[30px] flex items-center justify-between">
                             Sản phẩm yêu thích
                         </h3>
 
@@ -100,9 +100,9 @@ export const WishlistPage = () => {
 
                         {/* Pagination */}
                         <ul className="flex items-center mt-[50px] justify-center gap-[11px]">
-                            <li className="flex items-center cursor-pointer justify-center bg-client-secondary text-white rounded-full w-[4.5rem] h-[4.5rem]">1</li>
-                            <li className="flex items-center cursor-pointer justify-center bg-client-primary hover:bg-client-secondary transition-default text-white rounded-full w-[4.5rem] h-[4.5rem]">2</li>
-                            <div className="w-[4.5rem] h-[4.5rem] rounded-full bg-client-primary hover:bg-client-secondary cursor-pointer transition-default flex items-center justify-center next-button"></div>
+                            <li className="flex items-center cursor-pointer justify-center bg-client-secondary text-white rounded-full w-[45px] h-[45px]">1</li>
+                            <li className="flex items-center cursor-pointer justify-center bg-client-primary hover:bg-client-secondary transition-default text-white rounded-full w-[45px] h-[45px]">2</li>
+                            <div className="w-[45px] h-[45px] rounded-full bg-client-primary hover:bg-client-secondary cursor-pointer transition-default flex items-center justify-center next-button"></div>
                         </ul>
                     </div>
                 </div>

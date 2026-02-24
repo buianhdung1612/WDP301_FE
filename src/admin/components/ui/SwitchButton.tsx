@@ -48,8 +48,8 @@ export const SwitchButton = <T extends FieldValues>({
                                 '& .MuiSwitch-thumb': {
                                     boxShadow: "0px 2px 1px -1px rgba(145 158 171 / 20%),0px 1px 1px 0px rgba(145 158 171 / 14%),0px 1px 3px 0px rgba(145 158 171 / 12%)",
                                     backgroundColor: "#fff",
-                                    width: "1.4rem",
-                                    height: "1.4rem",
+                                    width: "0.875rem",
+                                    height: "0.875rem",
                                 },
                                 '& .MuiSwitch-track': {
                                     height: "20px",
@@ -61,7 +61,7 @@ export const SwitchButton = <T extends FieldValues>({
                         />
                     }
                     label={
-                        <Typography variant="body1" sx={{ fontSize: "1.4rem", color: "#1C252E", mt: "5px" }}>
+                        <Typography variant="body1" sx={{ fontSize: "0.875rem", color: "#1C252E", mt: "5px" }}>
                             {field.value === checkedValue ? 'Hoạt động' : 'Dừng hoạt động'}
                         </Typography>
                     }

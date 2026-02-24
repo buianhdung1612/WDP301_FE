@@ -102,15 +102,15 @@ export const AgeRangeFormDialog = ({ open, onClose, editId }: AgeRangeFormDialog
             fullWidth
             slotProps={{
                 paper: {
-                    sx: { borderRadius: "16px", padding: "8px" }
+                    sx: { borderRadius: "var(--shape-borderRadius-lg)", padding: "8px" }
                 }
             }}
             sx={{ zIndex: 1400 }} // Higher than list dialog
         >
-            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1.8rem', fontWeight: 700 }}>
+            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1.125rem', fontWeight: 700 }}>
                 {isEdit ? t("admin.product.age_range.edit_title") : t("admin.product.age_range.create_title")}
                 <Tooltip title={t("admin.common.close")}>
-                    <IconButton onClick={onClose} size="small" sx={{ '&:hover': { backgroundColor: '#f4f6f8' } }}>
+                    <IconButton onClick={onClose} size="small" sx={{ '&:hover': { backgroundColor: 'var(--palette-background-neutral)' } }}>
                         <CloseIcon />
                     </IconButton>
                 </Tooltip>
@@ -161,16 +161,16 @@ export const AgeRangeFormDialog = ({ open, onClose, editId }: AgeRangeFormDialog
                         form="age-range-form"
                         disabled={isSubmitting}
                         sx={{
-                            background: '#1C252E',
+                            background: 'var(--palette-text-primary)',
                             fontWeight: 700,
-                            fontSize: '1.4rem',
+                            fontSize: '0.875rem',
                             padding: "8px 24px",
-                            borderRadius: '8px',
+                            borderRadius: "var(--shape-borderRadius)",
                             textTransform: 'none',
                             boxShadow: "none",
                             '&:hover': {
-                                background: '#454F5B',
-                                boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
+                                background: "var(--palette-grey-700)",
+                                boxShadow: "var(--customShadows-z8)"
                             }
                         }}
                     >
@@ -181,3 +181,7 @@ export const AgeRangeFormDialog = ({ open, onClose, editId }: AgeRangeFormDialog
         </Dialog>
     );
 };
+
+
+
+

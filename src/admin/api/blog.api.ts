@@ -6,7 +6,7 @@ const BASE_URL = '/api/v1/admin/article';
 
 /** Header auth dùng chung */
 const withAuth = () => {
-    const token = Cookies.get('token');
+    const token = Cookies.get("tokenAdmin");
 
     return {
         headers: {
@@ -70,16 +70,6 @@ const generateSlug = (title: string): string => {
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-')
         .trim();
-};
-
-/** Map status từ FE (uppercase) sang BE (lowercase) */
-const mapStatusToBackend = (status: string): string => {
-    const statusMap: Record<string, string> = {
-        'DRAFT': 'draft',
-        'PUBLISHED': 'published',
-        'ARCHIVED': 'archived',
-    };
-    return statusMap[status] || 'draft';
 };
 
 /** Map status từ BE (lowercase) sang FE (uppercase) */

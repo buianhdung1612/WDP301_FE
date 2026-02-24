@@ -60,7 +60,7 @@ const Sidebar = () => {
                     <div className="px-[40px] pt-[40px] pb-[30px] bg-white text-center">
                         <div className="mx-auto w-[150px] h-[150px] shadow-[0px_7px_29px_0px_#64646f33] border-[3px] border-white rounded-full relative group">
                             <img src={user.avatar || "https://i.imgur.com/CgtIu6c.jpeg"} alt="" className="w-full h-full object-cover rounded-full" />
-                            <label htmlFor="profile_photo" className="hover:bg-client-primary hover:text-white cursor-pointer transition-default w-[30px] h-[30px] text-[1.2rem] bg-white flex justify-center items-center absolute bottom-[5px] right-[5px] text-[#333] border-[#dddddd] rounded-full z-10">
+                            <label htmlFor="profile_photo" className="hover:bg-client-primary hover:text-white cursor-pointer transition-default w-[30px] h-[30px] text-[12px] bg-white flex justify-center items-center absolute bottom-[5px] right-[5px] text-[#333] border-[#dddddd] rounded-full z-10">
                                 <Camera />
                             </label>
                             {uploading && (
@@ -77,7 +77,7 @@ const Sidebar = () => {
                                 disabled={uploading}
                             />
                         </div>
-                        <h3 className="text-[2.2rem] mt-[22px] mb-[5px] font-[600] text-client-secondary uppercase leading-tight">{user.fullName}</h3>
+                        <h3 className="text-[22px] mt-[22px] mb-[5px] font-[600] text-client-secondary uppercase leading-tight">{user.fullName}</h3>
                         <p className="text-[#7d7b7b] font-[500]">{user.email}</p>
                     </div>
 
@@ -142,9 +142,9 @@ const Sidebar = () => {
                         <li>
                             <button
                                 onClick={handleLogout}
-                                className="inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] text-[#7d7b7b] hover:text-client-primary transition-default w-full"
+                                className="inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] text-[#7d7b7b] hover:text-client-primary transition-default w-full"
                             >
-                                <LogOut className="w-[2rem] h-[2rem]" />
+                                <LogOut className="w-[20px] h-[20px]" />
                                 Đăng xuất
                             </button>
                         </li>

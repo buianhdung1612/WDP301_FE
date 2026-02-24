@@ -8,9 +8,11 @@ import { useTranslation } from 'react-i18next';
 interface SearchProps {
     maxWidth?: string | number;
     placeholder?: string;
+    value?: string;
+    onChange?: (value: string) => void;
 }
 
-export const Search = ({ maxWidth = 260, placeholder }: SearchProps) => {
+export const Search = ({ maxWidth = 260, placeholder, value, onChange }: SearchProps) => {
     const { t } = useTranslation();
     const displayPlaceholder = placeholder || t("admin.common.search");
 
@@ -20,6 +22,8 @@ export const Search = ({ maxWidth = 260, placeholder }: SearchProps) => {
                 fullWidth
                 variant="outlined"
                 placeholder={displayPlaceholder}
+                value={value || ''}
+                onChange={(e) => onChange?.(e.target.value)}
                 slotProps={{
                     input: {
                         startAdornment: (
@@ -32,9 +36,27 @@ export const Search = ({ maxWidth = 260, placeholder }: SearchProps) => {
                 sx={{
                     '& .MuiOutlinedInput-root': {
                         borderRadius: '8px',
-                        fontSize: "1.6rem",
+                        fontSize: "0.9375rem",
                         paddingLeft: "14px",
                         paddingRight: "14px",
+                        bgcolor: 'white',
+                        '& fieldset': {
+                            borderColor: 'rgba(145, 158, 171, 0.2)',
+                        },
+                        '&:hover fieldset': {
+                            borderColor: 'rgba(145, 158, 171, 0.4)',
+                        },
+                        '&.Mui-focused fieldset': {
+                            borderColor: '#1C252E',
+                            borderWidth: '1px',
+                        },
+                    },
+                    '& .MuiOutlinedInput-input': {
+                        py: '16px',
+                        '&::placeholder': {
+                            color: '#919EAB',
+                            opacity: 1,
+                        },
                     },
                 }}
             />

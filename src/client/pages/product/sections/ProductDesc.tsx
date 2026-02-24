@@ -42,7 +42,7 @@ export const ProductDesc = ({ description, content }: ProductDescProps) => {
 
     return (
         <div className="px-[30px] pt-[80px] mb-[50px]">
-            <div className="app-container p-[40px] rounded-[3rem] bg-[#e67e201a]">
+            <div className="app-container p-[40px] rounded-[30px] bg-[#e67e201a]">
                 <ul className="flex items-center gap-[45px] border-b border-[#d7d7d7]">
                     {productTabsData.map((tab) => {
                         const isActive = tab.key === activeTabKey;
@@ -51,7 +51,7 @@ export const ProductDesc = ({ description, content }: ProductDescProps) => {
                                 key={tab.key}
                                 className={`
                                     relative 
-                                    text-[2.1rem] 
+                                    text-[21px] 
                                     font-secondary 
                                     font-[900]
                                     px-[10px] 
@@ -80,7 +80,7 @@ export const ProductDesc = ({ description, content }: ProductDescProps) => {
                     })}
                 </ul>
 
-                <div className="pt-[40px] text-[1.6rem] text-[#505050] min-h-[200px] leading-relaxed">
+                <div className="pt-[40px] text-[10px] text-[#505050] min-h-[200px] leading-relaxed">
                     <AnimatePresence mode="wait">
                         {activeTab && (
                             <motion.div

@@ -24,7 +24,7 @@ export const RenderTitleCell = (params: GridRenderCellParams) => {
                     sx={{
                         color: COLORS.primary,
                         fontWeight: 600,
-                        fontSize: '1.3rem',
+                        fontSize: '0.8125rem',
                     }}
                 >
                     {name}
@@ -47,7 +47,7 @@ export const RenderCategoryCell = (params: GridRenderCellParams) => {
     const categoryName = typeof category === 'object' ? category?.name : "Không xác định";
 
     return (
-        <span style={{ fontSize: '1.3rem', color: '#637381' }}>
+        <span style={{ fontSize: '0.8125rem', color: 'var(--palette-text-secondary)' }}>
             {categoryName}
         </span>
     );
@@ -56,12 +56,12 @@ export const RenderCategoryCell = (params: GridRenderCellParams) => {
 export const RenderStatusCell = (params: GridRenderCellParams) => {
     const status = params.row.status;
     const label = status === 'active' ? "Hoạt động" : "Tạm dừng";
-    const bg = status === 'active' ? "#00B8D929" : "#EF444429";
-    const text = status === 'active' ? "#006C9C" : "#B91C1C";
+    const bg = status === 'active' ? "var(--palette-info-lighter)" : "var(--palette-error-lighter)";
+    const text = status === 'active' ? "var(--palette-info-dark)" : "var(--palette-error-dark)";
 
     return (
         <span
-            className="inline-flex items-center justify-center min-w-[2.4rem] h-[2.4rem] text-[1.2rem] px-[6px] font-[700] rounded-[6px]"
+            className="inline-flex items-center justify-center min-w-[1.5rem] h-[1.5rem] text-[0.75rem] px-[6px] font-[700] rounded-[6px]"
             style={{ backgroundColor: bg, color: text }}
         >
             {label}
@@ -73,7 +73,7 @@ export const RenderPricingCell = (params: GridRenderCellParams) => {
     const { pricingType, basePrice } = params.row;
     if (pricingType === 'fixed') {
         return (
-            <span style={{ fontSize: '1.3rem' }}>
+            <span style={{ fontSize: '0.8125rem' }}>
                 {basePrice?.toLocaleString('vi-VN')} VNĐ
             </span>
         );
@@ -86,7 +86,7 @@ export const RenderPetTypesCell = (params: GridRenderCellParams) => {
     return (
         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
             {petTypes.map((type: string) => (
-                <Chip key={type} label={type} size="small" variant="outlined" sx={{ fontSize: '1.1rem' }} />
+                <Chip key={type} label={type} size="small" variant="outlined" sx={{ fontSize: '0.6875rem' }} />
             ))}
         </Box>
     );
@@ -132,9 +132,9 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                 {...({
                     sx: {
                         '& .MuiTypography-root': {
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             fontWeight: "600",
-                            color: "#FF5630"
+                            color: "var(--palette-error-main)"
                         },
                     },
                 } as any)}
@@ -143,3 +143,8 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
         </GridActionsCell>
     );
 }
+
+
+
+
+

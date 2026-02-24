@@ -1,4 +1,4 @@
-import { Box, Stack, TextField, ThemeProvider, useTheme, Button, MenuItem, Select, FormControl, InputLabel, FormControlLabel, Switch, Typography } from "@mui/material"
+import { Box, Stack, TextField, ThemeProvider, useTheme, MenuItem, Select, FormControl, InputLabel } from "@mui/material"
 import { Breadcrumb } from "../../components/ui/Breadcrumb"
 import { Title } from "../../components/ui/Title"
 import { useState, type Dispatch, type SetStateAction } from "react";
@@ -6,10 +6,11 @@ import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
 import { useCreateCoupon } from "./hooks/useCoupon";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
-import { createCouponSchema, CreateCouponFormValues } from "../../schemas/coupon.schema";
+import { createCouponSchema } from "../../schemas/coupon.schema";
 import { getCouponTheme } from "./configs/theme";
 import { prefixAdmin } from "../../constants/routes";
 import { toast } from "react-toastify";
+import { LoadingButton } from "../../components/ui/LoadingButton";
 
 export const CouponCreatePage = () => {
     const [expandedDetail, setExpandedDetail] = useState(true);
@@ -24,7 +25,7 @@ export const CouponCreatePage = () => {
         handleSubmit,
         reset,
         watch
-    } = useForm<CreateCouponFormValues>({
+    } = useForm<any>({
         resolver: zodResolver(createCouponSchema),
         defaultValues: {
             code: "",
@@ -46,7 +47,7 @@ export const CouponCreatePage = () => {
 
     const { mutate: create, isPending } = useCreateCoupon();
 
-    const onSubmit = (data: CreateCouponFormValues) => {
+    const onSubmit = (data: any) => {
         create(data, {
             onSuccess: (response) => {
                 if (response.success) {
@@ -77,7 +78,7 @@ export const CouponCreatePage = () => {
 
     return (
         <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
+            <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
                     <Title title="Tạo mới mã giảm giá" />
                     <Breadcrumb
@@ -92,8 +93,8 @@ export const CouponCreatePage = () => {
             <ThemeProvider theme={localTheme}>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <Stack sx={{
-                        margin: "0px 120px",
-                        gap: "40px"
+                        margin: "0px calc(15 * var(--spacing))",
+                        gap: "calc(5 * var(--spacing))"
                     }}>
                         <CollapsibleCard
                             title="Thông tin cơ bản"
@@ -101,12 +102,12 @@ export const CouponCreatePage = () => {
                             expanded={expandedDetail}
                             onToggle={toggle(setExpandedDetail)}
                         >
-                            <Stack p="24px" gap="24px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Box
                                     sx={{
                                         display: "grid",
                                         gridTemplateColumns: "repeat(2, 1fr)",
-                                        gap: "24px 16px",
+                                        gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))",
                                     }}
                                 >
                                     <Controller
@@ -156,12 +157,12 @@ export const CouponCreatePage = () => {
                             expanded={true}
                             onToggle={() => { }}
                         >
-                            <Stack p="24px" gap="24px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Box
                                     sx={{
                                         display: "grid",
                                         gridTemplateColumns: "repeat(2, 1fr)",
-                                        gap: "24px 16px",
+                                        gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))",
                                     }}
                                 >
                                     <Controller
@@ -246,12 +247,12 @@ export const CouponCreatePage = () => {
                             expanded={true}
                             onToggle={() => { }}
                         >
-                            <Stack p="24px" gap="24px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Box
                                     sx={{
                                         display: "grid",
                                         gridTemplateColumns: "repeat(2, 1fr)",
-                                        gap: "24px 16px",
+                                        gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))",
                                     }}
                                 >
                                     <Controller
@@ -280,7 +281,7 @@ export const CouponCreatePage = () => {
                             </Stack>
                         </CollapsibleCard>
 
-                        <Box gap="24px" sx={{ display: "flex", alignItems: "center" }}>
+                        <Box gap="calc(3 * var(--spacing))" sx={{ display: "flex", alignItems: "center" }}>
                             <Controller
                                 name="status"
                                 control={control}
@@ -298,28 +299,13 @@ export const CouponCreatePage = () => {
                                     </TextField>
                                 )}
                             />
-                            <Button
+                            <LoadingButton
                                 type="submit"
-                                disabled={isPending}
-                                sx={{
-                                    background: '#1C252E',
-                                    minHeight: "4.8rem",
-                                    minWidth: "6.4rem",
-                                    fontWeight: 700,
-                                    fontSize: "1.4rem",
-                                    padding: "8px 16px",
-                                    borderRadius: "8px",
-                                    textTransform: "none",
-                                    boxShadow: "none",
-                                    "&:hover": {
-                                        background: "#454F5B",
-                                        boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
-                                    }
-                                }}
-                                variant="contained"
-                            >
-                                {isPending ? 'Đang tạo...' : 'Tạo mã giảm giá'}
-                            </Button>
+                                loading={isPending}
+                                label="Tạo mã giảm giá"
+                                loadingLabel="Đang tạo..."
+                                sx={{ minHeight: "3rem", minWidth: "4rem" }}
+                            />
                         </Box>
                     </Stack>
                 </form>
@@ -328,3 +314,7 @@ export const CouponCreatePage = () => {
         </>
     )
 }
+
+
+
+

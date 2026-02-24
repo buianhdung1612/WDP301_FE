@@ -57,36 +57,36 @@ export const ResetPasswordPage = () => {
             />
             <div className="app-container">
                 <form className="p-[10px] mb-[300px] 2xl:mb-[230px] flex flex-col gap-[20px]" onSubmit={handleSubmit(onSubmit)}>
-                    <p className="text-client-text text-[1.4rem]">Nhập mật khẩu mới cho tài khoản của bạn.</p>
+                    <p className="text-client-text text-[14px]">Nhập mật khẩu mới cho tài khoản của bạn.</p>
 
                     <div className="flex flex-col gap-[5px] w-[50%]">
-                        <label htmlFor="password" align-items="center" className="block text-[1.4rem] font-[600] text-client-text">Mật khẩu mới <span className="text-[#a00]">*</span></label>
+                        <label htmlFor="password" align-items="center" className="block text-[14px] font-[600] text-client-text">Mật khẩu mới <span className="text-[#a00]">*</span></label>
                         <input
                             id="password"
                             type="password"
                             {...register("password")}
-                            className={`block w-full py-[16px] px-[32px] border bg-white text-[#000] outline-none rounded-[40px] text-[1.5rem] ${errors.password ? "border-red-500" : "border-[#200707cc]"}`}
+                            className={`block w-full py-[16px] px-[32px] border bg-white text-[#000] outline-none rounded-[40px] text-[15px] ${errors.password ? "border-red-500" : "border-[#200707cc]"}`}
                             placeholder="********"
                         />
-                        {errors.password && <span className="text-red-500 text-[1.3rem] ml-[20px]">{errors.password.message}</span>}
+                        {errors.password && <span className="text-red-500 text-[13px] ml-[20px]">{errors.password.message}</span>}
                     </div>
 
                     <div className="flex flex-col gap-[5px] w-[50%]">
-                        <label htmlFor="confirmPassword" className="block text-[1.4rem] font-[600] text-client-text">Xác nhận mật khẩu <span className="text-[#a00]">*</span></label>
+                        <label htmlFor="confirmPassword" className="block text-[14px] font-[600] text-client-text">Xác nhận mật khẩu <span className="text-[#a00]">*</span></label>
                         <input
                             id="confirmPassword"
                             type="password"
                             {...register("confirmPassword")}
-                            className={`block w-full py-[16px] px-[32px] border bg-white text-[#000] outline-none rounded-[40px] text-[1.5rem] ${errors.confirmPassword ? "border-red-500" : "border-[#200707cc]"}`}
+                            className={`block w-full py-[16px] px-[32px] border bg-white text-[#000] outline-none rounded-[40px] text-[15px] ${errors.confirmPassword ? "border-red-500" : "border-[#200707cc]"}`}
                             placeholder="********"
                         />
-                        {errors.confirmPassword && <span className="text-red-500 text-[1.3rem] ml-[20px]">{errors.confirmPassword.message}</span>}
+                        {errors.confirmPassword && <span className="text-red-500 text-[13px] ml-[20px]">{errors.confirmPassword.message}</span>}
                     </div>
 
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="mt-[10px] w-fit text-white bg-client-primary hover:bg-client-secondary py-[16px] px-[50px] cursor-pointer text-[1.5rem] font-secondary rounded-[40px] transition-default disabled:opacity-50"
+                        className="mt-[10px] w-fit text-white bg-client-primary hover:bg-client-secondary py-[16px] px-[50px] cursor-pointer text-[15px] font-secondary rounded-[40px] transition-default disabled:opacity-50"
                     >
                         {isSubmitting ? "Đang cập nhật..." : "Đổi mật khẩu"}
                     </button>

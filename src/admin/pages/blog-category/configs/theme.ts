@@ -7,22 +7,22 @@ export const getBlogCategoryTheme = (outerTheme: Theme) => createTheme(outerThem
                 root: {
                     backgroundImage: "none !important",
                     backdropFilter: "none !important",
-                    backgroundColor: "#fff !important",
-                    boxShadow: "0 0 2px 0 #919eab33, 0 12px 24px -4px #919eab1f",
-                    borderRadius: "16px",
-                    color: "#1C252E",
+                    backgroundColor: "var(--palette-background-paper) !important",
+                    boxShadow: "var(--customShadows-card)",
+                    borderRadius: "var(--shape-borderRadius-lg)",
+                    color: "var(--palette-text-primary)",
                 },
             }
         },
         MuiFormLabel: {
             styleOverrides: {
                 root: {
-                    color: "#919EAB",
-                    fontSize: "1.5rem",
+                    color: "var(--palette-text-disabled)",
+                    fontSize: "0.9375rem",
                     '&.Mui-focused': {
-                        color: "#1C252E",
+                        color: "var(--palette-text-primary)",
                         fontWeight: "600",
-                        fontSize: "1.5rem"
+                        fontSize: "0.9375rem"
                     }
                 }
             }
@@ -30,18 +30,18 @@ export const getBlogCategoryTheme = (outerTheme: Theme) => createTheme(outerThem
         MuiOutlinedInput: {
             styleOverrides: {
                 root: {
-                    color: "#1C252E",
-                    borderRadius: "8px",
-                    fontSize: "1.5rem",
+                    color: "var(--palette-text-primary)",
+                    borderRadius: "var(--shape-borderRadius)",
+                    fontSize: "0.9375rem",
                     '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: "#919eab33",
+                        borderColor: "var(--palette-text-disabled)33",
                         transition: 'border-color 0.2s',
                     },
                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: "#1C252E",
+                        borderColor: "var(--palette-text-primary)",
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: "#1C252E",
+                        borderColor: "var(--palette-text-primary)",
                         borderWidth: "2px",
                     },
 
@@ -57,13 +57,17 @@ export const getBlogCategoryTheme = (outerTheme: Theme) => createTheme(outerThem
                     padding: 0,
                 },
                 option: {
-                    fontSize: '1.4rem',
+                    fontSize: '0.875rem',
                     padding: '6px',
                     marginBottom: '4px',
-                    borderRadius: '6px',
+                    borderRadius: "var(--shape-borderRadius-sm)",
 
                 },
             },
         },
     }
 });
+
+
+
+

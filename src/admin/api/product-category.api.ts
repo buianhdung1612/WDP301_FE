@@ -7,7 +7,7 @@ const BASE_URL = '/api/v1/admin/product/category';
 
 /** Header auth dùng chung cho product-categories */
 const withAuth = () => {
-    const token = Cookies.get('token');
+    const token = Cookies.get("tokenAdmin");
 
     return {
         headers: {

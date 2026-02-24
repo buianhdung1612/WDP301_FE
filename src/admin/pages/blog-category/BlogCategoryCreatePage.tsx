@@ -1,4 +1,5 @@
-import { Box, Stack, TextField, ThemeProvider, useTheme, Button } from "@mui/material"
+import { Box, Stack, TextField, ThemeProvider, useTheme } from "@mui/material"
+import { LoadingButton } from "../../components/ui/LoadingButton";
 import { Breadcrumb } from "../../components/ui/Breadcrumb"
 import { Title } from "../../components/ui/Title"
 import { Tiptap } from "../../components/layouts/titap/Tiptap"
@@ -73,7 +74,7 @@ export const BlogCategoryCreatePage = () => {
 
     return (
         <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
+            <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
                     <Title title="Tạo mới danh mục bài viết" />
                     <Breadcrumb
@@ -88,8 +89,8 @@ export const BlogCategoryCreatePage = () => {
             <ThemeProvider theme={localTheme}>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <Stack sx={{
-                        margin: "0px 120px",
-                        gap: "40px"
+                        margin: "0px calc(15 * var(--spacing))",
+                        gap: "calc(5 * var(--spacing))"
                     }}>
                         <CollapsibleCard
                             title="Chi tiết"
@@ -97,12 +98,12 @@ export const BlogCategoryCreatePage = () => {
                             expanded={expandedDetail}
                             onToggle={toggle(setExpandedDetail)}
                         >
-                            <Stack p="24px" gap="24px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Box
                                     sx={{
                                         display: "grid",
                                         gridTemplateColumns: "repeat(2, 1fr)",
-                                        gap: "24px 16px",
+                                        gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))",
                                     }}
                                 >
                                     <Controller
@@ -139,35 +140,19 @@ export const BlogCategoryCreatePage = () => {
                                 />
                             </Stack>
                         </CollapsibleCard>
-                        <Box gap="24px" sx={{ display: "flex", alignItems: "center" }}>
+                        <Box gap="calc(3 * var(--spacing))" sx={{ display: "flex", alignItems: "center" }}>
                             <SwitchButton
                                 control={control}
                                 name="status"
                                 checkedValue="active"
                                 uncheckedValue="inactive"
                             />
-                            <Button
+                            <LoadingButton
                                 type="submit"
-                                disabled={isPending}
-                                sx={{
-                                    background: '#1C252E',
-                                    minHeight: "4.8rem",
-                                    minWidth: "6.4rem",
-                                    fontWeight: 700,
-                                    fontSize: "1.4rem",
-                                    padding: "8px 16px",
-                                    borderRadius: "8px",
-                                    textTransform: "none",
-                                    boxShadow: "none",
-                                    "&:hover": {
-                                        background: "#454F5B",
-                                        boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
-                                    }
-                                }}
-                                variant="contained"
-                            >
-                                {isPending ? 'Đang tạo...' : 'Tạo danh mục'}
-                            </Button>
+                                loading={isPending}
+                                label="Tạo danh mục"
+                                loadingLabel="Đang tạo..."
+                            />
                         </Box>
                     </Stack>
                 </form>
@@ -175,3 +160,7 @@ export const BlogCategoryCreatePage = () => {
         </>
     );
 };
+
+
+
+

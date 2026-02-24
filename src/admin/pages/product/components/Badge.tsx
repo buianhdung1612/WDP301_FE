@@ -11,7 +11,7 @@ interface BadgeProps {
 export const Badge = ({ label, backgroundColor, textColor, icon }: BadgeProps) => {
     return (
         <span
-            className="inline-flex items-center justify-center leading-1.5 min-w-[2.4rem] h-[2.4rem] text-[1.2rem] px-[6px] font-[700] rounded-[6px]"
+            className="inline-flex items-center justify-center leading-1.5 min-w-[1.5rem] h-[1.5rem] text-[0.75rem] px-[6px] font-[700] rounded-[6px]"
             style={{
                 backgroundColor,
                 color: textColor,
@@ -67,8 +67,8 @@ export const StockProgress = ({ stock, maxStock = 20 }: StockProgressProps) => {
                 justifyContent: 'center',
                 height: '100%',
                 width: '100%',
-                fontSize: '1.2rem',
-                color: '#637381',
+                fontSize: '0.75rem',
+                color: 'var(--palette-text-secondary)',
             }}
         >
             <LinearProgress
@@ -77,12 +77,12 @@ export const StockProgress = ({ stock, maxStock = 20 }: StockProgressProps) => {
                 sx={{
                     width: '80px',
                     height: '6px',
-                    borderRadius: '16px',
+                    borderRadius: "var(--shape-borderRadius-lg)",
                     marginBottom: '8px',
                     backgroundColor: status.bgColor,
                     '& .MuiLinearProgress-bar': {
                         backgroundColor: status.color,
-                        borderRadius: '16px',
+                        borderRadius: "var(--shape-borderRadius-lg)",
                     },
                 }}
             />
@@ -90,3 +90,7 @@ export const StockProgress = ({ stock, maxStock = 20 }: StockProgressProps) => {
         </Box>
     );
 };
+
+
+
+

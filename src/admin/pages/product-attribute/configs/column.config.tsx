@@ -20,8 +20,8 @@ export const RenderNameCell = (params: GridRenderCellParams) => {
             sx={{
                 display: 'flex',
                 alignItems: 'center',
-                py: "16px",
-                gap: "16px",
+                py: "calc(2 * var(--spacing))",
+                gap: "calc(2 * var(--spacing))",
                 width: "100%",
             }}>
             <Link
@@ -35,7 +35,7 @@ export const RenderNameCell = (params: GridRenderCellParams) => {
                 sx={{
                     color: COLORS.primary,
                     fontWeight: 600,
-                    fontSize: '1.4rem',
+                    fontSize: '0.875rem',
                     transition: 'color 0.2s',
                 }}
             >
@@ -53,8 +53,8 @@ export const RenderTypeCell = (params: GridRenderCellParams) => {
     return (
         <span
             style={{
-                fontSize: '1.4rem',
-                color: '#637381',
+                fontSize: '0.875rem',
+                color: 'var(--palette-text-secondary)',
             }}
         >
             {typeOption ? typeOption.label : type}
@@ -75,10 +75,10 @@ export const RenderOptionsCell = (params: GridRenderCellParams) => {
                     label={`${v.label}`}
                     size="small"
                     sx={{
-                        fontSize: '1.1rem',
+                        fontSize: '0.6875rem',
                         fontWeight: 600,
                         height: '24px',
-                        borderRadius: '6px',
+                        borderRadius: "var(--shape-borderRadius-sm)",
                         background: '#00B8D929',
                         color: '#006C9C',
                         border: 'none'
@@ -90,10 +90,10 @@ export const RenderOptionsCell = (params: GridRenderCellParams) => {
                     label={`+${options.length - 5}`}
                     size="small"
                     sx={{
-                        fontSize: '1.1rem',
+                        fontSize: '0.6875rem',
                         fontWeight: 600,
                         height: '24px',
-                        borderRadius: '6px',
+                        borderRadius: "var(--shape-borderRadius-sm)",
                         background: '#00B8D929',
                         color: '#006C9C',
                     }}
@@ -136,7 +136,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                 {...({
                     sx: {
                         '& .MuiTypography-root': {
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             fontWeight: "600"
                         },
                     },
@@ -150,9 +150,9 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                 {...({
                     sx: {
                         '& .MuiTypography-root': {
-                            fontSize: '1.3rem',
+                            fontSize: '0.8125rem',
                             fontWeight: "600",
-                            color: "#FF5630"
+                            color: "var(--palette-error-main)"
                         },
                     },
                 } as any)}
@@ -202,3 +202,7 @@ export const columnsInitialState = {
         paginationModel: { page: 0, pageSize: 10 },
     },
 };
+
+
+
+

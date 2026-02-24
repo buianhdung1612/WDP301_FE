@@ -7,7 +7,6 @@ import {
     deleteCategory,
     updateCategory
 } from '../../../api/service-category.api';
-import { ApiResponse } from '../../../config/type';
 
 export const useServiceCategories = () => {
     return useQuery({
@@ -76,3 +75,7 @@ export const useDeleteServiceCategory = () => {
         },
     });
 };
+
+
+
+

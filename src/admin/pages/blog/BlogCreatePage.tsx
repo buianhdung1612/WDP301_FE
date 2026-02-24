@@ -1,4 +1,5 @@
-import { Box, Stack, TextField, ThemeProvider, useTheme, Button, MenuItem, Select, FormControl, InputLabel, FormHelperText, createTheme } from "@mui/material"
+import { Box, Stack, TextField, ThemeProvider, useTheme, MenuItem, Select, FormControl, InputLabel, FormHelperText, createTheme } from "@mui/material"
+import { LoadingButton } from "../../components/ui/LoadingButton";
 import { useTranslation } from "react-i18next";
 import { Breadcrumb } from "../../components/ui/Breadcrumb"
 import { Title } from "../../components/ui/Title"
@@ -15,7 +16,6 @@ import { prefixAdmin } from "../../constants/routes"
 
 import { useNestedBlogCategories } from "../blog-category/hooks/useBlogCategory";
 import { CategoryTreeSelectGeneric } from "../../components/ui/CategoryTreeSelectGeneric";
-import { useBlogTags } from "./hooks/useBlog";
 
 export const BlogCreatePage = () => {
     const { t } = useTranslation();
@@ -33,10 +33,10 @@ export const BlogCreatePage = () => {
                     root: {
                         backgroundImage: "none !important",
                         backdropFilter: "none !important",
-                        backgroundColor: "#fff !important",
-                        boxShadow: "0 0 2px 0 #919eab33, 0 12px 24px -4px #919eab1f",
-                        borderRadius: "16px",
-                        color: "#1C252E",
+                        backgroundColor: "var(--palette-background-paper) !important",
+                        boxShadow: "var(--customShadows-card)",
+                        borderRadius: "var(--shape-borderRadius-lg)",
+                        color: "var(--palette-text-primary)",
                     },
                 }
             },
@@ -46,10 +46,10 @@ export const BlogCreatePage = () => {
                         padding: 0,
                     },
                     option: {
-                        fontSize: '1.4rem',
+                        fontSize: '0.875rem',
                         padding: '6px',
                         marginBottom: '4px',
-                        borderRadius: '6px',
+                        borderRadius: "var(--shape-borderRadius-sm)",
                     },
                 },
             },
@@ -57,7 +57,6 @@ export const BlogCreatePage = () => {
     });
 
     const { data: blogCategories = [] } = useNestedBlogCategories();
-    const { data: availableTags = [] } = useBlogTags();
     const { mutate: create, isPending } = useCreateBlog();
 
     const {
@@ -105,7 +104,7 @@ export const BlogCreatePage = () => {
 
     return (
         <>
-            <div className="mb-[40px] gap-[16px] flex items-start justify-end">
+            <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
                     <Title title={t("admin.blog.title.create")} />
                     <Breadcrumb
@@ -120,8 +119,8 @@ export const BlogCreatePage = () => {
             <ThemeProvider theme={localTheme}>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <Stack sx={{
-                        margin: "0px 120px",
-                        gap: "40px"
+                        margin: "0px calc(15 * var(--spacing))",
+                        gap: "calc(5 * var(--spacing))"
                     }}>
                         <CollapsibleCard
                             title={t("admin.common.details")}
@@ -129,7 +128,7 @@ export const BlogCreatePage = () => {
                             expanded={expandedDetail}
                             onToggle={toggle(setExpandedDetail)}
                         >
-                            <Stack p="24px" gap="24px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Controller
                                     name="name"
                                     control={control}
@@ -184,12 +183,12 @@ export const BlogCreatePage = () => {
                             expanded={expandedExtra}
                             onToggle={toggle(setExpandedExtra)}
                         >
-                            <Stack p="24px" gap="24px">
+                            <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Box
                                     sx={{
                                         display: "grid",
                                         gridTemplateColumns: "repeat(2, 1fr)",
-                                        gap: "24px 16px",
+                                        gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))",
                                     }}
                                 >
                                     <Controller
@@ -221,29 +220,13 @@ export const BlogCreatePage = () => {
                                 </Box>
                             </Stack>
                         </CollapsibleCard>
-                        <Box gap="24px" sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
-                            <Button
+                        <Box gap="calc(3 * var(--spacing))" sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+                            <LoadingButton
                                 type="submit"
-                                disabled={isPending}
-                                sx={{
-                                    background: '#1C252E',
-                                    minHeight: "4.8rem",
-                                    minWidth: "6.4rem",
-                                    fontWeight: 700,
-                                    fontSize: "1.4rem",
-                                    padding: "8px 16px",
-                                    borderRadius: "8px",
-                                    textTransform: "none",
-                                    boxShadow: "none",
-                                    "&:hover": {
-                                        background: "#454F5B",
-                                        boxShadow: "0 8px 16px 0 rgba(145 158 171 / 16%)"
-                                    }
-                                }}
-                                variant="contained"
-                            >
-                                {isPending ? t('admin.common.processing') : t('admin.blog.title.create')}
-                            </Button>
+                                loading={isPending}
+                                label={t('admin.blog.title.create')}
+                                loadingLabel={t('admin.common.processing')}
+                            />
                         </Box>
                     </Stack>
                 </form>
@@ -252,3 +235,6 @@ export const BlogCreatePage = () => {
         </>
     )
 }
+
+
+
