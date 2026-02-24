@@ -193,12 +193,12 @@ export const ServiceDetailPage = () => {
         if (selectedPetIds.length === 0) { toast.warning("Bé cưng nào sẽ đi Spa vậy ạ? Vui lòng chọn bé nha!"); return; }
         if (!selectedTimeSlot) { toast.warning("Bạn chưa chọn giờ hẹn kìa!"); return; }
         try {
+            const startTime = dayjs(`${selectedDate} ${selectedTimeSlot.time}`, "YYYY-MM-DD HH:mm").toISOString();
             const bookingData = {
                 serviceId: service._id,
                 petIds: selectedPetIds,
-                date: selectedDate,
-                timeSlot: selectedTimeSlot.time,
-                note: note
+                startTime: startTime,
+                notes: note
             };
             const response = await createBooking(bookingData);
             if (response.code === 200 || response.code === 201) {

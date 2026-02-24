@@ -11,12 +11,12 @@ import { useAuthStore } from "../../../stores/useAuthStore";
 import { useServices } from "../../hooks/useService";
 import { getAvailableTimeSlots, createBooking } from "../../api/booking.api";
 import { getMyPets } from "../../api/pet.api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { PetCreateModal } from "./sections/PetCreateModal";
 import { Tooltip } from "@mui/material";
 import {
     Scissors, Bath, Sparkles, User, Plus, Clock,
-    Calendar, ArrowRight, ArrowLeft, Info, Camera
+    Calendar, ArrowRight, ArrowLeft, Info
 } from "lucide-react";
 
 const getServiceIcon = (name: string) => {
@@ -60,6 +60,23 @@ export const BookingPage = () => {
 
     const [note, setNote] = useState("");
 
+    // Fetch Pets
+    useEffect(() => {
+        const fetchPets = async () => {
+            if (!user) return;
+            setLoadingPets(true);
+            try {
+                const res = await getMyPets();
+                if (res.code === 200) setPets(res.data);
+            } catch (error) {
+                console.error("Error fetching pets:", error);
+            } finally {
+                setLoadingPets(false);
+            }
+        };
+        fetchPets();
+    }, [user]);
+
     const filteredSlotsBySession = useMemo(() => {
         return availableSlots.filter(slot => {
             const hour = parseInt(slot.time.split(":")[0]);
@@ -72,7 +89,7 @@ export const BookingPage = () => {
 
     // Check availability of each session
     const sessionAvailability = useMemo(() => {
-        const sessions = { "Sáng": false, "Chiều": false, "Tối": false };
+        const sessions: Record<string, boolean> = { "Sáng": false, "Chiều": false, "Tối": false };
         availableSlots.forEach(slot => {
             const hour = parseInt(slot.time.split(":")[0]);
             if (slot.totalStaff > 0) {
@@ -87,68 +104,25 @@ export const BookingPage = () => {
     // Auto-switch session if current has no staff
     useEffect(() => {
         if (availableSlots.length > 0) {
-            if (!sessionAvailability[activeTimeSession as keyof typeof sessionAvailability]) {
-                const firstAvailable = (Object.keys(sessionAvailability) as (keyof typeof sessionAvailability)[])
+            if (!sessionAvailability[activeTimeSession]) {
+                const firstAvailable = Object.keys(sessionAvailability)
                     .find(key => sessionAvailability[key]);
                 if (firstAvailable) setActiveTimeSession(firstAvailable);
             }
         }
-    }, [sessionAvailability, availableSlots]);
+    }, [sessionAvailability, availableSlots, activeTimeSession]);
 
     // Services Filter
-    const services = useMemo(() => {
+    const filteredServices = useMemo(() => {
         return allServices.filter((s: any) => {
             const bookingType = s.categoryId?.bookingTypes;
             return !bookingType || bookingType === "STANDALONE" || bookingType === "BOTH";
         });
     }, [allServices]);
 
-    // Derive unique categories for services
-    const serviceCategories = useMemo(() => {
-        const cats = services.map(s => s.categoryId?.name).filter(Boolean);
-        return ["Tất cả", ...Array.from(new Set(cats))];
-    }, [services]);
-
-    const filteredServices = useMemo(() => {
-        if (activeServiceCategory === "Tất cả") return services;
-        return services.filter(s => s.categoryId?.name === activeServiceCategory);
-    }, [services, activeServiceCategory]);
-
-    const selectedService = useMemo(() =>
-        services.find(s => s._id === selectedServiceId),
-        [services, selectedServiceId]);
-
-    // Fetch pets
-    const fetchPets = async () => {
-        if (!user) return;
-        setLoadingPets(true);
-        try {
-            const res = await getMyPets();
-            if (res.code === 200) {
-                setPets(res.data);
-            } else {
-                console.error("Error fetching pets:", res.message);
-                if (res.code === "error") {
-                    toast.warn("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại!");
-                }
-            }
-        } catch (error: any) {
-            console.error("Error fetching pets:", error);
-        } finally {
-            setLoadingPets(false);
-        }
-    };
-
-    useEffect(() => {
-        if (isHydrated && user) fetchPets();
-    }, [user, isHydrated]);
-
-    const handlePetCreateSuccess = (newPet: any) => {
-        fetchPets();
-        if (newPet && newPet._id) {
-            setSelectedPetIds(prev => [...prev, newPet._id]);
-        }
-    };
+    const selectedService = useMemo(() => {
+        return filteredServices.find((s: any) => s._id === selectedServiceId);
+    }, [filteredServices, selectedServiceId]);
 
     // Fetch available slots
     useEffect(() => {
@@ -172,7 +146,7 @@ export const BookingPage = () => {
             }
         };
         fetchSlots();
-    }, [selectedDate, selectedServiceId, selectedPetIds.length]);
+    }, [selectedDate, selectedServiceId, selectedPetIds.length, selectedPetIds]);
 
     // Pricing Logic
     const pricing = useMemo(() => {
@@ -282,6 +256,18 @@ export const BookingPage = () => {
         }
     };
 
+    const handlePetCreateSuccess = async () => {
+        setLoadingPets(true);
+        try {
+            const res = await getMyPets();
+            if (res.code === 200) setPets(res.data);
+        } catch (error) {
+            console.error("Error refreshing pets:", error);
+        } finally {
+            setLoadingPets(false);
+        }
+    };
+
     const renderStepContent = () => {
         switch (currentStep) {
             case 1:
@@ -289,51 +275,33 @@ export const BookingPage = () => {
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="flex flex-col gap-6"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                     >
-                        <div className="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar border-b border-gray-100">
-                            {serviceCategories.map((cat: any) => (
-                                <button
-                                    key={cat}
-                                    onClick={() => setActiveServiceCategory(cat)}
-                                    className={`px-6 py-2.5 rounded-full text-[14px] font-bold whitespace-nowrap transition-all duration-300 ${activeServiceCategory === cat
-                                        ? "bg-client-primary text-white shadow-md"
-                                        : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                                        }`}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {filteredServices.map((s) => (
-                                <div
-                                    key={s._id}
-                                    onClick={() => setSelectedServiceId(s._id)}
-                                    className={`p-4 rounded-[20px] border-2 cursor-pointer transition-all duration-300 flex items-center gap-4 ${selectedServiceId === s._id
-                                        ? "border-client-primary bg-client-primary/5 shadow-sm"
-                                        : "border-gray-50 hover:border-client-primary/30 hover:bg-gray-50/50"
-                                        }`}
-                                >
-                                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${selectedServiceId === s._id ? "bg-client-primary text-white" : "bg-gray-100 text-client-secondary"}`}>
-                                        {getServiceIcon(s.name)}
-                                    </div>
-
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="text-[16px] font-bold text-[#181818] mb-0.5 truncate">
-                                            {s.name}
-                                        </h3>
-                                        <div className="flex items-center justify-between gap-2">
-                                            <span className="text-client-primary font-bold text-[15px]">
-                                                {s.pricingType === 'fixed' ? `${s.basePrice?.toLocaleString()}đ` : `${s.priceList?.[0]?.value?.toLocaleString() || "100k"}đ+`}
-                                            </span>
-                                            {selectedServiceId === s._id && <CheckCircleIcon style={{ fontSize: "18px", color: "#E67E22" }} />}
-                                        </div>
+                        {filteredServices.map((s) => (
+                            <div
+                                key={s._id}
+                                onClick={() => setSelectedServiceId(s._id)}
+                                className={`p-6 rounded-[32px] border-2 cursor-pointer transition-all duration-300 flex items-center gap-6 ${selectedServiceId === s._id
+                                    ? "border-client-primary bg-client-primary/5 shadow-md scale-[1.02]"
+                                    : "border-gray-50 hover:border-client-primary/30 hover:bg-white hover:shadow-sm"
+                                    }`}
+                            >
+                                <div className={`w-20 h-20 rounded-2xl flex items-center justify-center shrink-0 ${selectedServiceId === s._id ? "bg-client-primary text-white shadow-lg" : "bg-gray-50 text-client-secondary"}`}>
+                                    {getServiceIcon(s.name)}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="text-[20px] font-bold text-[#181818] mb-1 truncate">
+                                        {s.name}
+                                    </h3>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-client-primary font-bold text-[18px]">
+                                            {s.pricingType === 'fixed' ? `${s.basePrice?.toLocaleString()}đ` : `${s.priceList?.[0]?.value?.toLocaleString() || "100k"}đ+`}
+                                        </span>
+                                        {selectedServiceId === s._id && <CheckCircleIcon style={{ fontSize: "24px", color: "#E67E22" }} />}
                                     </div>
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        ))}
                     </motion.div>
                 );
             case 2:
@@ -343,55 +311,52 @@ export const BookingPage = () => {
                         animate={{ opacity: 1, x: 0 }}
                         className="space-y-8"
                     >
-                        {loadingPets ? (
-                            <div className="text-center py-20 text-[16px] text-gray-500">Đang tải danh sách bé cưng...</div>
-                        ) : (
-                            <div className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {pets.map((pet) => (
-                                        <div
-                                            key={pet._id}
-                                            onClick={() => handlePetToggle(pet._id)}
-                                            className={`p-4 rounded-[20px] border-2 cursor-pointer transition-all flex items-center gap-4 ${selectedPetIds.includes(pet._id)
-                                                ? "border-client-primary bg-client-primary/5 shadow-sm"
-                                                : "border-gray-50 hover:border-client-primary/30"
-                                                }`}
-                                        >
-                                            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0">
-                                                {pet.avatar ? (
-                                                    <img src={pet.avatar} alt={pet.name} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="w-full h-full bg-gray-50 flex items-center justify-center text-gray-300">
-                                                        <Camera className="w-6 h-6 opacity-50" />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <h4 className="text-[16px] font-bold text-[#181818] truncate">{pet.name}</h4>
-                                                <p className="text-[12px] text-gray-500 capitalize truncate">
-                                                    {pet.type === 'dog' ? 'Chú cún' : 'Bé mèo'} • {pet.breed || 'Cưng'}
-                                                </p>
-                                            </div>
-                                            {selectedPetIds.includes(pet._id) && (
-                                                <div className="w-6 h-6 rounded-full bg-client-primary flex items-center justify-center text-white shrink-0">
-                                                    <CheckCircleIcon style={{ fontSize: "16px" }} />
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {loadingPets ? (
+                                <div className="col-span-full py-20 text-center text-gray-400">Đang chuẩn bị hồ sơ các bé...</div>
+                            ) : pets.length === 0 ? (
+                                <div className="col-span-full py-16 text-center text-gray-400 bg-white rounded-[40px] border-2 border-dashed border-gray-100 italic">
+                                    Quý khách chưa thêm bé cưng nào ạ!
                                 </div>
-
-                                <button
-                                    onClick={() => setIsPetModalOpen(true)}
-                                    className="w-full py-4 border-2 border-dashed border-gray-200 rounded-[20px] text-gray-400 font-bold hover:border-client-primary hover:text-client-primary transition-all flex items-center justify-center gap-2 group"
-                                >
-                                    <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-client-primary/10 transition-colors">
-                                        <Plus className="w-5 h-5" />
+                            ) : (
+                                pets.map((pet) => (
+                                    <div
+                                        key={pet._id}
+                                        onClick={() => handlePetToggle(pet._id)}
+                                        className={`p-6 rounded-[32px] border-2 cursor-pointer transition-all duration-300 flex items-center gap-6 ${selectedPetIds.includes(pet._id)
+                                            ? "border-client-primary bg-client-primary/5 shadow-md scale-[1.02]"
+                                            : "border-gray-50 hover:border-client-primary/30 hover:bg-white hover:shadow-sm"
+                                            }`}
+                                    >
+                                        <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 shrink-0 border-2 border-white shadow-sm">
+                                            <img
+                                                src={pet.image || "https://img.freepik.com/free-vector/cute-dog-sitting-cartoon-vector-icon-illustration-animal-nature-icon-concept-isolated-premium-vector-flat-cartoon-style_138676-4180.jpg"}
+                                                alt={pet.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="text-[18px] font-bold text-[#181818] mb-0.5 truncate">{pet.name}</h4>
+                                            <p className="text-[14px] text-gray-500 font-medium">{pet.breedId?.name} • {pet.weight}kg</p>
+                                        </div>
+                                        {selectedPetIds.includes(pet._id) && (
+                                            <div className="w-8 h-8 rounded-full bg-client-primary flex items-center justify-center text-white shadow-sm">
+                                                <CheckCircleIcon style={{ fontSize: "18px" }} />
+                                            </div>
+                                        )}
                                     </div>
-                                    Thêm bé cưng mới
-                                </button>
-                            </div>
-                        )}
+                                ))
+                            )}
+                            <button
+                                onClick={() => setIsPetModalOpen(true)}
+                                className="p-6 border-2 border-dashed border-gray-200 rounded-[32px] text-gray-400 font-bold hover:border-client-primary hover:text-client-primary transition-all flex items-center justify-center gap-3 group bg-white/50"
+                            >
+                                <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-client-primary/10 transition-colors">
+                                    <Plus className="w-6 h-6" />
+                                </div>
+                                Thêm bé cưng mới
+                            </button>
+                        </div>
                     </motion.div>
                 );
             case 3:
@@ -430,7 +395,7 @@ export const BookingPage = () => {
                                     <div className="space-y-6">
                                         <div className="flex bg-gray-100 p-1 rounded-2xl">
                                             {["Sáng", "Chiều", "Tối"].map((session) => {
-                                                const isSessionClosed = !sessionAvailability[session as keyof typeof sessionAvailability];
+                                                const isSessionClosed = !sessionAvailability[session];
                                                 return (
                                                     <Tooltip
                                                         key={session}
@@ -478,6 +443,7 @@ export const BookingPage = () => {
                                                         >
                                                             <button
                                                                 disabled={!isAvailable}
+                                                                type="button"
                                                                 onClick={() => setSelectedTimeSlot(slot)}
                                                                 className={`relative py-3 rounded-xl text-[14px] font-bold transition-all border-2 flex flex-col items-center justify-center overflow-hidden ${isSelected
                                                                     ? "bg-client-primary border-client-primary text-white shadow-md scale-105 z-10"
@@ -542,7 +508,7 @@ export const BookingPage = () => {
 
                         <div className="space-y-6">
                             <div className="bg-[#FAF8F6] p-10 rounded-[40px] border-2 border-dashed border-[#dcd1c3] shadow-inner">
-                                <h4 className="text-[1.5rem] font-third text-client-secondary group-hover:text-client-primary transition-colors duration-300">Tóm tắt dịch vụ</h4>
+                                <h4 className="text-[24px] font-third text-client-secondary mb-6">Tóm tắt dịch vụ</h4>
                                 <div className="space-y-6">
                                     <div className="flex justify-between items-start text-[16px]">
                                         <span className="text-gray-500">Dịch vụ:</span>

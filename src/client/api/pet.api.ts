@@ -1,48 +1,49 @@
-import { apiApp } from "../../api/index";
+import { apiApp } from "../../api";
 
-const API_PET = "/api/v1/client/pet/my-pets";
+export interface Pet {
+    _id: string;
+    name: string;
+    type: "dog" | "cat";
+    breed?: string;
+    weight?: number;
+    age?: number;
+    color?: string;
+    gender?: "male" | "female" | "unknown";
+    notes?: string;
+    avatar?: string;
+    healthStatus?: "accepted" | "rejected";
+    status: string;
+}
+
+export interface PetPayload {
+    name: string;
+    type: "dog" | "cat";
+    breed?: string;
+    weight?: number;
+    age?: number;
+    color?: string;
+    gender?: "male" | "female" | "unknown";
+    healthStatus?: "accepted" | "rejected";
+    notes?: string;
+    avatar?: string;
+}
 
 export const getMyPets = async () => {
-    try {
-        const response = await apiApp.get(API_PET);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+    const response = await apiApp.get("/api/v1/client/pet/my-pets");
+    return response.data;
 };
 
-export const createPet = async (data: any) => {
-    try {
-        const response = await apiApp.post(API_PET, data);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+export const createMyPet = async (data: PetPayload) => {
+    const response = await apiApp.post("/api/v1/client/pet/my-pets", data);
+    return response.data;
 };
 
-export const getPetDetail = async (id: string) => {
-    try {
-        const response = await apiApp.get(`${API_PET}/${id}`);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
-};
-
-export const updatePet = async (id: string, data: any) => {
-    try {
-        const response = await apiApp.patch(`${API_PET}/${id}`, data);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+export const updateMyPet = async (id: string, data: Partial<PetPayload>) => {
+    const response = await apiApp.patch(`/api/v1/client/pet/my-pets/${id}`, data);
+    return response.data;
 };
 
 export const deletePet = async (id: string) => {
-    try {
-        const response = await apiApp.delete(`${API_PET}/${id}`);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+    const response = await apiApp.delete(`/api/v1/client/pet/my-pets/${id}`);
+    return response.data;
 };
