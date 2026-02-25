@@ -105,7 +105,7 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
 
                 if (!map.has(staffId)) {
                     map.set(staffId, {
-                        info: b.staffId,
+                        info: typeof sId === 'object' ? sId : b.staffId,
                         schedules: [],
                         bookings: []
                     });
@@ -114,7 +114,9 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
             });
         });
 
-        const allStaff = Array.from(map.values()).sort((a, b) => a.info.fullName.localeCompare(b.info.fullName));
+        const allStaff = Array.from(map.values())
+            .filter(s => s.info && s.info.fullName)
+            .sort((a, b) => (a.info.fullName || '').localeCompare(b.info.fullName || ''));
 
         if (onlyShowSelected && selectedStaffIds.length > 0) {
             return allStaff.filter(s => selectedStaffIds.includes(s.info._id));
