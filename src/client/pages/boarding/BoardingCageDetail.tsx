@@ -26,7 +26,7 @@ export const BoardingCageDetailPage = () => {
   return (
     <div className="bg-[#fcfcfc]">
       <div className="app-container py-[40px]">
-        <Link to="/khach-san" className="inline-flex items-center gap-[6px] text-[1.4rem] text-[#555]">
+        <Link to="/hotels" className="inline-flex items-center gap-[6px] text-[1.4rem] text-[#555]">
           <ChevronLeft className="w-4 h-4" />
           Quay lại danh sách
         </Link>

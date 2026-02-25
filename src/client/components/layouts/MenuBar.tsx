@@ -22,12 +22,12 @@ export const MenuBar = () => {
     },
     {
       label: "Khách sạn",
-      to: "/khach-san",
+      to: "/hotels",
       icon: Building2,
     },
     {
       label: "Bài viết",
-      to: "/bai-viet",
+      to: "/blogs",
       img: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/07/Menu-img-12.png",
     },
     {

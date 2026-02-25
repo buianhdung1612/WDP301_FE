@@ -6,7 +6,7 @@ import { AppCard } from "../../components/ui/AppCard";
 
 const breadcrumbs = [
     { label: "Trang chủ", to: "/" },
-    { label: "Bài viết", to: "/bai-viet" },
+    { label: "Bài viết", to: "/blogs" },
 ];
 
 export const BlogListPage = () => {

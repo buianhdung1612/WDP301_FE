@@ -5,7 +5,7 @@ import { ProductBanner } from "../product/sections/ProductBanner";
 import { Sidebar } from "./sections/Sidebar";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { getMyPets, deletePet } from "../../api/pet.api";
-import { Trash2, Edit3, Info, Camera } from "lucide-react";
+import { Camera } from "lucide-react";
 
 export const PetListPage = () => {
     const { user, isHydrated } = useAuthStore();
@@ -87,97 +87,75 @@ export const PetListPage = () => {
                 </div>
                 <div className="w-[75%] px-[12px]">
                     <div className="mt-[100px] p-[35px] bg-white shadow-[0px_8px_24px_#959da533] rounded-[12px]">
-                        <div className="flex items-center justify-between mb-[30px]">
-                            <div>
-                                <h3 className="text-[26px] font-[700] text-client-secondary uppercase leading-tight">Thú cưng của tôi</h3>
-                                <p className="text-[15px] text-[#7d7b7b] mt-[5px]">Quản lý thông tin các bé cưng để đặt lịch nhanh hơn.</p>
-                            </div>
-                            <Link
-                                className="relative overflow-hidden group bg-client-primary rounded-[50px] px-[30px] py-[14px] font-[600] text-[15px] text-white flex items-center gap-[10px] shadow-sm hover:shadow-md transition-all active:scale-95"
-                                to={"/dashboard/pet/create"}
-                            >
-                                <span className="relative z-10 flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                    Thêm bé mới
-                                </span>
+                        <h3 className="text-[24px] font-[600] text-client-secondary flex items-center justify-between mb-[10px]">
+                            Danh sách thú cưng
+                            <Link className="relative overflow-hidden group bg-client-primary rounded-[8px] px-[25px] py-[12px] font-[500] text-[14px] text-white flex items-center gap-[8px]" to={"/dashboard/pet/create"}>
+                                <span className="relative z-10">Thêm thú cưng</span>
                                 <div className="absolute top-0 left-0 w-full h-full bg-client-secondary transition-transform duration-500 ease-in-out transform scale-x-0 origin-left group-hover:scale-x-100"></div>
                             </Link>
-                        </div>
+                        </h3>
 
                         {loading ? (
                             <div className="py-[100px] text-center">
-                                <div className="inline-block w-12 h-12 border-4 border-client-primary border-t-transparent rounded-full animate-spin"></div>
-                                <p className="mt-4 text-[16px] text-gray-500 font-medium">Đang tải danh sách bé cưng...</p>
+                                <p className="text-[16px] text-gray-500">Đang tải danh sách bé cưng...</p>
                             </div>
                         ) : pets.length > 0 ? (
-                            <div className="grid grid-cols-2 gap-[25px] mt-[10px]">
+                            <div className="grid grid-cols-2 gap-[30px] mt-[30px]">
                                 {pets.map((item) => (
-                                    <div key={item._id} className="group relative bg-[#fcfcfc] border border-[#eee] rounded-[24px] p-[25px] transition-all duration-300 hover:shadow-[0px_12px_32px_rgba(0,0,0,0.06)] hover:border-client-primary/20 hover:-translate-y-1">
-                                        <div className="flex gap-[25px]">
-                                            <div className="w-[100px] h-[100px] rounded-[20px] overflow-hidden bg-white border border-[#eee] shadow-sm">
+                                    <div key={item._id} className="group h-full">
+                                        <div className="relative border rounded-[16px] p-[25px] transition-all duration-300 bg-white border-[#eee] hover:shadow-[0px_10px_30px_rgba(0,0,0,0.08)] hover:border-client-primary/30 h-full flex items-start gap-5">
+                                            <div className="w-[80px] h-[80px] rounded-[12px] overflow-hidden bg-gray-50 border border-[#eee] shrink-0">
                                                 {item.avatar ? (
                                                     <img
                                                         src={item.avatar}
                                                         alt={item.name}
-                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                        className="w-full h-full object-cover"
                                                     />
                                                 ) : (
-                                                    <div className="w-full h-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-gray-100 transition-colors">
-                                                        <Camera className="w-8 h-8 opacity-50" />
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <Camera className="w-8 h-8 opacity-40" />
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="flex-1 flex flex-col justify-center">
+
+                                            <div className="flex-1 flex flex-col">
                                                 <div className="flex items-center justify-between">
-                                                    <h4 className="text-[20px] font-[700] text-client-secondary leading-tight">{item.name}</h4>
-                                                    <div className="px-[12px] py-[4px] rounded-full bg-client-primary/10 text-client-primary text-[12px] font-[700] uppercase">
+                                                    <h4 className="text-[18px] font-[700] text-client-secondary truncate pr-2">{item.name}</h4>
+                                                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-[600] uppercase tracking-wider ${item.type === 'dog' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>
                                                         {item.type === 'dog' ? 'Chó' : 'Mèo'}
-                                                    </div>
+                                                    </span>
                                                 </div>
-                                                <div className="mt-[10px] space-y-[6px]">
-                                                    <div className="flex items-center gap-2 text-[14px] text-[#637381]">
-                                                        <span className="font-semibold text-client-secondary">Giống:</span> {item.breed || "Không rõ"}
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-[14px] text-[#637381]">
-                                                        <span className="font-semibold text-client-secondary">Cân nặng:</span> {item.weight || "?"} kg
-                                                    </div>
+
+                                                <div className="mt-2 space-y-1">
+                                                    <p className="text-[14px] text-[#555]">
+                                                        <span className="text-gray-400 font-medium">Giống:</span> {item.breed || "Chưa xác định"}
+                                                    </p>
+                                                    <p className="text-[14px] text-[#555]">
+                                                        <span className="text-gray-400 font-medium">Cân nặng:</span> {item.weight || "?"} kg
+                                                    </p>
+                                                </div>
+
+                                                <div className="pt-[15px] flex items-center gap-[15px] opacity-0 group-hover:opacity-100 transition-opacity mt-auto">
+                                                    <Link to={`/dashboard/pet/edit/${item._id}`} className="text-[14px] font-[600] text-client-primary hover:underline">
+                                                        Chỉnh sửa
+                                                    </Link>
+                                                    <div className="w-[1px] h-[12px] bg-gray-300"></div>
+                                                    <button
+                                                        onClick={() => handleDelete(item._id, item.name)}
+                                                        className="text-[14px] font-[600] text-red-500 hover:underline"
+                                                    >
+                                                        Xóa
+                                                    </button>
                                                 </div>
                                             </div>
-                                        </div>
-
-                                        <div className="mt-[20px] pt-[20px] border-t border-dashed border-[#ddd] flex items-center justify-end gap-[15px] opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Link
-                                                to={`/dashboard/pet/edit/${item._id}`}
-                                                className="flex items-center gap-1.5 text-[14px] font-[600] text-client-secondary hover:text-client-primary transition-colors"
-                                            >
-                                                <Edit3 className="w-5 h-5" />
-                                                Chỉnh sửa
-                                            </Link>
-                                            <div className="w-[1px] h-[14px] bg-gray-300"></div>
-                                            <button
-                                                onClick={() => handleDelete(item._id, item.name)}
-                                                className="flex items-center gap-1.5 text-[14px] font-[600] text-red-500 hover:text-red-700 transition-colors"
-                                            >
-                                                <Trash2 className="w-5 h-5" />
-                                                Xóa bé
-                                            </button>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <div className="py-[100px] text-center bg-[#fcfcfc] rounded-[24px] border-2 border-dashed border-[#eee]">
-                                <div className="w-[80px] h-[80px] bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-400">
-                                    <Info className="w-12 h-12" />
-                                </div>
-                                <h4 className="text-[18px] font-[600] text-client-secondary">Chưa có bé cưng nào</h4>
-                                <p className="text-[15px] text-[#7d7b7b] mt-2 mb-8">Hãy thêm thông tin bé cưng của bạn để chúng mình tiện chăm sóc nhé!</p>
-                                <Link
-                                    className="bg-client-primary text-white px-10 py-4 rounded-full text-[16px] font-[700] hover:bg-client-secondary transition-all shadow-sm"
-                                    to={"/dashboard/pet/create"}
-                                >
-                                    Thêm ngay bây giờ
-                                </Link>
+                            <div className="py-[80px] text-center border-2 border-dashed border-gray-100 rounded-[20px] bg-gray-50/50 mt-[30px]">
+                                <p className="text-[16px] text-gray-500 italic">Bạn chưa thêm bé cưng nào.</p>
+                                <Link to="/dashboard/pet/create" className="text-client-primary font-bold mt-4 inline-block hover:underline">Thêm ngay bé cưng đầu tiên nào!</Link>
                             </div>
                         )}
                     </div>

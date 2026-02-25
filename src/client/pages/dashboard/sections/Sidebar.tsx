@@ -1,4 +1,4 @@
-﻿import { Camera, AlignJustify, ShoppingBag, User, Arcade, Heart, Star, Lock, LogOut } from "iconoir-react";
+import { Camera, AlignJustify, ShoppingBag, User, Arcade, Heart, Star, Lock, LogOut } from "iconoir-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../../../stores/useAuthStore";
 import { logout as logoutApi } from "../../../api/auth.api";
@@ -7,7 +7,7 @@ import React, { useState } from "react";
 import { changeAvatar } from "../../../api/dashboard.api";
 import { uploadImagesToCloudinary } from "../../../../admin/api/uploadCloudinary.api";
 
-const Sidebar = () => {
+export const Sidebar = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const pathname = location.pathname;
@@ -33,10 +33,14 @@ const Sidebar = () => {
                 const urls = await uploadImagesToCloudinary(Array.from(files));
                 if (urls && urls.length > 0) {
                     const newAvatar = urls[0];
+
+                    // Cập nhật giao diện ngay lập tức
                     set({ user: { ...user, avatar: newAvatar } as any });
                     setUploading(false);
 
+                    // Gọi API backend cập nhật ngầm
                     const res = await changeAvatar({ avatar: newAvatar });
+
                     if (res.success) {
                         toast.success("Cập nhật ảnh đại diện thành công!");
                     } else {
@@ -80,62 +84,60 @@ const Sidebar = () => {
                         <h3 className="text-[22px] mt-[22px] mb-[5px] font-[600] text-client-secondary uppercase leading-tight">{user.fullName}</h3>
                         <p className="text-[#7d7b7b] font-[500]">{user.email}</p>
                     </div>
-
-                    <ul>
-                        <li className="bg-[#FFF0F0] text-[1.4rem] my-[10px] font-[500] py-[12px] px-[25px] uppercase text-client-primary border-y border-dashed border-[#dddddd]">Tổng quan</li>
+                    <ul className="">
+                        <li className="bg-[#FFF0F0] text-[14px] my-[10px] font-[500] py-[12px] px-[25px] uppercase text-client-primary border-y border-dashed border-[#dddddd]">Tổng quan</li>
                         <li>
-                            <Link to="/dashboard/overview" className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/overview" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                                <AlignJustify className="w-[2rem] h-[2rem]" />
+                            <Link to={"/dashboard/overview"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/overview" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <AlignJustify className="w-[20px] h-[20px]" />
                                 Tổng quan
                             </Link>
                         </li>
                         <li>
-                            <Link to="/dashboard/orders" className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/order") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                                <ShoppingBag className="w-[2rem] h-[2rem]" />
+                            <Link to={"/dashboard/orders"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/order") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <ShoppingBag className="w-[20px] h-[20px]" />
                                 Đơn hàng
                             </Link>
                         </li>
                         <li>
-                            <Link to="/dashboard/boarding-bookings" className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/boarding-bookings") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                                <ShoppingBag className="w-[2rem] h-[2rem]" />
-                                Lịch khách sạn
+                            <Link to={"/dashboard/bookings"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/booking") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <AlignJustify className="w-[20px] h-[20px]" />
+                                Dịch vụ
                             </Link>
                         </li>
+                        <li className="bg-[#FFF0F0] text-[14px] my-[10px] font-[500] py-[12px] px-[25px] uppercase text-client-primary border-y border-dashed border-[#dddddd]">Cài đặt tài khoản</li>
                         <li>
-                            <Link to="/dashboard/pets" className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/pets") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                                <Heart className="w-[2rem] h-[2rem]" />
-                                Quản lý thú cưng
-                            </Link>
-                        </li>
-
-                        <li className="bg-[#FFF0F0] text-[1.4rem] my-[10px] font-[500] py-[12px] px-[25px] uppercase text-client-primary border-y border-dashed border-[#dddddd]">Cài đặt tài khoản</li>
-                        <li>
-                            <Link to="/dashboard/profile" className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/profile" || pathname === "/dashboard/profile/edit" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                                <User className="w-[2rem] h-[2rem]" />
+                            <Link to={"/dashboard/profile"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/profile" || pathname === "/dashboard/profile/edit" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <User className="w-[20px] h-[20px]" />
                                 Thông tin cá nhân
                             </Link>
                         </li>
                         <li>
-                            <Link to="/dashboard/address" className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/address") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                                <Arcade className="w-[2rem] h-[2rem]" />
+                            <Link to={"/dashboard/address"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/address") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <Arcade className="w-[20px] h-[20px]" />
                                 Địa chỉ
                             </Link>
                         </li>
                         <li>
-                            <Link to="/dashboard/wishlist" className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/wishlist" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                                <Heart className="w-[2rem] h-[2rem]" />
+                            <Link to={"/dashboard/pet"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/pet") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <AlignJustify className="w-[20px] h-[20px]" />
+                                Thú cưng
+                            </Link>
+                        </li>
+                        <li>
+                            <Link to={"/dashboard/wishlist"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/wishlist" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <Heart className="w-[20px] h-[20px]" />
                                 Yêu thích
                             </Link>
                         </li>
                         <li>
-                            <Link to="/dashboard/review" className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/review" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                                <Star className="w-[2rem] h-[2rem]" />
+                            <Link to={"/dashboard/review"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/review" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <Star className="w-[20px] h-[20px]" />
                                 Đánh giá
                             </Link>
                         </li>
                         <li>
-                            <Link to="/dashboard/change-password" className={`inline-flex items-center gap-[10px] text-[1.5rem] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/change-password" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                                <Lock className="w-[2rem] h-[2rem]" />
+                            <Link to={"/dashboard/change-password"} className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/change-password" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                                <Lock className="w-[20px] h-[20px]" />
                                 Đổi mật khẩu
                             </Link>
                         </li>
@@ -154,6 +156,3 @@ const Sidebar = () => {
         </div>
     );
 };
-
-export { Sidebar };
-export default Sidebar;

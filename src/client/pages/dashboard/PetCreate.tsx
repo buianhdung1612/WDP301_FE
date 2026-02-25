@@ -5,13 +5,12 @@ import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createPet } from "../../api/pet.api";
+import { createMyPet } from "../../api/pet.api";
 import { ProductBanner } from "../product/sections/ProductBanner";
 import { ArrowRight, Camera } from "lucide-react";
 import { uploadImagesToCloudinary } from "../../../admin/api/uploadCloudinary.api";
 import CreatableSelect from 'react-select/creatable';
 import { useBreeds, useCreateBreed } from "../../../admin/pages/account-user/hooks/useBreed";
-import { Icon } from "@iconify/react";
 
 interface BreedOption {
     label: string;
@@ -27,6 +26,7 @@ const schema = z.object({
     breed: z.string().optional(),
     weight: z.number().min(0.1, "Cân nặng phải lớn hơn 0!"),
     avatar: z.string().optional(),
+    gender: z.enum(["male", "female", "unknown"]),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -41,7 +41,8 @@ export const PetCreatePage = () => {
         defaultValues: {
             type: "dog",
             weight: 1,
-            avatar: ""
+            avatar: "",
+            gender: "unknown"
         }
     });
 
@@ -76,7 +77,7 @@ export const PetCreatePage = () => {
 
     const onSubmit = async (data: FormData) => {
         try {
-            const response = await createPet(data);
+            const response = await createMyPet(data);
             if (response.code === 200) {
                 toast.success(response.message || "Đã thêm thú cưng thành công!");
                 navigate("/dashboard/pet");
@@ -98,7 +99,7 @@ export const PetCreatePage = () => {
     return (
         <>
             <ProductBanner
-                pageTitle="Thêm bé cưng mới"
+                pageTitle="Thêm thú cưng mới"
                 breadcrumbs={breadcrumbs}
                 url="https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/06/bc-shop-details.jpg"
                 className="bg-top"
@@ -110,165 +111,148 @@ export const PetCreatePage = () => {
                 </div>
                 <div className="w-[75%] px-[12px]">
                     <div className="mt-[100px] p-[35px] bg-white shadow-[0px_8px_24px_#959da533] rounded-[12px]">
-                        <h3 className="text-[24px] font-[700] text-client-secondary mb-[25px] flex items-center justify-between uppercase">
-                            Thông tin bé cưng
-                            <Link className="relative overflow-hidden group bg-orange-400 rounded-full px-[25px] py-[10px] font-[600] text-[14px] text-white" to={"/dashboard/pet"}>
+                        <h3 className="text-[24px] font-[600] text-client-secondary mb-[25px] flex items-center justify-between">
+                            Thông tin thú cưng
+                            <Link className="relative overflow-hidden group bg-[#ffa500] rounded-[8px] px-[25px] py-[12px] font-[500] text-[14px] text-white" to={"/dashboard/pet"}>
                                 <span className="relative z-10">Quay lại</span>
-                                <div className="absolute top-0 left-0 w-full h-full bg-orange-500 transition-transform duration-500 ease-in-out transform scale-x-0 origin-left group-hover:scale-x-100"></div>
+                                <div className="absolute top-0 left-0 w-full h-full bg-[#cc8400] transition-transform duration-500 ease-in-out transform scale-x-0 origin-left group-hover:scale-x-100"></div>
                             </Link>
                         </h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-[40px]">
-                            {/* Avatar Section */}
-                            <div className="flex flex-col items-center gap-[20px]">
-                                <div className="group relative">
-                                    <div className="w-[160px] h-[160px] rounded-full border-4 border-white shadow-[0_8px_20px_rgba(0,0,0,0.1)] overflow-hidden relative transition-transform duration-500 hover:scale-[1.02]">
-                                        {preview ? (
-                                            <img
-                                                src={preview}
-                                                className={`w-full h-full object-cover transition-all duration-500 ${uploading ? 'scale-110 blur-[2px]' : 'group-hover:scale-110'}`}
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full bg-[#f8f9fa] flex flex-col items-center justify-center text-[#919eab]">
-                                                <Camera className="w-[32px] h-[32px] mb-1" />
-                                                <span className="text-[12px] font-bold uppercase tracking-wider">Tải ảnh lên</span>
-                                            </div>
-                                        )}
-
-                                        <label className="absolute inset-0 bg-client-secondary/40 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer backdrop-blur-[2px]">
-                                            <Camera className="w-[32px] h-[32px] mb-1 animate-bounce" />
-                                            <span className="text-[11px] font-bold tracking-wider uppercase">{preview ? "Đổi ảnh bé" : "Tải ảnh lên"}</span>
+                        <div className="p-[25px] border border-[#eee] rounded-[10px]">
+                            <form className="space-y-[20px]" onSubmit={handleSubmit(onSubmit)}>
+                                <div className="flex flex-col items-center mb-[30px]">
+                                    <div className="relative group">
+                                        <div className="w-[120px] h-[120px] rounded-[12px] border-2 border-dashed border-[#ddd] overflow-hidden bg-gray-50 flex flex-col items-center justify-center text-gray-400 group-hover:border-client-primary transition-all">
+                                            {preview ? (
+                                                <img src={preview} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <>
+                                                    <Camera className="w-[32px] h-[32px] mb-1 opacity-50" />
+                                                    <span className="text-[12px] font-[500]">Chọn ảnh</span>
+                                                </>
+                                            )}
+                                        </div>
+                                        <label className="absolute inset-0 cursor-pointer">
                                             <input type="file" hidden accept="image/*" onChange={handleAvatarChange} disabled={uploading} />
                                         </label>
-
                                         {uploading && (
-                                            <div className="absolute inset-0 bg-white/60 flex flex-col items-center justify-center backdrop-blur-[4px]">
-                                                <div className="w-10 h-10 border-[3px] border-client-primary border-t-transparent rounded-full animate-spin mb-2"></div>
-                                                <span className="text-[10px] font-bold text-client-secondary uppercase animate-pulse">Đang tải...</span>
+                                            <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-[12px]">
+                                                <div className="w-6 h-6 border-2 border-client-primary border-t-transparent rounded-full animate-spin"></div>
                                             </div>
                                         )}
                                     </div>
-
-                                    {/* Action Badge */}
-                                    {!uploading && (
-                                        <div className="absolute bottom-2 right-2 w-[42px] h-[42px] bg-client-primary rounded-full border-4 border-white flex items-center justify-center text-white shadow-lg pointer-events-none transform transition-transform duration-300 group-hover:scale-110">
-                                            <Icon icon="solar:pen-bold" width={20} />
-                                        </div>
-                                    )}
+                                    <p className="mt-3 text-[13px] text-gray-400">Hình ảnh giúp chúng mình nhận diện bé tốt hơn</p>
                                 </div>
-                                <div className="text-center w-full">
-                                    <p className="text-[14px] text-client-secondary font-bold mb-1">Ảnh của bé cưng</p>
-                                    <p className="text-[12px] text-[#7d7b7b] leading-tight italic max-w-[180px] mx-auto">Một tấm ảnh thật xinh <br /> sẽ giúp tụi mình nhận biết nhanh hơn!</p>
-                                </div>
-                            </div>
 
-                            {/* Form Section */}
-                            <div className="md:col-span-2">
-                                <form className="space-y-[25px]" onSubmit={handleSubmit(onSubmit)}>
-                                    <div className="grid grid-cols-2 gap-[20px]">
-                                        <div className="flex flex-col gap-[8px]">
-                                            <label className="text-[15px] font-[700] text-client-secondary">Tên bé cưng <span className="text-red-500">*</span></label>
-                                            <input
-                                                type="text"
-                                                {...register("name")}
-                                                className={`border rounded-[15px] px-[20px] py-[12px] text-[15px] focus:outline-none focus:border-client-primary transition-all bg-[#fcfcfc] hover:bg-white ${errors.name ? "border-red-500" : "border-[#eee]"}`}
-                                                placeholder="Ví dụ: Lucky, Mimi..."
-                                            />
-                                            {errors.name && <span className="text-red-500 text-[13px] font-medium">{errors.name.message}</span>}
-                                        </div>
-
-                                        <div className="flex flex-col gap-[8px]">
-                                            <label className="text-[15px] font-[700] text-client-secondary">Loài <span className="text-red-500">*</span></label>
-                                            <select
-                                                {...register("type")}
-                                                className={`border rounded-[15px] px-[20px] py-[12px] text-[15px] focus:outline-none focus:border-client-primary transition-all bg-[#fcfcfc] hover:bg-white ${errors.type ? "border-red-500" : "border-[#eee]"}`}
-                                            >
-                                                <option value="dog">Chó</option>
-                                                <option value="cat">Mèo</option>
-                                            </select>
-                                            {errors.type && <span className="text-red-500 text-[13px] font-medium">{errors.type.message}</span>}
-                                        </div>
+                                <div className="grid grid-cols-2 gap-[25px]">
+                                    <div className="flex flex-col gap-[10px]">
+                                        <label className="text-[15px] font-[600] text-client-secondary">Tên bé cưng <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="text"
+                                            {...register("name")}
+                                            className={`border rounded-[10px] px-[20px] py-[15px] text-[15px] focus:outline-none focus:border-client-primary transition-all bg-[#fcfcfc] hover:bg-white ${errors.name ? "border-red-500" : "border-[#eee]"}`}
+                                            placeholder="Ví dụ: Lucky, Mimi..."
+                                        />
+                                        {errors.name && <span className="text-red-500 text-[13px]">{errors.name.message}</span>}
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-[20px]">
-                                        <div className="flex flex-col gap-[8px]">
-                                            <label className="text-[15px] font-[700] text-client-secondary">Giống bé (Breed)</label>
-                                            <CreatableSelect
-                                                isClearable
-                                                options={breedOptions}
-                                                value={petBreed ? { label: petBreed, value: petBreed } : null}
-                                                onChange={(newValue) => {
-                                                    const val = (newValue as BreedOption)?.value || "";
-                                                    setValue("breed", val);
-
-                                                    // If it's a new option, create it in backend
-                                                    if ((newValue as any)?.__isNew__) {
-                                                        createBreedMutate({ name: val, type: petType });
-                                                    }
-                                                }}
-                                                placeholder="Ví dụ: Poodle, Golden..."
-                                                formatCreateLabel={(inputValue) => `Thêm giống "${inputValue}"`}
-                                                styles={{
-                                                    control: (base) => ({
-                                                        ...base,
-                                                        borderRadius: '15px',
-                                                        padding: '4px 8px',
-                                                        fontSize: '15px',
-                                                        backgroundColor: '#fcfcfc',
-                                                        borderColor: '#eee',
-                                                        boxShadow: 'none',
-                                                        '&:hover': {
-                                                            borderColor: '#F8721F',
-                                                            backgroundColor: 'white'
-                                                        }
-                                                    }),
-                                                    menu: (base) => ({
-                                                        ...base,
-                                                        borderRadius: '15px',
-                                                        fontSize: '15px',
-                                                        overflow: 'hidden',
-                                                        zIndex: 100, // Fix z-index issue
-                                                        boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
-                                                    }),
-                                                    option: (base, state) => ({
-                                                        ...base,
-                                                        backgroundColor: state.isFocused ? '#F8721F1a' : 'white',
-                                                        color: state.isFocused ? '#F8721F' : 'inherit',
-                                                        padding: '10px 20px',
-                                                        '&:active': {
-                                                            backgroundColor: '#F8721F33'
-                                                        }
-                                                    })
-                                                }}
-                                            />
-                                        </div>
-
-                                        <div className="flex flex-col gap-[8px]">
-                                            <label className="text-[15px] font-[700] text-client-secondary">Cân nặng (kg) <span className="text-red-500">*</span></label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                {...register("weight", { valueAsNumber: true })}
-                                                className={`border rounded-[15px] px-[20px] py-[12px] text-[15px] focus:outline-none focus:border-client-primary transition-all bg-[#fcfcfc] hover:bg-white ${errors.weight ? "border-red-500" : "border-[#eee]"}`}
-                                            />
-                                            {errors.weight && <span className="text-red-500 text-[13px] font-medium">{errors.weight.message}</span>}
-                                        </div>
-                                    </div>
-
-                                    <div className="pt-[15px] flex items-center gap-[10px]">
-                                        <button
-                                            type="submit"
-                                            disabled={isSubmitting || uploading}
-                                            className="relative overflow-hidden group bg-client-primary rounded-[50px] px-[40px] py-[15px] font-[700] text-[16px] text-white cursor-pointer flex items-center gap-[12px] disabled:opacity-50 transition-all hover:shadow-lg active:scale-95"
+                                    <div className="flex flex-col gap-[10px]">
+                                        <label className="text-[15px] font-[600] text-client-secondary">Loài <span className="text-red-500">*</span></label>
+                                        <select
+                                            {...register("type")}
+                                            className={`border rounded-[10px] px-[20px] py-[15px] text-[15px] focus:outline-none focus:border-client-primary transition-all bg-[#fcfcfc] hover:bg-white ${errors.type ? "border-red-500" : "border-[#eee]"}`}
                                         >
-                                            <span className="relative z-10">{isSubmitting ? "Đang lưu..." : "Lưu bé cưng"}</span>
-                                            {!isSubmitting && <ArrowRight className="relative z-10 w-[20px] h-[20px] transition-transform duration-300 rotate-[-45deg] group-hover:rotate-0" />}
-                                            <div className="absolute top-0 left-0 w-full h-full bg-client-secondary transition-transform duration-500 ease-in-out transform scale-x-0 origin-left group-hover:scale-x-100"></div>
-                                        </button>
-                                        <p className="text-[13px] text-[#7d7b7b] font-medium italic">* Thông tin bắt buộc</p>
+                                            <option value="dog">Chó</option>
+                                            <option value="cat">Mèo</option>
+                                        </select>
                                     </div>
-                                </form>
-                            </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-[25px]">
+                                    <div className="flex flex-col gap-[10px]">
+                                        <label className="text-[15px] font-[600] text-client-secondary">Giống bé (Breed)</label>
+                                        <CreatableSelect
+                                            isClearable
+                                            options={breedOptions}
+                                            value={petBreed ? { label: petBreed, value: petBreed } : null}
+                                            onChange={(newValue) => {
+                                                const val = (newValue as BreedOption)?.value || "";
+                                                setValue("breed", val);
+                                                if ((newValue as any)?.__isNew__) {
+                                                    createBreedMutate({ name: val, type: petType });
+                                                }
+                                            }}
+                                            placeholder="Chọn hoặc nhập giống mới..."
+                                            formatCreateLabel={(inputValue) => `Thêm giống "${inputValue}"`}
+                                            styles={{
+                                                control: (base) => ({
+                                                    ...base,
+                                                    borderRadius: '10px',
+                                                    padding: '8px 10px',
+                                                    fontSize: '15px',
+                                                    backgroundColor: '#fcfcfc',
+                                                    borderColor: '#eee',
+                                                    boxShadow: 'none',
+                                                    '&:hover': {
+                                                        borderColor: '#F8721F',
+                                                        backgroundColor: 'white'
+                                                    }
+                                                }),
+                                                menu: (base) => ({
+                                                    ...base,
+                                                    borderRadius: '10px',
+                                                    fontSize: '15px',
+                                                    zIndex: 100
+                                                })
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col gap-[10px]">
+                                        <label className="text-[15px] font-[600] text-client-secondary">Cân nặng (kg) <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            {...register("weight", { valueAsNumber: true })}
+                                            className={`border rounded-[10px] px-[20px] py-[15px] text-[15px] focus:outline-none focus:border-client-primary transition-all bg-[#fcfcfc] hover:bg-white ${errors.weight ? "border-red-500" : "border-[#eee]"}`}
+                                            placeholder="0.0"
+                                        />
+                                        {errors.weight && <span className="text-red-500 text-[13px]">{errors.weight.message}</span>}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col gap-[10px]">
+                                    <label className="text-[15px] font-[600] text-client-secondary">Giới tính</label>
+                                    <div className="flex gap-4">
+                                        {["male", "female", "unknown"].map((g) => (
+                                            <label key={g} className="flex items-center gap-2 cursor-pointer group">
+                                                <input
+                                                    type="radio"
+                                                    value={g}
+                                                    {...register("gender")}
+                                                    className="appearance-none w-[18px] h-[18px] border-2 border-[#ddd] rounded-full checked:border-client-primary checked:border-[5px] transition-all cursor-pointer"
+                                                />
+                                                <span className="text-[14px] font-[500] text-[#555] group-hover:text-client-primary transition-colors">
+                                                    {g === "male" ? "Đực" : g === "female" ? "Cái" : "Không rõ"}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="pt-[10px]">
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting || uploading}
+                                        className="relative overflow-hidden group bg-client-primary rounded-[8px] px-[30px] py-[12px] font-[500] text-[14px] text-white cursor-pointer flex items-center gap-[8px] disabled:opacity-50"
+                                    >
+                                        <span className="relative z-10">{isSubmitting ? "Đang xử lý..." : "Lưu thú cưng"}</span>
+                                        {!isSubmitting && <ArrowRight className="relative z-10 w-[18px] h-[18px] transition-transform duration-300 rotate-[-45deg] group-hover:rotate-0" />}
+                                        <div className="absolute top-0 left-0 w-full h-full bg-client-secondary transition-transform duration-500 ease-in-out transform scale-x-0 origin-left group-hover:scale-x-100"></div>
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
-import { Calendar, Check, MapPin, PawPrint, Search } from "lucide-react";
+import { Check, MapPin, PawPrint, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { useMyPets } from "../../hooks/usePet";
@@ -222,7 +222,7 @@ export const BoardingBookingPage = () => {
                 {isLoadingPets && <div className="text-[1.3rem] text-[#637381]">Đang tải thú cưng...</div>}
                 {!isLoadingPets && myPets.length === 0 && (
                   <div className="text-[1.3rem] text-[#637381]">
-                    Bạn chưa có thú cưng nào. <Link to="/dashboard/pets" className="text-client-secondary font-bold">Thêm mới</Link>
+                    Bạn chưa có thú cưng nào. <Link to="/dashboard/pet" className="text-client-secondary font-bold">Thêm mới</Link>
                   </div>
                 )}
                 {myPets.map((pet: any) => (
@@ -309,7 +309,7 @@ export const BoardingBookingPage = () => {
                     <div className="text-[1.3rem] text-[#637381] mb-[8px]">Size {SIZE_LABELS[c.size] || c.size} • {Number(c.dailyPrice || 0).toLocaleString()}đ/ngày</div>
                     <div className="text-[1.3rem] text-[#505050] line-clamp-2 min-h-[38px]">{c.description || "Phòng sạch sẽ, an toàn, đầy đủ tiện nghi cơ bản."}</div>
                     <div className="flex items-center gap-[8px] mt-[10px]">
-                      <Link to={`/khach-san/${c._id}`} className="px-[12px] py-[6px] rounded-[10px] border border-[#18181820] text-[1.2rem] inline-flex">
+                      <Link to={`/hotels/${c._id}`} className="px-[12px] py-[6px] rounded-[10px] border border-[#18181820] text-[1.2rem] inline-flex">
                         Chi tiết
                       </Link>
                       <button type="button" onClick={() => setSelectedCageId(c._id)} className="px-[12px] py-[6px] rounded-[10px] bg-client-secondary text-white text-[1.2rem]">

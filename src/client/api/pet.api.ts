@@ -33,6 +33,11 @@ export const getMyPets = async () => {
     return response.data;
 };
 
+export const getPetDetail = async (id: string) => {
+    const response = await apiApp.get(`/api/v1/client/pet/my-pets/${id}`);
+    return response.data;
+};
+
 export const createMyPet = async (data: PetPayload) => {
     const response = await apiApp.post("/api/v1/client/pet/my-pets", data);
     return response.data;

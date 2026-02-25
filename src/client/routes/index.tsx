@@ -8,9 +8,7 @@ import { LoginPage } from "../pages/auth/Login";
 import { ForgotPasswordPage } from "../pages/auth/ForgotPassword";
 import { OTPPasswordPage } from "../pages/auth/OTPPassword";
 import { ResetPasswordPage } from "../pages/auth/ResetPassword";
-import { BookingSuccessPage } from "../pages/booking/BookingSuccess";
-import { BoardingBookingPage } from "../pages/boarding/BoardingBooking";
-import { BoardingCageDetailPage } from "../pages/boarding/BoardingCageDetail";
+import { BookingPage } from "../pages/booking/Booking";
 import { ServicePage } from "../pages/service/Service";
 import { ServiceDetailPage } from "../pages/service/ServiceDetail";
 import { CartPage } from "../pages/cart/Cart";
@@ -28,26 +26,32 @@ import { ReviewPage } from "../pages/dashboard/Review";
 import { OrderDetailPage } from "../pages/dashboard/OrderDetail";
 import { OrderHistoryPage } from "../pages/dashboard/OrderHistory";
 import { OrderInvoicePage } from "../pages/dashboard/OrderInvoice";
-import { BoardingBookingHistoryPage } from "../pages/dashboard/BoardingBookingHistory";
-import { BoardingBookingDetailPage } from "../pages/dashboard/BoardingBookingDetail";
-import { PetManagementPage } from "../pages/dashboard/PetManagement";
+import { PetListPage } from "../pages/dashboard/PetList";
+import { PetCreatePage } from "../pages/dashboard/PetCreate";
+import { PetEditPage } from "../pages/dashboard/PetEdit";
+import { BoardingBookingPage } from "../pages/boarding/BoardingBooking";
+import { BoardingCageDetailPage } from "../pages/boarding/BoardingCageDetail";
+import { BookingSuccessPage } from "../pages/booking/BookingSuccess";
+import { BookingHistoryPage } from "../pages/dashboard/BookingHistory";
+import { BookingDetailPage } from "../pages/dashboard/BookingDetail";
 import { AuthGuard } from "../components/guards/AuthGuard";
 
 export const ClientRoutes: RouteObject[] = [
     { path: "/", element: <HomePage /> },
     { path: "/product/detail/:slug", element: <ProductDetailPage /> },
     { path: "/shop", element: <ProductListPage /> },
-    { path: "/bai-viet", element: <BlogListPage /> },
-    { path: "/khach-san", element: <BoardingBookingPage /> },
-    { path: "/khach-san/:id", element: <BoardingCageDetailPage /> },
+    { path: "/blogs", element: <BlogListPage /> },
     { path: "/cart", element: <CartPage /> },
     { path: "/checkout", element: <CheckoutPage /> },
     { path: "/order/success", element: <CheckSuccessPage /> },
     { path: "/services", element: <ServicePage /> },
     { path: "/services/:slug", element: <ServiceDetailPage /> },
+    { path: "/hotels", element: <BoardingBookingPage /> },
+    { path: "/hotels/:id", element: <BoardingCageDetailPage /> },
     {
         element: <AuthGuard />,
         children: [
+            { path: "/services/booking", element: <BookingPage /> },
             { path: "/services/booking/success", element: <BookingSuccessPage /> },
         ]
     },
@@ -72,9 +76,11 @@ export const ClientRoutes: RouteObject[] = [
             { path: "order/invoice/:id", element: <OrderInvoicePage /> },
             { path: "order/detail/:id", element: <OrderDetailPage /> },
             { path: "orders", element: <OrderHistoryPage /> },
-            { path: "pets", element: <PetManagementPage /> },
-            { path: "boarding-bookings", element: <BoardingBookingHistoryPage /> },
-            { path: "boarding-bookings/:id", element: <BoardingBookingDetailPage /> },
+            { path: "bookings", element: <BookingHistoryPage /> },
+            { path: "booking/detail/:id", element: <BookingDetailPage /> },
+            { path: "pet", element: <PetListPage /> },
+            { path: "pet/create", element: <PetCreatePage /> },
+            { path: "pet/edit/:id", element: <PetEditPage /> },
         ]
     },
 ];
