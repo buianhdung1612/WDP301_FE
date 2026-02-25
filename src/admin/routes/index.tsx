@@ -44,7 +44,7 @@ import { BookingEditPage } from "../pages/booking/BookingEditPage";
 import { BookingDetailPage } from "../pages/booking/BookingDetailPage";
 import { BookingConfigPage } from "../pages/booking/BookingConfigPage";
 import { CalendarPage } from "../pages/calendar/CalendarPage";
-import { SettingGeneralPage } from "../pages/settings/SettingGeneralPage";
+import { SettingsPage } from "../pages/settings/SettingsPage";
 import { BreedListPage } from "../pages/service/BreedListPage";
 // HR Management Pages
 import { ScheduleCalendarPage } from "../pages/hr/ScheduleCalendarPage";
@@ -108,7 +108,7 @@ export const AdminRoutes = [
     { path: "booking/detail/:id", element: <PermissionGuard permission="booking_view"><BookingDetailPage /></PermissionGuard> },
     { path: "booking/config", element: <PermissionGuard permission="booking_view"><BookingConfigPage /></PermissionGuard> },
     { path: "calendar", element: <PermissionGuard permission="calendar_view"><CalendarPage /></PermissionGuard> },
-    { path: "dashboard/setting-general", element: <PermissionGuard permission="settings_view"><SettingGeneralPage /></PermissionGuard> },
+    { path: "dashboard/settings", element: <PermissionGuard permission="settings_view"><SettingsPage /></PermissionGuard> },
     { path: "service/breed/list", element: <PermissionGuard permission="breed_view"><BreedListPage /></PermissionGuard> },
     { path: "schedule-calendar", element: <PermissionGuard permission="schedule_view"><ScheduleCalendarPage /></PermissionGuard> },
     { path: "shifts", element: <PermissionGuard permission="shift_view"><ShiftListPage /></PermissionGuard> },

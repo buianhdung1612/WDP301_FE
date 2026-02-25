@@ -21,7 +21,7 @@ import 'dayjs/locale/vi';
 dayjs.locale('vi');
 
 import { getServices } from '../../../api/service.api';
-import { useSettingGeneral, useUpdateSettingGeneral } from '../../settings/hooks/useSettingGeneral';
+import { useSettingGeneral, useUpdateSettingGeneral } from '../../settings/hooks/useSettings';
 
 interface Event {
     id: string;

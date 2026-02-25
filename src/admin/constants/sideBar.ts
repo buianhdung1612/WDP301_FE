@@ -163,9 +163,7 @@ export const menuManagementData = [
         label: "Cài đặt",
         tKey: "admin.sidebar.settings",
         Icon: SettingsIcon,
+        path: `/${prefixAdmin}/dashboard/settings`,
         permission: "settings_view",
-        children: [
-            { id: "general", label: "Cài đặt chung", tKey: "admin.sidebar.setting_general", path: `/${prefixAdmin}/dashboard/setting-general`, permission: "settings_view" },
-        ]
     }
 ];

@@ -20,7 +20,7 @@ import {
 import { CalendarFiltersDrawer } from './sections/CalendarFiltersDrawer';
 import { CalendarEventDialog } from './sections/CalendarEventDialog';
 import { useCreateBooking, useBookings } from './hooks/useBooking';
-import { useSettingGeneral } from '../settings/hooks/useSettingGeneral';
+import { useSettingGeneral } from '../settings/hooks/useSettings';
 import { toast } from 'react-toastify';
 
 import { Title } from "../../components/ui/Title";
