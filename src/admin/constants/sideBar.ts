@@ -180,11 +180,16 @@ export const menuManagementData = [
         label: "Cài đặt",
         tKey: "admin.sidebar.settings",
         Icon: SettingsIcon,
+        path: `/${prefixAdmin}/dashboard/settings`,
         permission: "settings_view",
         children: [
-            { id: "general", label: "Cài đặt chung", tKey: "admin.sidebar.setting_general", path: `/${prefixAdmin}/dashboard/setting-general`, permission: "settings_view" },
-            { id: "breed", label: "Giống thú cưng", path: `/${prefixAdmin}/settings/breed/list`, permission: "breed_view" },
-            { id: "attendance-config", label: "Cấu hình chấm công", path: `/${prefixAdmin}/settings/attendance-config`, permission: "attendance_edit" },
+            { id: "settings-general", label: "Cài đặt chung", path: `/${prefixAdmin}/dashboard/settings/general` },
+            { id: "settings-shipping", label: "Vận chuyển", path: `/${prefixAdmin}/dashboard/settings/shipping` },
+            { id: "settings-payment", label: "Thanh toán", path: `/${prefixAdmin}/dashboard/settings/payment` },
+            { id: "settings-social", label: "Mạng xã hội", path: `/${prefixAdmin}/dashboard/settings/social` },
+            { id: "settings-app-password", label: "Mật khẩu ứng dụng", path: `/${prefixAdmin}/dashboard/settings/app-password` },
+            { id: "settings-breed", label: "Giống thú cưng", path: `/${prefixAdmin}/settings/breed/list` },
+            { id: "settings-attendance", label: "Cấu hình điểm danh", path: `/${prefixAdmin}/settings/attendance-config` },
         ]
     }
 ];
