@@ -665,6 +665,16 @@ input[type="number"]::-webkit-inner-spin-button {
     opacity: 0.5;
 }
 
+.banner.banner-hotel::before {
+    background-image: linear-gradient(90deg, rgba(16, 41, 55, 0.45), rgba(16, 41, 55, 0.2), rgba(16, 41, 55, 0.45));
+    background-color: transparent;
+    opacity: 1;
+}
+
+.banner.banner-hotel::after {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
 /* End Banner Detail Page */
 
 

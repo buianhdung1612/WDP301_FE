@@ -4,7 +4,9 @@ import { toast } from "react-toastify";
 import { Check, MapPin, PawPrint, Search, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../../../stores/useAuthStore";
+import { FooterSub } from "../../components/layouts/FooterSub";
 import { useMyPets } from "../../hooks/usePet";
+import { ProductBanner } from "../product/sections/ProductBanner";
 import {
   useAvailableCages,
   useCreateBoardingBooking,
@@ -34,6 +36,11 @@ const SIZE_OPTIONS = [
   { value: "M", label: "Size M - 63 x 43 x 53 cm (8-15kg)" },
   { value: "L", label: "Size L - 83 x 63 x 63 cm (15-20kg)" },
   { value: "XL_XXL", label: "Size XL/XXL - 105 x 85 x 100 cm (trên 20kg)" },
+];
+
+const breadcrumbs = [
+  { label: "Trang chủ", to: "/" },
+  { label: "Khách sạn", to: "/hotels" },
 ];
 
 export const BoardingBookingPage = () => {
@@ -206,90 +213,97 @@ export const BoardingBookingPage = () => {
   };
 
   return (
-    <div className="bg-[#fffdf9]">
-      <div className="relative overflow-hidden bg-gradient-to-r from-[#fff1e6] via-[#fff8ef] to-[#fff]">
-        <div className="app-container py-[44px]">
-          <div className="flex flex-col lg:flex-row items-center gap-[24px]">
-            <div className="w-full lg:w-[55%]">
-              <div className="inline-flex items-center gap-[8px] py-[6px] px-[12px] rounded-full bg-[#fff0e2] text-client-primary text-[12px] uppercase tracking-[1px] font-[700] mb-[10px]">
-                <Sparkles className="w-3.5 h-3.5" />
-                Lưu trú an tâm
-              </div>
-              <div className="text-[34px] font-secondary text-client-secondary leading-[1.1]">Khách sạn thú cưng</div>
-              <p className="text-[14px] text-[#505050] mt-[8px]">
-                Trải nghiệm lưu trú an toàn, sạch sẽ và chuyên nghiệp với quy trình chăm sóc riêng cho từng bé.
-              </p>
-              <div className="flex items-center gap-[8px] mt-[14px] text-[13px] text-[#637381]">
-                <MapPin className="w-4 h-4 text-client-secondary" />
-                64 Ung Văn Khiêm, Pleiku, Gia Lai
-              </div>
-            </div>
-
-            <div className="w-full lg:w-[45%] bg-white rounded-[18px] shadow-[0_18px_45px_-28px_rgba(230,126,32,0.5)] p-[14px] border border-[#f1e4d6]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-[10px]">
-                <div>
-                  <label className="block text-[12px] font-[700] mb-[6px] text-client-secondary">Ngày nhận</label>
-                  <input
-                    type="date"
-                    value={checkInDate}
-                    onChange={(e) => setCheckInDate(e.target.value)}
-                    min={dayjs().format("YYYY-MM-DD")}
-                    className="w-full py-[9px] px-[12px] border border-[#eee] rounded-[10px] text-[12px] focus:outline-none focus:border-client-primary"
-                  />
+    <>
+      <ProductBanner
+        pageTitle="Khách sạn thú cưng"
+        breadcrumbs={breadcrumbs}
+        url="https://i.pinimg.com/1200x/c1/f4/49/c1f44969b4eab486fb51b9501792fdc1.jpg"
+        className="banner-hotel bg-top"
+      />
+      <div className="bg-[#fffdf9]">
+        <div className="relative overflow-hidden bg-gradient-to-r from-[#fff1e6] via-[#fff8ef] to-[#fff]">
+          <div className="app-container py-[44px]">
+            <div className="flex flex-col lg:flex-row items-center gap-[24px]">
+              <div className="w-full lg:w-[55%]">
+                <div className="inline-flex items-center gap-[8px] py-[6px] px-[12px] rounded-full bg-[#fff0e2] text-client-primary text-[12px] uppercase tracking-[1px] font-[700] mb-[10px]">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Lưu trú an tâm
                 </div>
-                <div>
-                  <label className="block text-[12px] font-[700] mb-[6px] text-client-secondary">Ngày trả</label>
-                  <input
-                    type="date"
-                    value={checkOutDate}
-                    onChange={(e) => setCheckOutDate(e.target.value)}
-                    min={dayjs(checkInDate).add(1, "day").format("YYYY-MM-DD")}
-                    className="w-full py-[9px] px-[12px] border border-[#eee] rounded-[10px] text-[12px] focus:outline-none focus:border-client-primary"
-                  />
+                <div className="text-[34px] font-secondary text-client-secondary leading-[1.1]">Khách sạn thú cưng</div>
+                <p className="text-[14px] text-[#505050] mt-[8px]">
+                  Trải nghiệm lưu trú an toàn, sạch sẽ và chuyên nghiệp với quy trình chăm sóc riêng cho từng bé.
+                </p>
+                <div className="flex items-center gap-[8px] mt-[14px] text-[13px] text-[#637381]">
+                  <MapPin className="w-4 h-4 text-client-secondary" />
+                  64 Ung Văn Khiêm, Pleiku, Gia Lai
                 </div>
               </div>
 
-              <div className="mt-[10px] grid grid-cols-1 md:grid-cols-2 gap-[10px]">
-                <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                  className="w-full py-[9px] px-[12px] border border-[#eee] rounded-[10px] text-[12px] focus:outline-none focus:border-client-primary"
-                >
-                  {TYPE_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={size}
-                  onChange={(e) => setSize(e.target.value)}
-                  className="w-full py-[9px] px-[12px] border border-[#eee] rounded-[10px] text-[12px] focus:outline-none focus:border-client-primary"
-                >
-                  {SIZE_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <div className="w-full lg:w-[45%] bg-white rounded-[18px] shadow-[0_18px_45px_-28px_rgba(230,126,32,0.5)] p-[14px] border border-[#f1e4d6]">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[10px]">
+                  <div>
+                    <label className="block text-[12px] font-[700] mb-[6px] text-client-secondary">Ngày nhận</label>
+                    <input
+                      type="date"
+                      value={checkInDate}
+                      onChange={(e) => setCheckInDate(e.target.value)}
+                      min={dayjs().format("YYYY-MM-DD")}
+                      className="w-full py-[9px] px-[12px] border border-[#eee] rounded-[10px] text-[12px] focus:outline-none focus:border-client-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[12px] font-[700] mb-[6px] text-client-secondary">Ngày trả</label>
+                    <input
+                      type="date"
+                      value={checkOutDate}
+                      onChange={(e) => setCheckOutDate(e.target.value)}
+                      min={dayjs(checkInDate).add(1, "day").format("YYYY-MM-DD")}
+                      className="w-full py-[9px] px-[12px] border border-[#eee] rounded-[10px] text-[12px] focus:outline-none focus:border-client-primary"
+                    />
+                  </div>
+                </div>
 
-              <button
-                type="button"
-                className="w-full mt-[10px] py-[10px] rounded-[10px] bg-client-primary text-white text-[13px] font-[700] flex items-center justify-center gap-[8px] hover:bg-client-secondary transition-default"
-              >
-                <Search className="w-4 h-4" />
-                Tìm phòng trống
-              </button>
+                <div className="mt-[10px] grid grid-cols-1 md:grid-cols-2 gap-[10px]">
+                  <select
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
+                    className="w-full py-[9px] px-[12px] border border-[#eee] rounded-[10px] text-[12px] focus:outline-none focus:border-client-primary"
+                  >
+                    {TYPE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={size}
+                    onChange={(e) => setSize(e.target.value)}
+                    className="w-full py-[9px] px-[12px] border border-[#eee] rounded-[10px] text-[12px] focus:outline-none focus:border-client-primary"
+                  >
+                    {SIZE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  type="button"
+                  className="w-full mt-[10px] py-[10px] rounded-[10px] bg-client-primary text-white text-[13px] font-[700] flex items-center justify-center gap-[8px] hover:bg-client-secondary transition-default"
+                >
+                  <Search className="w-4 h-4" />
+                  Tìm phòng trống
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="app-container py-[36px]">
-        <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-[20px]">
-          <div className="bg-white rounded-[18px] border border-[#f1e4d6] p-[16px] h-fit shadow-[0_18px_45px_-34px_rgba(230,126,32,0.5)]">
-            <div className="text-[20px] font-secondary text-client-secondary mb-[10px]">Thông tin đặt phòng</div>
+        <div className="app-container py-[36px]">
+          <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-[20px]">
+            <div className="bg-white rounded-[18px] border border-[#f1e4d6] p-[16px] h-fit shadow-[0_18px_45px_-34px_rgba(230,126,32,0.5)]">
+              <div className="text-[20px] font-secondary text-client-secondary mb-[10px]">Thông tin đặt phòng</div>
 
             <div className="grid grid-cols-1 gap-[8px] mb-[12px]">
               <input type="text" placeholder="Họ và tên" required value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full py-[9px] px-[12px] border border-[#eee] rounded-[10px] text-[13px] focus:outline-none focus:border-client-primary" />
@@ -430,7 +444,7 @@ export const BoardingBookingPage = () => {
             )}
           </div>
 
-          <div>
+            <div>
             <div className="text-[24px] font-secondary text-client-secondary mb-[10px]">Danh sách chuồng trống</div>
             {isLoadingCages && <div className="text-[13px] text-[#637381]">Đang tải...</div>}
             {!isLoadingCages && cagesSafe.length === 0 && <div className="text-[13px] text-[#637381]">Không có phòng trống phù hợp.</div>}
@@ -463,9 +477,11 @@ export const BoardingBookingPage = () => {
                 );
               })}
             </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      <FooterSub />
+    </>
   );
 };

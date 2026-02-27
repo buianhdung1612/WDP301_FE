@@ -465,6 +465,9 @@ export const PetCagesPage = () => {
                                           <span>{item?.activity || "Van dong"}{item?.durationMinutes ? ` (${item.durationMinutes} phut)` : ""}</span>
                                           <span className={`px-[6px] py-[2px] rounded-full text-[10px] font-[700] ${statusMeta.className}`}>{statusMeta.label}</span>
                                         </div>
+                                        {(item?.staffName || item?.staffId?.fullName) && (
+                                          <div className="mt-[4px] text-[11px] text-[#64748b]">NVKS: {item?.staffName || item?.staffId?.fullName}</div>
+                                        )}
                                       </div>
                                     );
                                   })}

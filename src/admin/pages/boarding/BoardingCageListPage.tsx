@@ -1,19 +1,31 @@
-﻿import { useMemo, useState } from "react";
+﻿import { ChangeEvent, MouseEvent, SyntheticEvent, useMemo, useState } from "react";
 import {
-    Chip,
+    Avatar,
     Box,
     Button,
     Card,
+    Checkbox,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
+    IconButton,
+    Menu,
     MenuItem,
     Stack,
+    styled,
+    Tab,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TablePagination,
+    TableRow,
+    Tabs,
     TextField,
     Typography,
 } from "@mui/material";
-import { DataGrid, GridActionsCell, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
 import { Icon } from "@iconify/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
@@ -28,6 +40,29 @@ const trangThaiChuongOptions = [
     { value: "occupied", label: "Đang sử dụng" },
     { value: "maintenance", label: "Bảo trì" },
 ];
+
+const TabBadge = styled("span")(() => ({
+    height: "24px",
+    minWidth: "24px",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: "8px",
+    padding: "0px 6px",
+    borderRadius: "var(--shape-borderRadius-sm)",
+    fontSize: "0.75rem",
+    fontWeight: 700,
+    transition: "all 0.2s",
+}));
+
+const getCageStatusMeta = (status?: string) => {
+    const map: Record<string, { label: string; color: string; bg: string }> = {
+        available: { label: "Sẵn sàng", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
+        occupied: { label: "Đang sử dụng", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)" },
+        maintenance: { label: "Bảo trì", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
+    };
+    return map[String(status || "")] || { label: status || "-", color: "var(--palette-text-disabled)", bg: "var(--palette-background-neutral)" };
+};
 
 const kichThuocChuongOptions = [
     {
@@ -102,7 +137,12 @@ const initForm = {
 
 export const BoardingCageListPage = () => {
     const queryClient = useQueryClient();
-    const [search, setSearch] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [tabStatus, setTabStatus] = useState("all");
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [selected, setSelected] = useState<string[]>([]);
+    const [anchorEl, setAnchorEl] = useState<{ [key: string]: HTMLElement | null }>({});
     const [open, setOpen] = useState(false);
     const [editing, setEditing] = useState<any>(null);
     const [form, setForm] = useState<any>(initForm);
@@ -113,25 +153,28 @@ export const BoardingCageListPage = () => {
         queryFn: () => getBoardingCages(),
     });
 
-    const rows = useMemo(() => {
-        const list = Array.isArray(data?.data) ? data.data : [];
-        if (!search) return list;
-        const q = search.toLowerCase();
-        return list.filter((item: any) =>
-            String(item.cageCode || "").toLowerCase().includes(q) ||
-            String(item.description || "").toLowerCase().includes(q)
-        );
-    }, [data, search]);
+    const allRows = useMemo(() => (Array.isArray(data?.data) ? data.data : []), [data]);
 
-    const summary = useMemo(() => {
-        const list = Array.isArray(data?.data) ? data.data : [];
-        return {
-            total: list.length,
-            available: list.filter((item: any) => item.status === "available").length,
-            occupied: list.filter((item: any) => item.status === "occupied").length,
-            maintenance: list.filter((item: any) => item.status === "maintenance").length,
-        };
-    }, [data]);
+    const statusCounts = useMemo(() => ({
+        all: allRows.length,
+        available: allRows.filter((item: any) => item.status === "available").length,
+        occupied: allRows.filter((item: any) => item.status === "occupied").length,
+        maintenance: allRows.filter((item: any) => item.status === "maintenance").length,
+    }), [allRows]);
+
+    const filteredRows = useMemo(() => {
+        const q = searchQuery.trim().toLowerCase();
+        return allRows.filter((item: any) => {
+            if (tabStatus !== "all" && String(item.status || "") !== tabStatus) return false;
+            if (!q) return true;
+            return (
+                String(item.cageCode || "").toLowerCase().includes(q) ||
+                String(item.description || "").toLowerCase().includes(q) ||
+                String(item.type || "").toLowerCase().includes(q) ||
+                String(item.size || "").toLowerCase().includes(q)
+            );
+        });
+    }, [allRows, searchQuery, tabStatus]);
 
     const createMut = useMutation({
         mutationFn: createBoardingCage,
@@ -200,118 +243,320 @@ export const BoardingCageListPage = () => {
         }
     };
 
-    const columns: GridColDef[] = [
-        { field: "cageCode", headerName: "Mã chuồng", flex: 1, minWidth: 130 },
-        { field: "type", headerName: "Loại", width: 120 },
-        {
-            field: "size",
-            headerName: "Kích thước",
-            width: 220,
-            renderCell: (params) => <Typography>{getSizeLabel(params.value)}</Typography>,
-        },
-        {
-            field: "dailyPrice",
-            headerName: "Giá/ngày",
-            width: 140,
-            renderCell: (params) => (
-                <Typography>{Number(params.value || 0).toLocaleString("vi-VN")}đ</Typography>
-            )
-        },
-        {
-            field: "amenities",
-            headerName: "Tiện nghi",
-            flex: 1,
-            minWidth: 220,
-            renderCell: (params) => {
-                const list = Array.isArray(params.row?.amenities) ? params.row.amenities : [];
-                if (!list.length) return <Typography>Chưa cập nhật</Typography>;
-                const shortText = list.slice(0, 3).join(", ");
-                return <Typography title={list.join(", ")}>{shortText}</Typography>;
-            }
-        },
-        {
-            field: "status",
-            headerName: "Trạng thái",
-            width: 160,
-            renderCell: (params) => {
-                const label = trangThaiChuongOptions.find((item) => item.value === params.value)?.label || params.value;
-                return <Typography>{label}</Typography>;
-            }
-        },
-        {
-            field: "actions",
-            type: "actions",
-            headerName: "",
-            width: 80,
-            renderCell: (params) => (
-                <GridActionsCell {...params}>
-                    <GridActionsCellItem
-                        icon={<Icon icon="solar:pen-bold" width={18} />}
-                        label="Sửa"
-                        onClick={() => handleOpenEdit(params.row)}
-                        showInMenu
-                    />
-                    <GridActionsCellItem
-                        icon={<Icon icon="solar:trash-bin-trash-bold" width={18} />}
-                        label="Xóa"
-                        onClick={() => {
-                            if (window.confirm("Bạn có chắc muốn xóa chuồng này?")) deleteMut.mutate(params.row._id);
-                        }}
-                        showInMenu
-                    />
-                </GridActionsCell>
-            )
+    const handleOpenMenu = (event: MouseEvent<HTMLElement>, id: string) => {
+        setAnchorEl((prev) => ({ ...prev, [id]: event.currentTarget }));
+    };
+
+    const handleCloseMenu = (id: string) => {
+        setAnchorEl((prev) => ({ ...prev, [id]: null }));
+    };
+
+    const handleTabChange = (_event: SyntheticEvent, newValue: string) => {
+        setTabStatus(newValue);
+        setPage(0);
+    };
+
+    const handleChangePage = (_event: unknown, newPage: number) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
+    const handleSelectAllClick = (event: ChangeEvent<HTMLInputElement>) => {
+        if (event.target.checked) {
+            setSelected(filteredRows.map((row: any) => row._id));
+            return;
         }
-    ];
+        setSelected([]);
+    };
+
+    const handleSelectRow = (id: string) => {
+        const selectedIndex = selected.indexOf(id);
+        let newSelected: string[] = [];
+        if (selectedIndex === -1) {
+            newSelected = [...selected, id];
+        } else if (selectedIndex === 0) {
+            newSelected = selected.slice(1);
+        } else if (selectedIndex === selected.length - 1) {
+            newSelected = selected.slice(0, -1);
+        } else if (selectedIndex > 0) {
+            newSelected = [...selected.slice(0, selectedIndex), ...selected.slice(selectedIndex + 1)];
+        }
+        setSelected(newSelected);
+    };
 
     return (
-        <Box>
-            <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between" }}>
-                <Box sx={{ width: "100%" }}>
-                    <Box
-                        sx={{
-                            p: 2.5,
-                            borderRadius: 3,
-                            border: "1px solid #fde68a",
-                            background: "linear-gradient(120deg, #fffbeb 0%, #fff7ed 50%, #eff6ff 100%)",
-                        }}
-                    >
-                        <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between" alignItems={{ xs: "flex-start", md: "center" }}>
-                            <Box>
-                                <Title title="Quản lý chuồng khách sạn" />
-                                <Breadcrumb items={[
-                                    { label: "Bảng điều khiển", to: `/${prefixAdmin}` },
-                                    { label: "Khách sạn" },
-                                    { label: "Quản lý chuồng" },
-                                ]} />
-                            </Box>
-                            <Button variant="contained" onClick={handleOpenCreate} startIcon={<Icon icon="mingcute:add-line" />}>
-                                Tạo chuồng
-                            </Button>
-                        </Stack>
-                    </Box>
+        <Box sx={{ maxWidth: "1200px", mx: "auto", p: "calc(3 * var(--spacing))" }}>
+            <Box sx={{ mb: 5, display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
+                <Box>
+                    <Title title="Quản lý chuồng khách sạn" />
+                    <Breadcrumb items={[
+                        { label: "Bảng điều khiển", to: `/${prefixAdmin}` },
+                        { label: "Quản lý chuồng khách sạn" },
+                    ]} />
                 </Box>
+                <Button
+                    variant="contained"
+                    onClick={handleOpenCreate}
+                    startIcon={<Icon icon="eva:plus-fill" />}
+                    sx={{
+                        bgcolor: "var(--palette-text-primary)",
+                        color: "var(--palette-common-white)",
+                        minHeight: "2.5rem",
+                        fontWeight: 700,
+                        fontSize: "0.875rem",
+                        padding: "0 calc(2 * var(--spacing))",
+                        borderRadius: "var(--shape-borderRadius)",
+                        textTransform: "none",
+                        boxShadow: "none",
+                        "&:hover": {
+                            bgcolor: "var(--palette-grey-700)",
+                            boxShadow: "var(--customShadows-z8)",
+                        },
+                    }}
+                >
+                    Tạo chuồng mới
+                </Button>
             </Box>
 
-            <Stack direction={{ xs: "column", md: "row" }} spacing={1.5} sx={{ mb: 2 }}>
-                <Chip color="primary" label={`Tổng chuồng: ${summary.total}`} />
-                <Chip color="success" label={`Sẵn sàng: ${summary.available}`} />
-                <Chip color="warning" label={`Đang sử dụng: ${summary.occupied}`} />
-                <Chip color="default" label={`Bảo trì: ${summary.maintenance}`} />
-            </Stack>
+            <Card
+                sx={{
+                    borderRadius: "var(--shape-borderRadius-lg)",
+                    bgcolor: "var(--palette-background-paper)",
+                    boxShadow: "var(--customShadows-card)",
+                    overflow: "hidden",
+                    display: "flex",
+                    flexDirection: "column",
+                }}
+            >
+                <Tabs
+                    value={tabStatus}
+                    onChange={handleTabChange}
+                    variant="scrollable"
+                    scrollButtons={false}
+                    sx={{
+                        px: "20px",
+                        minHeight: "48px",
+                        borderBottom: "1px solid var(--palette-background-neutral)",
+                        "& .MuiTabs-flexContainer": { gap: "calc(4 * var(--spacing))" },
+                        "& .MuiTabs-indicator": { backgroundColor: "var(--palette-text-primary)", height: 2 },
+                    }}
+                >
+                    {[
+                        { value: "all", label: "Tất cả", color: "var(--palette-common-white)", bg: "var(--palette-grey-800)", activeColor: "var(--palette-common-white)", activeBg: "var(--palette-grey-800)" },
+                        { value: "available", label: "Sẵn sàng", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)", activeColor: "var(--palette-success-contrastText)", activeBg: "var(--palette-success-main)" },
+                        { value: "occupied", label: "Đang sử dụng", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)", activeColor: "var(--palette-warning-contrastText)", activeBg: "var(--palette-warning-main)" },
+                        { value: "maintenance", label: "Bảo trì", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)", activeColor: "var(--palette-error-contrastText)", activeBg: "var(--palette-error-main)" },
+                    ].map((tab) => (
+                        <Tab
+                            key={tab.value}
+                            value={tab.value}
+                            disableRipple
+                            label={(
+                                <Box sx={{ display: "flex", alignItems: "center" }}>
+                                    <Typography
+                                        sx={{
+                                            fontSize: "0.875rem",
+                                            fontWeight: tabStatus === tab.value ? 700 : 500,
+                                            color: tabStatus === tab.value ? "var(--palette-text-primary)" : "inherit",
+                                        }}
+                                    >
+                                        {tab.label}
+                                    </Typography>
+                                    <TabBadge
+                                        sx={{
+                                            bgcolor: tabStatus === tab.value ? tab.activeBg : tab.bg,
+                                            color: tabStatus === tab.value ? tab.activeColor : tab.color,
+                                        }}
+                                    >
+                                        {statusCounts[tab.value as keyof typeof statusCounts]}
+                                    </TabBadge>
+                                </Box>
+                            )}
+                            sx={{
+                                minWidth: 0,
+                                padding: "0",
+                                minHeight: "48px",
+                                textTransform: "none",
+                                color: "var(--palette-text-secondary)",
+                                "&.Mui-selected": { color: "var(--palette-text-primary)" },
+                            }}
+                        />
+                    ))}
+                </Tabs>
 
-            <Card sx={{ p: 2 }}>
-                <Search placeholder="Tìm theo mã chuồng hoặc mô tả..." value={search} onChange={setSearch} />
-                <Box sx={{ mt: 2, height: 560 }}>
-                    <DataGrid
-                        rows={rows}
-                        columns={columns}
-                        getRowId={(row) => row._id}
-                        loading={isLoading}
-                        pageSizeOptions={[10, 20, 50]}
-                        initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-                    />
+                <Box sx={{ p: "20px", display: "flex", alignItems: "center", gap: 2, borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                    <Search placeholder="Tìm theo mã chuồng hoặc mô tả..." value={searchQuery} onChange={setSearchQuery} maxWidth="24rem" />
                 </Box>
+
+                <TableContainer sx={{ position: "relative", overflow: "unset" }}>
+                    <Table sx={{ minWidth: 1080 }}>
+                        <TableHead sx={{ bgcolor: "var(--palette-background-neutral)" }}>
+                            <TableRow>
+                                <TableCell padding="checkbox" sx={{ borderBottom: "none", textAlign: "center" }}>
+                                    <Checkbox
+                                        indeterminate={selected.length > 0 && selected.length < filteredRows.length}
+                                        checked={filteredRows.length > 0 && selected.length === filteredRows.length}
+                                        onChange={handleSelectAllClick}
+                                        sx={{ color: "var(--palette-text-disabled)", p: 0 }}
+                                    />
+                                </TableCell>
+                                <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Mã chuồng</TableCell>
+                                <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Loại</TableCell>
+                                <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Kích thước</TableCell>
+                                <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Giá/ngày</TableCell>
+                                <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Tiện nghi</TableCell>
+                                <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }} align="right">Trạng thái</TableCell>
+                                <TableCell sx={{ borderBottom: "none", width: 80 }} align="right" />
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {isLoading ? (
+                                <TableRow>
+                                    <TableCell colSpan={8} align="center" sx={{ py: 10 }}>
+                                        <Typography sx={{ color: "var(--palette-text-secondary)" }}>Đang tải dữ liệu...</Typography>
+                                    </TableCell>
+                                </TableRow>
+                            ) : filteredRows.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={8} align="center" sx={{ py: 10 }}>
+                                        <Typography sx={{ color: "var(--palette-text-secondary)" }}>Không có dữ liệu</Typography>
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                filteredRows
+                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                    .map((row: any) => {
+                                        const isItemSelected = selected.indexOf(row._id) !== -1;
+                                        const statusMeta = getCageStatusMeta(row.status);
+                                        const amenities = Array.isArray(row.amenities) ? row.amenities : [];
+                                        return (
+                                            <TableRow
+                                                key={row._id}
+                                                hover
+                                                selected={isItemSelected}
+                                                sx={{ "&:hover": { bgcolor: "var(--palette-action-hover)" }, transition: "background-color 0.2s" }}
+                                            >
+                                                <TableCell padding="checkbox" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", textAlign: "center" }}>
+                                                    <Checkbox
+                                                        checked={isItemSelected}
+                                                        onClick={() => handleSelectRow(row._id)}
+                                                        sx={{ color: "var(--palette-text-disabled)", p: 0 }}
+                                                    />
+                                                </TableCell>
+                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                    <Stack direction="row" spacing={1.5} alignItems="center">
+                                                        <Avatar src={row.avatar} variant="rounded" sx={{ width: 38, height: 38 }}>
+                                                            <Icon icon="mdi:dog-side" width={18} />
+                                                        </Avatar>
+                                                        <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
+                                                            {row.cageCode || "-"}
+                                                        </Typography>
+                                                    </Stack>
+                                                </TableCell>
+                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                    <Typography sx={{ fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
+                                                        {String(row.type || "standard").toUpperCase()}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                    <Typography sx={{ fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
+                                                        {getSizeLabel(row.size)}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                    <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
+                                                        {Number(row.dailyPrice || 0).toLocaleString("vi-VN")}đ
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                    <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.8125rem" }}>
+                                                        {amenities.length ? amenities.slice(0, 3).join(", ") : "Chưa cập nhật"}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                    <Box
+                                                        component="span"
+                                                        sx={{
+                                                            display: "inline-flex",
+                                                            alignItems: "center",
+                                                            px: 1,
+                                                            height: "24px",
+                                                            borderRadius: "var(--shape-borderRadius-sm)",
+                                                            fontWeight: 700,
+                                                            fontSize: "0.6875rem",
+                                                            color: statusMeta.color,
+                                                            bgcolor: statusMeta.bg,
+                                                        }}
+                                                    >
+                                                        {statusMeta.label}
+                                                    </Box>
+                                                </TableCell>
+                                                <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", width: 80 }}>
+                                                    <IconButton
+                                                        onClick={(event) => handleOpenMenu(event, row._id)}
+                                                        sx={{
+                                                            color: "var(--palette-text-primary)",
+                                                            "&:hover": {
+                                                                bgcolor: "rgba(var(--palette-action-activeChannel) / var(--palette-action-hoverOpacity))",
+                                                            },
+                                                        }}
+                                                    >
+                                                        <Icon icon="eva:more-vertical-fill" width={20} />
+                                                    </IconButton>
+                                                    <Menu
+                                                        anchorEl={anchorEl[row._id]}
+                                                        open={Boolean(anchorEl[row._id])}
+                                                        onClose={() => handleCloseMenu(row._id)}
+                                                        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                                                        transformOrigin={{ vertical: "top", horizontal: "right" }}
+                                                        slotProps={{
+                                                            paper: {
+                                                                sx: {
+                                                                    width: 160,
+                                                                    boxShadow: "var(--customShadows-z20)",
+                                                                    borderRadius: "var(--shape-borderRadius-md)",
+                                                                    p: 0.5,
+                                                                },
+                                                            },
+                                                        }}
+                                                    >
+                                                        <MenuItem onClick={() => { handleCloseMenu(row._id); handleOpenEdit(row); }}>
+                                                            <Icon icon="solar:pen-bold" width={18} style={{ marginRight: 8 }} />
+                                                            Sửa
+                                                        </MenuItem>
+                                                        <MenuItem
+                                                            onClick={() => {
+                                                                handleCloseMenu(row._id);
+                                                                if (window.confirm("Bạn có chắc muốn xóa chuồng này?")) deleteMut.mutate(row._id);
+                                                            }}
+                                                            sx={{ color: "var(--palette-error-main)" }}
+                                                        >
+                                                            <Icon icon="solar:trash-bin-trash-bold" width={18} style={{ marginRight: 8 }} />
+                                                            Xóa
+                                                        </MenuItem>
+                                                    </Menu>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+
+                <TablePagination
+                    rowsPerPageOptions={[10, 20, 50]}
+                    component="div"
+                    count={filteredRows.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                />
             </Card>
 
             <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
@@ -374,3 +619,9 @@ export const BoardingCageListPage = () => {
         </Box>
     );
 };
+
+
+
+
+
+

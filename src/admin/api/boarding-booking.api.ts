@@ -27,8 +27,11 @@ export const getBoardingBookingDetail = async (id: string) => {
     return response.data;
 };
 
-export const getBoardingHotelStaffs = async () => {
-    const response = await apiApp.get(`${BASE_URL}/hotel-staffs`, withAuth());
+export const getBoardingHotelStaffs = async (date?: string) => {
+    const response = await apiApp.get(`${BASE_URL}/hotel-staffs`, {
+        ...withAuth(),
+        params: date ? { date } : undefined,
+    });
     return response.data;
 };
 
@@ -58,16 +61,10 @@ export interface BoardingExerciseItem {
     activity?: string;
     durationMinutes?: number;
     note?: string;
+    staffId?: string | { _id?: string; fullName?: string } | null;
+    staffName?: string;
     status?: "pending" | "done" | "skipped";
     doneAt?: string | null;
-}
-
-export interface BoardingShiftChecklistItem {
-    shift?: "morning" | "afternoon" | "night";
-    title?: string;
-    note?: string;
-    checked?: boolean;
-    checkedAt?: string | null;
 }
 
 export const updateBoardingCareSchedule = async (
@@ -75,7 +72,7 @@ export const updateBoardingCareSchedule = async (
     payload: {
         feedingSchedule?: BoardingFeedingItem[];
         exerciseSchedule?: BoardingExerciseItem[];
-        shiftChecklist?: BoardingShiftChecklistItem[];
+        careDate?: string;
     }
 ) => {
     const response = await apiApp.patch(`${BASE_URL}/${id}/care-schedule`, payload, withAuth());
