@@ -15,6 +15,7 @@ import { BlogDetailPage } from "../pages/blog/BlogDetailPage";
 import { BlogEditPage } from "../pages/blog/BlogEditPage";
 import { LoginPage } from "../pages/authen/LoginPage";
 import { DashboardPage } from "../pages/dashboard/DashboardPage";
+import { SystemPage } from "../pages/dashboard/SystemPage";
 import { BlogCategoryEditPage } from "../pages/blog-category/BlogCategoryEditPage";
 import { CouponListPage } from "../pages/coupon/CouponListPage";
 import { CouponCreatePage } from "../pages/coupon/CouponCreatePage";
@@ -70,6 +71,7 @@ import { PermissionGuard } from "../components/auth/PermissionGuard";
 
 export const AdminRoutes = [
     { path: "dashboard", element: <PermissionGuard permission="dashboard_view"><DashboardPage /></PermissionGuard> },
+    { path: "dashboard/system", element: <PermissionGuard permission="dashboard_view"><SystemPage /></PermissionGuard> },
     { path: "product/list", element: <PermissionGuard permission="product_view"><ProductListPage /></PermissionGuard> },
     { path: "product/create", element: <PermissionGuard permission="product_create"><ProductCreatePage /></PermissionGuard> },
     { path: "product/edit/:id", element: <PermissionGuard permission="product_edit"><ProductEditPage /></PermissionGuard> },

@@ -1,4 +1,4 @@
-import { Outlet, useMatch, useSearchParams } from "react-router-dom";
+import { Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { BlogTagDialog } from "../pages/blog/components/BlogTagDialog";
 import { ThemeProvider } from "@mui/material/styles";
 import { ToastContainer } from "react-toastify";
@@ -12,9 +12,13 @@ import { useGetMe } from "../pages/authen/hooks/use-get-me";
 
 const LayoutAdminContent = () => {
     useGetMe();
-    const isBlogDetail = useMatch("/admin/blog/detail/:id");
+    const location = useLocation();
     const { isOpen } = useSidebar();
     const [searchParams, setSearchParams] = useSearchParams();
+
+    const isBlogDetail = location.pathname.startsWith("/admin/blog/detail/");
+    const fullWidthRoutes = ["/admin/dashboard", "/admin/dashboard/system", "/admin/dashboard/analytics"];
+    const isFullWidthPage = fullWidthRoutes.includes(location.pathname) || isBlogDetail;
 
     const isTagsModalOpen = searchParams.get('modal') === 'tags';
 
@@ -34,8 +38,8 @@ const LayoutAdminContent = () => {
                 <ThemeProvider theme={adminTheme}>
                     <main
                         className={
-                            isBlogDetail
-                                ? undefined
+                            isFullWidthPage
+                                ? "max-w-[1536px] mx-auto px-[calc(5*var(--spacing))] pt-[8px] pb-[64px]"
                                 : "w-[1200px] mx-auto px-[40px] pt-[8px] pb-[64px]"
                         }
                     >

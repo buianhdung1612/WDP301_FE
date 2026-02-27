@@ -21,6 +21,13 @@ export const menuOverviewData = [
         path: `/${prefixAdmin}/dashboard/analytics`,
         permission: "dashboard_view"
     },
+    {
+        id: "system",
+        Icon: SettingsIcon,
+        label: "Hệ thống",
+        path: `/${prefixAdmin}/dashboard/system`,
+        permission: "dashboard_view"
+    },
 ];
 
 export const menuStaffData = [
