@@ -3,12 +3,14 @@ import { useBoardingCageDetail } from "../../hooks/useBoarding";
 import { Check, ChevronLeft } from "lucide-react";
 
 const SIZE_LABELS: Record<string, string> = {
-  M: "M",
-  L: "L",
-  XL: "XL",
-  C: "C",
-  B: "B",
-  A: "A",
+  S: "S (dưới 8kg)",
+  M: "M (8-15kg)",
+  L: "L (15-20kg)",
+  XL_XXL: "XL/XXL (trên 20kg)",
+  C: "S (dữ liệu cũ)",
+  B: "M (dữ liệu cũ)",
+  A: "L (dữ liệu cũ)",
+  XL: "XL/XXL (dữ liệu cũ)",
 };
 
 export const BoardingCageDetailPage = () => {
