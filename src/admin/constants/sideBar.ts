@@ -1,16 +1,17 @@
-import { prefixAdmin } from "./routes";
-import DataExplorationIcon from '@mui/icons-material/DataExploration';
-import ScheduleSendIcon from '@mui/icons-material/ScheduleSend';
-import ExtensionIcon from '@mui/icons-material/Extension';
-import ArticleIcon from '@mui/icons-material/Article';
-import DiscountIcon from '@mui/icons-material/Discount';
-import PetsIcon from '@mui/icons-material/Pets';
-import PeopleIcon from '@mui/icons-material/People';
-import SecurityIcon from '@mui/icons-material/Security';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import SettingsIcon from '@mui/icons-material/Settings';
-import BadgeIcon from '@mui/icons-material/Badge';
-import ChatIcon from '@mui/icons-material/Chat';
+﻿import { prefixAdmin } from "./routes";
+import DataExplorationIcon from "@mui/icons-material/DataExploration";
+import ScheduleSendIcon from "@mui/icons-material/ScheduleSend";
+import ExtensionIcon from "@mui/icons-material/Extension";
+import ArticleIcon from "@mui/icons-material/Article";
+import DiscountIcon from "@mui/icons-material/Discount";
+import PetsIcon from "@mui/icons-material/Pets";
+import PeopleIcon from "@mui/icons-material/People";
+import SecurityIcon from "@mui/icons-material/Security";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import SettingsIcon from "@mui/icons-material/Settings";
+import BadgeIcon from "@mui/icons-material/Badge";
+import ChatIcon from "@mui/icons-material/Chat";
+import HomeWorkIcon from "@mui/icons-material/HomeWork";
 
 export const menuOverviewData = [
     {
@@ -104,7 +105,7 @@ export const menuManagementData = [
     },
     {
         id: "accounts",
-        label: "Quản trị viên",
+        label: "Tài khoản quản trị",
         tKey: "admin.sidebar.accounts",
         Icon: PeopleIcon,
         permission: "account_admin_view",
@@ -136,6 +137,18 @@ export const menuManagementData = [
             { id: "list", label: "Danh sách đơn", tKey: "admin.sidebar.booking_list", path: `/${prefixAdmin}/booking/list`, permission: "booking_view" },
             { id: "create", label: "Tạo đơn dịch vụ", path: `/${prefixAdmin}/booking/create`, permission: "booking_create" },
             { id: "config", label: "Cấu hình đơn", path: `/${prefixAdmin}/booking/config`, permission: "booking_view" },
+        ]
+    },
+    {
+        id: "boarding",
+        label: "Khách sạn",
+        Icon: HomeWorkIcon,
+        permission: "boarding_booking_view",
+        children: [
+            { id: "booking-list", label: "Danh sách đơn khách sạn", path: `/${prefixAdmin}/boarding/booking-list`, permission: "boarding_booking_view" },
+            { id: "booking-create", label: "Tạo đơn khách sạn", path: `/${prefixAdmin}/boarding/create`, permission: "boarding_booking_create" },
+            { id: "care-schedule", label: "Lịch chăm sóc", path: `/${prefixAdmin}/boarding/care-schedule`, permission: "boarding_booking_edit" },
+            { id: "cages", label: "Quản lý chuồng", path: `/${prefixAdmin}/boarding/cages`, permission: "boarding_cage_view" },
         ]
     },
     {

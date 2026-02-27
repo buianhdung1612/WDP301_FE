@@ -67,6 +67,10 @@ import { OrderCreatePage } from "../pages/order/OrderCreatePage";
 import { OrderEditPage } from "../pages/order/OrderEditPage";
 import { ChatPage } from "../pages/chat/ChatPage";
 import { PermissionGuard } from "../components/auth/PermissionGuard";
+import { BoardingBookingListPage } from "../pages/boarding/BoardingBookingListPage";
+import { BoardingBookingCreatePage } from "../pages/boarding/BoardingBookingCreatePage";
+import { BoardingCageListPage } from "../pages/boarding/BoardingCageListPage";
+import { BoardingCareSchedulePage } from "../pages/boarding/BoardingCareSchedulePage";
 
 export const AdminRoutes = [
     { path: "dashboard", element: <PermissionGuard permission="dashboard_view"><DashboardPage /></PermissionGuard> },
@@ -134,6 +138,10 @@ export const AdminRoutes = [
     { path: "attendance", element: <PermissionGuard permission="attendance_view"><AttendanceListPage /></PermissionGuard> },
     { path: "hr/work-history", element: <PermissionGuard permission="hr_view"><StaffWorkHistoryPage /></PermissionGuard> },
     { path: "settings/attendance-config", element: <PermissionGuard permission="attendance_edit"><AttendanceConfigPage /></PermissionGuard> },
+    { path: "boarding/booking-list", element: <PermissionGuard permission="boarding_booking_view"><BoardingBookingListPage /></PermissionGuard> },
+    { path: "boarding/create", element: <PermissionGuard permission="boarding_booking_create"><BoardingBookingCreatePage /></PermissionGuard> },
+    { path: "boarding/care-schedule", element: <PermissionGuard permission="boarding_booking_edit"><BoardingCareSchedulePage /></PermissionGuard> },
+    { path: "boarding/cages", element: <PermissionGuard permission="boarding_cage_view"><BoardingCageListPage /></PermissionGuard> },
     { path: "staff/tasks", element: <StaffTaskListPage /> },
     { path: "staff/schedule", element: <StaffWorkSchedulePage /> },
     { path: "staff/customers", element: <StaffCustomerListPage /> },

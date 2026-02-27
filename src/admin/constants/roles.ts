@@ -58,6 +58,26 @@ export const PERMISSIONS_GROUPED = [
         ]
     },
     {
+        module: "Quản lý Chuồng",
+        permissions: [
+            { id: "boarding_cage_view", name: "Xem danh sách chuồng" },
+            { id: "boarding_cage_create", name: "Tạo mới chuồng" },
+            { id: "boarding_cage_edit", name: "Chỉnh sửa chuồng" },
+            { id: "boarding_cage_delete", name: "Xóa chuồng" },
+        ]
+    },
+    {
+        module: "Quản lý Khách sạn",
+        permissions: [
+            { id: "boarding_booking_view", name: "Xem danh sách đặt khách sạn" },
+            { id: "boarding_booking_create", name: "Tạo lịch khách sạn" },
+            { id: "boarding_booking_edit", name: "Cập nhật lịch khách sạn" },
+            { id: "boarding_booking_delete", name: "Hủy/Xóa lịch khách sạn" },
+            { id: "boarding_booking_checkin", name: "Xác nhận nhận chuồng (Check-in)" },
+            { id: "boarding_booking_checkout", name: "Xác nhận trả chuồng (Check-out)" },
+        ]
+    },
+    {
         module: "Đơn hàng & Đặt lịch",
         permissions: [
             { id: "booking_view", name: "Xem danh sách lịch đặt" },
