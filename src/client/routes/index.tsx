@@ -29,8 +29,10 @@ import { OrderInvoicePage } from "../pages/dashboard/OrderInvoice";
 import { PetListPage } from "../pages/dashboard/PetList";
 import { PetCreatePage } from "../pages/dashboard/PetCreate";
 import { PetEditPage } from "../pages/dashboard/PetEdit";
+import { PetCagesPage } from "../pages/dashboard/PetCages";
 import { BoardingBookingPage } from "../pages/boarding/BoardingBooking";
 import { BoardingCageDetailPage } from "../pages/boarding/BoardingCageDetail";
+import { BoardingPaymentSuccessPage } from "../pages/boarding/BoardingPaymentSuccess";
 import { BookingSuccessPage } from "../pages/booking/BookingSuccess";
 import { BookingHistoryPage } from "../pages/dashboard/BookingHistory";
 import { BookingDetailPage } from "../pages/dashboard/BookingDetail";
@@ -47,6 +49,7 @@ export const ClientRoutes: RouteObject[] = [
     { path: "/services", element: <ServicePage /> },
     { path: "/services/:slug", element: <ServiceDetailPage /> },
     { path: "/hotels", element: <BoardingBookingPage /> },
+    { path: "/hotels/success", element: <BoardingPaymentSuccessPage /> },
     { path: "/hotels/:id", element: <BoardingCageDetailPage /> },
     {
         element: <AuthGuard />,
@@ -81,6 +84,7 @@ export const ClientRoutes: RouteObject[] = [
             { path: "pet", element: <PetListPage /> },
             { path: "pet/create", element: <PetCreatePage /> },
             { path: "pet/edit/:id", element: <PetEditPage /> },
+            { path: "pet-cages", element: <PetCagesPage /> },
         ]
     },
 ];
