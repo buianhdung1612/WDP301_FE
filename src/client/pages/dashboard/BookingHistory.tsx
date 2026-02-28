@@ -88,7 +88,7 @@ export const BookingHistoryPage = () => {
                                 Lịch sử đặt lịch
                             </h3>
                             <Link
-                                to="/services/booking"
+                                to="/services"
                                 className="bg-client-primary text-white px-6 py-2.5 rounded-full font-bold text-[14px] hover:scale-105 transition-all shadow-lg shadow-orange-100"
                             >
                                 + Đặt lịch mới

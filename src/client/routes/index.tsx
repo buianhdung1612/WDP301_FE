@@ -53,10 +53,7 @@ export const ClientRoutes: RouteObject[] = [
     { path: "/hotels/:id", element: <BoardingCageDetailPage /> },
     {
         element: <AuthGuard />,
-        children: [
-            { path: "/services/booking", element: <BookingPage /> },
-            { path: "/services/booking/success", element: <BookingSuccessPage /> },
-        ]
+        children: []
     },
     { path: "/auth/register", element: <RegisterPage /> },
     { path: "/auth/login", element: <LoginPage /> },

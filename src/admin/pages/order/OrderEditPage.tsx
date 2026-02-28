@@ -18,7 +18,11 @@ import {
     Autocomplete,
     CircularProgress,
     Grid,
-    Box
+    Box,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem
 } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { toast } from "react-toastify";
@@ -52,6 +56,7 @@ export const OrderEditPage = () => {
     const [paymentMethod, setPaymentMethod] = useState("money");
     const [notes, setNotes] = useState("");
     const [orderStatus, setOrderStatus] = useState("pending");
+    const [paymentStatus, setPaymentStatus] = useState("unpaid");
 
     useEffect(() => {
         if (order) {
@@ -69,6 +74,7 @@ export const OrderEditPage = () => {
             setPaymentMethod(order.paymentMethod || "money");
             setNotes(order.note || "");
             setOrderStatus(order.orderStatus || "pending");
+            setPaymentStatus(order.paymentStatus || "unpaid");
         }
     }, [order]);
 
@@ -141,7 +147,8 @@ export const OrderEditPage = () => {
             total,
             paymentMethod,
             note: notes,
-            orderStatus
+            orderStatus,
+            paymentStatus
         };
 
         updateOrder({ id: id!, data }, {
@@ -192,6 +199,7 @@ export const OrderEditPage = () => {
                                 loading={isLoadingUsers}
                                 value={users.find((u: any) => u._id === selectedUser?._id) || selectedUser}
                                 onChange={(_e, val) => setSelectedUser(val)}
+                                disabled
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
@@ -227,6 +235,7 @@ export const OrderEditPage = () => {
                                 loading={isLoadingProducts}
                                 onChange={(_e, val) => handleAddItem(val)}
                                 value={null}
+                                disabled
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
@@ -294,7 +303,7 @@ export const OrderEditPage = () => {
                                                             <IconButton
                                                                 size="small"
                                                                 onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
-                                                                disabled={item.quantity <= 1}
+                                                                disabled
                                                             >
                                                                 <Icon icon="eva:minus-fill" />
                                                             </IconButton>
@@ -303,6 +312,7 @@ export const OrderEditPage = () => {
                                                             </Typography>
                                                             <IconButton
                                                                 size="small"
+                                                                disabled
                                                                 onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
                                                             >
                                                                 <Icon icon="eva:plus-fill" />
@@ -313,7 +323,7 @@ export const OrderEditPage = () => {
                                                         {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price * item.quantity)}
                                                     </TableCell>
                                                     <TableCell align="right">
-                                                        <IconButton color="error" size="small" onClick={() => handleRemoveItem(item.productId)}>
+                                                        <IconButton color="error" size="small" onClick={() => handleRemoveItem(item.productId)} disabled>
                                                             <Icon icon="eva:trash-2-outline" />
                                                         </IconButton>
                                                     </TableCell>
@@ -358,6 +368,7 @@ export const OrderEditPage = () => {
                                         value={shippingFee}
                                         onChange={(e) => setShippingFee(Number(e.target.value))}
                                         fullWidth
+                                        disabled
                                     />
                                 </Stack>
                                 <Stack spacing={1}>
@@ -368,6 +379,7 @@ export const OrderEditPage = () => {
                                         value={discount}
                                         onChange={(e) => setDiscount(Number(e.target.value))}
                                         fullWidth
+                                        disabled
                                     />
                                 </Stack>
                                 <Divider sx={{ borderStyle: 'dashed', my: 1 }} />
@@ -415,6 +427,42 @@ export const OrderEditPage = () => {
                                         {paymentMethod === method.value && <Icon icon="eva:checkmark-circle-2-fill" color="#00A76F" width={20} />}
                                     </Box>
                                 ))}
+                            </Stack>
+                        </Card>
+
+                        <Card sx={{ p: 3, borderRadius: 'var(--shape-borderRadius-lg)', boxShadow: 'var(--customShadows-card)' }}>
+                            <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Cập nhật trạng thái</Typography>
+                            <Stack spacing={3}>
+                                <FormControl fullWidth>
+                                    <InputLabel>Trạng thái đơn hàng</InputLabel>
+                                    <Select
+                                        value={orderStatus}
+                                        label="Trạng thái đơn hàng"
+                                        onChange={(e) => setOrderStatus(e.target.value)}
+                                        disabled={["completed", "cancelled"].includes(order?.orderStatus)}
+                                    >
+                                        <MenuItem value="pending">Chờ xác nhận</MenuItem>
+                                        <MenuItem value="confirmed">Đã xác nhận</MenuItem>
+                                        <MenuItem value="shipping">Đang giao</MenuItem>
+                                        <MenuItem value="completed">Giao thành công</MenuItem>
+                                        <MenuItem value="cancelled">Hủy</MenuItem>
+                                        <MenuItem value="returned">Trả hàng</MenuItem>
+                                    </Select>
+                                </FormControl>
+
+                                <FormControl fullWidth>
+                                    <InputLabel>Trạng thái thanh toán</InputLabel>
+                                    <Select
+                                        value={paymentStatus}
+                                        label="Trạng thái thanh toán"
+                                        onChange={(e) => setPaymentStatus(e.target.value)}
+                                        disabled={order?.paymentStatus === "paid"}
+                                    >
+                                        <MenuItem value="unpaid">Chưa thanh toán</MenuItem>
+                                        <MenuItem value="paid">Đã thanh toán</MenuItem>
+                                        <MenuItem value="refunded">Đã hoàn lại tiền</MenuItem>
+                                    </Select>
+                                </FormControl>
                             </Stack>
                         </Card>
 
