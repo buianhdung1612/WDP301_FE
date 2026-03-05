@@ -5,6 +5,7 @@ export interface CreateBoardingBookingPayload {
   checkInDate: string;
   checkOutDate: string;
   petIds: string[];
+  quantity?: number;
   fullName: string;
   phone: string;
   email?: string;
