@@ -235,15 +235,6 @@ export const ServiceDetailPage = () => {
                                         { label: "Thời lượng tối thiểu", value: `${service.minDuration || 0} phút`, icon: "solar:clock-square-bold-duotone" },
                                         { label: "Thời lượng tối đa", value: `${service.maxDuration || 0} phút`, icon: "solar:alarm-bold-duotone" },
                                         { label: "Loại giá", value: PRICING_TYPE_MAP[service.pricingType] || service.pricingType, icon: "solar:tag-price-bold-duotone" },
-                                        {
-                                            label: "Phụ thu quá giờ",
-                                            value: service.surchargeType === "none"
-                                                ? "Không có"
-                                                : service.surchargeType === "fixed"
-                                                    ? `Cố định: ${fmt(service.surchargeValue)}`
-                                                    : `${fmt(service.surchargeValue)}/phút`,
-                                            icon: "solar:dollar-minimalistic-bold-duotone",
-                                        },
                                         { label: "Slug", value: service.slug || "—", icon: "solar:link-bold-duotone" },
                                     ].map((item) => (
                                         <Grid key={item.label} size={{ xs: 12, sm: 6 }}>
@@ -315,10 +306,12 @@ export const ServiceDetailPage = () => {
                                                 border: "1px solid var(--palette-divider)",
                                             }}
                                         >
-                                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                                {item.label || `Mức ${idx + 1}`}
+                                            <Typography variant="body2" sx={{ fontWeight: 600, color: "#00A76F" }}>
+                                                {service.pricingType === 'by-weight' && item.label ? (
+                                                    idx === 0 ? `< ${item.label} kg` : `${service.priceList[idx - 1]?.label} -> ${item.label} kg`
+                                                ) : (item.label || `Mức ${idx + 1}`)}
                                             </Typography>
-                                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "var(--palette-success-dark)" }}>
+                                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#00A76F" }}>
                                                 {fmt(item.value)}
                                             </Typography>
                                         </Stack>
@@ -348,6 +341,26 @@ export const ServiceDetailPage = () => {
                             ) : (
                                 <Typography variant="body2" sx={{ color: "var(--palette-text-disabled)", fontStyle: "italic" }}>
                                     Chưa có mô tả
+                                </Typography>
+                            )}
+                        </Card>
+
+                        {/* Quy trình */}
+                        <Card sx={{ p: 3, mt: 3, borderRadius: "var(--shape-borderRadius-lg)", boxShadow: "var(--customShadows-card)" }}>
+                            <Typography sx={{ fontSize: "1.125rem", fontWeight: 600, mb: 2 }}>Quy trình thực hiện</Typography>
+                            {service.procedure ? (
+                                <Box
+                                    dangerouslySetInnerHTML={{ __html: service.procedure }}
+                                    sx={{
+                                        fontSize: "0.875rem",
+                                        color: "var(--palette-text-secondary)",
+                                        lineHeight: 1.8,
+                                        "& p": { m: 0 },
+                                    }}
+                                />
+                            ) : (
+                                <Typography variant="body2" sx={{ color: "var(--palette-text-disabled)", fontStyle: "italic" }}>
+                                    Chưa có quy trình chi tiết
                                 </Typography>
                             )}
                         </Card>

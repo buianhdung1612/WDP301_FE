@@ -10,7 +10,7 @@ import { ProductBanner } from "../product/sections/ProductBanner";
 import { ArrowRight, Camera } from "lucide-react";
 import { uploadImagesToCloudinary } from "../../../admin/api/uploadCloudinary.api";
 import CreatableSelect from 'react-select/creatable';
-import { useBreeds, useCreateBreed } from "../../../admin/pages/account-user/hooks/useBreed";
+import { useClientBreeds, useClientCreateBreed } from "../../hooks/useBreed";
 
 interface BreedOption {
     label: string;
@@ -26,7 +26,9 @@ const schema = z.object({
     breed: z.string().optional(),
     weight: z.number().min(0.1, "Cân nặng phải lớn hơn 0!"),
     avatar: z.string().optional(),
-    gender: z.enum(["male", "female", "unknown"]),
+    gender: z.enum(["male", "female"]),
+    age: z.number().min(0, "Tuổi không hợp lệ!").optional(),
+    notes: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -42,14 +44,16 @@ export const PetCreatePage = () => {
             type: "dog",
             weight: 1,
             avatar: "",
-            gender: "unknown"
+            gender: "male",
+            age: 0,
+            notes: ""
         }
     });
 
     const petType = watch("type");
     const petBreed = watch("breed");
-    const { data: breeds = [] } = useBreeds(petType);
-    const { mutate: createBreedMutate } = useCreateBreed();
+    const { data: breeds = [] } = useClientBreeds(petType);
+    const { mutate: createBreedMutate } = useClientCreateBreed();
 
     const breedOptions: BreedOption[] = breeds.map((b: any) => ({
         label: b.name,
@@ -222,23 +226,44 @@ export const PetCreatePage = () => {
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col gap-[10px]">
-                                    <label className="text-[15px] font-[600] text-client-secondary">Giới tính</label>
-                                    <div className="flex gap-4">
-                                        {["male", "female", "unknown"].map((g) => (
-                                            <label key={g} className="flex items-center gap-2 cursor-pointer group">
-                                                <input
-                                                    type="radio"
-                                                    value={g}
-                                                    {...register("gender")}
-                                                    className="appearance-none w-[18px] h-[18px] border-2 border-[#ddd] rounded-full checked:border-client-primary checked:border-[5px] transition-all cursor-pointer"
-                                                />
-                                                <span className="text-[14px] font-[500] text-[#555] group-hover:text-client-primary transition-colors">
-                                                    {g === "male" ? "Đực" : g === "female" ? "Cái" : "Không rõ"}
-                                                </span>
-                                            </label>
-                                        ))}
+                                <div className="grid grid-cols-2 gap-[25px]">
+                                    <div className="flex flex-col gap-[10px]">
+                                        <label className="text-[15px] font-[600] text-client-secondary">Tuổi (Năm)</label>
+                                        <input
+                                            type="number"
+                                            {...register("age", { valueAsNumber: true })}
+                                            className="border rounded-[10px] px-[20px] py-[15px] text-[15px] focus:outline-none focus:border-client-primary transition-all bg-[#fcfcfc] hover:bg-white border-[#eee]"
+                                            placeholder="Ví dụ: 2"
+                                        />
                                     </div>
+                                    <div className="flex flex-col gap-[10px]">
+                                        <label className="text-[15px] font-[600] text-client-secondary">Giới tính</label>
+                                        <div className="flex gap-6 h-[54px] items-center">
+                                            {["male", "female"].map((g) => (
+                                                <label key={g} className="flex items-center gap-2 cursor-pointer group">
+                                                    <input
+                                                        type="radio"
+                                                        value={g}
+                                                        {...register("gender")}
+                                                        className="appearance-none w-[20px] h-[20px] border-2 border-[#ddd] rounded-full checked:border-client-primary checked:border-[5px] transition-all cursor-pointer"
+                                                    />
+                                                    <span className="text-[14px] font-[500] text-[#555] group-hover:text-client-primary transition-colors">
+                                                        {g === "male" ? "Đực" : "Cái"}
+                                                    </span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col gap-[10px]">
+                                    <label className="text-[15px] font-[600] text-client-secondary">Ghi chú sức khỏe/Lưu ý</label>
+                                    <textarea
+                                        {...register("notes")}
+                                        rows={3}
+                                        className="border rounded-[10px] px-[20px] py-[15px] text-[15px] focus:outline-none focus:border-client-primary transition-all bg-[#fcfcfc] hover:bg-white border-[#eee] resize-none"
+                                        placeholder="Ví dụ: Bé bị dị ứng xà phòng, nhát người lạ..."
+                                    />
                                 </div>
 
                                 <div className="pt-[10px]">

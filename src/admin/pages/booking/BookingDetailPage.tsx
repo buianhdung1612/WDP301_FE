@@ -312,9 +312,7 @@ export const BookingDetailPage = () => {
                                             })()}
 
                                             <Typography variant="subtitle2" sx={{ fontWeight: 600, minWidth: 100, textAlign: 'right', color: 'var(--palette-text-primary)' }}>
-                                                {mapping?.surchargeAmount > 0
-                                                    ? `+ ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(mapping.surchargeAmount)}`
-                                                    : "Dịch vụ chính"}
+                                                Dịch vụ chính
                                             </Typography>
                                         </Stack>
                                     );
@@ -330,14 +328,7 @@ export const BookingDetailPage = () => {
                                                 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(booking.subTotal || 0)}
                                             </Typography>
                                         </Stack>
-                                        <Stack direction="row" justifyContent="space-between">
-                                            <Typography variant="body2" sx={{ color: 'var(--palette-text-disabled)' }}>Phụ phí</Typography>
-                                            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'error.main' }}>
-                                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
-                                                    booking.petStaffMap?.reduce((sum: number, m: any) => sum + (m.surchargeAmount || 0), 0) || 0
-                                                )}
-                                            </Typography>
-                                        </Stack>
+
                                         <Stack direction="row" justifyContent="space-between">
                                             <Typography variant="body2" sx={{ color: 'var(--palette-text-disabled)' }}>Giảm giá</Typography>
                                             <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'error.main' }}>

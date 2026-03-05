@@ -23,7 +23,7 @@ const schema = z.object({
     breed: z.string().optional(),
     weight: z.number().min(0.1, "Cân nặng phải lớn hơn 0!"),
     avatar: z.string().optional(),
-    gender: z.enum(["male", "female", "unknown"]),
+    gender: z.enum(["male", "female"]),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -44,7 +44,7 @@ export const PetCreateModal = ({ isOpen, onClose, onSuccess }: PetCreateModalPro
             type: "dog",
             weight: 1,
             avatar: "",
-            gender: "unknown"
+            gender: "male"
         }
     });
 
@@ -226,7 +226,7 @@ export const PetCreateModal = ({ isOpen, onClose, onSuccess }: PetCreateModalPro
                         <div className="flex flex-col gap-[8px]">
                             <label className="text-[14px] font-[600] text-client-secondary">Giới tính</label>
                             <div className="flex gap-5">
-                                {["male", "female", "unknown"].map((g) => (
+                                {["male", "female"].map((g) => (
                                     <label key={g} className="flex items-center gap-2 cursor-pointer group">
                                         <input
                                             type="radio"
@@ -235,7 +235,7 @@ export const PetCreateModal = ({ isOpen, onClose, onSuccess }: PetCreateModalPro
                                             className="appearance-none w-[16px] h-[16px] border-2 border-[#ddd] rounded-full checked:border-client-primary checked:border-[5px] transition-all cursor-pointer"
                                         />
                                         <span className="text-[13px] font-[500] text-[#555] group-hover:text-client-primary transition-colors">
-                                            {g === "male" ? "Đực" : g === "female" ? "Cái" : "Không rõ"}
+                                            {g === "male" ? "Đực" : "Cái"}
                                         </span>
                                     </label>
                                 ))}

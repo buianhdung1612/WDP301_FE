@@ -13,7 +13,16 @@ import BadgeIcon from "@mui/icons-material/Badge";
 import ChatIcon from "@mui/icons-material/Chat";
 import HomeWorkIcon from "@mui/icons-material/HomeWork";
 
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+
 export const menuOverviewData = [
+    {
+        id: "ecommerce",
+        Icon: ShoppingCartIcon,
+        label: "Bán hàng",
+        path: `/${prefixAdmin}/dashboard/ecommerce`,
+        permission: "dashboard_view"
+    },
     {
         id: "analytics",
         Icon: DataExplorationIcon,

@@ -5,7 +5,10 @@ const baseServiceSchema = z.object({
     slug: z.string().optional(),
     categoryId: z.string().min(1, "Vui lòng chọn danh mục"),
     description: z.string().optional(),
+    procedure: z.string().optional(),
     duration: z.number().min(1, "Thời lượng dự kiến phải lớn hơn 0"),
+    minDuration: z.number().min(1, "Thời lượng tối thiểu phải lớn hơn 0"),
+    maxDuration: z.number().min(1, "Thời lượng tối đa phải lớn hơn 0"),
     petTypes: z.array(z.string()).min(1, "Vui lòng chọn ít nhất một loại thú cưng"),
     pricingType: z.enum(["fixed", "by-weight"]),
     basePrice: z.number().optional(),
@@ -14,19 +17,17 @@ const baseServiceSchema = z.object({
         value: z.number().optional()
     })),
     status: z.enum(["active", "inactive"]),
-    minDuration: z.number().min(0, "Thời lượng tối thiểu không được âm"),
-    maxDuration: z.number().min(0, "Thời lượng tối đa không được âm"),
-    surchargeType: z.enum(["none", "fixed", "per-minute"]),
-    surchargeValue: z.number().min(0, "Giá trị phụ thu không được âm"),
     images: z.array(z.string()).optional(),
 });
 
 export type ServiceFormValues = z.infer<typeof baseServiceSchema>;
 
-export const serviceSchema = baseServiceSchema.refine((data) => data.maxDuration >= data.duration, {
-    message: "Thời lượng tối đa phải lớn hơn hoặc bằng thời lượng dự kiến",
-    path: ["maxDuration"],
-}).refine((data) => data.duration >= data.minDuration, {
-    message: "Thời lượng dự kiến phải lớn hơn hoặc bằng thời lượng tối thiểu",
-    path: ["duration"],
-});
+export const serviceSchema = baseServiceSchema
+    .refine((data) => data.minDuration <= data.duration, {
+        message: "Thời lượng tối thiểu không được lớn hơn thời lượng dự kiến",
+        path: ["minDuration"],
+    })
+    .refine((data) => data.duration <= data.maxDuration, {
+        message: "Thời lượng dự kiến không được lớn hơn thời lượng tối đa",
+        path: ["maxDuration"],
+    });

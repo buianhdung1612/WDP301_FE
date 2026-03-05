@@ -1,6 +1,11 @@
 import { createTheme, Theme } from "@mui/material";
 
 export const getServiceTheme = (outerTheme: Theme) => createTheme(outerTheme, {
+    palette: {
+        primary: {
+            main: '#00A76F',
+        },
+    },
     components: {
         MuiCard: {
             styleOverrides: {

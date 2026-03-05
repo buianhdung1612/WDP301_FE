@@ -40,6 +40,15 @@ export const getMyBooking = async (id: string) => {
     }
 };
 
+export const updateBooking = async (id: string, data: any) => {
+    try {
+        const response = await apiApp.patch(`${API_BOOKING}/bookings/${id}`, data);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
 export const exportBookingPdf = async (bookingCode: string, phone: string) => {
     try {
         const response = await apiApp.get(`${API_BOOKING}/export-pdf`, {

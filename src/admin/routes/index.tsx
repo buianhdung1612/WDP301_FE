@@ -16,6 +16,8 @@ import { BlogEditPage } from "../pages/blog/BlogEditPage";
 import { LoginPage } from "../pages/authen/LoginPage";
 import { DashboardPage } from "../pages/dashboard/DashboardPage";
 import { SystemPage } from "../pages/dashboard/SystemPage";
+import EcommercePage from "../pages/dashboard/EcommercePage";
+import AnalyticsPage from "../pages/dashboard/AnalyticsPage";
 import { BlogCategoryEditPage } from "../pages/blog-category/BlogCategoryEditPage";
 import { CouponListPage } from "../pages/coupon/CouponListPage";
 import { CouponCreatePage } from "../pages/coupon/CouponCreatePage";
@@ -76,6 +78,8 @@ import { BoardingCareSchedulePage } from "../pages/boarding/BoardingCareSchedule
 export const AdminRoutes = [
     { path: "dashboard", element: <PermissionGuard permission="dashboard_view"><DashboardPage /></PermissionGuard> },
     { path: "dashboard/system", element: <PermissionGuard permission="dashboard_view"><SystemPage /></PermissionGuard> },
+    { path: "dashboard/ecommerce", element: <PermissionGuard permission="dashboard_view"><EcommercePage /></PermissionGuard> },
+    { path: "dashboard/analytics", element: <PermissionGuard permission="dashboard_view"><AnalyticsPage /></PermissionGuard> },
     { path: "product/list", element: <PermissionGuard permission="product_view"><ProductListPage /></PermissionGuard> },
     { path: "product/create", element: <PermissionGuard permission="product_create"><ProductCreatePage /></PermissionGuard> },
     { path: "product/edit/:id", element: <PermissionGuard permission="product_edit"><ProductEditPage /></PermissionGuard> },

@@ -22,6 +22,7 @@ import { useAuthStore } from "../../../stores/useAuthStore";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { QuickAddPetModal } from "./sections/QuickAddPetModal";
 
 export const ServiceDetailPage = () => {
     const { slug } = useParams();
@@ -39,9 +40,9 @@ export const ServiceDetailPage = () => {
     const [isTimeModalOpen, setIsTimeModalOpen] = useState(false);
     const [activeTimeSession, setActiveTimeSession] = useState("Sáng");
     const [activeHour, setActiveHour] = useState<string | null>(null);
-    const [note, setNote] = useState("");
     const [bookingPreview, setBookingPreview] = useState<any>(null);
     const [isVerifying, setIsVerifying] = useState(false);
+    const [isQuickAddPetOpen, setIsQuickAddPetOpen] = useState(false);
 
     // Fetch Pets
     useEffect(() => {
@@ -118,6 +119,8 @@ export const ServiceDetailPage = () => {
                 }))
             };
         } else {
+            const sortedList = [...(service.priceList || [])].sort((a, b) => parseFloat(a.label) - parseFloat(b.label));
+
             const breakdown = selectedPetIds.map(id => {
                 const pet = pets.find(p => p._id === id);
                 if (!pet) return { name: "N/A", price: 0, weight: 0 };
@@ -125,19 +128,19 @@ export const ServiceDetailPage = () => {
                 let matchedPrice = service.basePrice || 0;
                 let priceLabel = "Mặc định";
 
-                if (service.priceList && service.priceList.length > 0) {
-                    for (const bracket of service.priceList) {
-                        const numbers = bracket.label.match(/\d+/g);
-                        if (numbers) {
-                            const val1 = parseInt(numbers[0]);
-                            const val2 = numbers[1] ? parseInt(numbers[1]) : Infinity;
-                            if (bracket.label.toLowerCase().includes("dưới") || bracket.label.includes("<")) {
-                                if (weight <= val1) { matchedPrice = bracket.value; priceLabel = bracket.label; break; }
-                            } else if (bracket.label.toLowerCase().includes("trên") || bracket.label.includes(">")) {
-                                if (weight > val1) { matchedPrice = bracket.value; priceLabel = bracket.label; break; }
-                            } else if (weight >= val1 && weight <= val2) {
-                                matchedPrice = bracket.value; priceLabel = bracket.label; break;
-                            }
+                if (sortedList.length > 0) {
+                    for (let i = 0; i < sortedList.length; i++) {
+                        const threshold = parseFloat(sortedList[i].label);
+                        if (weight <= threshold) {
+                            matchedPrice = sortedList[i].value;
+                            priceLabel = i === 0 ? `< ${threshold} kg` : `${sortedList[i - 1].label} -> ${threshold} kg`;
+                            break;
+                        }
+                        // If weight exceeds the last bracket, we might need a default or use the last one
+                        // Usually backend should handle this, but for UI:
+                        if (i === sortedList.length - 1) {
+                            matchedPrice = sortedList[i].value;
+                            priceLabel = `> ${sortedList[i - 1]?.label || 0} kg`;
                         }
                     }
                 }
@@ -197,13 +200,12 @@ export const ServiceDetailPage = () => {
             const bookingData = {
                 serviceId: service._id,
                 petIds: selectedPetIds,
-                startTime: startTime,
-                notes: note
+                startTime: startTime
             };
             const response = await createBooking(bookingData);
             if (response.code === 200 || response.code === 201) {
-                toast.success("Đặt lịch thành công! TeddyPet đang đợi bé ạ.");
-                navigate("/services/booking/success");
+                toast.success("Đặt lịch thành công! Đang chuyển sang trang thanh toán...");
+                navigate(`/services/checkout/${response.data._id}`);
             } else { toast.error(response.message || "Có lỗi xảy ra, thử lại sau nha."); }
         } catch (error: any) { toast.error(error.response?.data?.message || "Lỗi hệ thống, bạn thông cảm nha!"); }
     };
@@ -268,13 +270,22 @@ export const ServiceDetailPage = () => {
                                 <p className="text-[16px] text-[#505050]">(2 đánh giá từ khách hàng)</p>
                             </div>
 
-                            <div className="mt-[20px] text-client-secondary text-[28px] font-secondary">
-                                <p>
-                                    {service.pricingType === 'fixed'
-                                        ? `${service.basePrice.toLocaleString("vi-VN")}đ`
-                                        : `Chỉ từ ${(service.priceList?.[0]?.value || service.basePrice || 0).toLocaleString("vi-VN")}đ`}
-                                </p>
-                            </div>
+
+                            {service.pricingType === 'by-weight' && service.priceList && service.priceList.length > 0 && (
+                                <div className="mt-[15px]">
+                                    <div className="text-[14px] font-bold text-client-secondary mb-3 uppercase tracking-wider opacity-60">Bảng giá tham khảo:</div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {service.priceList.map((tier: any, idx: number) => (
+                                            <div key={idx} className="flex justify-between items-center py-2 px-4 bg-gray-50 rounded-xl border border-gray-100">
+                                                <span className="text-[13px] font-bold text-gray-500">
+                                                    {idx === 0 ? `< ${tier.label}kg` : `${service.priceList[idx - 1].label} -> ${tier.label}kg`}
+                                                </span>
+                                                <span className="text-[14px] font-bold text-client-primary">{tier.value.toLocaleString()}đ</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Booking Options */}
                             <div className="space-y-5 mt-[40px]">
@@ -300,9 +311,19 @@ export const ServiceDetailPage = () => {
                                                 </div>
                                             );
                                         })}
-                                        <Link to="/dashboard/pet/create" className="w-[45px] h-[45px] rounded-full border-2 border-dashed border-[#eee] flex items-center justify-center text-[#ccc] hover:border-client-primary hover:text-client-primary transition-all">
+                                        <div
+                                            className="w-[45px] h-[45px] rounded-full border-2 border-dashed border-[#eee] flex items-center justify-center text-[#ccc] hover:border-client-primary hover:text-client-primary transition-all cursor-pointer"
+                                            onClick={() => {
+                                                if (!user) {
+                                                    toast.info("Vui lòng đăng nhập để thêm bé cưng nha!");
+                                                    navigate("/auth/login");
+                                                    return;
+                                                }
+                                                setIsQuickAddPetOpen(true);
+                                            }}
+                                        >
                                             <Plus size={20} />
-                                        </Link>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -468,28 +489,26 @@ export const ServiceDetailPage = () => {
                                             onClick={() => setIsTimeModalOpen(true)}
                                             className={`w-full h-[55px] px-6 rounded-[40px] flex items-center justify-between border cursor-pointer transition-all ${selectedTimeSlot ? 'border-client-primary bg-white ring-2 ring-client-primary/10' : 'border-transparent bg-[#f8f8f8]'}`}
                                         >
-                                            <span className={`font-bold ${selectedTimeSlot ? 'text-client-primary' : 'text-gray-400'}`}>
-                                                {selectedTimeSlot?.time || "Chọn giờ"}
-                                            </span>
+                                            <div className="flex flex-col items-start leading-none">
+                                                <span className={`font-bold ${selectedTimeSlot ? 'text-client-primary' : 'text-gray-400'}`}>
+                                                    {selectedTimeSlot?.time || "Chọn giờ"}
+                                                </span>
+                                                {selectedTimeSlot && bookingPreview && (
+                                                    <span className="text-[11px] text-gray-400 font-bold mt-1.5 flex items-center gap-1.5">
+                                                        <Clock className="w-3 h-3" />
+                                                        Dự kiến xong: {bookingPreview.endTime} (~{bookingPreview.totalDuration}p)
+                                                    </span>
+                                                )}
+                                            </div>
                                             <Clock className="w-5 h-5 text-gray-400" />
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Note */}
-                                <div>
-                                    <div className="mb-[10px] text-client-secondary font-secondary text-[18px]">Ghi chú:</div>
-                                    <textarea
-                                        value={note}
-                                        onChange={(e) => setNote(e.target.value)}
-                                        placeholder="Lưu ý đặc biệt cho bé..."
-                                        className="w-full h-[100px] p-6 rounded-[30px] bg-[#f8f8f8] border border-transparent focus:border-client-primary outline-none transition-all resize-none font-medium text-client-secondary focus:bg-white focus:ring-2 focus:ring-client-primary/10"
-                                    />
-                                </div>
 
                                 {/* Pricing Breakdown */}
                                 {selectedPetIds.length > 0 && (
-                                    <div className="bg-orange-50/50 p-6 rounded-[30px] border border-orange-100/50">
+                                    <div className="bg-orange-50/50 px-[20px] py-[15px] rounded-[30px] border border-orange-100/50">
                                         <div className="flex justify-between items-center text-[20px] font-secondary text-client-secondary">
                                             <span>Tạm tính ({selectedPetIds.length} bé):</span>
                                             <span className="text-client-primary font-bold">{pricing.total.toLocaleString()}đ</span>
@@ -497,17 +516,14 @@ export const ServiceDetailPage = () => {
                                     </div>
                                 )}
 
-                                {/* Main Actions */}
-                                <div className="flex items-center gap-[20px] h-[60px] mt-[40px]">
+                                 {/* Main Action */}
+                                <div className="mt-[40px]">
                                     <button
                                         onClick={handleSubmit}
-                                        className="flex-1 h-full rounded-[40px] text-white text-[20px] font-secondary bg-client-secondary hover:bg-client-primary transition-all shadow-xl active:scale-[0.98]"
+                                        className="w-full h-[60px] rounded-[40px] text-white text-[20px] font-secondary bg-client-primary hover:bg-client-secondary transition-all shadow-xl active:scale-[0.98] flex items-center justify-center uppercase font-bold tracking-wider"
                                     >
                                         ĐẶT LỊCH NGAY
                                     </button>
-                                    <div className="w-[60px] h-full flex items-center justify-center text-client-secondary hover:text-client-primary transition-all border border-[#eee] rounded-full cursor-pointer">
-                                        <Heart className="w-[28px] h-[28px]" />
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -516,9 +532,18 @@ export const ServiceDetailPage = () => {
             </section>
 
             {/* Bottom Sections mirroring ProductDetailPage */}
-            <ServiceDesc serviceName={service.name} description={service.description} />
+            <ServiceDesc serviceName={service.name} description={service.description} procedure={service.procedure} />
             <ServiceComment />
             <ServiceRelated categoryId={service.categoryId?._id || service.categoryId} currentServiceId={service._id} />
+
+            <QuickAddPetModal
+                isOpen={isQuickAddPetOpen}
+                onClose={() => setIsQuickAddPetOpen(false)}
+                onSuccess={(newPet) => {
+                    setPets(prev => [...prev, newPet]);
+                    setSelectedPetIds(prev => [...prev, newPet._id]);
+                }}
+            />
 
             <FooterSub />
 
@@ -677,7 +702,7 @@ export const ServiceDetailPage = () => {
                                                                     </div>
                                                                     <div className="flex-1 pb-2">
                                                                         <div className="flex items-center justify-between mb-1">
-                                                                            <span className="text-[13px] font-bold text-client-secondary bg-white px-2 py-0.5 rounded-lg border border-gray-100">{item.startTime} - {item.endTime}</span>
+                                                                            <span className="text-[13px] font-bold text-client-secondary bg-white px-2 py-0.5 rounded-lg border border-gray-100">Dự kiến ~ {item.startTime} - {item.endTime}</span>
                                                                             <span className="text-[10px] font-bold px-2 py-0.5 bg-client-primary/10 text-client-primary rounded-md uppercase tracking-wider">Đợt {idx + 1}</span>
                                                                         </div>
                                                                         <div className="flex flex-wrap gap-1">

@@ -52,17 +52,16 @@ export const ServiceEditPage = () => {
             name: "",
             slug: "",
             description: "",
+            procedure: "",
             categoryId: "",
             duration: 30,
+            minDuration: 30,
+            maxDuration: 60,
             petTypes: ["DOG", "CAT"],
             pricingType: "fixed",
             basePrice: 0,
             priceList: [{ label: "", value: 0 }],
             status: "active",
-            minDuration: 0,
-            maxDuration: 0,
-            surchargeType: "none",
-            surchargeValue: 0,
             images: [],
         },
     });
@@ -80,17 +79,16 @@ export const ServiceEditPage = () => {
                 name: service.name || "",
                 slug: service.slug || "",
                 description: service.description || "",
+                procedure: service.procedure || "",
                 categoryId: service.categoryId || "",
                 duration: service.duration || 30,
+                minDuration: service.minDuration || 30,
+                maxDuration: service.maxDuration || 60,
                 petTypes: service.petTypes || ["DOG", "CAT"],
                 pricingType: service.pricingType || "fixed",
                 basePrice: service.basePrice || 0,
                 priceList: (service.priceList && service.priceList.length > 0) ? service.priceList : [{ label: "", value: 0 }],
                 status: service.status || "active",
-                minDuration: service.minDuration || 0,
-                maxDuration: service.maxDuration || 0,
-                surchargeType: service.surchargeType || "none",
-                surchargeValue: service.surchargeValue || 0,
                 images: service.images || [],
             });
         }
@@ -184,20 +182,7 @@ export const ServiceEditPage = () => {
                                             />
                                         )}
                                     />
-                                    <Controller
-                                        name="maxDuration"
-                                        control={control}
-                                        render={({ field, fieldState }) => (
-                                            <TextField
-                                                {...field}
-                                                type="number"
-                                                label="Thời lượng tối đa (phút)"
-                                                error={!!fieldState.error}
-                                                helperText={fieldState.error?.message || "Vượt quá mốc này sẽ tính phụ thu"}
-                                                onChange={(e) => field.onChange(Number(e.target.value))}
-                                            />
-                                        )}
-                                    />
+
                                     <Controller
                                         name="minDuration"
                                         control={control}
@@ -206,12 +191,29 @@ export const ServiceEditPage = () => {
                                                 {...field}
                                                 type="number"
                                                 label="Thời lượng tối thiểu (phút)"
+                                                placeholder="Ngăn hoàn thành sớm"
                                                 error={!!fieldState.error}
                                                 helperText={fieldState.error?.message}
                                                 onChange={(e) => field.onChange(Number(e.target.value))}
                                             />
                                         )}
                                     />
+                                    <Controller
+                                        name="maxDuration"
+                                        control={control}
+                                        render={({ field, fieldState }) => (
+                                            <TextField
+                                                {...field}
+                                                type="number"
+                                                label="Thời lượng tối đa (phút)"
+                                                placeholder="Tự động hoàn thành đơn"
+                                                error={!!fieldState.error}
+                                                helperText={fieldState.error?.message}
+                                                onChange={(e) => field.onChange(Number(e.target.value))}
+                                            />
+                                        )}
+                                    />
+
                                     <Controller
                                         name="petTypes"
                                         control={control}
@@ -255,16 +257,33 @@ export const ServiceEditPage = () => {
                                     )}
                                 />
 
-                                <Controller
-                                    name="description"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Tiptap
-                                            value={field.value ?? ""}
-                                            onChange={field.onChange}
-                                        />
-                                    )}
-                                />
+                                <Box sx={{ mt: 2 }}>
+                                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Mô tả dịch vụ</Typography>
+                                    <Controller
+                                        name="description"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Tiptap
+                                                value={field.value ?? ""}
+                                                onChange={field.onChange}
+                                            />
+                                        )}
+                                    />
+                                </Box>
+
+                                <Box sx={{ mt: 2 }}>
+                                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Quy trình thực hiện (Các bước thực hiện)</Typography>
+                                    <Controller
+                                        name="procedure"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Tiptap
+                                                value={field.value ?? ""}
+                                                onChange={field.onChange}
+                                            />
+                                        )}
+                                    />
+                                </Box>
                             </Stack>
                         </CollapsibleCard>
 
@@ -308,84 +327,82 @@ export const ServiceEditPage = () => {
                                     <Box>
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                                             <Typography variant="subtitle2">Bảng giá theo quy mô/cân nặng</Typography>
-                                            <Button startIcon={<AddIcon />} onClick={() => append({ label: '', value: 0 })}>Thêm mức</Button>
+                                            <Button color="primary" sx={{ color: '#00A76F', fontWeight: 700 }} startIcon={<AddIcon />} onClick={() => append({ label: '', value: 0 })}>Thêm mức</Button>
                                         </Box>
                                         <Table>
                                             <TableHead>
                                                 <TableRow>
-                                                    <TableCell sx={{ fontSize: '0.8125rem' }}>Mô tả (VD: Dưới 5kg)</TableCell>
-                                                    <TableCell sx={{ fontSize: '0.8125rem' }}>Giá (VNĐ)</TableCell>
+                                                    <TableCell sx={{ fontSize: '0.8125rem', width: 220 }}>Mức cân nặng (kg)</TableCell>
+                                                    <TableCell sx={{ fontSize: '0.8125rem', width: 120, textAlign: 'center' }}>Quy mô</TableCell>
+                                                    <TableCell sx={{ fontSize: '0.8125rem', width: 220 }}>Giá (VNĐ)</TableCell>
                                                     <TableCell width={50}></TableCell>
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                {fields.map((field, index) => (
-                                                    <TableRow key={field.id}>
-                                                        <TableCell>
-                                                            <Controller
-                                                                name={`priceList.${index}.label`}
-                                                                control={control}
-                                                                render={({ field }) => <TextField {...field} fullWidth size="small" />}
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <Controller
-                                                                name={`priceList.${index}.value`}
-                                                                control={control}
-                                                                render={({ field }) => (
-                                                                    <TextField
-                                                                        {...field}
-                                                                        type="number"
-                                                                        fullWidth
-                                                                        size="small"
-                                                                        onChange={(e) => field.onChange(Number(e.target.value))}
-                                                                    />
+                                                {fields.map((field, index) => {
+                                                    const priceList = watch("priceList");
+                                                    const prevVal = index > 0 ? priceList[index - 1]?.label : null;
+                                                    const currentVal = priceList[index]?.label;
+
+                                                    let rangeText = "";
+                                                    if (currentVal) {
+                                                        if (index === 0) {
+                                                            rangeText = `< ${currentVal} kg`;
+                                                        } else if (prevVal) {
+                                                            rangeText = `${prevVal} -> ${currentVal} kg`;
+                                                        }
+                                                    }
+
+                                                    return (
+                                                        <TableRow key={field.id}>
+                                                            <TableCell>
+                                                                <Controller
+                                                                    name={`priceList.${index}.label`}
+                                                                    control={control}
+                                                                    render={({ field }) => (
+                                                                        <TextField
+                                                                            {...field}
+                                                                            fullWidth
+                                                                            size="small"
+                                                                            placeholder="Ví dụ: 5"
+                                                                        />
+                                                                    )}
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell sx={{ textAlign: 'center' }}>
+                                                                {rangeText && (
+                                                                    <Typography variant="caption" sx={{ whiteSpace: 'nowrap', color: '#00A76F', fontWeight: 600 }}>
+                                                                        {rangeText}
+                                                                    </Typography>
                                                                 )}
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <IconButton color="error" onClick={() => remove(index)}><DeleteIcon /></IconButton>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Controller
+                                                                    name={`priceList.${index}.value`}
+                                                                    control={control}
+                                                                    render={({ field }) => (
+                                                                        <TextField
+                                                                            {...field}
+                                                                            type="number"
+                                                                            fullWidth
+                                                                            size="small"
+                                                                            onChange={(e) => field.onChange(Number(e.target.value))}
+                                                                        />
+                                                                    )}
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <IconButton color="error" onClick={() => remove(index)}><DeleteIcon /></IconButton>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })}
                                             </TableBody>
                                         </Table>
                                     </Box>
                                 )}
 
-                                <Divider sx={{ borderStyle: 'dashed', my: 1 }} />
 
-                                <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>Cấu hình phụ thu quá giờ</Typography>
-
-                                <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))" }}>
-                                    <Controller
-                                        name="surchargeType"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <FormControl fullWidth>
-                                                <InputLabel>Loại phụ thu quá giờ</InputLabel>
-                                                <Select {...field} label="Loại phụ thu quá giờ">
-                                                    <MenuItem value="none">Không có</MenuItem>
-                                                    <MenuItem value="fixed">Cố định (đ/lần)</MenuItem>
-                                                    <MenuItem value="per-minute">Theo phút (đ/phút)</MenuItem>
-                                                </Select>
-                                            </FormControl>
-                                        )}
-                                    />
-                                    <Controller
-                                        name="surchargeValue"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                type="number"
-                                                label="Giá trị phụ thu (đ)"
-                                                onChange={(e) => field.onChange(Number(e.target.value))}
-                                                disabled={watch("surchargeType") === "none"}
-                                            />
-                                        )}
-                                    />
-                                </Box>
                             </Stack>
                         </CollapsibleCard>
 

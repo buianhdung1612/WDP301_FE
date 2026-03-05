@@ -8,7 +8,7 @@ export interface Pet {
     weight?: number;
     age?: number;
     color?: string;
-    gender?: "male" | "female" | "unknown";
+    gender?: "male" | "female";
     notes?: string;
     avatar?: string;
     healthStatus?: "accepted" | "rejected";
@@ -22,7 +22,7 @@ export interface PetPayload {
     weight?: number;
     age?: number;
     color?: string;
-    gender?: "male" | "female" | "unknown";
+    gender?: "male" | "female";
     healthStatus?: "accepted" | "rejected";
     notes?: string;
     avatar?: string;

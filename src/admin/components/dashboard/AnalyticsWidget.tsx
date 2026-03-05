@@ -1,0 +1,155 @@
+import { Box, Typography } from "@mui/material";
+import { Icon } from '@iconify/react';
+import Chart from 'react-apexcharts';
+import DashboardCard from "./DashboardCard";
+
+interface AnalyticsWidgetProps {
+    title: string;
+    total: string;
+    percent: number;
+    color: string;
+    icon: string;
+    chartData: number[];
+    colorType?: 'primary' | 'secondary' | 'info' | 'warning' | 'error';
+}
+
+const AnalyticsWidget = ({ title, total, percent, color, icon, chartData, colorType = 'primary' }: AnalyticsWidgetProps) => {
+    const isLoss = percent < 0;
+
+    const chartOptions: any = {
+        chart: {
+            sparkline: { enabled: true },
+            animations: { enabled: true }
+        },
+        stroke: { curve: 'smooth', width: 2.5 },
+        colors: [color],
+        tooltip: { enabled: false },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shade: 'light',
+                type: "vertical",
+                opacityFrom: 0,
+                opacityTo: 0,
+            }
+        },
+        states: {
+            hover: { filter: { type: 'none' } },
+            active: { filter: { type: 'none' } }
+        },
+    };
+
+    const commonFont = '"Public Sans Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"';
+
+    return (
+        <DashboardCard
+            sx={{
+                p: 'calc(3 * var(--spacing))',
+                display: 'flex',
+                flexDirection: 'column',
+                position: 'relative',
+                zIndex: 0,
+                boxShadow: 'none',
+                color: `var(--palette-${colorType}-darker)`,
+                bgcolor: 'var(--palette-common-white)',
+                backgroundImage: `linear-gradient(135deg, rgba(var(--palette-${colorType}-lighterChannel) / 48%), rgba(var(--palette-${colorType}-lightChannel) / 48%))`,
+                transition: 'box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+                overflow: 'hidden',
+                borderRadius: 'var(--card-radius, 16px)',
+                minHeight: 180,
+                '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    backgroundImage: `radial-gradient(rgba(var(--palette-${colorType}-darkerChannel) / 0.1) 1px, transparent 1px)`,
+                    backgroundSize: '8px 8px',
+                    opacity: 0.4,
+                }
+            }}
+        >
+            {/* Percentage Box - Absolute Positioned */}
+            <Box
+                sx={{
+                    top: 16,
+                    right: 16,
+                    display: 'flex',
+                    position: 'absolute',
+                    alignItems: 'center',
+                    gap: 'calc(0.5 * var(--spacing))',
+                    zIndex: 1
+                }}
+            >
+                <Icon icon={isLoss ? "eva:trending-down-fill" : "eva:trending-up-fill"} width={20} height={20} />
+                <Box
+                    component="span"
+                    sx={{
+                        fontWeight: 600,
+                        fontSize: '0.875rem',
+                        lineHeight: 1.57143,
+                        fontFamily: commonFont
+                    }}
+                >
+                    {percent > 0 ? `+${percent}` : percent}%
+                </Box>
+            </Box>
+
+            {/* Icon */}
+            <Box
+                component="img"
+                src={icon}
+                sx={{
+                    width: 48,
+                    height: 48,
+                    mb: 'calc(3 * var(--spacing))',
+                    maxWidth: '100%',
+                    verticalAlign: 'middle',
+                    position: 'relative',
+                    zIndex: 1
+                }}
+            />
+
+            {/* Title and Total */}
+            <Box sx={{ position: 'relative', zIndex: 1 }}>
+                <Typography
+                    sx={{
+                        mb: 'var(--spacing)',
+                        fontWeight: 600,
+                        fontSize: '0.875rem',
+                        lineHeight: 1.57143,
+                        fontFamily: commonFont,
+                        color: 'inherit'
+                    }}
+                >
+                    {title}
+                </Typography>
+                <Typography
+                    sx={{
+                        fontWeight: 700,
+                        fontSize: '1.5rem',
+                        lineHeight: 1.5,
+                        fontFamily: commonFont,
+                        color: 'inherit'
+                    }}
+                >
+                    {total}
+                </Typography>
+            </Box>
+
+            <Box sx={{
+                position: 'absolute',
+                bottom: 24,
+                right: 24,
+                width: 100,
+                height: 40,
+                zIndex: 1
+            }}>
+                <Chart type="line" series={[{ data: chartData }]} options={chartOptions} width={100} height={40} />
+            </Box>
+        </DashboardCard>
+    );
+};
+
+export default AnalyticsWidget;

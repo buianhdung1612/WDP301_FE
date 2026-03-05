@@ -11,6 +11,7 @@ import { ResetPasswordPage } from "../pages/auth/ResetPassword";
 import { BookingPage } from "../pages/booking/Booking";
 import { ServicePage } from "../pages/service/Service";
 import { ServiceDetailPage } from "../pages/service/ServiceDetail";
+import { ServiceCheckoutPage } from "../pages/service/ServiceCheckout";
 import { CartPage } from "../pages/cart/Cart";
 import { CheckoutPage } from "../pages/checkout/Checkout";
 import { CheckSuccessPage } from "../pages/checkout/CheckoutSuccess";
@@ -48,6 +49,7 @@ export const ClientRoutes: RouteObject[] = [
     { path: "/order/success", element: <CheckSuccessPage /> },
     { path: "/services", element: <ServicePage /> },
     { path: "/services/:slug", element: <ServiceDetailPage /> },
+    { path: "/services/checkout/:id", element: <ServiceCheckoutPage /> },
     { path: "/hotels", element: <BoardingBookingPage /> },
     { path: "/hotels/success", element: <BoardingPaymentSuccessPage /> },
     { path: "/hotels/:id", element: <BoardingCageDetailPage /> },

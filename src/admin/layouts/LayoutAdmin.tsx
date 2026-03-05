@@ -17,7 +17,7 @@ const LayoutAdminContent = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const isBlogDetail = location.pathname.startsWith("/admin/blog/detail/");
-    const fullWidthRoutes = ["/admin/dashboard", "/admin/dashboard/system", "/admin/dashboard/analytics"];
+    const fullWidthRoutes = ["/admin/dashboard", "/admin/dashboard/system", "/admin/dashboard/analytics", "/admin/dashboard/ecommerce"];
     const isFullWidthPage = fullWidthRoutes.includes(location.pathname) || isBlogDetail;
 
     const isTagsModalOpen = searchParams.get('modal') === 'tags';

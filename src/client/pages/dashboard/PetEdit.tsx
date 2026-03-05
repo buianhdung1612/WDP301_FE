@@ -26,7 +26,7 @@ const schema = z.object({
     breed: z.string().optional(),
     weight: z.number().min(0.1, "Cân nặng phải lớn hơn 0!"),
     avatar: z.string().optional(),
-    gender: z.enum(["male", "female", "unknown"]),
+    gender: z.enum(["male", "female"]),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -249,7 +249,7 @@ export const PetEditPage = () => {
                                 <div className="flex flex-col gap-[10px]">
                                     <label className="text-[15px] font-[600] text-client-secondary">Giới tính</label>
                                     <div className="flex gap-4">
-                                        {["male", "female", "unknown"].map((g) => (
+                                        {["male", "female"].map((g) => (
                                             <label key={g} className="flex items-center gap-2 cursor-pointer group">
                                                 <input
                                                     type="radio"
@@ -258,7 +258,7 @@ export const PetEditPage = () => {
                                                     className="appearance-none w-[18px] h-[18px] border-2 border-[#ddd] rounded-full checked:border-client-primary checked:border-[5px] transition-all cursor-pointer"
                                                 />
                                                 <span className="text-[14px] font-[500] text-[#555] group-hover:text-client-primary transition-colors">
-                                                    {g === "male" ? "Đực" : g === "female" ? "Cái" : "Không rõ"}
+                                                    {g === "male" ? "Đực" : "Cái"}
                                                 </span>
                                             </label>
                                         ))}

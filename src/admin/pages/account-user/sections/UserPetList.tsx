@@ -222,7 +222,7 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
                                         <Box>
                                             <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-primary)' }}>{pet.name}</Typography>
                                             <Typography variant="caption" sx={{ color: 'var(--palette-text-secondary)', fontSize: '0.75rem' }}>
-                                                {pet.gender === 'male' ? 'Đực' : pet.gender === 'female' ? 'Cái' : 'Không rõ'}
+                                                {pet.gender === 'male' ? 'Đực' : 'Cái'}
                                             </Typography>
                                         </Box>
                                     </Stack>
@@ -364,7 +364,6 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
                             >
                                 <MenuItem value="male" sx={{ fontSize: '0.875rem' }}>Đực</MenuItem>
                                 <MenuItem value="female" sx={{ fontSize: '0.875rem' }}>Cái</MenuItem>
-                                <MenuItem value="unknown" sx={{ fontSize: '0.875rem' }}>Không rõ</MenuItem>
                             </TextField>
                         </Stack>
 

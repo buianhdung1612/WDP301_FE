@@ -5,6 +5,8 @@ export interface IService {
     categoryId: string | { _id: string; name: string };
     description: string;
     duration: number;
+    minDuration: number;
+    maxDuration: number;
     petTypes: string[];
     pricingType: 'fixed' | 'by-weight';
     basePrice?: number;

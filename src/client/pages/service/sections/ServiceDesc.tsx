@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface ServiceDescProps {
     serviceName: string;
     description: string;
+    procedure?: string;
 }
 
 const contentVariants = {
@@ -12,7 +13,7 @@ const contentVariants = {
     exit: { opacity: 0, y: -20, transition: { duration: 0.2 } },
 };
 
-export const ServiceDesc = ({ serviceName, description }: ServiceDescProps) => {
+export const ServiceDesc = ({ serviceName, description, procedure }: ServiceDescProps) => {
     const [activeTabKey, setActiveTabKey] = useState("description");
 
     const tabsData = [
@@ -29,7 +30,12 @@ export const ServiceDesc = ({ serviceName, description }: ServiceDescProps) => {
         {
             label: "Quy trình thực hiện",
             key: "process",
-            content: `
+            content: procedure ? `
+                <div class="prose prose-orange max-w-none">
+                    <h4 class="text-[28px] font-secondary text-client-secondary mb-6">Quy trình dịch vụ</h4>
+                    <div class="text-[#505050] leading-relaxed">${procedure}</div>
+                </div>
+            ` : `
                 <div class="space-y-6">
                     <div class="flex items-start gap-4">
                         <div class="w-10 h-10 rounded-full bg-client-primary/10 flex items-center justify-center shrink-0 text-client-primary font-bold">1</div>
