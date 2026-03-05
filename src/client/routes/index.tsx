@@ -32,6 +32,7 @@ import { PetEditPage } from "../pages/dashboard/PetEdit";
 import { PetCagesPage } from "../pages/dashboard/PetCages";
 import { BoardingBookingPage } from "../pages/boarding/BoardingBooking";
 import { BoardingCageDetailPage } from "../pages/boarding/BoardingCageDetail";
+import { BoardingCheckoutPage } from "../pages/boarding/BoardingCheckout";
 import { BoardingPaymentSuccessPage } from "../pages/boarding/BoardingPaymentSuccess";
 import { BookingSuccessPage } from "../pages/booking/BookingSuccess";
 import { BookingHistoryPage } from "../pages/dashboard/BookingHistory";
@@ -49,6 +50,7 @@ export const ClientRoutes: RouteObject[] = [
     { path: "/services", element: <ServicePage /> },
     { path: "/services/:slug", element: <ServiceDetailPage /> },
     { path: "/hotels", element: <BoardingBookingPage /> },
+    { path: "/hotels/checkout", element: <BoardingCheckoutPage /> },
     { path: "/hotels/success", element: <BoardingPaymentSuccessPage /> },
     { path: "/hotels/:id", element: <BoardingCageDetailPage /> },
     {

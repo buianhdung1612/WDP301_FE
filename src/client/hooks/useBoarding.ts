@@ -1,7 +1,11 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createBoardingBooking, payBoardingBooking } from "../api/boarding-booking.api";
 import { getAvailableCages } from "../api/boarding-cage.api";
-import { getBoardingCageDetail } from "../api/boarding-cage-detail.api";
+import {
+  createBoardingCageReview,
+  getBoardingCageDetail,
+  getBoardingCageReviews,
+} from "../api/boarding-cage-detail.api";
 
 export const useCreateBoardingBooking = () => {
   return useMutation({
@@ -51,5 +55,30 @@ export const useBoardingCageDetail = (id?: string) => {
       return response.data;
     },
     enabled: !!id,
+  });
+};
+
+export const useBoardingCageReviews = (id?: string) => {
+  return useQuery({
+    queryKey: ["boarding-cage-reviews", id],
+    queryFn: async () => {
+      if (!id) return { reviews: [], total: 0, averageRating: 0 };
+      const response = await getBoardingCageReviews(id);
+      return response.data;
+    },
+    enabled: !!id,
+  });
+};
+
+export const useCreateBoardingCageReview = (id?: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: { fullName: string; rating: number; comment: string }) => {
+      if (!id) throw new Error("Missing cage id");
+      return createBoardingCageReview(id, payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["boarding-cage-reviews", id] });
+    },
   });
 };
