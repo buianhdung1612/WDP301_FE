@@ -7,6 +7,7 @@ export const BoardingPaymentSuccessPage = () => {
   const [searchParams] = useSearchParams();
   const bookingId = searchParams.get("bookingId") || "";
   const paymentResult = (searchParams.get("payment") || "").toLowerCase();
+  const isCodFlow = paymentResult === "cod" || paymentResult === "pay_at_site";
 
   const { data, isLoading } = useQuery<any>({
     queryKey: ["boarding-payment-success", bookingId],
@@ -21,7 +22,7 @@ export const BoardingPaymentSuccessPage = () => {
 
   const paid = data?.booking?.paymentStatus === "paid";
   const failed = paymentResult === "failed";
-  const waiting = !!bookingId && !paid && !failed;
+  const waiting = !!bookingId && !paid && !failed && !isCodFlow;
 
   return (
     <div className="min-h-[70vh] bg-[#fffdf9] py-[80px] px-[16px]">
@@ -37,7 +38,7 @@ export const BoardingPaymentSuccessPage = () => {
         <h1 className="text-[30px] font-secondary text-client-secondary">
           {isLoading && bookingId
             ? "Dang xac nhan thanh toan..."
-            : paid || !bookingId
+            : paid || !bookingId || isCodFlow
               ? "Ban da dat phong thanh cong"
               : failed
                 ? "Thanh toan chua thanh cong"
@@ -45,7 +46,7 @@ export const BoardingPaymentSuccessPage = () => {
         </h1>
 
         <p className="text-[14px] text-[#606060] mt-[10px]">
-          {paid || !bookingId
+          {paid || !bookingId || isCodFlow
             ? "Cam on ban da dat khach san cho thu cung. Ban co the xem lai thong tin trong tai khoan."
             : failed
               ? "Giao dich bi huy hoac khong thanh cong. Ban co the thuc hien lai thanh toan."
@@ -54,7 +55,7 @@ export const BoardingPaymentSuccessPage = () => {
 
         {!!bookingId && (
           <p className="text-[12px] text-[#6b7280] mt-[8px]">
-            Trang thai hien tai: {data?.booking?.paymentStatus || (failed ? "failed" : "pending")} / {data?.booking?.boardingStatus || "-"}
+            Trang thai hien tai: {isCodFlow ? "thanh toan tai quay" : (data?.booking?.paymentStatus || (failed ? "failed" : "pending"))} / {data?.booking?.boardingStatus || "-"}
           </p>
         )}
 

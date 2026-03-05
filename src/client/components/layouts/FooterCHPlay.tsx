@@ -68,7 +68,7 @@ export const FooterCHPlay = () => {
                     </div>
                 </div>
                 <div className="w-[28%]">
-                    ds
+                    
                 </div>
             </div>
         </section>
