@@ -48,6 +48,8 @@ export const ClientRoutes: RouteObject[] = [
     { path: "/cart", element: <CartPage /> },
     { path: "/checkout", element: <CheckoutPage /> },
     { path: "/order/success", element: <CheckSuccessPage /> },
+    { path: "/booking/success", element: <BookingSuccessPage /> },
+    { path: "/services/booking/success", element: <BookingSuccessPage /> },
     { path: "/services", element: <ServicePage /> },
     { path: "/services/:slug", element: <ServiceDetailPage /> },
     { path: "/services/checkout/:id", element: <ServiceCheckoutPage /> },

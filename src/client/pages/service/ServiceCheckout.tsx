@@ -159,7 +159,7 @@ export const ServiceCheckoutPage = () => {
             } else {
                 toast.success("Đặt lịch thành công! TeddyPet đang đợi bé ạ.");
                 resetBooking(); // Xóa dữ liệu store sau khi đã đặt lịch thành công
-                navigate("/services/booking/success");
+                navigate("/booking/success");
             }
         } catch (error) {
             console.error(error);
@@ -270,7 +270,7 @@ export const ServiceCheckoutPage = () => {
                                         </div>
                                         <span className="text-[14px] font-bold text-client-secondary">Quy trình thực hiện cụ thể:</span>
                                     </div>
-                                    <div 
+                                    <div
                                         className="text-[14px] text-gray-500 leading-relaxed bg-gray-50/50 p-4 rounded-xl border border-dashed border-gray-200"
                                         dangerouslySetInnerHTML={{ __html: booking.serviceId?.procedure || storeService?.procedure }}
                                     />

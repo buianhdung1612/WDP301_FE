@@ -176,7 +176,7 @@ export const ServiceDetailPage = () => {
         if (!selectedTimeSlot || selectedPetIds.length === 0) return;
 
         setIsVerifying(true);
-        // Giả lập một khoảng trễ nhỏ để tạo cảm giác "hệ thống đang tính toán"
+        // Giả lập một khoảng trễ nhỏ
         setTimeout(() => {
             const duration = service?.duration || 30;
             const freeStaff = selectedTimeSlot.freeStaff || 1;
@@ -573,12 +573,6 @@ export const ServiceDetailPage = () => {
                                                 <span className={`font-bold ${selectedTimeSlot ? 'text-client-primary' : 'text-gray-400'}`}>
                                                     {selectedTimeSlot?.time || "Chọn giờ"}
                                                 </span>
-                                                {selectedTimeSlot && bookingPreview && (
-                                                    <span className="text-[11px] text-gray-400 font-bold mt-1.5 flex items-center gap-1.5">
-                                                        <Clock className="w-3 h-3" />
-                                                        Dự kiến xong: {bookingPreview.endTime} (~{bookingPreview.totalDuration}p)
-                                                    </span>
-                                                )}
                                             </div>
                                             <Clock className="w-5 h-5 text-gray-400" />
                                         </div>
@@ -754,13 +748,14 @@ export const ServiceDetailPage = () => {
                                         </div>
 
                                         {/* Verification & Preview Section */}
+                                        {/* Lộ trình thực hiện - Đã bỏ chữ Dự kiến */}
                                         {selectedTimeSlot && (
-                                            <div className={`transition-all duration-500 overflow-hidden ${bookingPreview ? "max-h-[400px]" : "max-h-[80px]"}`}>
+                                            <div className={`transition-all duration-500 overflow-hidden ${bookingPreview ? "max-h-[460px]" : "max-h-[80px]"}`}>
                                                 {!bookingPreview ? (
                                                     <button
                                                         onClick={handleVerifySchedule}
                                                         disabled={isVerifying}
-                                                        className="w-full py-3.5 bg-gray-50 text-client-secondary rounded-[15px] font-bold text-[14px] hover:bg-client-primary/5 hover:text-client-primary transition-all border-2 border-dashed border-gray-200 flex items-center justify-center gap-2 group"
+                                                        className="w-full py-4 bg-gray-50 text-client-secondary rounded-[15px] font-bold text-[14px] hover:bg-client-primary/5 hover:text-client-primary transition-all border-2 border-dashed border-gray-200 flex items-center justify-center gap-2 group mb-4"
                                                     >
                                                         {isVerifying ? (
                                                             <Icon icon="line-md:loading-loop" width={20} />
@@ -770,7 +765,7 @@ export const ServiceDetailPage = () => {
                                                         <span>Kiểm tra lộ trình phục vụ ({selectedPetIds.length} bé)</span>
                                                     </button>
                                                 ) : (
-                                                    <div className="bg-orange-50/30 rounded-[20px] p-4 border border-orange-100/50">
+                                                    <div className="bg-orange-50/30 rounded-[20px] p-4 border border-orange-100/50 mb-4">
                                                         <div className="flex items-center justify-between mb-3">
                                                             <div className="flex items-center gap-2">
                                                                 <div className="w-1.5 h-6 bg-client-primary rounded-full"></div>
@@ -781,7 +776,7 @@ export const ServiceDetailPage = () => {
                                                                 className="flex items-center gap-1 text-[11px] font-bold text-client-primary hover:bg-client-primary/5 px-2.5 py-1 rounded-full transition-all"
                                                             >
                                                                 <Icon icon="solar:restart-bold" width={12} />
-                                                                Thay đổi
+                                                                Đổi giờ khác
                                                             </button>
                                                         </div>
 
@@ -794,7 +789,7 @@ export const ServiceDetailPage = () => {
                                                                     </div>
                                                                     <div className="flex-1 pb-2">
                                                                         <div className="flex items-center justify-between mb-1">
-                                                                            <span className="text-[13px] font-bold text-client-secondary bg-white px-2 py-0.5 rounded-lg border border-gray-100">Dự kiến ~ {item.startTime} - {item.endTime}</span>
+                                                                            <span className="text-[13px] font-bold text-client-secondary bg-white px-2 py-0.5 rounded-lg border border-gray-100">Thời gian: {item.startTime} - {item.endTime}</span>
                                                                             <span className="text-[10px] font-bold px-2 py-0.5 bg-client-primary/10 text-client-primary rounded-md uppercase tracking-wider">Đợt {idx + 1}</span>
                                                                         </div>
                                                                         <div className="flex flex-wrap gap-1">
@@ -813,7 +808,7 @@ export const ServiceDetailPage = () => {
                                                                 <span className="text-[16px] font-bold text-client-primary">{bookingPreview.endTime}</span>
                                                             </div>
                                                             <div className="text-right">
-                                                                <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Tổng thời gian dự kiến:</span>
+                                                                <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Tổng thời gian:</span>
                                                                 <p className="text-[16px] font-bold text-client-secondary">{bookingPreview.totalDuration} phút</p>
                                                             </div>
                                                         </div>
@@ -832,16 +827,17 @@ export const ServiceDetailPage = () => {
                                 )}
 
                                 {/* Modal Footer - Fixed if preview exists */}
+                                {/* Chốt giờ hẹn khi đã có lộ trình */}
                                 {bookingPreview && (
                                     <div className="mt-4 pt-4 border-t border-gray-100">
                                         <button
                                             onClick={() => {
                                                 setIsTimeModalOpen(false);
                                             }}
-                                            className="w-full py-3 bg-client-primary text-white rounded-[20px] font-bold text-[15px] shadow-lg shadow-client-primary/10 hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2 group"
+                                            className="w-full py-4 bg-client-primary text-white rounded-[20px] font-bold text-[16px] shadow-lg shadow-client-primary/10 hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2 group"
                                         >
-                                            <Icon icon="solar:check-circle-bold" width={22} className="group-hover:rotate-12 transition-transform" />
-                                            <span>Đồng ý và Chốt lịch hẹn ({selectedTimeSlot.time})</span>
+                                            <Icon icon="solar:check-circle-bold" width={24} className="group-hover:rotate-12 transition-transform" />
+                                            <span>Chốt lịch vào {selectedTimeSlot.time}</span>
                                         </button>
                                     </div>
                                 )}
