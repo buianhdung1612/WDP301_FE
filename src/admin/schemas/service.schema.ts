@@ -4,6 +4,7 @@ const baseServiceSchema = z.object({
     name: z.string().min(1, "Tên dịch vụ không được để trống"),
     slug: z.string().optional(),
     categoryId: z.string().min(1, "Vui lòng chọn danh mục"),
+    departmentId: z.string().min(1, "Vui lòng chọn phòng ban phụ trách"),
     description: z.string().optional(),
     procedure: z.string().optional(),
     duration: z.number().min(1, "Thời lượng dự kiến phải lớn hơn 0"),

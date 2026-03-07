@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useServiceDetail } from "../../hooks/useService";
 import { ProductBanner } from "../product/sections/ProductBanner";
 import { ProductGallery } from "../product/sections/ProductGallery";
@@ -16,58 +16,73 @@ import StarIcon from "@mui/icons-material/Star";
 import { useState, useMemo, useEffect } from "react";
 import dayjs from "dayjs";
 import { Icon } from "@iconify/react";
-import { getAvailableTimeSlots, createBooking } from "../../api/booking.api";
+import { getAvailableTimeSlots } from "../../api/booking.api";
 import { getMyPets } from "../../api/pet.api";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { QuickAddPetModal } from "./sections/QuickAddPetModal";
+import { useBookingStore } from "../../../stores/useBookingStore";
 
 export const ServiceDetailPage = () => {
     const { slug } = useParams();
     const navigate = useNavigate();
     const { user } = useAuthStore();
     const { data: service, isLoading, error } = useServiceDetail(slug || "");
+    const { setBookingData, selectedPets: selectedStorePets } = useBookingStore();
 
-    // Booking States
+    // Trạng thái đặt lịch
     const [selectedDate, setSelectedDate] = useState<string>(dayjs().format("YYYY-MM-DD"));
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<any>(null);
     const [selectedPetIds, setSelectedPetIds] = useState<string[]>([]);
     const [pets, setPets] = useState<any[]>([]);
-    const [availableSlots, setAvailableSlots] = useState<any[]>([]);
+    const [availableShifts, setAvailableShifts] = useState<any[]>([]);
+    const [activeShiftId, setActiveShiftId] = useState<string | null>(null);
+    const [activeHour, setActiveHour] = useState<string | null>(null);
     const [isLoadingSlots, setIsLoadingSlots] = useState(false);
     const [isTimeModalOpen, setIsTimeModalOpen] = useState(false);
-    const [activeTimeSession, setActiveTimeSession] = useState("Sáng");
-    const [activeHour, setActiveHour] = useState<string | null>(null);
     const [bookingPreview, setBookingPreview] = useState<any>(null);
     const [isVerifying, setIsVerifying] = useState(false);
     const [isQuickAddPetOpen, setIsQuickAddPetOpen] = useState(false);
 
-    // Fetch Pets
+    // Lấy danh sách thú cưng
     useEffect(() => {
         if (user) {
             getMyPets().then(res => setPets(res.data || []));
         }
     }, [user]);
 
-    // Fetch Time Slots
+    // Đồng bộ thú cưng đã chọn từ store khi component được gắn vào (mount)
+    useEffect(() => {
+        if (selectedStorePets.length > 0) {
+            setSelectedPetIds(selectedStorePets.map(p => p._id));
+        }
+    }, [selectedStorePets]);
+
+    // Lấy danh sách các khung giờ còn trống
     useEffect(() => {
         if (service && selectedDate) {
             setIsLoadingSlots(true);
-            // Default to 1 pet to show available slots even if none selected yet
             const petCount = selectedPetIds.length > 0 ? selectedPetIds.length : 1;
             getAvailableTimeSlots(selectedDate, service._id, petCount, selectedPetIds)
                 .then(res => {
-                    setAvailableSlots(res.data || []);
-                    if (selectedTimeSlot && !res.data.find((s: any) => s.time === selectedTimeSlot.time)) {
-                        setSelectedTimeSlot(null);
-                        setBookingPreview(null);
+                    const shifts = res.data?.shifts || [];
+                    setAvailableShifts(shifts);
+
+                    // Reset selected slot if not found in any shift
+                    if (selectedTimeSlot) {
+                        const exists = shifts.some((shift: any) =>
+                            shift.slots.some((s: any) => s.time === selectedTimeSlot.time)
+                        );
+                        if (!exists) {
+                            setSelectedTimeSlot(null);
+                            setBookingPreview(null);
+                        }
                     }
                 })
                 .finally(() => setIsLoadingSlots(false));
         } else {
-            setAvailableSlots([]);
+            setAvailableShifts([]);
         }
     }, [service, selectedDate, selectedPetIds]);
 
@@ -75,29 +90,35 @@ export const ServiceDetailPage = () => {
         setSelectedPetIds(prev =>
             prev.includes(petId) ? prev.filter(id => id !== petId) : [...prev, petId]
         );
+        setBookingPreview(null);
     };
 
-    const filteredSlotsBySession = useMemo(() => {
-        return availableSlots.filter((slot: any) => {
-            const hour = parseInt(slot.time.split(":")[0]);
-            if (activeTimeSession === "Sáng") return hour < 13;
-            if (activeTimeSession === "Chiều") return hour >= 13 && hour < 18;
-            if (activeTimeSession === "Tối") return hour >= 18;
-            return true;
-        });
-    }, [availableSlots, activeTimeSession]);
+    const activeShift = useMemo(() => {
+        if (activeShiftId) return availableShifts.find(s => s._id === activeShiftId);
+        return availableShifts[0];
+    }, [availableShifts, activeShiftId]);
 
     const groupedSlots = useMemo(() => {
         const groups: Record<string, any[]> = {};
-        filteredSlotsBySession.forEach((slot: any) => {
+        if (!activeShift) return groups;
+
+        activeShift.slots.forEach((slot: any) => {
             const hour = slot.time.split(":")[0];
             if (!groups[hour]) groups[hour] = [];
             groups[hour].push(slot);
         });
         return groups;
-    }, [filteredSlotsBySession]);
+    }, [activeShift]);
 
-    // Auto-select first available hour when session/data changes
+    // Tự động chọn ca và giờ rảnh đầu tiên
+    useEffect(() => {
+        if (availableShifts.length > 0) {
+            if (!activeShiftId || !availableShifts.find(s => s._id === activeShiftId)) {
+                setActiveShiftId(availableShifts[0]._id);
+            }
+        }
+    }, [availableShifts]);
+
     useEffect(() => {
         const hours = Object.keys(groupedSlots).sort((a, b) => parseInt(a) - parseInt(b));
         if (hours.length > 0 && (!activeHour || !groupedSlots[activeHour])) {
@@ -136,8 +157,8 @@ export const ServiceDetailPage = () => {
                             priceLabel = i === 0 ? `< ${threshold} kg` : `${sortedList[i - 1].label} -> ${threshold} kg`;
                             break;
                         }
-                        // If weight exceeds the last bracket, we might need a default or use the last one
-                        // Usually backend should handle this, but for UI:
+                        // Nếu cân nặng vượt quá mốc cuối cùng, có thể cần giá mặc định hoặc dùng mốc cuối:
+                        // Thông thường phía Backend sẽ xử lý việc này, nhưng để hiển thị trên UI:
                         if (i === sortedList.length - 1) {
                             matchedPrice = sortedList[i].value;
                             priceLabel = `> ${sortedList[i - 1]?.label || 0} kg`;
@@ -155,7 +176,7 @@ export const ServiceDetailPage = () => {
         if (!selectedTimeSlot || selectedPetIds.length === 0) return;
 
         setIsVerifying(true);
-        // Simulate a tiny delay for "checking" feel, though logic is local
+        // Giả lập một khoảng trễ nhỏ để tạo cảm giác "hệ thống đang tính toán"
         setTimeout(() => {
             const duration = service?.duration || 30;
             const freeStaff = selectedTimeSlot.freeStaff || 1;
@@ -195,19 +216,55 @@ export const ServiceDetailPage = () => {
         if (!service) return;
         if (selectedPetIds.length === 0) { toast.warning("Bé cưng nào sẽ đi Spa vậy ạ? Vui lòng chọn bé nha!"); return; }
         if (!selectedTimeSlot) { toast.warning("Bạn chưa chọn giờ hẹn kìa!"); return; }
-        try {
-            const startTime = dayjs(`${selectedDate} ${selectedTimeSlot.time}`, "YYYY-MM-DD HH:mm").toISOString();
-            const bookingData = {
-                serviceId: service._id,
-                petIds: selectedPetIds,
-                startTime: startTime
-            };
-            const response = await createBooking(bookingData);
-            if (response.code === 200 || response.code === 201) {
-                toast.success("Đặt lịch thành công! Đang chuyển sang trang thanh toán...");
-                navigate(`/services/checkout/${response.data._id}`);
-            } else { toast.error(response.message || "Có lỗi xảy ra, thử lại sau nha."); }
-        } catch (error: any) { toast.error(error.response?.data?.message || "Lỗi hệ thống, bạn thông cảm nha!"); }
+
+        if (!bookingPreview) {
+            toast.warning("Bạn vui lòng nhấn 'Kiểm tra lộ trình' trước khi tiếp tục nha!");
+            setIsTimeModalOpen(true);
+            return;
+        }
+
+        // Kiểm tra an toàn cuối cùng: nếu bản xem trước không khớp với lựa chọn hiện tại
+        // (Đề phòng trường hợp hiếm gặp, mặc dù handlePetToggle đã xử lý việc này)
+        const petCountInPreview = bookingPreview.timeline.reduce((sum: number, batch: any) => sum + batch.pets.length, 0);
+        if (petCountInPreview !== selectedPetIds.length) {
+            toast.warning("Có sự thay đổi về số lượng bé cưng, vui lòng kiểm tra lại lộ trình nha!");
+            setBookingPreview(null);
+            setIsTimeModalOpen(true);
+            return;
+        }
+
+        const startTimeDate = dayjs(`${selectedDate} ${selectedTimeSlot.time}`, "YYYY-MM-DD HH:mm");
+        if (startTimeDate.isBefore(dayjs())) {
+            toast.warning("Giờ hẹn này đã trôi qua rồi, bạn chọn giờ khác nhé!");
+            return;
+        }
+
+        const selectedPetsData = pets.filter(p => selectedPetIds.includes(p._id));
+
+        // Tính toán bản xem trước/thời lượng nếu chưa có hoặc để kiểm tra lần cuối
+        const duration = service.duration || 30;
+        const freeStaff = selectedTimeSlot.freeStaff || 1;
+        const petCount = selectedPetIds.length;
+        const totalDuration = duration * Math.ceil(petCount / freeStaff);
+        const endTime = startTimeDate.add(totalDuration, 'minute');
+
+        // Lưu vào store
+        setBookingData({
+            service,
+            selectedPets: selectedPetsData,
+            startTime: startTimeDate.toISOString(),
+            endTime: endTime.toISOString(),
+            totalDuration: totalDuration,
+            bookingPreview: bookingPreview || {
+                totalDuration,
+                endTime: endTime.format("HH:mm"),
+                timeline: [] // Lộ trình tối thiểu nếu chưa có
+            },
+            selectedDate,
+            selectedTimeSlot
+        });
+
+        navigate(`/services/checkout/new`);
     };
 
     if (isLoading) return (
@@ -243,10 +300,10 @@ export const ServiceDetailPage = () => {
 
             <section className="relative px-[30px] bg-white pt-[80px] pb-[120px]">
                 <div className="app-container grid grid-cols-2 gap-[60px] 2xl:gap-[40px] relative border-b border-[#eee] pb-[80px] items-stretch">
-                    {/* Left Column: Product Gallery */}
+                    {/* Cột trái: Thư viện ảnh sản phẩm/dịch vụ */}
                     <ProductGallery images={service.images || []} />
 
-                    {/* Right Column: Service Information */}
+                    {/* Cột phải: Thông tin chi tiết dịch vụ */}
                     <div>
                         <div className="flex flex-col h-full">
                             <span className="text-client-primary font-bold uppercase tracking-[3px] text-[13px] inline-block">
@@ -287,32 +344,16 @@ export const ServiceDetailPage = () => {
                                 </div>
                             )}
 
-                            {/* Booking Options */}
+                            {/* Các tùy chọn đặt lịch */}
                             <div className="space-y-5 mt-[40px]">
-                                {/* Pet Selection */}
+                                {/* Chọn thú cưng */}
                                 <div>
-                                    <div className="mb-[15px] text-client-secondary flex items-center">
-                                        <span className="font-secondary text-[18px]">Chọn bé cưng:</span>
-                                        {selectedPetIds.length > 0 && <span className="ml-[10px] text-client-primary font-bold">({selectedPetIds.length} bé)</span>}
-                                    </div>
-                                    <div className="flex items-center flex-wrap gap-[10px]">
-                                        {pets.map(pet => {
-                                            const isSelected = selectedPetIds.includes(pet._id);
-                                            return (
-                                                <div
-                                                    key={pet._id}
-                                                    className={`flex items-center justify-center py-[10px] px-[25px] cursor-pointer capitalize rounded-[40px] transition-all border font-bold
-                                                        ${isSelected
-                                                            ? 'bg-client-secondary text-white border-client-secondary shadow-md'
-                                                            : 'bg-[#fff0f0] text-client-secondary border-transparent hover:bg-client-secondary hover:text-white'}`}
-                                                    onClick={() => handlePetToggle(pet._id)}
-                                                >
-                                                    {pet.name}
-                                                </div>
-                                            );
-                                        })}
-                                        <div
-                                            className="w-[45px] h-[45px] rounded-full border-2 border-dashed border-[#eee] flex items-center justify-center text-[#ccc] hover:border-client-primary hover:text-client-primary transition-all cursor-pointer"
+                                    <div className="flex items-center justify-between mb-[20px]">
+                                        <h3 className="text-client-secondary font-secondary text-[20px] flex items-center gap-2">
+                                            Chọn bé cưng của bạn
+                                            {selectedPetIds.length > 0 && <span className="text-client-primary text-[14px] font-bold bg-client-primary/5 px-2 py-0.5 rounded-full">Đã chọn {selectedPetIds.length} bé</span>}
+                                        </h3>
+                                        <button
                                             onClick={() => {
                                                 if (!user) {
                                                     toast.info("Vui lòng đăng nhập để thêm bé cưng nha!");
@@ -321,13 +362,52 @@ export const ServiceDetailPage = () => {
                                                 }
                                                 setIsQuickAddPetOpen(true);
                                             }}
+                                            className="text-[13px] font-bold text-client-primary flex items-center gap-1.5 hover:brightness-110 transition-all"
                                         >
-                                            <Plus size={20} />
-                                        </div>
+                                            <Plus size={16} /> Thêm bé mới
+                                        </button>
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-2">
+                                        {pets.map((pet) => {
+                                            const isSelected = selectedPetIds.includes(pet._id);
+                                            return (
+                                                <button
+                                                    key={pet._id}
+                                                    onClick={() => handlePetToggle(pet._id)}
+                                                    className={`p-1.5 pr-4 rounded-[20px] border transition-all flex items-center gap-2 shrink-0 group relative
+                                                        ${isSelected
+                                                            ? 'border-client-primary bg-client-primary/[0.03]'
+                                                            : 'border-gray-100 bg-white hover:border-gray-300'}`}
+                                                >
+
+                                                    <div className="w-[48px] h-[48px] rounded-[12px] overflow-hidden border border-gray-50 bg-gray-50">
+                                                        {pet.avatar ? (
+                                                            <img src={pet.avatar} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f9f9f9' }}>
+                                                                <Icon icon="solar:PawPrint-bold" width={22} className="text-gray-300" />
+                                                            </Box>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-left">
+                                                        <p className={`text-[14px] font-bold leading-none mb-1.5 ${isSelected ? 'text-client-primary' : 'text-client-secondary'}`}>
+                                                            {pet.name}
+                                                        </p>
+                                                        <p className="text-[11px] text-gray-400 font-bold uppercase tracking-tight">
+                                                            {pet.weight}kg • {pet.type === 'dog' ? 'Chó' : 'Mèo'}
+                                                        </p>
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                        {pets.length === 0 && (
+                                            <p className="text-gray-400 text-[14px] font-medium py-2">Bạn chưa có thú cưng nào, vui lòng thêm mới nhé!</p>
+                                        )}
                                     </div>
                                 </div>
 
-                                {/* Date & Time */}
+                                {/* Chọn Ngày & Giờ */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="custom-datepicker">
                                         <div className="mb-[10px] text-client-secondary font-secondary text-[18px]">Ngày hẹn:</div>
@@ -516,7 +596,7 @@ export const ServiceDetailPage = () => {
                                     </div>
                                 )}
 
-                                 {/* Main Action */}
+                                {/* Main Action */}
                                 <div className="mt-[40px]">
                                     <button
                                         onClick={handleSubmit}
@@ -582,17 +662,25 @@ export const ServiceDetailPage = () => {
                             {/* Modal Body - Scrollable */}
                             <div className="flex-1 overflow-y-auto p-6 pt-4 custom-scrollbar">
 
-                                <div className="flex bg-gray-50 p-1 rounded-[15px] mb-4">
-                                    {["Sáng", "Chiều", "Tối"].map((session) => (
+                                <div className="flex bg-gray-50 p-1 rounded-[15px] mb-4 overflow-x-auto no-scrollbar gap-1">
+                                    {availableShifts.map((shift) => (
                                         <button
-                                            key={session}
-                                            onClick={() => setActiveTimeSession(session)}
-                                            className={`flex-1 py-1.5 rounded-[12px] text-[13px] font-bold transition-all 
-                                                ${activeTimeSession === session ? "bg-white text-client-primary shadow-sm" : "text-gray-400"}`}
+                                            key={shift._id}
+                                            onClick={() => setActiveShiftId(shift._id)}
+                                            className={`flex-1 min-w-[120px] py-2 rounded-[12px] text-[12px] font-bold transition-all whitespace-nowrap px-3
+                                                ${activeShiftId === shift._id ? "bg-white text-client-primary shadow-sm border border-client-primary/10" : "text-gray-400 hover:text-gray-600"}`}
                                         >
-                                            {session}
+                                            <div className="flex flex-col items-center">
+                                                <span>{shift.name}</span>
+                                                <span className="text-[10px] opacity-60 font-medium">{shift.startTime} - {shift.endTime}</span>
+                                            </div>
                                         </button>
                                     ))}
+                                    {availableShifts.length === 0 && !isLoadingSlots && (
+                                        <div className="py-2 px-4 text-gray-400 text-[13px] text-center w-full">
+                                            Không có ca trực nào trong ngày này
+                                        </div>
+                                    )}
                                 </div>
 
                                 {isLoadingSlots ? (
@@ -633,23 +721,27 @@ export const ServiceDetailPage = () => {
                                                             const fullTime = `${activeHour}:${m}`;
                                                             const slot = groupedSlots[activeHour || ""]?.find(s => s.time === fullTime);
 
-                                                            // Priority: if slot exists from server, use its availability. 
-                                                            // Otherwise, assume it's available for the UI's sake.
-                                                            const isAvailable = slot ? (slot.status === "available") : true;
+                                                            // Check if time is in the past for today's date
+                                                            const isPastTime = selectedDate === dayjs().format("YYYY-MM-DD") &&
+                                                                dayjs(`${selectedDate} ${fullTime}`, "YYYY-MM-DD H:mm").isBefore(dayjs());
+
+                                                            const isAvailable = (slot ? (slot.status === "available") : false) && !isPastTime;
                                                             const isSelected = selectedTimeSlot?.time === fullTime;
 
                                                             return (
                                                                 <button
                                                                     key={m}
+                                                                    disabled={!isAvailable}
                                                                     onClick={() => {
                                                                         if (slot) setSelectedTimeSlot(slot);
                                                                         else setSelectedTimeSlot({ time: fullTime, status: "available" });
+                                                                        setBookingPreview(null); // Reset preview when time changes
                                                                     }}
                                                                     className={`py-2 rounded-[8px] font-bold text-[13px] transition-all border-2
                                                                     ${isSelected
                                                                             ? 'bg-client-primary border-client-primary text-white scale-105 shadow-md'
                                                                             : isAvailable
-                                                                                ? 'bg-white border-gray-50 text-client-secondary hover:border-client-primary/40 hover:shadow-sm'
+                                                                                ? 'bg-white border-gray-100 text-client-secondary hover:border-client-primary/40 hover:shadow-sm'
                                                                                 : 'bg-gray-50 border-transparent text-gray-300 cursor-not-allowed'}`}
                                                                 >
                                                                     {m}
@@ -663,7 +755,7 @@ export const ServiceDetailPage = () => {
 
                                         {/* Verification & Preview Section */}
                                         {selectedTimeSlot && (
-                                            <div className={`mt-5 transition-all duration-500 overflow-hidden ${bookingPreview ? "max-h-[400px]" : "max-h-[80px]"}`}>
+                                            <div className={`transition-all duration-500 overflow-hidden ${bookingPreview ? "max-h-[400px]" : "max-h-[80px]"}`}>
                                                 {!bookingPreview ? (
                                                     <button
                                                         onClick={handleVerifySchedule}
@@ -721,7 +813,7 @@ export const ServiceDetailPage = () => {
                                                                 <span className="text-[16px] font-bold text-client-primary">{bookingPreview.endTime}</span>
                                                             </div>
                                                             <div className="text-right">
-                                                                <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Tổng thời gian:</span>
+                                                                <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Tổng thời gian dự kiến:</span>
                                                                 <p className="text-[16px] font-bold text-client-secondary">{bookingPreview.totalDuration} phút</p>
                                                             </div>
                                                         </div>
@@ -745,9 +837,8 @@ export const ServiceDetailPage = () => {
                                         <button
                                             onClick={() => {
                                                 setIsTimeModalOpen(false);
-                                                setBookingPreview(null);
                                             }}
-                                            className="w-full py-4 bg-client-primary text-white rounded-[20px] font-bold text-[15px] shadow-lg shadow-client-primary/10 hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2 group"
+                                            className="w-full py-3 bg-client-primary text-white rounded-[20px] font-bold text-[15px] shadow-lg shadow-client-primary/10 hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2 group"
                                         >
                                             <Icon icon="solar:check-circle-bold" width={22} className="group-hover:rotate-12 transition-transform" />
                                             <span>Đồng ý và Chốt lịch hẹn ({selectedTimeSlot.time})</span>

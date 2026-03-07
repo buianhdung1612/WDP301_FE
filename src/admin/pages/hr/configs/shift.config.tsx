@@ -16,6 +16,17 @@ export const getShiftColumns = (onEdit: (id: string) => void, onDelete: (id: str
         )
     },
     {
+        field: "department",
+        headerName: "Phòng ban",
+        flex: 1,
+        minWidth: 150,
+        renderCell: (params) => (
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                {params.row.departmentId?.name || "Tất cả"}
+            </Typography>
+        )
+    },
+    {
         field: "time",
         headerName: "Thời gian",
         flex: 1,

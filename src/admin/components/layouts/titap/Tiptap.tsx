@@ -1,6 +1,6 @@
-import { Stack, Typography, Box, Divider } from "@mui/material"
+import { Stack, Box, Divider } from "@mui/material"
 import { EditorContent, useEditor, useEditorState } from '@tiptap/react'
-import { useTranslation } from "react-i18next";
+
 import { memo, useEffect, useState, useCallback, useRef } from "react";
 import { ImageInsertButton } from "./sections/ImageInsertButton";
 import { LinkButtons } from "./sections/LinkButtons";
@@ -27,7 +27,6 @@ interface TiptapProps {
 }
 
 export const Tiptap = memo(({ value = '', onChange }: TiptapProps) => {
-    const { t } = useTranslation();
     const [isFullscreen, setIsFullscreen] = useState(false);
     const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -41,7 +40,7 @@ export const Tiptap = memo(({ value = '', onChange }: TiptapProps) => {
     }, [onChange]);
 
     const editor = useEditor({
-        extensions: getExtensions(t("admin.tiptap.placeholder")),
+        extensions: getExtensions("Hãy viết điều gì đó tuyệt vời..."),
         content: value,
         immediatelyRender: true,
         shouldRerenderOnTransaction: false,
@@ -128,7 +127,7 @@ export const Tiptap = memo(({ value = '', onChange }: TiptapProps) => {
         <Stack gap="12px" sx={{
             backgroundColor: isFullscreen ? "#1c252e7a" : "#fff"
         }}>
-            <Typography variant="h6" sx={{ fontSize: "0.875rem", fontWeight: "600" }}> {t("admin.tiptap.content_label")} </Typography>
+
             {isFullscreen && (
                 <Box
                     onClick={toggleFullscreen}
@@ -205,5 +204,5 @@ export const Tiptap = memo(({ value = '', onChange }: TiptapProps) => {
                 </Box>
             </Box>
         </Stack >
-    )
-})
+    );
+});

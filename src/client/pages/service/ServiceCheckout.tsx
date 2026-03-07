@@ -1,26 +1,23 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { getMyBooking, updateBooking } from "../../api/booking.api";
+import { getMyBooking, updateBooking, createBooking } from "../../api/booking.api";
 import { ProductBanner } from "../product/sections/ProductBanner";
 import { FooterSub } from "../../components/layouts/FooterSub";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-    CreditCard, 
-    Wallet, 
-    Banknote, 
+import {
     ArrowLeft,
     User,
     LogOut,
-    Calendar, 
-    Clock, 
+    Calendar,
+    Clock,
     PawPrint,
-    Loader2,
-    CheckCircle2,
-    MessageSquare
+    Loader2
 } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import { useAuthStore } from "../../../stores/useAuthStore";
+import { useBookingStore } from "../../../stores/useBookingStore";
 
 const breadcrumbs = [
     { label: "Trang chủ", to: "/" },
@@ -32,21 +29,36 @@ export const ServiceCheckoutPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user, logout } = useAuthStore();
+    const {
+        service: storeService,
+        selectedPets: storePets,
+        startTime: storeStartTime,
+        endTime: storeEndTime,
+        totalDuration: storeDuration,
+        note: storeNote,
+        resetBooking
+    } = useBookingStore();
     const [booking, setBooking] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [paymentMethod, setPaymentMethod] = useState<string>("money");
     const [isProcessing, setIsProcessing] = useState(false);
     const [showNotes, setShowNotes] = useState(false);
     const [notes, setNotes] = useState("");
+    const [totalDuration, setTotalDuration] = useState<number>(0);
 
     useEffect(() => {
-        if (id) {
+        if (id && id !== "new") {
             getMyBooking(id)
                 .then(res => {
                     if (res.code === 200) {
                         setBooking(res.data);
                         setNotes(res.data.notes || "");
                         if (res.data.notes) setShowNotes(true);
+
+                        // Đối với đơn hàng đã có, tính toán thời lượng thực tế/dự kiến
+                        const start = dayjs(res.data.startTime || res.data.start);
+                        const end = dayjs(res.data.endTime || res.data.end);
+                        setTotalDuration(end.diff(start, 'minute'));
                     } else {
                         toast.error("Không tìm thấy thông tin lịch đặt!");
                         navigate("/services");
@@ -58,27 +70,95 @@ export const ServiceCheckoutPage = () => {
                     navigate("/services");
                 })
                 .finally(() => setIsLoading(false));
+        } else if (id === "new" && !booking) {
+            if (storeService && storePets.length > 0) {
+                // Lấy tổng thời lượng dự kiến từ store
+                setTotalDuration(storeDuration || 0);
+
+                // Tính toán các khoản phí dựa trên dữ liệu từ store
+                let subTotal = 0;
+                storePets.forEach((pet: any) => {
+                    if (storeService.pricingType === 'fixed') {
+                        subTotal += storeService.basePrice || 0;
+                    } else if (storeService.pricingType === 'by-weight') {
+                        const weight = pet.weight || 0;
+                        const priceItem = storeService.priceList?.find((item: any) => {
+                            const label = item.label;
+                            if (!label) return false;
+                            if (label.includes('<')) return weight < parseFloat(label.replace(/[^\d.]/g, ''));
+                            if (label.includes('>')) return weight > parseFloat(label.replace(/[^\d.]/g, ''));
+                            if (label.includes('-')) {
+                                const nums = label.match(/\d+\.?\d*/g);
+                                return nums && weight >= parseFloat(nums[0]) && weight <= parseFloat(nums[1]);
+                            }
+                            return weight <= parseFloat(label.replace(/[^\d.]/g, ''));
+                        });
+                        subTotal += priceItem ? priceItem.value : (storeService.basePrice || 0);
+                    }
+                });
+
+                if (storeNote) {
+                    setNotes(storeNote);
+                    setShowNotes(true);
+                }
+
+                setBooking({
+                    serviceId: storeService,
+                    petIds: storePets,
+                    start: storeStartTime,
+                    end: storeEndTime,
+                    customerName: user?.fullName,
+                    customerPhone: user?.phone,
+                    subTotal: subTotal,
+                    total: subTotal,
+                    discount: 0
+                });
+                setIsLoading(false);
+            } else {
+                toast.error("Thiếu thông tin đặt lịch!");
+                navigate("/services");
+            }
         }
-    }, [id, navigate]);
+    }, [id, navigate, user, storeService, storePets, storeStartTime, storeEndTime, storeDuration, storeNote]);
 
     const handlePayment = async () => {
-        if (!booking || !id) return;
+        if (!booking) return;
         setIsProcessing(true);
 
         try {
-            // Cập nhật ghi chú trước khi thanh toán
-            await updateBooking(id, { notes: showNotes ? notes : "" });
+            let bookingCode = booking.code;
 
-            const phone = booking.customerPhone || "";
-            const bookingCode = booking.code;
+            if (id === "new") {
+                const bookingData = {
+                    serviceId: booking.serviceId?._id,
+                    petIds: booking.petIds?.map((p: any) => p._id),
+                    startTime: booking.start,
+                    notes: showNotes ? notes : ""
+                };
+
+                const response = await createBooking(bookingData);
+                if (response.code === 200 || response.code === 201) {
+                    bookingCode = response.data.code;
+                } else {
+                    toast.error(response.message || "Không thể khởi tạo đơn hàng!");
+                    setIsProcessing(false);
+                    return;
+                }
+            } else if (id) {
+                await updateBooking(id, { notes: showNotes ? notes : "" });
+            }
+
+            const phone: string = booking.customerPhone || user?.phone || "";
 
             if (paymentMethod === "zalopay") {
+                resetBooking();
                 window.location.href = `http://localhost:3000/api/v1/client/order/payment-zalopay?bookingCode=${bookingCode}&phone=${phone}`;
             } else if (paymentMethod === "vnpay") {
+                resetBooking();
                 window.location.href = `http://localhost:3000/api/v1/client/order/payment-vnpay?bookingCode=${bookingCode}&phone=${phone}`;
             } else {
-                // Thanh toán tại quầy
                 toast.success("Đặt lịch thành công! TeddyPet đang đợi bé ạ.");
+                resetBooking(); // Xóa dữ liệu store sau khi đã đặt lịch thành công
                 navigate("/services/booking/success");
             }
         } catch (error) {
@@ -114,8 +194,9 @@ export const ServiceCheckoutPage = () => {
             />
 
             <div className="app-container flex pb-[150px] 2xl:pb-[100px] relative">
-                {/* Left Column: Booking Information */}
+                {/* Cột trái: Thông tin đặt lịch */}
                 <div className="w-[calc(100%-518px)] py-[50px]">
+                    {/* Header thông tin người dùng */}
                     <div className="mb-[40px] p-[20px] bg-[#fcfcfc] border border-dashed border-gray-200 rounded-[15px] flex items-center justify-between">
                         <div className="flex items-center gap-[12px] text-[16px] text-client-secondary font-medium">
                             <div className="w-[40px] h-[40px] rounded-full bg-white flex items-center justify-center border border-gray-100 shadow-sm">
@@ -136,15 +217,17 @@ export const ServiceCheckoutPage = () => {
                     <h2 className="text-[40px] font-secondary mt-[8px] mb-[30px] font-bold">Thông tin dịch vụ</h2>
 
                     <div className="space-y-[25px]">
-                        {/* Summary Card */}
+                        {/* Thẻ tóm tắt chi tiết */}
                         <div className="bg-white border border-gray-100 rounded-[25px] p-[35px]">
                             <h3 className="text-[18px] font-bold text-client-secondary mb-[25px]">Chi tiết đặt lịch</h3>
-                            
+
                             <div className="grid grid-cols-2 gap-8">
                                 <div className="space-y-6">
                                     <div className="flex flex-col gap-1">
-                                        <span className="text-[12px] text-gray-400 font-bold uppercase tracking-widest">Dịch vụ thực hiện</span>
-                                        <span className="text-[16px] font-bold text-client-secondary">{booking.serviceId?.name}</span>
+                                        <span className="text-[12px] text-gray-400 font-bold uppercase tracking-widest">Dịch vụ</span>
+                                        <span className="text-[16px] font-bold text-client-secondary">
+                                            {booking.serviceId?.name}
+                                        </span>
                                     </div>
                                     <div className="flex flex-col gap-1">
                                         <span className="text-[12px] text-gray-400 font-bold uppercase tracking-widest">Thời gian hẹn</span>
@@ -161,7 +244,7 @@ export const ServiceCheckoutPage = () => {
                                                     {dayjs(booking.start).format("HH:mm")} - {dayjs(booking.end).format("HH:mm")}
                                                 </span>
                                                 <span className="text-[13px] text-client-primary/60 font-medium bg-client-primary/5 px-2 py-0.5 rounded-full">
-                                                    ~{dayjs(booking.end).diff(dayjs(booking.start), 'minute')} phút
+                                                    ~{totalDuration} phút dự kiến
                                                 </span>
                                             </div>
                                         </div>
@@ -178,15 +261,31 @@ export const ServiceCheckoutPage = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {(booking.serviceId?.procedure || storeService?.procedure) && (
+                                <div className="mt-8 pt-6 border-t border-gray-100">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div className="w-6 h-6 rounded-lg bg-client-primary/10 flex items-center justify-center">
+                                            <Icon icon="solar:clipboard-list-bold-duotone" width={14} className="text-client-primary" />
+                                        </div>
+                                        <span className="text-[14px] font-bold text-client-secondary">Quy trình thực hiện cụ thể:</span>
+                                    </div>
+                                    <div 
+                                        className="text-[14px] text-gray-500 leading-relaxed bg-gray-50/50 p-4 rounded-xl border border-dashed border-gray-200"
+                                        dangerouslySetInnerHTML={{ __html: booking.serviceId?.procedure || storeService?.procedure }}
+                                    />
+                                </div>
+                            )}
                         </div>
 
+                        {/* Phần ghi chú */}
                         <div className="mt-[30px] mb-[40px] cursor-pointer">
-                            <input 
-                                type="checkbox" 
-                                id="bookingNotesCheckbox" 
-                                checked={showNotes} 
-                                onChange={() => setShowNotes(!showNotes)} 
-                                className="hidden" 
+                            <input
+                                type="checkbox"
+                                id="bookingNotesCheckbox"
+                                checked={showNotes}
+                                onChange={() => setShowNotes(!showNotes)}
+                                className="hidden"
                             />
                             <label htmlFor="bookingNotesCheckbox" className="text-client-text pl-[0px] text-[16px] font-medium select-none flex items-center gap-[12px]">
                                 <div className={`w-[20px] h-[20px] border-2 rounded-[4px] flex items-center justify-center transition-all ${showNotes ? 'bg-client-primary border-client-primary' : 'border-[#ddd]'}`}>
@@ -194,10 +293,10 @@ export const ServiceCheckoutPage = () => {
                                 </div>
                                 Thêm ghi chú lịch đặt
                             </label>
-                            
+
                             <AnimatePresence>
                                 {showNotes && (
-                                    <motion.div 
+                                    <motion.div
                                         initial={{ height: 0, opacity: 0 }}
                                         animate={{ height: "auto", opacity: 1 }}
                                         exit={{ height: 0, opacity: 0 }}
@@ -205,7 +304,7 @@ export const ServiceCheckoutPage = () => {
                                     >
                                         <div className="mt-[20px]">
                                             <textarea
-                                                placeholder="Lưu ý đặc biệt cho dịch vụ, ví dụ: bé hơi nhát người lạ, cần cắt tỉa kỹ phần đuôi..."
+                                                placeholder="Lưu ý đặc biệt cho dịch vụ..."
                                                 value={notes}
                                                 onChange={(e) => setNotes(e.target.value)}
                                                 rows={3}
@@ -216,24 +315,24 @@ export const ServiceCheckoutPage = () => {
                                 )}
                             </AnimatePresence>
                         </div>
-                    </div>
 
-                    <div className="pt-[40px] mt-[40px] border-t border-[#eee]">
-                        <Link to="/services" className="flex items-center text-client-secondary font-secondary hover:text-client-primary transition-default group">
-                            <ArrowLeft className="text-[18px] mr-[10px] transition-transform group-hover:-translate-x-1" />
-                            <span className="text-[16px] font-secondary font-medium">Trở lại dịch vụ</span>
-                        </Link>
+                        <div className="pt-[40px] mt-[40px] border-t border-[#eee]">
+                            <Link to="/services" className="flex items-center text-client-secondary font-secondary hover:text-client-primary transition-default group">
+                                <ArrowLeft className="text-[18px] mr-[10px] transition-transform group-hover:-translate-x-1" />
+                                <span className="text-[16px] font-secondary font-medium">Trở lại dịch vụ</span>
+                            </Link>
+                        </div>
                     </div>
                 </div>
 
-                {/* Right Column: Order Summary Sidebar */}
+                {/* Cột phải: Sidebar tóm tắt đơn hàng */}
                 <div className="w-[468px] ml-[50px] py-[50px] shrink-0">
                     <div className="sticky top-[20px] bg-white rounded-[25px] border border-[#eee] overflow-hidden">
                         <h2 className="py-[20px] px-[30px] text-[20px] font-bold text-client-secondary border-b border-[#eee]">Tóm tắt đơn đặt</h2>
-                        
+
                         <div className="p-[35px]">
-                            {/* Pet List Summary */}
-                            <ul className="mb-[25px] max-h-[300px] overflow-visible pr-[10px]">
+                            {/* Danh sách thú cưng tóm tắt */}
+                            <ul className="mb-[30px] pr-[10px]">
                                 {booking.petIds?.map((pet: any, index: number) => {
                                     let petPrice = 0;
                                     if (booking.serviceId?.pricingType === 'fixed') {
@@ -255,18 +354,17 @@ export const ServiceCheckoutPage = () => {
                                     }
 
                                     return (
-                                        <li key={index} className="flex mb-[20px] pb-[20px] overflow-visible border-b border-[#f9f9f9] last:border-0 last:mb-0">
+                                        <li key={index} className="flex py-[20px] border-b border-[#f9f9f9] first:pt-0 last:border-0 last:pb-0">
                                             <div className="relative shrink-0">
                                                 <div className="w-[65px] h-[65px] rounded-[12px] overflow-hidden border border-[#eee] bg-gray-50">
-                                                    {pet.avatar ? <img src={pet.avatar} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-100"><PawPrint size={24}/></div>}
-                                                </div>
-                                                <div className="absolute top-0 right-0 translate-y-[-35%] translate-x-[35%] shadow-md aspect-square bg-client-primary w-[22px] rounded-full flex items-center justify-center text-white text-[11px] font-bold border-2 border-white">
-                                                    1
+                                                    {pet.avatar ? <img src={pet.avatar} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-100"><PawPrint size={24} /></div>}
                                                 </div>
                                             </div>
                                             <div className="pl-[15px] pr-[10px] flex-1">
                                                 <div className="text-[14px] font-bold text-client-secondary mb-[2px] line-clamp-1">{pet.name}</div>
-                                                <p className="text-client-primary font-bold text-[13px]">{booking.serviceId?.name}</p>
+                                                <p className="text-[#999] font-medium text-[13px]">
+                                                    {pet.weight || '0'}kg • {pet.age || '0'} tháng tuổi
+                                                </p>
                                             </div>
                                             <div className="text-client-secondary ml-auto font-bold text-[14px] self-center">
                                                 {petPrice.toLocaleString()}đ
@@ -276,34 +374,30 @@ export const ServiceCheckoutPage = () => {
                                 })}
                             </ul>
 
-                            {/* Payment Methods */}
+                            {/* Phương thức thanh toán */}
                             <div className="mb-[35px] pt-[25px] border-t border-[#eee]">
-                                <h3 className="text-[16px] font-bold text-client-secondary mb-[18px] tracking-tight">
+                                <h3 className="text-[17px] font-bold text-client-secondary mb-[18px]">
                                     Phương thức thanh toán
                                 </h3>
-                                <div className="space-y-[12px]">
+                                <div className="space-y-[15px]">
                                     {[
                                         { id: 'money', label: 'Thanh toán tại quầy' },
                                         { id: 'zalopay', label: 'Ví điện tử ZaloPay' },
                                         { id: 'vnpay', label: 'Cổng thanh toán VNPAY' }
                                     ].map((method) => (
-                                        <label key={method.id} className="flex items-center gap-[12px] cursor-pointer group">
-                                            <input
-                                                type="radio"
-                                                name="payment"
-                                                checked={paymentMethod === method.id}
-                                                onChange={() => setPaymentMethod(method.id)}
-                                                className="appearance-none w-[16px] h-[16px] border-[2px] border-[#ddd] rounded-full checked:border-client-primary checked:border-[5px] bg-white transition-all cursor-pointer"
-                                            />
-                                            <span className={`text-[14px] font-medium transition-colors ${paymentMethod === method.id ? 'text-client-secondary font-bold' : 'text-gray-600'}`}>
+                                        <div key={method.id} onClick={() => setPaymentMethod(method.id)} className="flex items-center gap-[12px] cursor-pointer group">
+                                            <div className={`w-[20px] h-[20px] rounded-full border-2 flex items-center justify-center transition-all ${paymentMethod === method.id ? 'border-client-primary bg-white' : 'border-[#ddd]'}`}>
+                                                {paymentMethod === method.id && <div className="w-[10px] h-[10px] rounded-full bg-client-primary"></div>}
+                                            </div>
+                                            <span className={`text-[15px] font-medium transition-colors ${paymentMethod === method.id ? 'text-client-secondary font-bold' : 'text-gray-600'}`}>
                                                 {method.label}
                                             </span>
-                                        </label>
+                                        </div>
                                     ))}
                                 </div>
                             </div>
 
-                            {/* Pricing Breakdown */}
+                            {/* Chi tiết giá tiền */}
                             <div className="space-y-[15px] pt-[25px] border-t border-[#eee]">
                                 <div className="flex justify-between text-[#666] text-[14px]">
                                     <span className="font-medium">Tạm tính</span>
@@ -315,7 +409,7 @@ export const ServiceCheckoutPage = () => {
                                         <span className="font-bold text-green-600">-{booking.discount?.toLocaleString()}đ</span>
                                     </div>
                                 )}
-                                
+
                                 <div className="pt-[20px] border-t border-[#eee] flex justify-between items-center">
                                     <span className="text-[16px] font-bold text-client-secondary uppercase tracking-tight">Tổng thanh toán</span>
                                     <div className="text-[26px] text-client-primary font-bold tracking-tighter leading-none">{booking.total?.toLocaleString()}đ</div>
@@ -324,24 +418,19 @@ export const ServiceCheckoutPage = () => {
                                 <button
                                     onClick={handlePayment}
                                     disabled={isProcessing}
-                                    className={`w-full mt-[30px] py-[12px] px-[25px] rounded-[30px] text-white font-bold transition-all text-[15px] flex items-center justify-center gap-2 ${
-                                        isProcessing
+                                    className={`w-full mt-[30px] py-[12px] px-[25px] rounded-[30px] text-white font-bold transition-all text-[15px] flex items-center justify-center gap-2 ${isProcessing
                                         ? 'bg-gray-400 cursor-not-allowed'
                                         : 'bg-client-primary hover:bg-client-secondary cursor-pointer active:scale-95'
-                                    }`}
+                                        }`}
                                 >
-                                    {isProcessing ? (
-                                        "Đang xử lý..."
-                                    ) : (
-                                        "ĐẶT LỊCH NGAY"
-                                    )}
+                                    {isProcessing ? "Đang xử lý..." : "ĐẶT LỊCH NGAY"}
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <FooterSub />
         </>
     );

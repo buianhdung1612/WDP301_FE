@@ -9,11 +9,12 @@ import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { useServices } from "../../hooks/useService";
-import { getAvailableTimeSlots, createBooking } from "../../api/booking.api";
+import { getAvailableTimeSlots } from "../../api/booking.api";
 import { getMyPets } from "../../api/pet.api";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { PetCreateModal } from "./sections/PetCreateModal";
 import { Tooltip } from "@mui/material";
+import { useBookingStore } from "../../../stores/useBookingStore";
 import {
     Scissors, Bath, Sparkles, User, Plus, Clock,
     Calendar, ArrowRight, ArrowLeft, Info
@@ -37,6 +38,12 @@ export const BookingPage = () => {
     const navigate = useNavigate();
     const { user, isHydrated } = useAuthStore();
     const { data: allServices = [] } = useServices();
+    const { setBookingData, resetBooking } = useBookingStore();
+
+    // Reset store when starting wizard
+    useEffect(() => {
+        resetBooking();
+    }, []);
 
     // Wizard State
     const [currentStep, setCurrentStep] = useState(1);
@@ -49,13 +56,12 @@ export const BookingPage = () => {
 
     // Form selection states
     const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+    const [isPetModalOpen, setIsPetModalOpen] = useState(false);
     const [selectedPetIds, setSelectedPetIds] = useState<string[]>([]);
     const [selectedDate, setSelectedDate] = useState<string>(dayjs().format("YYYY-MM-DD"));
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<any>(null);
-    const [isPetModalOpen, setIsPetModalOpen] = useState(false);
 
     // UI Local state for tab switching
-    const [activeServiceCategory, setActiveServiceCategory] = useState("Tất cả");
     const [activeTimeSession, setActiveTimeSession] = useState("Sáng"); // Sáng, Chiều, Tối
 
     const [note, setNote] = useState("");
@@ -231,29 +237,35 @@ export const BookingPage = () => {
             return;
         }
 
-        try {
-            const timeString = selectedTimeSlot?.time;
-            if (!timeString) return toast.error("Vui lòng chọn khung giờ!");
-            const startDateTime = new Date(`${selectedDate}T${timeString}:00`);
+        const timeString = selectedTimeSlot?.time;
+        if (!timeString) return toast.error("Vui lòng chọn khung giờ!");
+        const startDateTime = dayjs(`${selectedDate} ${timeString}`, "YYYY-MM-DD HH:mm");
 
-            const bookingData = {
-                serviceId: selectedServiceId,
-                petIds: selectedPetIds,
-                startTime: startDateTime.toISOString(),
-                notes: note
-            };
-
-            const response = await createBooking(bookingData);
-            if (response.code === 200 || response.code === 201) {
-                toast.success("Đặt lịch thành công!");
-                navigate("/services/booking/success");
-            } else {
-                toast.error(response.message || "Đã có lỗi xảy ra!");
-            }
-        } catch (error: any) {
-            console.error("Booking error:", error);
-            toast.error(error.response?.data?.message || "Lỗi khi đặt lịch!");
+        if (startDateTime.isBefore(dayjs())) {
+            toast.warning("Giờ hẹn này đã trôi qua rồi, bạn chọn giờ khác nhé!");
+            return;
         }
+
+        const service = allServices.find(s => s._id === selectedServiceId);
+        const selectedPetsData = pets.filter(p => selectedPetIds.includes(p._id));
+
+        if (!service) return toast.error("Không tìm thấy thông tin dịch vụ!");
+
+        const totalDurationCalculated = (service.duration || 60) * selectedPetsData.length;
+
+        setBookingData({
+            service,
+            selectedPets: selectedPetsData,
+            startTime: startDateTime.toISOString(),
+            endTime: startDateTime.add(totalDurationCalculated, 'minute').toISOString(),
+            totalDuration: totalDurationCalculated,
+            selectedDate,
+            selectedTimeSlot,
+            note,
+            bookingPreview: null // Booking wizard doesn't have complex timeline yet
+        });
+
+        navigate(`/services/checkout/new`);
     };
 
     const handlePetCreateSuccess = async () => {

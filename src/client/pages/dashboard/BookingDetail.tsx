@@ -7,6 +7,7 @@ import { formatCurrency } from "../../helpers";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import { useQuery } from "@tanstack/react-query";
+import { Icon } from "@iconify/react";
 
 // Timer component to check overtime locally every few seconds
 const OvertimeTimer = ({ startedAt, maxDuration }: { startedAt: string, maxDuration: number }) => {
@@ -183,7 +184,7 @@ export const BookingDetailPage = () => {
                             <table className="w-full text-left border-collapse">
                                 <thead className="bg-[#F9F9F9] border-b border-[#eee]">
                                     <tr>
-                                        <th className="p-[20px] text-[16px] font-[600] text-client-secondary">Dịch vụ</th>
+                                        <th className="p-[20px] text-[16px] font-[600] text-client-secondary">Nội dung dịch vụ</th>
                                         <th className="p-[20px] text-[16px] font-[600] text-client-secondary text-center">Ngày thực hiện</th>
                                         <th className="p-[20px] text-[16px] font-[600] text-client-secondary text-center">Giờ hẹn</th>
                                         <th className="p-[20px] text-[16px] font-[600] text-client-secondary text-right">Tổng cộng</th>
@@ -193,28 +194,29 @@ export const BookingDetailPage = () => {
                                     <tr className="border-b border-[#eee]">
                                         <td className="p-[20px]">
                                             <p className="font-[600] text-client-secondary text-[16px] mb-3">{booking.serviceId?.name}</p>
-                                            <div className="space-y-3">
+                                            <div className="space-y-2">
                                                 {booking.petIds?.map((pet: any) => {
                                                     const mapping = booking.petStaffMap?.find((m: any) =>
                                                         (m.petId?._id || m.petId) === pet._id
                                                     );
                                                     const petStatus = mapping?.status || 'pending';
                                                     const surcharge = mapping?.surchargeAmount || 0;
+                                                    const petPrice = mapping?.price || (booking.total / (booking.petIds?.length || 1));
 
                                                     return (
-                                                        <div key={pet._id} className="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                                        <div key={pet._id} className="bg-gray-50 p-2.5 rounded-xl border border-gray-100">
                                                             <div className="flex items-center justify-between">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="w-10 h-10 rounded-full bg-client-primary/10 flex items-center justify-center overflow-hidden border border-client-primary/20">
+                                                                <div className="flex items-center gap-2.5">
+                                                                    <div className="w-8 h-8 rounded-full bg-client-primary/10 flex items-center justify-center overflow-hidden border border-client-primary/20">
                                                                         {pet.avatar ? (
                                                                             <img src={pet.avatar} alt={pet.name} className="w-full h-full object-cover" />
                                                                         ) : (
-                                                                            <span className="text-client-primary font-bold">{pet.name?.charAt(0)}</span>
+                                                                            <span className="text-client-primary font-bold text-[12px]">{pet.name?.charAt(0)}</span>
                                                                         )}
                                                                     </div>
                                                                     <div>
-                                                                        <p className="text-[14px] font-bold text-client-secondary">{pet.name}</p>
-                                                                        <p className="text-[11px] text-[#7d7b7b]">{pet.breed || "Giống loài"}</p>
+                                                                        <p className="text-[13px] font-bold text-client-secondary">{pet.name}</p>
+                                                                        <p className="text-[10px] text-[#7d7b7b]">{pet.breed || "Giống loài"}</p>
                                                                     </div>
                                                                 </div>
                                                                 <div className="text-right">
@@ -261,6 +263,21 @@ export const BookingDetailPage = () => {
                                     </tr>
                                 </tfoot>
                             </table>
+
+                            {booking.serviceId?.procedure && (
+                                <div className="p-[30px] border-t border-[#eee] bg-[#f9f9f9]/30">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div className="w-8 h-8 rounded-full bg-client-primary/10 flex items-center justify-center text-client-primary">
+                                            <Icon icon="solar:clipboard-list-bold-duotone" width={18} />
+                                        </div>
+                                        <h4 className="font-bold text-client-secondary text-[16px]">Quy trình dịch vụ</h4>
+                                    </div>
+                                    <div 
+                                        className="text-[15px] text-[#505050] leading-relaxed prose prose-sm max-w-none"
+                                        dangerouslySetInnerHTML={{ __html: booking.serviceId.procedure }}
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

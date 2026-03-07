@@ -478,56 +478,66 @@ export const BookingList = () => {
                                                         m: 'calc(1.5 * var(--spacing))',
                                                         overflow: 'hidden',
                                                     }}>
-                                                        {row.petStaffMap?.map((item: any, idx: number) => (
-                                                            <Stack
-                                                                key={idx}
-                                                                direction="row"
-                                                                alignItems="center"
-                                                                spacing={"calc(2 * var(--spacing))"}
-                                                                sx={{
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    padding: 'calc(1.5 * var(--spacing)) calc(2 * var(--spacing)) calc(1.5 * var(--spacing)) calc(1.5 * var(--spacing))',
-                                                                    bgcolor: 'var(--palette-background-paper)',
-                                                                    '&:not(:last-of-type)': {
-                                                                        borderBottom: 'solid 2px var(--palette-background-neutral)'
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <Avatar
-                                                                    src={item.petId?.image}
-                                                                    variant="rounded"
-                                                                    sx={{ width: 48, height: 48, bgcolor: 'var(--palette-background-neutral)' }}
+                                                        {row.petStaffMap?.map((item: any, idx: number) => {
+                                                            const pet = item.petId;
+                                                            const petType = pet?.type === 'dog' ? 'Chó' : (pet?.type === 'cat' ? 'Mèo' : '');
+                                                            const petInfo = `${petType}${pet?.breed ? ` - ${pet.breed}` : ''}${pet?.weight ? ` - ${pet.weight}kg` : ''}`;
+                                                            const petPrice = item.price || (row.total / (row.petIds?.length || 1));
+
+                                                            return (
+                                                                <Stack
+                                                                    key={idx}
+                                                                    direction="row"
+                                                                    alignItems="center"
+                                                                    spacing={"calc(2 * var(--spacing))"}
+                                                                    sx={{
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        padding: 'calc(1.5 * var(--spacing)) calc(2 * var(--spacing)) calc(1.5 * var(--spacing)) calc(1.5 * var(--spacing))',
+                                                                        bgcolor: 'var(--palette-background-paper)',
+                                                                        '&:not(:last-of-type)': {
+                                                                            borderBottom: 'solid 2px var(--palette-background-neutral)'
+                                                                        }
+                                                                    }}
                                                                 >
-                                                                    <Icon icon="solar:dog-bold" width={24} />
-                                                                </Avatar>
+                                                                    <Avatar
+                                                                        src={pet?.avatar}
+                                                                        variant="rounded"
+                                                                        sx={{ width: 48, height: 48, bgcolor: 'var(--palette-background-neutral)' }}
+                                                                    >
+                                                                        <Icon icon="solar:dog-bold" width={24} />
+                                                                    </Avatar>
 
-                                                                <Box sx={{ flexGrow: 1 }}>
-                                                                    <Typography sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-primary)' }}>
-                                                                        {item.petId?.name || "Tên thú cưng"}
-                                                                    </Typography>
-                                                                    <Typography sx={{
-                                                                        color: 'var(--palette-text-secondary)',
-                                                                        fontSize: '0.875rem',
-                                                                        lineHeight: 1.57143
-                                                                    }}>
-                                                                        {item.staffId?.fullName ? `Phụ trách: ${item.staffId.fullName}` : "Chưa phân công"}
-                                                                    </Typography>
-                                                                </Box>
+                                                                    <Box sx={{ flexGrow: 1 }}>
+                                                                        <Typography sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-primary)' }}>
+                                                                            {pet?.name || "Tên thú cưng"}
+                                                                            <Box component="span" sx={{ ml: 1, fontWeight: 400, color: 'var(--palette-text-secondary)', fontSize: '0.75rem' }}>
+                                                                                ({petInfo})
+                                                                            </Box>
+                                                                        </Typography>
+                                                                        <Typography sx={{
+                                                                            color: 'var(--palette-text-secondary)',
+                                                                            fontSize: '0.875rem',
+                                                                            lineHeight: 1.57143
+                                                                        }}>
+                                                                            {item.staffId?.fullName ? `Phụ trách: ${item.staffId.fullName}` : "Chưa phân công"}
+                                                                        </Typography>
+                                                                    </Box>
 
-                                                                <Box sx={{ textAlign: 'right', minWidth: 100 }}>
-                                                                    <Typography sx={{ fontWeight: 400, fontSize: '0.875rem', color: 'var(--palette-text-primary)' }}>
-                                                                        x1
-                                                                    </Typography>
-                                                                </Box>
+                                                                    <Box sx={{ textAlign: 'right', minWidth: 100 }}>
+                                                                        <Typography sx={{ fontWeight: 400, fontSize: '0.875rem', color: 'var(--palette-text-primary)' }}>
+                                                                            x1
+                                                                        </Typography>
+                                                                    </Box>
 
-                                                                <Box sx={{ textAlign: 'right', minWidth: 120 }}>
-                                                                    <Typography sx={{ fontWeight: 400, fontSize: '0.875rem', color: 'var(--palette-text-primary)' }}>
-                                                                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(row.total / (row.petIds?.length || 1))}
-                                                                    </Typography>
-                                                                </Box>
-                                                            </Stack>
-                                                        ))}
+                                                                    <Box sx={{ textAlign: 'right', minWidth: 120 }}>
+                                                                        <Typography sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-primary)' }}>
+                                                                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(petPrice)}
+                                                                        </Typography>
+                                                                    </Box>
+                                                                </Stack>
+                                                            );
+                                                        })}
                                                         {(!row.petStaffMap || row.petStaffMap.length === 0) && (
                                                             <Typography sx={{ color: 'var(--palette-text-secondary)', fontSize: '0.875rem', fontStyle: 'italic', textAlign: 'center', py: 3 }}>
                                                                 Chưa có thông tin chi tiết thú cưng

@@ -28,6 +28,7 @@ import {
     FormControlLabel,
     Typography,
     CircularProgress,
+    Chip,
     Switch,
     Stack,
     ThemeProvider,
@@ -348,22 +349,39 @@ export const RoleEditPage = () => {
                                                             <Select
                                                                 {...field}
                                                                 multiple
-                                                                renderValue={(selected: any) => (
+                                                                 renderValue={(selected: any) => (
                                                                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                                                         {selected.map((serviceId: string) => {
                                                                             const service = services.find((s: any) => s._id === serviceId);
                                                                             return (
-                                                                                <Box key={serviceId} sx={{
-                                                                                    px: 1,
-                                                                                    py: 0.2,
-                                                                                    fontSize: '0.75rem',
-                                                                                    bgcolor: 'rgba(0, 167, 111, 0.16)',
-                                                                                    color: 'rgb(0, 120, 103)',
-                                                                                    borderRadius: "var(--shape-borderRadius-sm)",
-                                                                                    fontWeight: 700
-                                                                                }}>
-                                                                                    {service?.name || serviceId}
-                                                                                </Box>
+                                                                                <Chip
+                                                                                    key={serviceId}
+                                                                                    label={service?.name || `ID: ${serviceId}`}
+                                                                                    size="small"
+                                                                                    onDelete={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        const newValue = field.value.filter((id: string) => id !== serviceId);
+                                                                                        field.onChange(newValue);
+                                                                                    }}
+                                                                                    onMouseDown={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                    }}
+                                                                                    sx={{
+                                                                                        height: 24,
+                                                                                        fontSize: '0.75rem',
+                                                                                        bgcolor: 'rgba(0, 167, 111, 0.16)',
+                                                                                        color: 'rgb(0, 120, 103)',
+                                                                                        borderRadius: "var(--shape-borderRadius-sm)",
+                                                                                        fontWeight: 700,
+                                                                                        '& .MuiChip-deleteIcon': {
+                                                                                            color: 'rgb(0, 120, 103)',
+                                                                                            fontSize: 16,
+                                                                                            '&:hover': {
+                                                                                                color: 'rgb(183, 29, 24)',
+                                                                                            }
+                                                                                        }
+                                                                                    }}
+                                                                                />
                                                                             );
                                                                         })}
                                                                     </Box>

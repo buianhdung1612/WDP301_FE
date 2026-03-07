@@ -6,6 +6,7 @@ import { useState, type Dispatch, type SetStateAction } from "react";
 import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
 import { useCreateService } from "./hooks/useService";
 import { useNestedServiceCategories } from "../service-category/hooks/useServiceCategory";
+import { useDepartments } from "../hr/hooks/useDepartments";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { serviceSchema, ServiceFormValues } from "../../schemas/service.schema";
@@ -37,6 +38,7 @@ export const ServiceCreatePage = () => {
     const localTheme = getServiceTheme(outerTheme);
 
     const { data: categories = [] } = useNestedServiceCategories();
+    const { data: departments = [] } = useDepartments();
     const { mutate: create, isPending } = useCreateService();
 
     const {
@@ -51,6 +53,7 @@ export const ServiceCreatePage = () => {
             description: "",
             procedure: "",
             categoryId: "",
+            departmentId: "",
             duration: 30,
             minDuration: 30,
             maxDuration: 60,
@@ -135,6 +138,30 @@ export const ServiceCreatePage = () => {
                                         name="categoryId"
                                         label="Danh mục"
                                         categories={categories}
+                                    />
+                                    <Controller
+                                        name="departmentId"
+                                        control={control}
+                                        render={({ field, fieldState }) => (
+                                            <FormControl fullWidth error={!!fieldState.error}>
+                                                <InputLabel>Phòng ban phụ trách</InputLabel>
+                                                <Select
+                                                    {...field}
+                                                    label="Phòng ban phụ trách"
+                                                >
+                                                    {departments.map((dept: any) => (
+                                                        <MenuItem key={dept._id} value={dept._id}>
+                                                            {dept.name}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                                {fieldState.error && (
+                                                    <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5 }}>
+                                                        {fieldState.error.message}
+                                                    </Typography>
+                                                )}
+                                            </FormControl>
+                                        )}
                                     />
                                     <Controller
                                         name="duration"

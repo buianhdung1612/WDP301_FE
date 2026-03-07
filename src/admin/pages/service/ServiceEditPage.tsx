@@ -6,6 +6,7 @@ import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
 import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
 import { useUpdateService, useServiceDetail } from "./hooks/useService";
 import { useNestedServiceCategories } from "../service-category/hooks/useServiceCategory";
+import { useDepartments } from "../hr/hooks/useDepartments";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { serviceSchema, ServiceFormValues } from "../../schemas/service.schema";
@@ -39,6 +40,7 @@ export const ServiceEditPage = () => {
 
     const { data: service, isLoading: isFetching } = useServiceDetail(id);
     const { data: categories = [] } = useNestedServiceCategories();
+    const { data: departments = [] } = useDepartments();
     const { mutate: update, isPending } = useUpdateService();
 
     const {
@@ -54,6 +56,7 @@ export const ServiceEditPage = () => {
             description: "",
             procedure: "",
             categoryId: "",
+            departmentId: "",
             duration: 30,
             minDuration: 30,
             maxDuration: 60,
@@ -81,6 +84,7 @@ export const ServiceEditPage = () => {
                 description: service.description || "",
                 procedure: service.procedure || "",
                 categoryId: service.categoryId || "",
+                departmentId: service.departmentId || "",
                 duration: service.duration || 30,
                 minDuration: service.minDuration || 30,
                 maxDuration: service.maxDuration || 60,
@@ -167,6 +171,30 @@ export const ServiceEditPage = () => {
                                         name="categoryId"
                                         label="Danh mục"
                                         categories={categories}
+                                    />
+                                    <Controller
+                                        name="departmentId"
+                                        control={control}
+                                        render={({ field, fieldState }) => (
+                                            <FormControl fullWidth error={!!fieldState.error}>
+                                                <InputLabel>Phòng ban phụ trách</InputLabel>
+                                                <Select
+                                                    {...field}
+                                                    label="Phòng ban phụ trách"
+                                                >
+                                                    {departments.map((dept: any) => (
+                                                        <MenuItem key={dept._id} value={dept._id}>
+                                                            {dept.name}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                                {fieldState.error && (
+                                                    <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5 }}>
+                                                        {fieldState.error.message}
+                                                    </Typography>
+                                                )}
+                                            </FormControl>
+                                        )}
                                     />
                                     <Controller
                                         name="duration"
