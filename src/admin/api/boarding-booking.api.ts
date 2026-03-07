@@ -45,11 +45,18 @@ export const updateBoardingPaymentStatus = async (id: string, paymentStatus: str
     return response.data;
 };
 
+export interface BoardingProofMediaItem {
+    url: string;
+    kind?: "image" | "video";
+}
+
 export interface BoardingFeedingItem {
+    _id?: string;
     time?: string;
     food?: string;
     amount?: string;
     note?: string;
+    proofMedia?: BoardingProofMediaItem[];
     staffId?: string | { _id?: string; fullName?: string } | null;
     staffName?: string;
     status?: "pending" | "done" | "skipped";
@@ -57,10 +64,12 @@ export interface BoardingFeedingItem {
 }
 
 export interface BoardingExerciseItem {
+    _id?: string;
     time?: string;
     activity?: string;
     durationMinutes?: number;
     note?: string;
+    proofMedia?: BoardingProofMediaItem[];
     staffId?: string | { _id?: string; fullName?: string } | null;
     staffName?: string;
     status?: "pending" | "done" | "skipped";
@@ -73,6 +82,7 @@ export const updateBoardingCareSchedule = async (
         feedingSchedule?: BoardingFeedingItem[];
         exerciseSchedule?: BoardingExerciseItem[];
         careDate?: string;
+        resetTemplate?: boolean;
     }
 ) => {
     const response = await apiApp.patch(`${BASE_URL}/${id}/care-schedule`, payload, withAuth());

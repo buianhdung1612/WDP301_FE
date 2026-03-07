@@ -123,6 +123,13 @@ const parseAmenities = (value: string) => {
     return Array.from(new Set(parts));
 };
 
+const parseGalleryUrls = (value: string) => {
+    const parts = (String(value || "").match(/https?:\/\/\S+/gi) || [])
+        .map((item) => item.trim().replace(/[),;]+$/g, ""))
+        .filter((item) => /^https?:\/\//i.test(item));
+    return Array.from(new Set(parts));
+};
+
 const initForm = {
     cageCode: "",
     type: "standard",
@@ -131,6 +138,7 @@ const initForm = {
     maxWeightCapacity: 0,
     status: "available",
     avatar: "",
+    galleryText: "",
     description: "",
     amenitiesText: "",
 };
@@ -221,6 +229,7 @@ export const BoardingCageListPage = () => {
             maxWeightCapacity: row.maxWeightCapacity || 0,
             status: row.status || "available",
             avatar: row.avatar || "",
+            galleryText: Array.isArray(row.gallery) ? row.gallery.join("\n") : "",
             description: row.description || "",
             amenitiesText: Array.isArray(row.amenities) ? row.amenities.join(", ") : "",
         });
@@ -233,8 +242,10 @@ export const BoardingCageListPage = () => {
             ...form,
             size: normalizeCageSize(form.size),
             amenities: parseAmenities(form.amenitiesText),
+            gallery: parseGalleryUrls(form.galleryText),
         };
         delete payload.amenitiesText;
+        delete payload.galleryText;
 
         if (editing?._id) {
             updateMut.mutate({ id: editing._id, payload });
@@ -449,7 +460,7 @@ export const BoardingCageListPage = () => {
                                                 </TableCell>
                                                 <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
                                                     <Stack direction="row" spacing={1.5} alignItems="center">
-                                                        <Avatar src={row.avatar} variant="rounded" sx={{ width: 38, height: 38 }}>
+                                                        <Avatar src={row.avatar || (Array.isArray(row.gallery) ? row.gallery[0] : "")} variant="rounded" sx={{ width: 38, height: 38 }}>
                                                             <Icon icon="mdi:dog-side" width={18} />
                                                         </Avatar>
                                                         <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
@@ -597,6 +608,15 @@ export const BoardingCageListPage = () => {
                             ))}
                         </TextField>
                         <TextField label="Ảnh (URL)" value={form.avatar} onChange={(e) => setForm({ ...form, avatar: e.target.value })} />
+                        <TextField
+                            label="Bộ ảnh chuồng (nhiều URL)"
+                            multiline
+                            rows={3}
+                            value={form.galleryText}
+                            onChange={(e) => setForm({ ...form, galleryText: e.target.value })}
+                            placeholder="Mỗi dòng 1 URL ảnh chuồng chó/mèo hoặc ngăn cách bằng dấu phẩy"
+                            helperText="Ảnh trong bộ này sẽ hiển thị ở trang chi tiết chuồng."
+                        />
                         <TextField label="Mô tả" multiline rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
                         <TextField
                             label="Tiện nghi trong chuồng"
