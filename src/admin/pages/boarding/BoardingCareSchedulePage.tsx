@@ -24,7 +24,14 @@ import {
     Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
+import OpenInFullIcon from "@mui/icons-material/OpenInFull";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
@@ -32,14 +39,17 @@ import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { Title } from "../../components/ui/Title";
 import { prefixAdmin } from "../../constants/routes";
 import { Search } from "../../components/ui/Search";
+import { useAuthStore } from "../../../stores/useAuthStore";
 import {
     BoardingExerciseItem,
     BoardingFeedingItem,
+    BoardingProofMediaItem,
     getBoardingBookingDetail,
     getBoardingBookings,
     getBoardingHotelStaffs,
     updateBoardingCareSchedule,
 } from "../../api/boarding-booking.api";
+import { uploadMediaToCloudinary } from "../../api/uploadCloudinary.api";
 
 const trangThaiChamSocOptions: Array<{ value: "pending" | "done" | "skipped"; label: string }> = [
     { value: "pending", label: "Chưa thực hiện" },
@@ -47,11 +57,16 @@ const trangThaiChamSocOptions: Array<{ value: "pending" | "done" | "skipped"; la
     { value: "skipped", label: "Bỏ qua" },
 ];
 
+const MAX_PROOF_MEDIA_PER_ROW = 5;
+const MAX_IMAGE_PROOF_SIZE_MB = 5;
+const MAX_VIDEO_PROOF_SIZE_MB = 20;
+
 const taoDongLichAn = (): BoardingFeedingItem => ({
     time: "",
     food: "",
     amount: "",
     note: "",
+    proofMedia: [],
     staffId: "",
     staffName: "",
     status: "pending",
@@ -62,6 +77,7 @@ const taoDongVanDong = (): BoardingExerciseItem => ({
     activity: "",
     durationMinutes: 0,
     note: "",
+    proofMedia: [],
     staffId: "",
     staffName: "",
     status: "pending",
@@ -69,6 +85,7 @@ const taoDongVanDong = (): BoardingExerciseItem => ({
 
 export const BoardingCareSchedulePage = () => {
     const queryClient = useQueryClient();
+    const user = useAuthStore((state) => state.user);
     const [searchQuery, setSearchQuery] = useState("");
     const [careDate, setCareDate] = useState("");
     const [page, setPage] = useState(0);
@@ -80,6 +97,38 @@ export const BoardingCareSchedulePage = () => {
 
     const [feedingDraft, setFeedingDraft] = useState<BoardingFeedingItem[]>([]);
     const [exerciseDraft, setExerciseDraft] = useState<BoardingExerciseItem[]>([]);
+    const [uploadingProofKey, setUploadingProofKey] = useState<string>("");
+    const [proofViewer, setProofViewer] = useState<{
+        open: boolean;
+        items: BoardingProofMediaItem[];
+        index: number;
+        title: string;
+    }>({
+        open: false,
+        items: [],
+        index: 0,
+        title: "",
+    });
+
+    const canAssignHotelStaff = useMemo(() => {
+        const permissions = Array.isArray(user?.permissions) ? user.permissions : [];
+        if (
+            permissions.includes("account_admin_view") ||
+            permissions.includes("account_admin_edit") ||
+            permissions.includes("role_permissions")
+        ) {
+            return true;
+        }
+
+        const roles = Array.isArray(user?.roles) ? user.roles : [];
+        const hasNonStaffRole = roles.some((role: any) => role && typeof role === "object" && role.isStaff === false);
+        const hasStaffRole = roles.some((role: any) => role && typeof role === "object" && role.isStaff === true);
+
+        if (hasNonStaffRole) return true;
+        if (hasStaffRole) return false;
+
+        return false;
+    }, [user]);
 
     const { data, isLoading } = useQuery({
         queryKey: ["admin-boarding-bookings"],
@@ -89,6 +138,7 @@ export const BoardingCareSchedulePage = () => {
     const { data: hotelStaffRes } = useQuery({
         queryKey: ["admin-boarding-hotel-staffs", careDate],
         queryFn: () => getBoardingHotelStaffs(careDate || undefined),
+        enabled: canAssignHotelStaff,
     });
 
     const hotelStaffOptions = useMemo(() => {
@@ -112,6 +162,162 @@ export const BoardingCareSchedulePage = () => {
         return String(fallback || "");
     };
 
+    const normalizeProofMedia = (items: any): BoardingProofMediaItem[] => {
+        if (!Array.isArray(items)) return [];
+        return items
+            .map((item: any) => ({
+                url: String(item?.url || item || "").trim(),
+                kind: String(item?.kind || "").toLowerCase() === "video" ? "video" : "image",
+            }))
+            .filter((item) => Boolean(item.url));
+    };
+
+    const capNhatDongLichAn = (index: number, patch: Partial<BoardingFeedingItem>) => {
+        setFeedingDraft((prev) => prev.map((item, idx) => (idx === index ? { ...item, ...patch } : item)));
+    };
+
+    const capNhatDongVanDong = (index: number, patch: Partial<BoardingExerciseItem>) => {
+        setExerciseDraft((prev) => prev.map((item, idx) => (idx === index ? { ...item, ...patch } : item)));
+    };
+
+    const xoaMinhChung = (type: "feeding" | "exercise", rowIndex: number, mediaIndex: number) => {
+        if (type === "feeding") {
+            setFeedingDraft((prev) =>
+                prev.map((item, idx) =>
+                    idx === rowIndex
+                        ? { ...item, proofMedia: normalizeProofMedia(item.proofMedia).filter((_, index) => index !== mediaIndex) }
+                        : item
+                )
+            );
+            return;
+        }
+
+        setExerciseDraft((prev) =>
+            prev.map((item, idx) =>
+                idx === rowIndex
+                    ? { ...item, proofMedia: normalizeProofMedia(item.proofMedia).filter((_, index) => index !== mediaIndex) }
+                    : item
+            )
+        );
+    };
+
+    const taiMinhChung = async (type: "feeding" | "exercise", rowIndex: number, files: FileList | null) => {
+        if (!files || files.length === 0) return;
+        const fileList = Array.from(files);
+        const invalidFiles = fileList.filter((file) => !file.type.startsWith("image/") && !file.type.startsWith("video/"));
+        if (invalidFiles.length > 0) {
+            toast.error("Chỉ hỗ trợ tải ảnh hoặc video minh chứng");
+            return;
+        }
+
+        const currentProofCount = type === "feeding"
+            ? normalizeProofMedia(feedingDraft[rowIndex]?.proofMedia).length
+            : normalizeProofMedia(exerciseDraft[rowIndex]?.proofMedia).length;
+
+        if (currentProofCount >= MAX_PROOF_MEDIA_PER_ROW) {
+            toast.error(`Mỗi dòng chỉ được tối đa ${MAX_PROOF_MEDIA_PER_ROW} minh chứng`);
+            return;
+        }
+
+        if (currentProofCount + fileList.length > MAX_PROOF_MEDIA_PER_ROW) {
+            toast.error(`Bạn chỉ có thể tải thêm ${MAX_PROOF_MEDIA_PER_ROW - currentProofCount} file cho dòng này`);
+            return;
+        }
+
+        const oversizedImage = fileList.find(
+            (file) => file.type.startsWith("image/") && file.size > MAX_IMAGE_PROOF_SIZE_MB * 1024 * 1024
+        );
+        if (oversizedImage) {
+            toast.error(`Ảnh minh chứng không được vượt quá ${MAX_IMAGE_PROOF_SIZE_MB}MB`);
+            return;
+        }
+
+        const oversizedVideo = fileList.find(
+            (file) => file.type.startsWith("video/") && file.size > MAX_VIDEO_PROOF_SIZE_MB * 1024 * 1024
+        );
+        if (oversizedVideo) {
+            toast.error(`Video minh chứng không được vượt quá ${MAX_VIDEO_PROOF_SIZE_MB}MB`);
+            return;
+        }
+
+        const uploadKey = `${type}-${rowIndex}`;
+        try {
+            setUploadingProofKey(uploadKey);
+            const uploaded = await uploadMediaToCloudinary(fileList);
+
+            if (type === "feeding") {
+                setFeedingDraft((prev) =>
+                    prev.map((item, idx) =>
+                        idx === rowIndex
+                            ? { ...item, proofMedia: [...normalizeProofMedia(item.proofMedia), ...uploaded] }
+                            : item
+                    )
+                );
+            } else {
+                setExerciseDraft((prev) =>
+                    prev.map((item, idx) =>
+                        idx === rowIndex
+                            ? { ...item, proofMedia: [...normalizeProofMedia(item.proofMedia), ...uploaded] }
+                            : item
+                    )
+                );
+            }
+            toast.success("Đã tải minh chứng lên");
+        } catch (error: any) {
+            toast.error(error?.message || "Không thể tải minh chứng");
+        } finally {
+            setUploadingProofKey("");
+        }
+    };
+
+    const validateCompletedRowsProof = (
+        items: Array<BoardingFeedingItem | BoardingExerciseItem>,
+        label: string,
+        getTitle: (item: BoardingFeedingItem | BoardingExerciseItem) => string
+    ) => {
+        for (let index = 0; index < items.length; index += 1) {
+            const item = items[index];
+            if (item.status !== "done") continue;
+            const proofMedia = normalizeProofMedia(item.proofMedia);
+            if (proofMedia.length > 0) continue;
+            const title = getTitle(item);
+            toast.error(`${label} dòng ${index + 1}${title ? ` (${title})` : ""} phải có ảnh hoặc video minh chứng trước khi hoàn thành`);
+            return false;
+        }
+
+        return true;
+    };
+
+    const apDungDuLieuLichChamSoc = (booking: any, options?: { keepCareDate?: boolean }) => {
+        setEditingBooking(booking);
+        setFeedingDraft(
+            Array.isArray(booking.feedingSchedule) && booking.feedingSchedule.length > 0
+                ? booking.feedingSchedule.map((item: any) => ({
+                    ...item,
+                    proofMedia: normalizeProofMedia(item?.proofMedia),
+                    staffId: getStaffId(item?.staffId),
+                    staffName: item?.staffName || item?.staffId?.fullName || "",
+                }))
+                : [taoDongLichAn()]
+        );
+        setExerciseDraft(
+            Array.isArray(booking.exerciseSchedule) && booking.exerciseSchedule.length > 0
+                ? booking.exerciseSchedule.map((item: any) => ({
+                    ...item,
+                    proofMedia: normalizeProofMedia(item?.proofMedia),
+                    staffId: getStaffId(item?.staffId),
+                    staffName: item?.staffName || item?.staffId?.fullName || "",
+                }))
+                : [taoDongVanDong()]
+        );
+        if (!options?.keepCareDate) {
+            const nextCareDate = dayjs(booking.checkInDate).isValid()
+                ? dayjs(booking.checkInDate).format("YYYY-MM-DD")
+                : dayjs().format("YYYY-MM-DD");
+            setCareDate(nextCareDate);
+        }
+    };
+
     const updateCareMut = useMutation({
         mutationFn: ({
             id,
@@ -129,6 +335,22 @@ export const BoardingCareSchedulePage = () => {
             queryClient.invalidateQueries({ queryKey: ["admin-boarding-bookings"] });
             setCareDialogOpen(false);
             setEditingBooking(null);
+        },
+    });
+
+    const resetCareTemplateMut = useMutation({
+        mutationFn: (id: string) =>
+            updateBoardingCareSchedule(id, {
+                resetTemplate: true,
+                careDate,
+            }),
+        onSuccess: (response: any) => {
+            const booking = response?.data;
+            if (booking?._id) {
+                apDungDuLieuLichChamSoc(booking, { keepCareDate: true });
+            }
+            toast.success("Đã tạo lại lịch mẫu theo loại thú cưng");
+            queryClient.invalidateQueries({ queryKey: ["admin-boarding-bookings"] });
         },
     });
 
@@ -166,29 +388,7 @@ export const BoardingCareSchedulePage = () => {
                 return;
             }
 
-            setEditingBooking(booking);
-            setFeedingDraft(
-                Array.isArray(booking.feedingSchedule) && booking.feedingSchedule.length > 0
-                    ? booking.feedingSchedule.map((item: any) => ({
-                        ...item,
-                        staffId: getStaffId(item?.staffId),
-                        staffName: item?.staffName || item?.staffId?.fullName || "",
-                    }))
-                    : [taoDongLichAn()]
-            );
-            setExerciseDraft(
-                Array.isArray(booking.exerciseSchedule) && booking.exerciseSchedule.length > 0
-                    ? booking.exerciseSchedule.map((item: any) => ({
-                        ...item,
-                        staffId: getStaffId(item?.staffId),
-                        staffName: item?.staffName || item?.staffId?.fullName || "",
-                    }))
-                    : [taoDongVanDong()]
-            );
-            const nextCareDate = dayjs(booking.checkInDate).isValid()
-                ? dayjs(booking.checkInDate).format("YYYY-MM-DD")
-                : dayjs().format("YYYY-MM-DD");
-            setCareDate(nextCareDate);
+            apDungDuLieuLichChamSoc(booking);
             setCareDialogOpen(true);
         } catch (error: any) {
             toast.error(error?.response?.data?.message || "Lỗi tải dữ liệu lịch chăm sóc");
@@ -207,17 +407,25 @@ export const BoardingCareSchedulePage = () => {
     const luuLichChamSoc = () => {
         if (!editingBooking?._id) return;
 
+        if (!validateCompletedRowsProof(feedingDraft, "Lịch ăn", (item) => String((item as BoardingFeedingItem).food || "").trim())) {
+            return;
+        }
+        if (!validateCompletedRowsProof(exerciseDraft, "Lịch vận động", (item) => String((item as BoardingExerciseItem).activity || "").trim())) {
+            return;
+        }
+
         const feedingSchedule = feedingDraft
             .map((item) => ({
                 time: String(item.time || "").trim(),
                 food: String(item.food || "").trim(),
                 amount: String(item.amount || "").trim(),
                 note: String(item.note || "").trim(),
+                proofMedia: normalizeProofMedia(item.proofMedia),
                 staffId: String(getStaffId(item.staffId) || "").trim(),
                 staffName: getStaffName(String(getStaffId(item.staffId) || "").trim(), item.staffName),
                 status: (item.status || "pending") as "pending" | "done" | "skipped",
             }))
-            .filter((item) => item.time || item.food || item.amount || item.note || item.staffId);
+            .filter((item) => item.time || item.food || item.amount || item.note || item.staffId || item.proofMedia.length > 0);
 
         const exerciseSchedule = exerciseDraft
             .map((item) => ({
@@ -225,11 +433,12 @@ export const BoardingCareSchedulePage = () => {
                 activity: String(item.activity || "").trim(),
                 durationMinutes: Number(item.durationMinutes || 0),
                 note: String(item.note || "").trim(),
+                proofMedia: normalizeProofMedia(item.proofMedia),
                 staffId: String(getStaffId(item.staffId) || "").trim(),
                 staffName: getStaffName(String(getStaffId(item.staffId) || "").trim(), item.staffName),
                 status: (item.status || "pending") as "pending" | "done" | "skipped",
             }))
-            .filter((item) => item.time || item.activity || item.durationMinutes > 0 || item.note || item.staffId);
+            .filter((item) => item.time || item.activity || item.durationMinutes > 0 || item.note || item.staffId || item.proofMedia.length > 0);
 
         updateCareMut.mutate({
             id: editingBooking._id,
@@ -239,6 +448,11 @@ export const BoardingCareSchedulePage = () => {
                 careDate,
             },
         });
+    };
+
+    const taoLaiLichMau = () => {
+        if (!editingBooking?._id) return;
+        resetCareTemplateMut.mutate(editingBooking._id);
     };
 
     const getCareSummary = (row: any) => {
@@ -253,6 +467,191 @@ export const BoardingCareSchedulePage = () => {
         return { soLichAn, soVanDong, soNhanVienLichAn, soNhanVienVanDong };
     };
 
+    const xuLyDoiTrangThai = (
+        type: "feeding" | "exercise",
+        rowIndex: number,
+        nextStatus: "pending" | "done" | "skipped"
+    ) => {
+        if (nextStatus === "done") {
+            const targetItem = type === "feeding" ? feedingDraft[rowIndex] : exerciseDraft[rowIndex];
+            const proofMedia = normalizeProofMedia(targetItem?.proofMedia);
+            if (proofMedia.length === 0) {
+                toast.error("Phải tải ít nhất 1 ảnh hoặc video minh chứng trước khi chuyển sang Đã hoàn thành");
+                return;
+            }
+        }
+
+        if (type === "feeding") {
+            capNhatDongLichAn(rowIndex, { status: nextStatus });
+            return;
+        }
+
+        capNhatDongVanDong(rowIndex, { status: nextStatus });
+    };
+
+    const renderProofMediaSection = (
+        type: "feeding" | "exercise",
+        rowIndex: number,
+        item: BoardingFeedingItem | BoardingExerciseItem
+    ) => {
+        const proofMedia = normalizeProofMedia(item.proofMedia);
+        const uploadKey = `${type}-${rowIndex}`;
+        const isUploading = uploadingProofKey === uploadKey;
+
+        return (
+            <Box
+                sx={{
+                    mt: 1.5,
+                    ml: { xs: 0, md: "140px" },
+                    border: "1px dashed var(--palette-divider)",
+                    borderRadius: "12px",
+                    p: 1.5,
+                    bgcolor: "var(--palette-background-neutral)",
+                }}
+            >
+                <Stack direction={{ xs: "column", md: "row" }} spacing={1.5} alignItems={{ xs: "flex-start", md: "center" }}>
+                    <Button
+                        component="label"
+                        variant="outlined"
+                        color={proofMedia.length > 0 ? "success" : "primary"}
+                        size="small"
+                        startIcon={<CloudUploadOutlinedIcon />}
+                        disabled={isUploading}
+                    >
+                        {isUploading ? "Đang tải..." : "Tải ảnh/video minh chứng"}
+                        <input
+                            hidden
+                            type="file"
+                            accept="image/*,video/*"
+                            multiple
+                            onChange={(e) => {
+                                const files = e.target.files;
+                                void taiMinhChung(type, rowIndex, files);
+                                e.target.value = "";
+                            }}
+                        />
+                    </Button>
+                    <Typography sx={{ fontSize: "0.75rem", color: "var(--palette-text-secondary)" }}>
+                        Cần ít nhất 1 ảnh hoặc video để chuyển trạng thái sang "Đã hoàn thành". Tối đa {MAX_PROOF_MEDIA_PER_ROW} file, ảnh ≤ {MAX_IMAGE_PROOF_SIZE_MB}MB, video ≤ {MAX_VIDEO_PROOF_SIZE_MB}MB.
+                    </Typography>
+                </Stack>
+
+                {proofMedia.length > 0 ? (
+                    <>
+                        <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1.5, mb: 1 }}>
+                            <Button
+                                size="small"
+                                variant="text"
+                                startIcon={<OpenInFullIcon />}
+                                onClick={() => setProofViewer({
+                                    open: true,
+                                    items: proofMedia,
+                                    index: 0,
+                                    title: `${type === "feeding" ? "Minh chứng lịch ăn" : "Minh chứng lịch vận động"} - dòng ${rowIndex + 1}`,
+                                })}
+                            >
+                                Xem gallery
+                            </Button>
+                            <Typography sx={{ fontSize: "0.75rem", color: "var(--palette-text-secondary)" }}>
+                                {proofMedia.length} file đã tải
+                            </Typography>
+                        </Stack>
+                        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                        {proofMedia.map((media, mediaIndex) => (
+                            <Box
+                                key={`${media.url}-${mediaIndex}`}
+                                sx={{
+                                    position: "relative",
+                                    width: 88,
+                                    height: 88,
+                                    borderRadius: "12px",
+                                    overflow: "hidden",
+                                    border: "1px solid var(--palette-divider)",
+                                    bgcolor: "#fff",
+                                    cursor: "zoom-in",
+                                }}
+                                onClick={() => setProofViewer({
+                                    open: true,
+                                    items: proofMedia,
+                                    index: mediaIndex,
+                                    title: `${type === "feeding" ? "Minh chứng lịch ăn" : "Minh chứng lịch vận động"} - dòng ${rowIndex + 1}`,
+                                })}
+                            >
+                                {media.kind === "video" ? (
+                                    <video src={media.url} controls style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                ) : (
+                                    <img src={media.url} alt="proof" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                )}
+
+                                <IconButton
+                                    size="small"
+                                    color="error"
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        xoaMinhChung(type, rowIndex, mediaIndex);
+                                    }}
+                                    sx={{
+                                        position: "absolute",
+                                        top: 4,
+                                        right: 4,
+                                        bgcolor: "rgba(255,255,255,0.9)",
+                                        "&:hover": { bgcolor: "#fff" },
+                                    }}
+                                >
+                                    <DeleteOutlineIcon fontSize="small" />
+                                </IconButton>
+
+                                <IconButton
+                                    size="small"
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        setProofViewer({
+                                            open: true,
+                                            items: proofMedia,
+                                            index: mediaIndex,
+                                            title: `${type === "feeding" ? "Minh chứng lịch ăn" : "Minh chứng lịch vận động"} - dòng ${rowIndex + 1}`,
+                                        });
+                                    }}
+                                    sx={{
+                                        position: "absolute",
+                                        top: 4,
+                                        left: 4,
+                                        bgcolor: "rgba(255,255,255,0.9)",
+                                        "&:hover": { bgcolor: "#fff" },
+                                    }}
+                                >
+                                    <OpenInFullIcon fontSize="small" />
+                                </IconButton>
+
+                                <Box
+                                    sx={{
+                                        position: "absolute",
+                                        left: 6,
+                                        bottom: 6,
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: 0.5,
+                                        px: 0.75,
+                                        py: 0.25,
+                                        borderRadius: "999px",
+                                        bgcolor: "rgba(15,23,42,0.72)",
+                                        color: "#fff",
+                                        fontSize: "0.6875rem",
+                                        fontWeight: 700,
+                                    }}
+                                >
+                                    {media.kind === "video" ? <PlayCircleOutlineIcon sx={{ fontSize: 14 }} /> : <ImageOutlinedIcon sx={{ fontSize: 14 }} />}
+                                    {media.kind === "video" ? "Video" : "Ảnh"}
+                                </Box>
+                            </Box>
+                        ))}
+                        </Stack>
+                    </>
+                ) : null}
+            </Box>
+        );
+    };
+
     const handleChangePage = (_event: unknown, newPage: number) => {
         setPage(newPage);
     };
@@ -261,6 +660,8 @@ export const BoardingCareSchedulePage = () => {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
+
+    const currentProofMedia = proofViewer.items[proofViewer.index];
 
     return (
         <Box sx={{ maxWidth: "1200px", mx: "auto", p: "calc(3 * var(--spacing))" }}>
@@ -408,74 +809,89 @@ export const BoardingCareSchedulePage = () => {
                                 </Stack>
                                 <Stack spacing={1}>
                                     {feedingDraft.map((item, idx) => (
-                                        <Stack key={`feeding-${idx}`} direction="row" spacing={1} alignItems="center">
-                                            <TextField
-                                                label="Giờ"
-                                                type="time"
-                                                size="small"
-                                                value={item.time || ""}
-                                                onChange={(e) => setFeedingDraft((prev) => prev.map((x, i) => i === idx ? { ...x, time: e.target.value } : x))}
-                                                sx={{ width: 130 }}
-                                                InputLabelProps={{ shrink: true }}
-                                            />
-                                            <TextField
-                                                label="Thức ăn"
-                                                size="small"
-                                                value={item.food || ""}
-                                                onChange={(e) => setFeedingDraft((prev) => prev.map((x, i) => i === idx ? { ...x, food: e.target.value } : x))}
-                                                sx={{ minWidth: 170 }}
-                                            />
-                                            <TextField
-                                                label="Khẩu phần"
-                                                size="small"
-                                                value={item.amount || ""}
-                                                onChange={(e) => setFeedingDraft((prev) => prev.map((x, i) => i === idx ? { ...x, amount: e.target.value } : x))}
-                                                sx={{ minWidth: 150 }}
-                                            />
-                                            <TextField
-                                                label="NVKS phụ trách"
-                                                select
-                                                size="small"
-                                                value={String(getStaffId(item.staffId) || "")}
-                                                onChange={(e) => setFeedingDraft((prev) => prev.map((x, i) =>
-                                                    i === idx
-                                                        ? {
-                                                            ...x,
+                                        <Box key={`feeding-${idx}`}>
+                                            <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
+                                                <TextField
+                                                    label="Giờ"
+                                                    type="time"
+                                                    size="small"
+                                                    value={item.time || ""}
+                                                    onChange={(e) => capNhatDongLichAn(idx, { time: e.target.value })}
+                                                    sx={{ width: 130 }}
+                                                    InputLabelProps={{ shrink: true }}
+                                                />
+                                                <TextField
+                                                    label="Thức ăn"
+                                                    size="small"
+                                                    value={item.food || ""}
+                                                    onChange={(e) => capNhatDongLichAn(idx, { food: e.target.value })}
+                                                    sx={{ minWidth: 170 }}
+                                                />
+                                                <TextField
+                                                    label="Khẩu phần"
+                                                    size="small"
+                                                    value={item.amount || ""}
+                                                    onChange={(e) => capNhatDongLichAn(idx, { amount: e.target.value })}
+                                                    sx={{ minWidth: 150 }}
+                                                />
+                                                {canAssignHotelStaff ? (
+                                                    <TextField
+                                                        label="NVKS phụ trách"
+                                                        select
+                                                        size="small"
+                                                        value={String(getStaffId(item.staffId) || "")}
+                                                        onChange={(e) => capNhatDongLichAn(idx, {
                                                             staffId: e.target.value,
                                                             staffName: getStaffName(e.target.value),
+                                                        })}
+                                                        sx={{ minWidth: 220 }}
+                                                    >
+                                                        <MenuItem value="">Chưa gán</MenuItem>
+                                                        {hotelStaffOptions.map((staff) => (
+                                                            <MenuItem key={staff.value} value={staff.value}>{staff.label}</MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                ) : (
+                                                    <TextField
+                                                        label="NVKS phụ trách"
+                                                        size="small"
+                                                        value={
+                                                            String(
+                                                                item.staffName ||
+                                                                (getStaffId(item.staffId)
+                                                                    ? getStaffName(String(getStaffId(item.staffId) || ""), item.staffName)
+                                                                    : "Chưa gán")
+                                                            )
                                                         }
-                                                        : x
-                                                ))}
-                                                sx={{ minWidth: 220 }}
-                                            >
-                                                <MenuItem value="">Chưa gán</MenuItem>
-                                                {hotelStaffOptions.map((staff) => (
-                                                    <MenuItem key={staff.value} value={staff.value}>{staff.label}</MenuItem>
-                                                ))}
-                                            </TextField>
-                                            <TextField
-                                                label="Trạng thái"
-                                                select
-                                                size="small"
-                                                value={item.status || "pending"}
-                                                onChange={(e) => setFeedingDraft((prev) => prev.map((x, i) => i === idx ? { ...x, status: e.target.value as any } : x))}
-                                                sx={{ width: 170 }}
-                                            >
-                                                {trangThaiChamSocOptions.map((opt) => (
-                                                    <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-                                                ))}
-                                            </TextField>
-                                            <TextField
-                                                label="Ghi chú"
-                                                size="small"
-                                                value={item.note || ""}
-                                                onChange={(e) => setFeedingDraft((prev) => prev.map((x, i) => i === idx ? { ...x, note: e.target.value } : x))}
-                                                sx={{ flex: 1 }}
-                                            />
-                                            <IconButton color="error" onClick={() => setFeedingDraft((prev) => prev.filter((_, i) => i !== idx))}>
-                                                <DeleteOutlineIcon />
-                                            </IconButton>
-                                        </Stack>
+                                                        InputProps={{ readOnly: true }}
+                                                        sx={{ minWidth: 220 }}
+                                                    />
+                                                )}
+                                                <TextField
+                                                    label="Trạng thái"
+                                                    select
+                                                    size="small"
+                                                    value={item.status || "pending"}
+                                                    onChange={(e) => xuLyDoiTrangThai("feeding", idx, e.target.value as any)}
+                                                    sx={{ width: 170 }}
+                                                >
+                                                    {trangThaiChamSocOptions.map((opt) => (
+                                                        <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                                                    ))}
+                                                </TextField>
+                                                <TextField
+                                                    label="Ghi chú"
+                                                    size="small"
+                                                    value={item.note || ""}
+                                                    onChange={(e) => capNhatDongLichAn(idx, { note: e.target.value })}
+                                                    sx={{ flex: 1, minWidth: 220 }}
+                                                />
+                                                <IconButton color="error" onClick={() => setFeedingDraft((prev) => prev.filter((_, i) => i !== idx))}>
+                                                    <DeleteOutlineIcon />
+                                                </IconButton>
+                                            </Stack>
+                                            {renderProofMediaSection("feeding", idx, item)}
+                                        </Box>
                                     ))}
                                 </Stack>
                             </Box>
@@ -491,75 +907,90 @@ export const BoardingCareSchedulePage = () => {
                                 </Stack>
                                 <Stack spacing={1}>
                                     {exerciseDraft.map((item, idx) => (
-                                        <Stack key={`exercise-${idx}`} direction="row" spacing={1} alignItems="center">
-                                            <TextField
-                                                label="Giờ"
-                                                type="time"
-                                                size="small"
-                                                value={item.time || ""}
-                                                onChange={(e) => setExerciseDraft((prev) => prev.map((x, i) => i === idx ? { ...x, time: e.target.value } : x))}
-                                                sx={{ width: 130 }}
-                                                InputLabelProps={{ shrink: true }}
-                                            />
-                                            <TextField
-                                                label="Hoạt động"
-                                                size="small"
-                                                value={item.activity || ""}
-                                                onChange={(e) => setExerciseDraft((prev) => prev.map((x, i) => i === idx ? { ...x, activity: e.target.value } : x))}
-                                                sx={{ minWidth: 180 }}
-                                            />
-                                            <TextField
-                                                label="Số phút"
-                                                type="number"
-                                                size="small"
-                                                value={item.durationMinutes || 0}
-                                                onChange={(e) => setExerciseDraft((prev) => prev.map((x, i) => i === idx ? { ...x, durationMinutes: Number(e.target.value || 0) } : x))}
-                                                sx={{ width: 120 }}
-                                            />
-                                            <TextField
-                                                label="NVKS phụ trách"
-                                                select
-                                                size="small"
-                                                value={String(getStaffId(item.staffId) || "")}
-                                                onChange={(e) => setExerciseDraft((prev) => prev.map((x, i) =>
-                                                    i === idx
-                                                        ? {
-                                                            ...x,
+                                        <Box key={`exercise-${idx}`}>
+                                            <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
+                                                <TextField
+                                                    label="Giờ"
+                                                    type="time"
+                                                    size="small"
+                                                    value={item.time || ""}
+                                                    onChange={(e) => capNhatDongVanDong(idx, { time: e.target.value })}
+                                                    sx={{ width: 130 }}
+                                                    InputLabelProps={{ shrink: true }}
+                                                />
+                                                <TextField
+                                                    label="Hoạt động"
+                                                    size="small"
+                                                    value={item.activity || ""}
+                                                    onChange={(e) => capNhatDongVanDong(idx, { activity: e.target.value })}
+                                                    sx={{ minWidth: 180 }}
+                                                />
+                                                <TextField
+                                                    label="Số phút"
+                                                    type="number"
+                                                    size="small"
+                                                    value={item.durationMinutes || 0}
+                                                    onChange={(e) => capNhatDongVanDong(idx, { durationMinutes: Number(e.target.value || 0) })}
+                                                    sx={{ width: 120 }}
+                                                />
+                                                {canAssignHotelStaff ? (
+                                                    <TextField
+                                                        label="NVKS phụ trách"
+                                                        select
+                                                        size="small"
+                                                        value={String(getStaffId(item.staffId) || "")}
+                                                        onChange={(e) => capNhatDongVanDong(idx, {
                                                             staffId: e.target.value,
                                                             staffName: getStaffName(e.target.value),
+                                                        })}
+                                                        sx={{ minWidth: 220 }}
+                                                    >
+                                                        <MenuItem value="">Chưa gán</MenuItem>
+                                                        {hotelStaffOptions.map((staff) => (
+                                                            <MenuItem key={staff.value} value={staff.value}>{staff.label}</MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                ) : (
+                                                    <TextField
+                                                        label="NVKS phụ trách"
+                                                        size="small"
+                                                        value={
+                                                            String(
+                                                                item.staffName ||
+                                                                (getStaffId(item.staffId)
+                                                                    ? getStaffName(String(getStaffId(item.staffId) || ""), item.staffName)
+                                                                    : "Chưa gán")
+                                                            )
                                                         }
-                                                        : x
-                                                ))}
-                                                sx={{ minWidth: 220 }}
-                                            >
-                                                <MenuItem value="">Chưa gán</MenuItem>
-                                                {hotelStaffOptions.map((staff) => (
-                                                    <MenuItem key={staff.value} value={staff.value}>{staff.label}</MenuItem>
-                                                ))}
-                                            </TextField>
-                                            <TextField
-                                                label="Trạng thái"
-                                                select
-                                                size="small"
-                                                value={item.status || "pending"}
-                                                onChange={(e) => setExerciseDraft((prev) => prev.map((x, i) => i === idx ? { ...x, status: e.target.value as any } : x))}
-                                                sx={{ width: 170 }}
-                                            >
-                                                {trangThaiChamSocOptions.map((opt) => (
-                                                    <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-                                                ))}
-                                            </TextField>
-                                            <TextField
-                                                label="Ghi chú"
-                                                size="small"
-                                                value={item.note || ""}
-                                                onChange={(e) => setExerciseDraft((prev) => prev.map((x, i) => i === idx ? { ...x, note: e.target.value } : x))}
-                                                sx={{ flex: 1 }}
-                                            />
-                                            <IconButton color="error" onClick={() => setExerciseDraft((prev) => prev.filter((_, i) => i !== idx))}>
-                                                <DeleteOutlineIcon />
-                                            </IconButton>
-                                        </Stack>
+                                                        InputProps={{ readOnly: true }}
+                                                        sx={{ minWidth: 220 }}
+                                                    />
+                                                )}
+                                                <TextField
+                                                    label="Trạng thái"
+                                                    select
+                                                    size="small"
+                                                    value={item.status || "pending"}
+                                                    onChange={(e) => xuLyDoiTrangThai("exercise", idx, e.target.value as any)}
+                                                    sx={{ width: 170 }}
+                                                >
+                                                    {trangThaiChamSocOptions.map((opt) => (
+                                                        <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                                                    ))}
+                                                </TextField>
+                                                <TextField
+                                                    label="Ghi chú"
+                                                    size="small"
+                                                    value={item.note || ""}
+                                                    onChange={(e) => capNhatDongVanDong(idx, { note: e.target.value })}
+                                                    sx={{ flex: 1, minWidth: 220 }}
+                                                />
+                                                <IconButton color="error" onClick={() => setExerciseDraft((prev) => prev.filter((_, i) => i !== idx))}>
+                                                    <DeleteOutlineIcon />
+                                                </IconButton>
+                                            </Stack>
+                                            {renderProofMediaSection("exercise", idx, item)}
+                                        </Box>
                                     ))}
                                 </Stack>
                             </Box>
@@ -567,11 +998,145 @@ export const BoardingCareSchedulePage = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={dongDialogChamSoc} disabled={updateCareMut.isPending}>Đóng</Button>
-                    <Button variant="contained" onClick={luuLichChamSoc} disabled={updateCareMut.isPending || !editingBooking?._id}>
+                    <Button onClick={dongDialogChamSoc} disabled={updateCareMut.isPending || resetCareTemplateMut.isPending}>Đóng</Button>
+                    <Button
+                        variant="outlined"
+                        startIcon={<RestartAltIcon />}
+                        onClick={taoLaiLichMau}
+                        disabled={updateCareMut.isPending || resetCareTemplateMut.isPending || !editingBooking?._id}
+                    >
+                        {resetCareTemplateMut.isPending ? "Đang tạo lại..." : "Tạo lại lịch mẫu"}
+                    </Button>
+                    <Button variant="contained" onClick={luuLichChamSoc} disabled={updateCareMut.isPending || resetCareTemplateMut.isPending || !editingBooking?._id}>
                         {updateCareMut.isPending ? "Đang lưu..." : "Lưu lịch chăm sóc"}
                     </Button>
                 </DialogActions>
+            </Dialog>
+
+            <Dialog
+                open={proofViewer.open}
+                onClose={() => setProofViewer((prev) => ({ ...prev, open: false }))}
+                fullWidth
+                maxWidth="md"
+                PaperProps={{
+                    sx: {
+                        bgcolor: "#0f172a",
+                        color: "#fff",
+                        borderRadius: "20px",
+                        overflow: "hidden",
+                    },
+                }}
+            >
+                <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2 }}>
+                    <Box>
+                        <Typography sx={{ fontWeight: 700 }}>{proofViewer.title || "Gallery minh chứng"}</Typography>
+                        <Typography sx={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.7)" }}>
+                            {proofViewer.items.length > 0 ? `${proofViewer.index + 1}/${proofViewer.items.length}` : "0/0"}
+                        </Typography>
+                    </Box>
+                    <Button onClick={() => setProofViewer((prev) => ({ ...prev, open: false }))} sx={{ color: "#fff" }}>
+                        Đóng
+                    </Button>
+                </DialogTitle>
+                <DialogContent sx={{ pb: 3 }}>
+                    {currentProofMedia ? (
+                        <Box>
+                            <Box
+                                sx={{
+                                    position: "relative",
+                                    borderRadius: "16px",
+                                    overflow: "hidden",
+                                    bgcolor: "#020617",
+                                    minHeight: 420,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                {currentProofMedia.kind === "video" ? (
+                                    <video
+                                        src={currentProofMedia.url}
+                                        controls
+                                        style={{ width: "100%", maxHeight: "70vh", objectFit: "contain" }}
+                                    />
+                                ) : (
+                                    <img
+                                        src={currentProofMedia.url}
+                                        alt={`proof-${proofViewer.index + 1}`}
+                                        style={{ width: "100%", maxHeight: "70vh", objectFit: "contain" }}
+                                    />
+                                )}
+
+                                {proofViewer.items.length > 1 ? (
+                                    <>
+                                        <IconButton
+                                            onClick={() =>
+                                                setProofViewer((prev) => ({
+                                                    ...prev,
+                                                    index: prev.index === 0 ? prev.items.length - 1 : prev.index - 1,
+                                                }))
+                                            }
+                                            sx={{
+                                                position: "absolute",
+                                                left: 12,
+                                                top: "50%",
+                                                transform: "translateY(-50%)",
+                                                bgcolor: "rgba(255,255,255,0.14)",
+                                                color: "#fff",
+                                            }}
+                                        >
+                                            <ArrowBackIosNewIcon />
+                                        </IconButton>
+                                        <IconButton
+                                            onClick={() =>
+                                                setProofViewer((prev) => ({
+                                                    ...prev,
+                                                    index: prev.index === prev.items.length - 1 ? 0 : prev.index + 1,
+                                                }))
+                                            }
+                                            sx={{
+                                                position: "absolute",
+                                                right: 12,
+                                                top: "50%",
+                                                transform: "translateY(-50%)",
+                                                bgcolor: "rgba(255,255,255,0.14)",
+                                                color: "#fff",
+                                            }}
+                                        >
+                                            <ArrowForwardIosIcon />
+                                        </IconButton>
+                                    </>
+                                ) : null}
+                            </Box>
+
+                            {proofViewer.items.length > 1 ? (
+                                <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 2 }}>
+                                    {proofViewer.items.map((media, index) => (
+                                        <Box
+                                            key={`${media.url}-${index}-thumb`}
+                                            onClick={() => setProofViewer((prev) => ({ ...prev, index }))}
+                                            sx={{
+                                                width: 72,
+                                                height: 72,
+                                                borderRadius: "12px",
+                                                overflow: "hidden",
+                                                border: index === proofViewer.index ? "2px solid #fb7185" : "1px solid rgba(255,255,255,0.14)",
+                                                cursor: "pointer",
+                                                opacity: index === proofViewer.index ? 1 : 0.72,
+                                            }}
+                                        >
+                                            {media.kind === "video" ? (
+                                                <video src={media.url} muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                            ) : (
+                                                <img src={media.url} alt={`thumb-${index + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                            )}
+                                        </Box>
+                                    ))}
+                                </Stack>
+                            ) : null}
+                        </Box>
+                    ) : null}
+                </DialogContent>
             </Dialog>
         </Box>
     );
