@@ -40,12 +40,14 @@ const STATUS_META: Record<string, { label: string; className: string }> = {
 };
 
 const FALLBACK_GALLERY = [
-  "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=1400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=1200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1560185007-5f0bb1866cab?q=80&w=1200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1200&auto=format&fit=crop",
+  "https://source.unsplash.com/1600x1000/?dog-kennel",
+  "https://source.unsplash.com/1600x1000/?pet-hotel-cage",
+  "https://source.unsplash.com/1600x1000/?cat-room,pet",
+  "https://source.unsplash.com/1600x1000/?pet-boarding",
+  "https://source.unsplash.com/1600x1000/?dog-cat-hotel",
 ];
+const PLACEHOLDER_IMAGE =
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='700'><rect width='100%' height='100%' fill='%23f3f4f6'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%236b7280' font-size='28'>Khong co hinh chuong</text></svg>";
 
 const WEEK_DAYS = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 const ROOM_CAPACITY_DEFAULT = 4;
@@ -86,18 +88,28 @@ export const BoardingCageDetailPage = () => {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewContent, setReviewContent] = useState("");
   const { data: availableCages = [] } = useAvailableCages(checkInDate, checkOutDate);
+  const [brokenImages, setBrokenImages] = useState<string[]>([]);
+
+  const markImageBroken = (src?: string) => {
+    const safeSrc = String(src || "").trim();
+    if (!safeSrc || safeSrc.startsWith("data:image/svg+xml")) return;
+    setBrokenImages((prev) => (prev.includes(safeSrc) ? prev : [...prev, safeSrc]));
+  };
 
   const galleryImages = useMemo(() => {
     const fromCage = [
       String((cage as any)?.avatar || ""),
       ...((Array.isArray((cage as any)?.gallery) ? (cage as any).gallery : []) as string[]),
       ...((Array.isArray((cage as any)?.images) ? (cage as any).images : []) as string[]),
-    ].filter(Boolean);
+    ]
+      .map((item) => String(item || "").trim())
+      .filter((item) => Boolean(item) && /^https?:\/\//i.test(item));
 
-    const merged = [...fromCage, ...FALLBACK_GALLERY];
+    const merged = [...fromCage, ...FALLBACK_GALLERY].filter((item) => !brokenImages.includes(item));
     const unique = Array.from(new Set(merged));
+    if (unique.length === 0) return [PLACEHOLDER_IMAGE];
     return unique.slice(0, 5);
-  }, [cage]);
+  }, [cage, brokenImages]);
 
   useEffect(() => {
     if (!selectedImage && galleryImages.length > 0) {
@@ -375,7 +387,12 @@ export const BoardingCageDetailPage = () => {
 
           <div className="mt-[14px] grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-[12px]">
             <div className="rounded-[6px] overflow-hidden bg-[#f4f4f4] border border-[#f1e4d6] h-[520px]">
-              <img src={selectedImage || galleryImages[0]} alt={cage.cageCode} className="w-full h-full object-cover" />
+              <img
+                src={selectedImage || galleryImages[0] || PLACEHOLDER_IMAGE}
+                alt={cage.cageCode}
+                onError={(e) => markImageBroken((e.currentTarget as HTMLImageElement).src)}
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="grid grid-cols-2 gap-[10px]">
               {galleryImages.slice(1).map((img, idx) => (
@@ -385,7 +402,12 @@ export const BoardingCageDetailPage = () => {
                   onClick={() => setSelectedImage(img)}
                   className={`h-[254px] rounded-[6px] overflow-hidden border ${selectedImage === img ? "border-client-primary" : "border-[#f1e4d6]"}`}
                 >
-                  <img src={img} alt={`gallery-${idx + 1}`} className="w-full h-full object-cover" />
+                  <img
+                    src={img}
+                    alt={`gallery-${idx + 1}`}
+                    onError={(e) => markImageBroken((e.currentTarget as HTMLImageElement).src)}
+                    className="w-full h-full object-cover"
+                  />
                 </button>
               ))}
             </div>
@@ -763,7 +785,12 @@ export const BoardingCageDetailPage = () => {
             <div className="grid grid-cols-3 xl:grid-cols-2 md:grid-cols-1 gap-[14px]">
               {galleryImages.slice(0, 3).map((img, idx) => (
                 <article key={`${img}-${idx}`} className="bg-white border border-[#eadfd4] rounded-[8px] overflow-hidden">
-                  <img src={img} alt={`room-like-${idx}`} className="w-full h-[220px] object-cover" />
+                  <img
+                    src={img}
+                    alt={`room-like-${idx}`}
+                    onError={(e) => markImageBroken((e.currentTarget as HTMLImageElement).src)}
+                    className="w-full h-[220px] object-cover"
+                  />
                   <div className="p-[10px]">
                     <p className="text-[30px] font-secondary text-client-secondary">{cage.cageCode || "Chuồng"} {idx + 1}</p>
                     <p className="text-[13px] text-[#606b76]">{SIZE_LABELS[cage.size] || cage.size} • {String(cage.type || "standard").toUpperCase()}</p>
