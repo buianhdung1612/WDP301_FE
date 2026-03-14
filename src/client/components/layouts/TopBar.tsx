@@ -1,15 +1,12 @@
-import { Facebook, Instagram, X, Threads, YoutubeSolid, MailSolid } from "iconoir-react";
+import { Facebook, Instagram, MailSolid } from "iconoir-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom"
 import { SocialIcon } from "../ui/SocialIcon";
 
 export const TopBar = () => {
     const socialItems = [
-        { icon: Instagram, to: "/" },
         { icon: Facebook, to: "/" },
-        { icon: X, to: "/" },
-        { icon: Threads, to: "/" },
-        { icon: YoutubeSolid, to: "/" },
+        { icon: Instagram, to: "/" },
     ];
 
     const texts = [

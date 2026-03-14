@@ -33,18 +33,20 @@ export const getCouponTheme = (outerTheme: Theme) => createTheme(outerTheme, {
                     color: "var(--palette-text-primary)",
                     borderRadius: "var(--shape-borderRadius)",
                     fontSize: "0.9375rem",
+                    // Default: nearly invisible (matches product create page)
                     '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: "var(--palette-text-disabled)33",
-                        transition: 'border-color 0.2s',
+                        borderColor: "rgba(145, 158, 171, 0.2)",
+                        transition: 'border-color 0.15s ease',
                     },
+                    // Hover: visible gray
                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: "var(--palette-text-primary)",
+                        borderColor: "rgba(145, 158, 171, 0.8)",
                     },
+                    // Focus: thick dark border
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                         borderColor: "var(--palette-text-primary)",
                         borderWidth: "2px",
                     },
-
                 },
                 input: {
                     padding: "16px 14px",

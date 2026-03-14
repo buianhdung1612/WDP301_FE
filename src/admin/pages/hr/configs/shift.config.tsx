@@ -42,19 +42,6 @@ export const getShiftColumns = (onEdit: (id: string) => void, onDelete: (id: str
         )
     },
     {
-        field: "salaryMultiplier",
-        headerName: "Hệ số lương",
-        width: 120,
-        renderCell: (params) => (
-            <Chip
-                label={`x${params.value}`}
-                size="small"
-                color={params.value > 1 ? "warning" : "default"}
-                sx={{ fontWeight: 700 }}
-            />
-        )
-    },
-    {
         field: "status",
         headerName: "Trạng thái",
         width: 120,

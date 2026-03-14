@@ -7,7 +7,6 @@ export const roleSchema = z.object({
     serviceIds: z.array(z.string()),
     permissions: z.array(z.string()),
     departmentId: z.string().optional().nullable(),
-    commissionRate: z.coerce.number().min(0).max(100).default(0),
     status: z.enum(["active", "inactive"]),
 });
 

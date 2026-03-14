@@ -83,7 +83,6 @@ export const RoleEditPage = () => {
             serviceIds: [],
             permissions: [],
             departmentId: "",
-            commissionRate: 0,
             status: "active",
         },
     });
@@ -97,7 +96,6 @@ export const RoleEditPage = () => {
                 serviceIds: role.serviceIds || [],
                 permissions: role.permissions || [],
                 departmentId: role.departmentId || "",
-                commissionRate: role.commissionRate || 0,
                 status: role.status,
             });
         }
@@ -204,21 +202,6 @@ export const RoleEditPage = () => {
                                                     </MenuItem>
                                                 ))}
                                             </TextField>
-                                        )}
-                                    />
-                                    <Controller
-                                        name="commissionRate"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                type="number"
-                                                label="% Hoa hồng mặc định"
-                                                placeholder="0"
-                                                InputProps={{ inputProps: { min: 0, max: 100 } }}
-                                                error={!!control.getFieldState("commissionRate").error}
-                                                helperText={control.getFieldState("commissionRate").error?.message}
-                                            />
                                         )}
                                     />
                                 </Box>
@@ -349,7 +332,7 @@ export const RoleEditPage = () => {
                                                             <Select
                                                                 {...field}
                                                                 multiple
-                                                                 renderValue={(selected: any) => (
+                                                                renderValue={(selected: any) => (
                                                                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                                                         {selected.map((serviceId: string) => {
                                                                             const service = services.find((s: any) => s._id === serviceId);

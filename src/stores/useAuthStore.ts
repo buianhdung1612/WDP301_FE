@@ -9,6 +9,8 @@ interface User {
     avatar?: string;
     permissions?: string[];
     roles?: any[];
+    totalPoint?: number;
+    usedPoint?: number;
 }
 
 interface AuthState {

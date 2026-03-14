@@ -50,19 +50,19 @@ export const MainHeader = () => {
                     {/* Form Search */}
                     <form action="" className="w-[34.2%] flex">
                         <input type="text" name="keyword" placeholder="Tìm kiếm sản phẩm" className="w-[95.2%] bg-[#10293708] rounded-l-[40px] h-[50px] border border-[#d7d7d7] px-[32px] py-[16px] focus:outline-none focus:border-[#102937] transition-[border] duration-300 ease-linear" />
-                        <div className="ml-[-25px] w-[80px] h-[80px] rounded-full bg-client-secondary flex items-center justify-center text-white cursor-pointer hover:bg-client-primary transition-[background] duration-300 ease-linear">
-                            <Search stroke="3" />
+                        <div className="ml-[-25px] w-[50px] h-[50px] rounded-full bg-client-secondary flex items-center justify-center text-white cursor-pointer hover:bg-client-primary transition-[background] duration-300 ease-linear">
+                            <Search stroke="3" width={24} height={24} />
                         </div>
                     </form>
 
                     {/* Actions */}
                     <div className="flex items-center gap-[30px] w-[34.2%] justify-end mr-[16px]">
-                        <div className="w-[35px] h-[35px] p-[5px] flex items-center justify-center text-[#102937] hover:text-client-primary transition-[color] duration-300 cursor-pointer">
-                            <Heart stroke="2" className="w-[40px] h-[40px]" />
+                        <div className="w-[35px] h-[35px] flex items-center justify-center text-[#102937] hover:text-client-primary transition-[color] duration-300 cursor-pointer">
+                            <Heart stroke="2" className="w-[25px] h-[25px]" />
                         </div>
-                        <div className="group relative w-[35px] h-[35px] p-[5px] flex items-center justify-center cursor-pointer">
+                        <div className="group relative w-[35px] h-[35px] flex items-center justify-center cursor-pointer">
                             <Link to="/cart">
-                                <Handbag stroke="2" className="w-[40px] h-[40px] text-[#102937] group-hover:text-client-primary transition-default" />
+                                <Handbag stroke="2" className="w-[25px] h-[25px] text-[#102937] group-hover:text-client-primary transition-default" />
                             </Link>
                             {cartCount > 0 && (
                                 <span className="absolute right-[-1px] top-[-5px] w-[18px] h-[18px] text-[10px] bg-client-secondary text-white rounded-full flex items-center justify-center">{cartCount}</span>
@@ -130,8 +130,8 @@ export const MainHeader = () => {
                                 </div>
                             </div>
                         ) : (
-                            <Link to="/auth/login" className="w-[35px] h-[35px] p-[5px] flex items-center justify-center text-[#102937] hover:text-client-primary transition-[color] duration-300 cursor-pointer">
-                                <User stroke="2" className="w-[40px] h-[40px]" />
+                            <Link to="/auth/login" className="w-[35px] h-[35px] flex items-center justify-center text-[#102937] hover:text-client-primary transition-[color] duration-300 cursor-pointer">
+                                <User stroke="2" className="w-[25px] h-[25px]" />
                             </Link>
                         )}
                         <Button

@@ -175,6 +175,7 @@ export const menuManagementData = [
         permission: "coupon_view",
         children: [
             { id: "list", label: "Danh sách mã giảm giá", tKey: "admin.sidebar.coupon_list", path: `/${prefixAdmin}/coupon/list`, permission: "coupon_view" },
+            { id: "create", label: "Tạo mã giảm giá", tKey: "admin.sidebar.coupon_create", path: `/${prefixAdmin}/coupon/create`, permission: "coupon_create" },
         ]
     },
     {
@@ -186,8 +187,6 @@ export const menuManagementData = [
             { id: "departments", label: "Phòng ban", path: `/${prefixAdmin}/departments`, permission: "department_view" },
             { id: "schedule-calendar", label: "Lịch làm việc", path: `/${prefixAdmin}/schedule-calendar`, permission: "schedule_view" },
             { id: "shifts", label: "Ca làm việc", path: `/${prefixAdmin}/shifts`, permission: "shift_view" },
-            { id: "attendance", label: "Chấm công & Lương", path: `/${prefixAdmin}/attendance`, permission: "attendance_view" },
-            { id: "work-history", label: "Lịch sử công việc", path: `/${prefixAdmin}/hr/work-history`, permission: "hr_view" },
         ]
     },
     {
@@ -218,7 +217,6 @@ export const menuManagementData = [
             { id: "settings-social", label: "Mạng xã hội", path: `/${prefixAdmin}/dashboard/settings/social` },
             { id: "settings-app-password", label: "Mật khẩu ứng dụng", path: `/${prefixAdmin}/dashboard/settings/app-password` },
             { id: "settings-breed", label: "Giống thú cưng", path: `/${prefixAdmin}/settings/breed/list` },
-            { id: "settings-attendance", label: "Cấu hình điểm danh", path: `/${prefixAdmin}/settings/attendance-config` },
         ]
     }
 ];

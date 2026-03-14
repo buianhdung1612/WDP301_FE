@@ -112,8 +112,14 @@ export const CheckSuccessPage = () => {
                                 </tr>
                                 {order.discount > 0 && (
                                     <tr>
-                                        <td className="w-[66%] text-left py-[20px] border-b border-[#d7d7d7] font-[600]">Giảm giá ({order.coupon}):</td>
+                                        <td className="w-[66%] text-left py-[20px] border-b border-[#d7d7d7] font-[600]">Giảm giá {order.coupon ? `(${order.coupon})` : ""}:</td>
                                         <td className="w-[34%] text-right py-[20px] border-b border-[#d7d7d7] text-green-600">-{order.discount.toLocaleString()}đ</td>
+                                    </tr>
+                                )}
+                                {order.pointDiscount > 0 && (
+                                    <tr>
+                                        <td className="w-[66%] text-left py-[20px] border-b border-[#d7d7d7] font-[600]">💎 Điểm thưởng ({order.usedPoint.toLocaleString()} điểm):</td>
+                                        <td className="w-[34%] text-right py-[20px] border-b border-[#d7d7d7] text-green-600">-{order.pointDiscount.toLocaleString()}đ</td>
                                     </tr>
                                 )}
                                 <tr>

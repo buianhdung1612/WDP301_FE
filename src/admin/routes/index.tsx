@@ -22,6 +22,7 @@ import { BlogCategoryEditPage } from "../pages/blog-category/BlogCategoryEditPag
 import { CouponListPage } from "../pages/coupon/CouponListPage";
 import { CouponCreatePage } from "../pages/coupon/CouponCreatePage";
 import { CouponEditPage } from "../pages/coupon/CouponEditPage";
+import { CouponDetailPage } from "../pages/coupon/CouponDetailPage";
 import { ProductAttributeListPage } from "../pages/product-attribute/ProductAttributeListPage";
 import { ProductAttributeCreatePage } from "../pages/product-attribute/ProductAttributeCreatePage";
 import { ProductAttributeEditPage } from "../pages/product-attribute/ProductAttributeEditPage";
@@ -57,9 +58,6 @@ import { BreedListPage } from "../pages/settings/BreedListPage";
 import { ScheduleCalendarPage } from "../pages/hr/ScheduleCalendarPage";
 import { ShiftListPage } from "../pages/hr/ShiftListPage";
 import { DepartmentListPage } from "../pages/hr/DepartmentListPage";
-import { AttendanceListPage } from "../pages/hr/AttendanceListPage";
-import { StaffWorkHistoryPage } from "../pages/hr/StaffWorkHistoryPage";
-import { AttendanceConfigPage } from "../pages/hr/AttendanceConfigPage";
 
 import { StaffTaskListPage } from "../pages/staff-panel/StaffTaskListPage";
 import { StaffWorkSchedulePage } from "../pages/staff-panel/StaffWorkSchedulePage";
@@ -109,6 +107,7 @@ export const AdminRoutes = [
     { path: "coupon/list", element: <PermissionGuard permission="coupon_view"><CouponListPage /></PermissionGuard> },
     { path: "coupon/create", element: <PermissionGuard permission="coupon_create"><CouponCreatePage /></PermissionGuard> },
     { path: "coupon/edit/:id", element: <PermissionGuard permission="coupon_edit"><CouponEditPage /></PermissionGuard> },
+    { path: "coupon/detail/:id", element: <PermissionGuard permission="coupon_view"><CouponDetailPage /></PermissionGuard> },
     { path: "product/attribute/list", element: <PermissionGuard permission="product_attribute_view"><ProductAttributeListPage /></PermissionGuard> },
     { path: "product/attribute/create", element: <PermissionGuard permission="product_attribute_create"><ProductAttributeCreatePage /></PermissionGuard> },
     { path: "product/attribute/edit/:id", element: <PermissionGuard permission="product_attribute_edit"><ProductAttributeEditPage /></PermissionGuard> },
@@ -141,9 +140,6 @@ export const AdminRoutes = [
     { path: "schedule-calendar", element: <PermissionGuard permission="schedule_view"><ScheduleCalendarPage /></PermissionGuard> },
     { path: "shifts", element: <PermissionGuard permission="shift_view"><ShiftListPage /></PermissionGuard> },
     { path: "departments", element: <PermissionGuard permission="department_view"><DepartmentListPage /></PermissionGuard> },
-    { path: "attendance", element: <PermissionGuard permission="attendance_view"><AttendanceListPage /></PermissionGuard> },
-    { path: "hr/work-history", element: <PermissionGuard permission="hr_view"><StaffWorkHistoryPage /></PermissionGuard> },
-    { path: "settings/attendance-config", element: <PermissionGuard permission="attendance_edit"><AttendanceConfigPage /></PermissionGuard> },
     { path: "boarding/booking-list", element: <PermissionGuard permission="boarding_booking_view"><BoardingBookingListPage /></PermissionGuard> },
     { path: "boarding/create", element: <PermissionGuard permission="boarding_booking_create"><BoardingBookingCreatePage /></PermissionGuard> },
     { path: "boarding/care-schedule", element: <PermissionGuard permission="boarding_booking_edit"><BoardingCareSchedulePage /></PermissionGuard> },

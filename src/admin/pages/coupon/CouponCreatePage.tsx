@@ -11,6 +11,10 @@ import { getCouponTheme } from "./configs/theme";
 import { prefixAdmin } from "../../constants/routes";
 import { toast } from "react-toastify";
 import { LoadingButton } from "../../components/ui/LoadingButton";
+import { SwitchButton } from "../../components/ui/SwitchButton";
+
+import { DateRangePicker } from "../../components/ui/DateRangePicker";
+import dayjs from "dayjs";
 
 export const CouponCreatePage = () => {
     const [expandedDetail, setExpandedDetail] = useState(true);
@@ -24,7 +28,9 @@ export const CouponCreatePage = () => {
         control,
         handleSubmit,
         reset,
-        watch
+        watch,
+        setValue,
+        formState: { errors }
     } = useForm<any>({
         resolver: zodResolver(createCouponSchema),
         defaultValues: {
@@ -255,56 +261,45 @@ export const CouponCreatePage = () => {
                                         gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))",
                                     }}
                                 >
-                                    <Controller
-                                        name="startDate"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                label="Ngày bắt đầu (DD/MM/YYYY)"
-                                                placeholder="01/01/2026"
-                                            />
-                                        )}
-                                    />
-                                    <Controller
-                                        name="endDate"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                label="Ngày kết thúc (DD/MM/YYYY)"
-                                                placeholder="31/12/2026"
-                                            />
-                                        )}
-                                    />
+                                    <Box sx={{ gridColumn: "span 2" }}>
+                                        <DateRangePicker
+                                            startDate={watch("startDate")}
+                                            endDate={watch("endDate")}
+                                            onChange={({ startDate, endDate }) => {
+                                                setValue("startDate", startDate);
+                                                setValue("endDate", endDate);
+                                            }}
+                                            error={!!errors.startDate || !!errors.endDate}
+                                            helperText={(errors.startDate?.message as string) || (errors.endDate?.message as string)}
+                                        />
+                                    </Box>
                                 </Box>
                             </Stack>
                         </CollapsibleCard>
 
-                        <Box gap="calc(3 * var(--spacing))" sx={{ display: "flex", alignItems: "center" }}>
-                            <Controller
-                                name="status"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        select
-                                        label="Trạng thái"
-                                        SelectProps={{ native: true }}
-                                        variant="outlined"
-                                        sx={{ minWidth: 150 }}
-                                    >
-                                        <option value="active">Hoạt động</option>
-                                        <option value="inactive">Tạm ẩn</option>
-                                    </TextField>
-                                )}
-                            />
+                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: 2 }}>
+                            <Box sx={{ flexGrow: 1 }}>
+                                <SwitchButton
+                                    control={control}
+                                    name="status"
+                                    checkedValue="active"
+                                    uncheckedValue="inactive"
+                                />
+                            </Box>
                             <LoadingButton
                                 type="submit"
                                 loading={isPending}
                                 label="Tạo mã giảm giá"
                                 loadingLabel="Đang tạo..."
-                                sx={{ minHeight: "3rem", minWidth: "4rem" }}
+                                sx={{
+                                    minHeight: "44px",
+                                    minWidth: "160px",
+                                    borderRadius: "12px",
+                                    fontSize: "0.875rem",
+                                    fontWeight: 700,
+                                    boxShadow: "var(--customShadows-primary)",
+                                    "& .MuiLoadingButton-loadingIndicator": { color: "common.white" }
+                                }}
                             />
                         </Box>
                     </Stack>

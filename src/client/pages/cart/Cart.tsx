@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ProductBanner } from "../product/sections/ProductBanner";
 import { FooterSub } from "../../components/layouts/FooterSub";
 import { useCartStore, CartVariant } from "../../../stores/useCartStore";
+import { useAuthStore } from "../../../stores/useAuthStore";
 import { CartEmpty } from "./sections/CartEmpty";
 import { Link } from "react-router-dom";
 import { getCartDetails } from "../../api/cart.api";
@@ -23,6 +24,7 @@ export const CartPage = () => {
 
     const [loading, setLoading] = useState(true);
     const [removingItems, setRemovingItems] = useState<string[]>([]);
+    const [pointInfo, setPointInfo] = useState<{ canUsePoint: number, POINT_TO_MONEY: number } | null>(null);
 
     // Đồng bộ giỏ hàng từ API khi vào trang
     useEffect(() => {
@@ -43,6 +45,24 @@ export const CartPage = () => {
                 const response = await getCartDetails(cartDataForSync);
                 if (response.code === "success") {
                     syncCart(response.cart);
+                    if (response.canUsePoint !== undefined) {
+                        setPointInfo({
+                            canUsePoint: response.canUsePoint,
+                            POINT_TO_MONEY: response.POINT_TO_MONEY
+                        });
+
+                        // Sync to AuthStore
+                        const currentUser = useAuthStore.getState().user;
+                        if (currentUser) {
+                            useAuthStore.getState().set({
+                                user: {
+                                    ...currentUser,
+                                    totalPoint: response.totalPoint,
+                                    usedPoint: response.usedPoint
+                                }
+                            });
+                        }
+                    }
                 }
             } catch (error) {
                 console.error("Lỗi đồng bộ giỏ hàng:", error);
@@ -305,7 +325,25 @@ export const CartPage = () => {
                                     </div>
                                 </div>
 
-                                <div className="text-center">
+                                {pointInfo && pointInfo.canUsePoint > 0 && (
+                                    <div className="mt-[15px] p-[15px] bg-client-primary/5 rounded-[12px] border border-client-primary/10">
+                                        <div className="flex items-center gap-[8px] mb-[4px]">
+                                            <span className="text-[18px]">💎</span>
+                                            <span className="text-[14px] font-bold text-client-secondary">Điểm thưởng hiện có</span>
+                                        </div>
+                                        <div className="flex justify-between items-end">
+                                            <div>
+                                                <span className="text-[20px] font-black text-client-primary">{pointInfo.canUsePoint.toLocaleString()}</span>
+                                                <span className="text-[12px] text-client-text ml-[4px] font-medium">điểm</span>
+                                            </div>
+                                            <div className="text-[11px] text-gray-500 italic">
+                                                ≈ {(pointInfo.canUsePoint * pointInfo.POINT_TO_MONEY).toLocaleString()}đ
+                                            </div>
+                                        </div>
+                                        <p className="text-[11px] text-gray-400 mt-[8px]">Dùng điểm để được giảm giá khi thanh toán</p>
+                                    </div>
+                                )}
+                                <div className="text-center mt-[15px]">
                                     <Link
                                         to={items.some(item => item.checked) ? "/checkout" : "#"}
                                         onClick={(e) => {

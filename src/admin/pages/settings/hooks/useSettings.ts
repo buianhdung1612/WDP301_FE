@@ -4,7 +4,8 @@ import {
     getSettingShipping, updateSettingShipping,
     getSettingPayment, updateSettingPayment,
     getSettingLoginSocial, updateSettingLoginSocial,
-    getSettingAppPassword, updateSettingAppPassword
+    getSettingAppPassword, updateSettingAppPassword,
+    getSettingPoint, updateSettingPoint
 } from "../../../api/setting.api";
 import { toast } from "react-toastify";
 
@@ -107,6 +108,26 @@ export const useUpdateSettingAppPassword = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["settingAppPassword"] });
             toast.success("Cập nhật mật khẩu ứng dụng thành công");
+        },
+    });
+};
+
+/** Hook quản lý cài đặt Tích điểm */
+export const useSettingPoint = () => {
+    return useQuery({
+        queryKey: ["settingPoint"],
+        queryFn: getSettingPoint,
+        select: (data) => data.data,
+    });
+};
+
+export const useUpdateSettingPoint = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: updateSettingPoint,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["settingPoint"] });
+            toast.success("Cập nhật cấu hình tích điểm thành công");
         },
     });
 };

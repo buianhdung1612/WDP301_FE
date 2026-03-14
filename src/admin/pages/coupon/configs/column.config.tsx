@@ -6,7 +6,6 @@ import {
     RenderCreatedAtCell,
     RenderTypeDiscountCell,
     RenderValueCell,
-    RenderDateRangeCell
 } from '../utils/render-cells';
 
 export const columnsConfig: GridColDef<any>[] = [
@@ -46,12 +45,6 @@ export const columnsConfig: GridColDef<any>[] = [
             const { usageLimit, usedCount } = params.row;
             return <span>{usedCount || 0}/{usageLimit || '∞'}</span>;
         }
-    },
-    {
-        field: "dateRange",
-        headerName: "Thời gian",
-        width: 180,
-        renderCell: RenderDateRangeCell,
     },
     {
         field: "status",

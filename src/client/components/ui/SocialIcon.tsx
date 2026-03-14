@@ -20,7 +20,7 @@ export const SocialIcon = ({ items }: SocialIconProps) => {
                      hover:text-client-secondary hover:bg-white transition-default"
                 >
                     <Link to={to}>
-                        <Icon strokeWidth={2} className="w-[10px] h-[10px]" />
+                        <Icon strokeWidth={2} className="w-[16px] h-[16px]" />
                     </Link>
                 </li>
             ))}

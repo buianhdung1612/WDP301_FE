@@ -73,3 +73,15 @@ export const updateSettingAppPassword = async (data: any): Promise<ApiResponse<a
     const response = await apiApp.patch(`${BASE_URL}/api-app-password`, data, withAuth());
     return response.data;
 };
+
+/** Lấy thông tin cấu hình tích điểm */
+export const getSettingPoint = async (): Promise<ApiResponse<any>> => {
+    const response = await apiApp.get(`${BASE_URL}/point`, withAuth());
+    return response.data;
+};
+
+/** Cập nhật cấu hình tích điểm */
+export const updateSettingPoint = async (data: any): Promise<ApiResponse<any>> => {
+    const response = await apiApp.patch(`${BASE_URL}/point`, data, withAuth());
+    return response.data;
+};

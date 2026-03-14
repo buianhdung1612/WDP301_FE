@@ -40,7 +40,6 @@ export const ShiftDialog = ({
             name: '',
             startTime: dayjs().set('hour', 8).set('minute', 0),
             endTime: dayjs().set('hour', 12).set('minute', 0),
-            salaryMultiplier: 1.0,
             departmentId: '',
             status: 'active',
         }
@@ -58,7 +57,6 @@ export const ShiftDialog = ({
                 name: selectedItem.name || '',
                 startTime: parseTimeString(selectedItem.startTime),
                 endTime: parseTimeString(selectedItem.endTime),
-                salaryMultiplier: selectedItem.salaryMultiplier || 1.0,
                 departmentId: selectedItem.departmentId || '',
                 status: selectedItem.status || 'active',
             });
@@ -67,7 +65,6 @@ export const ShiftDialog = ({
                 name: '',
                 startTime: dayjs().set('hour', 8).set('minute', 0),
                 endTime: dayjs().set('hour', 12).set('minute', 0),
-                salaryMultiplier: 1.0,
                 departmentId: '',
                 status: 'active',
             });
@@ -165,22 +162,6 @@ export const ShiftDialog = ({
                                     )}
                                 />
                             </LocalizationProvider>
-                        </Grid>
-                        <Grid size={{ xs: 12 }}>
-                            <Controller
-                                name="salaryMultiplier"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        type="number"
-                                        label="Hệ số lương"
-                                        inputProps={{ step: 0.1, min: 1 }}
-                                        sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }}
-                                    />
-                                )}
-                            />
                         </Grid>
                         <Grid size={{ xs: 12 }}>
                             <Controller

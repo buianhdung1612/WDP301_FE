@@ -1,13 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import { ProductBanner } from "../product/sections/ProductBanner"
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, MapPin, Phone, User, Search, LogOut } from "iconoir-react";
+import { ArrowLeft, MapPin, Phone, User, Search, LogOut } from "iconoir-react";
 import { useCartStore } from "../../../stores/useCartStore";
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import { FooterSub } from "../../components/layouts/FooterSub";
 import { getAddresses } from "../../api/dashboard.api";
 import { getCartDetails } from "../../api/cart.api";
 import { createOrder } from "../../api/order.api";
+import { getClientCoupons, checkCoupon } from "../../api/coupon.api";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -81,6 +82,22 @@ export const CheckoutPage = () => {
     const [selectedAddressId, setSelectedAddressId] = useState<string>("new");
     const [loadingAddresses, setLoadingAddresses] = useState(true);
 
+    // Coupon states
+    const [couponCode, setCouponCode] = useState("");
+    const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+    const [couponError, setCouponError] = useState("");
+    const [couponDiscount, setCouponDiscount] = useState(0);
+    const [showCouponPopup, setShowCouponPopup] = useState(false);
+    const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
+    const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+    const [loadingCoupons, setLoadingCoupons] = useState(false);
+
+    // Point states
+    const [usedPoint, setUsedPoint] = useState(0);
+    const [pointDiscount, setPointDiscount] = useState(0);
+    const [canUsePoint, setCanUsePoint] = useState(0);
+    const [pointConfig, setPointConfig] = useState<any>(null);
+
     // Shipping & Payment States
     const [shippingOptions, setShippingOptions] = useState<any[]>([]);
     const [selectedShippingId, setSelectedShippingId] = useState<string | null>(null);
@@ -143,6 +160,40 @@ export const CheckoutPage = () => {
         fetchAddresses();
     }, [user]);
 
+    // Initial fetch for points and details
+    useEffect(() => {
+        const fetchInitialDetails = async () => {
+            if (items.length === 0) return;
+            try {
+                const activeItems = items.filter(item => item.checked);
+                if (activeItems.length > 0) {
+                    const response = await getCartDetails(activeItems);
+                    if (response.success && response.canUsePoint !== undefined) {
+                        setCanUsePoint(response.canUsePoint);
+                        setPointConfig({
+                            POINT_TO_MONEY: response.POINT_TO_MONEY,
+                            MONEY_PER_POINT: response.MONEY_PER_POINT
+                        });
+
+                        // Đồng bộ lại vào AuthStore để các trang khác (như header, profile) cũng cập nhật theo
+                        if (user) {
+                            useAuthStore.getState().set({
+                                user: {
+                                    ...user,
+                                    totalPoint: response.totalPoint,
+                                    usedPoint: response.usedPoint
+                                }
+                            });
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Lỗi lấy thông tin điểm:", error);
+            }
+        };
+        fetchInitialDetails();
+    }, [items.length]);
+
     // Calculate shipping fee when address or cart changes
     useEffect(() => {
         const calculateShipping = async () => {
@@ -178,6 +229,15 @@ export const CheckoutPage = () => {
                 });
 
                 if (response.success) {
+                    // Update point info
+                    if (response.canUsePoint !== undefined) {
+                        setCanUsePoint(response.canUsePoint);
+                        setPointConfig({
+                            POINT_TO_MONEY: response.POINT_TO_MONEY,
+                            MONEY_PER_POINT: response.MONEY_PER_POINT
+                        });
+                    }
+
                     // Update shipping options if available
                     if (response.shippingOptions) {
                         setShippingOptions(response.shippingOptions);
@@ -279,6 +339,24 @@ export const CheckoutPage = () => {
         setShippingFee(option.total_fee);
     };
 
+    const handleRemoveCoupon = () => {
+        setAppliedCoupon(null); setCouponDiscount(0); setCouponCode(""); setCouponError("");
+    };
+
+    const handlePointChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let val = parseInt(e.target.value) || 0;
+        if (val < 0) val = 0;
+        if (val > canUsePoint) val = canUsePoint;
+        setUsedPoint(val);
+        const discount = val * (pointConfig?.POINT_TO_MONEY || 0);
+        setPointDiscount(discount);
+    };
+
+    const handleRemovePoint = () => {
+        setUsedPoint(0);
+        setPointDiscount(0);
+    };
+
     const handlePlaceOrder = async (data: FormData) => {
         if (!selectedShippingId) {
             alert("Vui lòng chọn phương thức vận chuyển!");
@@ -288,7 +366,7 @@ export const CheckoutPage = () => {
         const activeItems = items.filter(item => item.checked).map(item => ({
             productId: item.productId,
             quantity: item.quantity,
-            variant: item.variant // [{attrId, label, value}]
+            variant: item.variant
         }));
 
         let orderData: any = {
@@ -296,7 +374,8 @@ export const CheckoutPage = () => {
             paymentMethod: paymentMethod,
             shippingMethod: selectedShippingId,
             note: data.note,
-            coupon: sessionStorage.getItem("couponCode") || ""
+            coupon: appliedCoupon?.code || sessionStorage.getItem("couponCode") || "",
+            usedPoint: usedPoint // Thêm điểm sử dụng
         };
 
         if (selectedAddressId === "new") {
@@ -338,17 +417,53 @@ export const CheckoutPage = () => {
                 setIsPlacingOrder(false);
                 alert(response.message || "Đặt hàng thất bại!");
             }
-        } catch (error) {
+        } catch (error: any) {
             setIsPlacingOrder(false);
             console.error("Lỗi đặt hàng:", error);
-            alert("Đã có lỗi xảy ra khi đặt hàng!");
+            alert(error.response?.data?.message || "Đã có lỗi xảy ra khi đặt hàng!");
         }
     };
 
     const handleLogout = () => {
         logout();
         navigate("/auth/login");
-    }
+    };
+
+    const fetchAvailableCoupons = async () => {
+        setLoadingCoupons(true);
+        try {
+            const res = await getClientCoupons();
+            if (res.success) setAvailableCoupons(res.data || []);
+        } catch { /* silent */ } finally { setLoadingCoupons(false); }
+    };
+
+    const handleOpenCouponPopup = () => { setShowCouponPopup(true); fetchAvailableCoupons(); };
+
+    const handleApplyCoupon = async (code: string) => {
+        if (!code.trim()) return;
+        setIsApplyingCoupon(true);
+        setCouponError("");
+        try {
+            const res = await checkCoupon({
+                code: code.trim().toUpperCase(),
+                orderValue: totalAmount
+            });
+            if (res.success) {
+                setAppliedCoupon(res.data);
+                setCouponDiscount(res.data.discountAmount || 0);
+                sessionStorage.setItem("couponCode", code.trim().toUpperCase());
+                setShowCouponPopup(false);
+                setCouponCode("");
+            } else {
+                setCouponError(res.message || "Mã không hợp lệ");
+            }
+        } catch (err: any) {
+            setCouponError(err.response?.data?.message || "Không thể kết nối máy chủ");
+        } finally {
+            setIsApplyingCoupon(false);
+        }
+    };
+
 
     return (
         <>
@@ -584,7 +699,7 @@ export const CheckoutPage = () => {
                     {/* Order Summary Sidebar */}
                     <div className="w-[40%] ml-[50px] py-[50px]">
                         <div className="sticky top-[20px] bg-white rounded-[25px] border border-[#eee] overflow-hidden">
-                            <h2 className="py-[20px] px-[30px] text-[20px] font-bold text-client-secondary border-b border-[#eee]">Order summary</h2>
+                            <h2 className="py-[20px] px-[30px] text-[20px] font-bold text-client-secondary border-b border-[#eee]">Tóm tắt đơn hàng</h2>
 
                             <div className="p-[35px]">
                                 {/* Product List */}
@@ -679,6 +794,160 @@ export const CheckoutPage = () => {
                                     </div>
                                 </div>
 
+                                {/* Point Usage Section */}
+                                {user && (
+                                    <div className="mb-[30px] pt-[25px] border-t border-[#eee]">
+                                        <h3 className="text-[16px] font-bold text-client-secondary mb-[15px] tracking-tight flex items-center gap-[8px]">
+                                            <span className="text-[18px]">💎</span>
+                                            Dùng điểm thưởng
+                                        </h3>
+                                        <div className="flex flex-col gap-[10px]">
+                                            <div className="flex items-center justify-between text-[13px] text-gray-500 mb-[5px]">
+                                                <span>Bạn có <span className="font-bold text-client-primary">{(canUsePoint || 0).toLocaleString()}</span> điểm</span>
+                                                {canUsePoint > 0 && <span className="italic">≈ {(canUsePoint * (pointConfig?.POINT_TO_MONEY || 0)).toLocaleString()}đ</span>}
+                                            </div>
+                                            <div className="flex gap-[10px]">
+                                                <input
+                                                    type="number"
+                                                    placeholder={canUsePoint > 0 ? "Nhập số điểm cần dùng" : "Bạn chưa có điểm"}
+                                                    value={usedPoint || ""}
+                                                    onChange={handlePointChange}
+                                                    disabled={!canUsePoint || canUsePoint <= 0}
+                                                    className={`flex-1 rounded-[30px] border border-[#eee] text-client-secondary py-[10px] px-[18px] text-[14px] outline-none focus:border-client-primary transition-all hover:border-gray-300 bg-white font-medium ${(!canUsePoint || canUsePoint <= 0) ? 'bg-gray-50 cursor-not-allowed opacity-60' : ''}`}
+                                                />
+                                                {usedPoint > 0 && (
+                                                    <button type="button" onClick={handleRemovePoint}
+                                                        className="px-[18px] py-[10px] rounded-[30px] bg-red-50 text-red-500 text-[14px] font-bold hover:bg-red-100 transition-all">
+                                                        Bỏ dùng
+                                                    </button>
+                                                )}
+                                            </div>
+                                            {usedPoint > 0 && (
+                                                <p className="text-[11px] text-gray-400 pl-[4px]">Hệ thống sẽ quy đổi {usedPoint.toLocaleString()} điểm thành <span className="font-bold text-green-600">-{pointDiscount.toLocaleString()}đ</span></p>
+                                            )}
+                                            {(!canUsePoint || canUsePoint <= 0) && (
+                                                <p className="text-[11px] text-gray-400 pl-[4px]">Tích lũy điểm từ các đơn hàng để được giảm giá.</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Coupon Section */}
+                                <div className="mb-[30px] pt-[25px] border-t border-[#eee]">
+                                    <h3 className="text-[16px] font-bold text-client-secondary mb-[15px] tracking-tight flex items-center gap-[8px]">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><line x1="7" y1="7" x2="7.01" y2="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+                                        Mã giảm giá
+                                    </h3>
+
+                                    {appliedCoupon ? (
+                                        <div className="flex items-center justify-between bg-client-primary/[0.06] border border-client-primary/30 border-dashed rounded-[14px] px-[16px] py-[12px]">
+                                            <div className="flex items-center gap-[10px]">
+                                                <div className="w-[28px] h-[28px] rounded-full bg-client-primary/20 flex items-center justify-center flex-shrink-0">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#00A651" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                                </div>
+                                                <div>
+                                                    <div className="text-[13px] font-bold text-client-primary">{appliedCoupon.code}</div>
+                                                    <div className="text-[11px] text-gray-500">Giảm {couponDiscount > 0 ? couponDiscount.toLocaleString() + 'đ' : (appliedCoupon.typeDiscount === 'percentage' ? appliedCoupon.value + '%' : appliedCoupon.value?.toLocaleString() + 'đ')}</div>
+                                                </div>
+                                            </div>
+                                            <button type="button" onClick={handleRemoveCoupon} className="w-[26px] h-[26px] rounded-full bg-red-50 hover:bg-red-100 flex items-center justify-center transition-colors">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" /></svg>
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-[10px]">
+                                            <div className="flex gap-[10px]">
+                                                <input
+                                                    type="text" placeholder="Nhập mã giảm giá"
+                                                    value={couponCode}
+                                                    onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(""); }}
+                                                    onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon(couponCode)}
+                                                    className="flex-1 rounded-[30px] border border-[#eee] text-client-secondary py-[10px] px-[18px] text-[14px] outline-none focus:border-client-primary transition-all hover:border-gray-300 bg-white font-medium tracking-wide placeholder:font-normal placeholder:tracking-normal"
+                                                />
+                                                <button type="button" onClick={() => handleApplyCoupon(couponCode)} disabled={isApplyingCoupon || !couponCode.trim()}
+                                                    className="px-[18px] py-[10px] rounded-[30px] bg-client-primary text-white text-[14px] font-bold hover:bg-client-secondary transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex-shrink-0">
+                                                    {isApplyingCoupon ? '...' : 'Áp dụng'}
+                                                </button>
+                                            </div>
+                                            {couponError && <p className="text-red-500 text-[12px] pl-[4px]">{couponError}</p>}
+                                            <button type="button" onClick={handleOpenCouponPopup} className="text-[13px] text-client-primary font-semibold hover:underline flex items-center gap-[6px] pl-[2px]">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+                                                Xem danh sách mã có thể dùng
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Coupon Popup */}
+                                {showCouponPopup && (
+                                    <div className="fixed inset-0 z-[9999] flex items-center justify-center" onClick={() => setShowCouponPopup(false)}>
+                                        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+                                        <div className="relative bg-white rounded-[24px] shadow-2xl w-full max-w-[480px] mx-[16px] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                                            <div className="flex items-center justify-between px-[28px] py-[20px] border-b border-[#f0f0f0]">
+                                                <div>
+                                                    <h3 className="text-[18px] font-bold text-client-secondary">Chọn mã giảm giá</h3>
+                                                    <p className="text-[13px] text-gray-400 mt-[2px]">Chọn 1 mã phù hợp với đơn hàng</p>
+                                                </div>
+                                                <button onClick={() => setShowCouponPopup(false)} className="w-[36px] h-[36px] rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#333" strokeWidth="2" strokeLinecap="round" /></svg>
+                                                </button>
+                                            </div>
+                                            <div className="px-[28px] pt-[20px] pb-[12px]">
+                                                <div className="flex gap-[10px]">
+                                                    <input type="text" placeholder="Nhập mã thủ công..." value={couponCode}
+                                                        onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(""); }}
+                                                        className="flex-1 rounded-[30px] border border-[#eee] text-client-secondary py-[10px] px-[18px] text-[14px] outline-none focus:border-client-primary transition-all bg-white" />
+                                                    <button type="button" onClick={() => handleApplyCoupon(couponCode)} disabled={isApplyingCoupon || !couponCode.trim()}
+                                                        className="px-[18px] py-[10px] rounded-[30px] bg-client-primary text-white text-[14px] font-bold hover:bg-client-secondary transition-all disabled:opacity-50 whitespace-nowrap">
+                                                        {isApplyingCoupon ? "..." : "Áp dụng"}
+                                                    </button>
+                                                </div>
+                                                {couponError && <p className="text-red-500 text-[12px] mt-[8px] pl-[4px]">{couponError}</p>}
+                                            </div>
+                                            <div className="max-h-[340px] overflow-y-auto px-[16px] pb-[20px] space-y-[10px]">
+                                                {loadingCoupons ? (
+                                                    <div className="text-center py-[40px] text-gray-400 text-[14px]">Đang tải...</div>
+                                                ) : availableCoupons.length === 0 ? (
+                                                    <div className="text-center py-[40px]">
+                                                        <div className="text-[40px] mb-[10px]">🎟️</div>
+                                                        <p className="text-gray-400 text-[14px]">Hiện không có mã giảm giá công khai</p>
+                                                    </div>
+                                                ) : availableCoupons.map((c: any) => {
+                                                    const isUsable = !c.minOrderValue || totalAmount >= c.minOrderValue;
+                                                    return (
+                                                        <div key={c._id} onClick={() => isUsable && handleApplyCoupon(c.code)}
+                                                            className={`relative rounded-[16px] border-2 overflow-hidden flex transition-all ${isUsable ? 'border-[#eee] hover:border-client-primary cursor-pointer hover:shadow-md' : 'border-[#f5f5f5] opacity-60 cursor-not-allowed'}`}>
+                                                            <div className={`w-[6px] flex-shrink-0 ${isUsable ? 'bg-client-primary' : 'bg-gray-300'}`} />
+                                                            <div className="flex-1 px-[16px] py-[14px]">
+                                                                <div className="flex items-start justify-between gap-[10px]">
+                                                                    <div className="flex-1">
+                                                                        <div className="flex items-center gap-[8px] mb-[4px]">
+                                                                            <span className={`text-[11px] font-bold px-[8px] py-[2px] rounded-full ${isUsable ? 'bg-client-primary/10 text-client-primary' : 'bg-gray-100 text-gray-400'}`}>{c.code}</span>
+                                                                            {c.typeDisplay === 'public' && <span className="text-[10px] text-emerald-600 bg-emerald-50 px-[6px] py-[1px] rounded-full font-semibold">Công khai</span>}
+                                                                        </div>
+                                                                        <p className="text-[14px] font-bold text-client-secondary mb-[2px]">{c.name}</p>
+                                                                        <div className="flex flex-wrap gap-[6px]">
+                                                                            {c.minOrderValue > 0 && <span className="text-[11px] text-gray-500 bg-gray-50 px-[8px] py-[2px] rounded-full">Đơn từ {c.minOrderValue.toLocaleString()}đ</span>}
+                                                                            {c.endDateFormat && <span className="text-[11px] text-gray-500 bg-gray-50 px-[8px] py-[2px] rounded-full">HSD: {c.endDateFormat}</span>}
+                                                                        </div>
+                                                                        {!isUsable && c.minOrderValue > 0 && <p className="text-[11px] text-red-400 mt-[4px]">Cần thêm {(c.minOrderValue - totalAmount).toLocaleString()}đ</p>}
+                                                                    </div>
+                                                                    <div className={`flex-shrink-0 text-center px-[10px] py-[6px] rounded-[10px] ${isUsable ? 'bg-client-primary/10' : 'bg-gray-100'}`}>
+                                                                        <div className={`text-[18px] font-black leading-none ${isUsable ? 'text-client-primary' : 'text-gray-400'}`}>
+                                                                            {c.typeDiscount === 'percentage' ? `${c.value}%` : `${Math.round(c.value / 1000)}K`}
+                                                                        </div>
+                                                                        <div className="text-[9px] text-gray-400 uppercase tracking-wide mt-[1px]">giảm</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Pricing Breakdown */}
                                 <div className="space-y-[15px] pt-[25px] border-t border-[#eee]">
                                     <div className="flex justify-between text-[#666] text-[14px]">
@@ -687,13 +956,32 @@ export const CheckoutPage = () => {
                                     </div>
                                     <div className="flex justify-between text-[#666] text-[14px]">
                                         <span className="font-medium">Phí vận chuyển</span>
-                                        <span className={`${shippingFee === 0 ? 'text-green-600' : 'text-client-primary'} font-bold`}>
-                                            {shippingFee === 0 ? "Miễn phí" : `+${shippingFee.toLocaleString()}đ`}
+                                        <span className={`${shippingFee === 0 && !selectedShippingId ? 'text-gray-400' : (shippingFee === 0 ? 'text-green-600' : 'text-client-primary')} font-bold`}>
+                                            {shippingFee === 0 && !selectedShippingId ? "__" : (shippingFee === 0 ? "Miễn phí" : `+${shippingFee.toLocaleString()}đ`)}
                                         </span>
                                     </div>
+                                    {couponDiscount > 0 && (
+                                        <div className="flex justify-between text-[#666] text-[14px]">
+                                            <span className="font-medium flex items-center gap-[6px]">
+                                                Giảm giá
+                                                <span className="text-client-primary text-[11px] font-bold bg-client-primary/10 px-[6px] py-[1px] rounded-full">{appliedCoupon?.code}</span>
+                                            </span>
+                                            <span className="font-bold text-red-500">-{couponDiscount.toLocaleString()}đ</span>
+                                        </div>
+                                    )}
+                                    {pointDiscount > 0 && (
+                                        <div className="flex justify-between text-[#666] text-[14px]">
+                                            <span className="font-medium flex items-center gap-[6px]">
+                                                💎 Điểm thưởng ({usedPoint.toLocaleString()})
+                                            </span>
+                                            <span className="font-bold text-red-500">-{pointDiscount.toLocaleString()}đ</span>
+                                        </div>
+                                    )}
                                     <div className="pt-[20px] border-t border-[#eee] flex justify-between items-center">
                                         <span className="text-[16px] font-bold text-client-secondary uppercase tracking-tight">Tổng thanh toán</span>
-                                        <div className="text-[26px] text-client-primary font-bold tracking-tighter leading-none">{(totalAmount + shippingFee).toLocaleString()}đ</div>
+                                        <div className="text-[26px] text-client-primary font-bold tracking-tighter leading-none">
+                                            {Math.max(0, totalAmount + shippingFee - couponDiscount - pointDiscount).toLocaleString()}đ
+                                        </div>
                                     </div>
 
                                     <button
