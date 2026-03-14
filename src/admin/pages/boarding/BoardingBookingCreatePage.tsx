@@ -43,6 +43,7 @@ const paymentMethodOptions = [
 
 const paymentStatusOptions = [
     { value: "unpaid", label: "Chưa thanh toán" },
+    { value: "partial", label: "Đã cọc 20%" },
     { value: "paid", label: "Đã thanh toán" },
 ];
 
@@ -155,7 +156,7 @@ export const BoardingBookingCreatePage = () => {
     return (
         <Box sx={{ maxWidth: 1280, mx: "auto", p: 3 }}>
             <Box sx={{ mb: 4 }}>
-                <Title title="Tạo đơn khách sạn mới" />
+                <Title title="Tạo khách sạn mới" />
                 <Breadcrumb
                     items={[
                         { label: "Bảng điều khiển", to: `/${prefixAdmin}` },
@@ -178,7 +179,7 @@ export const BoardingBookingCreatePage = () => {
                     <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="space-between" alignItems={{ xs: "flex-start", md: "center" }}>
                         <Box>
                             <Typography sx={{ fontSize: 24, fontWeight: 800, color: "#7c2d12" }}>
-                                Tạo đơn khách sạn như luồng đơn dịch vụ
+                                Tạo khách sạn như lồng dịch vụ
                             </Typography>
                             <Typography sx={{ color: "#9a3412", mt: 0.5 }}>
                                 Chọn khách hàng, thú cưng, chuồng và trạng thái thanh toán trước khi xác nhận.
@@ -273,7 +274,7 @@ export const BoardingBookingCreatePage = () => {
                                 <Divider />
 
                                 <Typography sx={{ fontWeight: 800, fontSize: 17, color: "#0f766e" }}>
-                                    Liên hệ & ghi chú
+                                    Liên hệ khách hàng
                                 </Typography>
                                 <Grid container spacing={2}>
                                     <Grid size={{ xs: 12, md: 4 }}>
@@ -366,7 +367,7 @@ export const BoardingBookingCreatePage = () => {
                                     <TextField
                                         fullWidth
                                         type="number"
-                                        label="Giảm giá (đ)"
+                                        label="Giảm giá (VNĐ)"
                                         value={formData.discount}
                                         onChange={(e) => setFormData((prev) => ({ ...prev, discount: Number(e.target.value) || 0 }))}
                                     />
@@ -390,7 +391,7 @@ export const BoardingBookingCreatePage = () => {
                                     </Stack>
                                     <Stack direction="row" justifyContent="space-between">
                                         <Typography color="text.secondary">Đơn giá/ngày</Typography>
-                                        <Typography fontWeight={700}>{pricing.pricePerDay.toLocaleString("vi-VN")}đ</Typography>
+                                        <Typography fontWeight={700}>{pricing.pricePerDay.toLocaleString("vi-VN")}VNĐ</Typography>
                                     </Stack>
                                     <Stack direction="row" justifyContent="space-between">
                                         <Typography color="text.secondary">Số đêm</Typography>
@@ -399,15 +400,15 @@ export const BoardingBookingCreatePage = () => {
                                     <Divider />
                                     <Stack direction="row" justifyContent="space-between">
                                         <Typography color="text.secondary">Tạm tính</Typography>
-                                        <Typography fontWeight={700}>{pricing.subTotal.toLocaleString("vi-VN")}đ</Typography>
+                                        <Typography fontWeight={700}>{pricing.subTotal.toLocaleString("vi-VN")}VNĐ</Typography>
                                     </Stack>
                                     <Stack direction="row" justifyContent="space-between">
                                         <Typography color="text.secondary">Giảm giá</Typography>
-                                        <Typography fontWeight={700} color="error.main">-{pricing.discount.toLocaleString("vi-VN")}đ</Typography>
+                                        <Typography fontWeight={700} color="error.main">-{pricing.discount.toLocaleString("vi-VN")}VNĐ</Typography>
                                     </Stack>
                                     <Stack direction="row" justifyContent="space-between">
                                         <Typography fontWeight={800}>Tổng cộng</Typography>
-                                        <Typography fontWeight={800} color="primary.main">{pricing.total.toLocaleString("vi-VN")}đ</Typography>
+                                        <Typography fontWeight={800} color="primary.main">{pricing.total.toLocaleString("vi-VN")}VNĐ</Typography>
                                     </Stack>
                                 </Stack>
                             </CardContent>

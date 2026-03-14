@@ -14,15 +14,17 @@ export const BoardingPaymentSuccessPage = () => {
     queryFn: () => getBoardingBookingDetail(bookingId),
     enabled: !!bookingId,
     refetchInterval: (query) => {
-      const paid = query.state.data?.booking?.paymentStatus === "paid";
-      return paid ? false : 2000;
+      const paymentStatus = String(query.state.data?.booking?.paymentStatus || "");
+      return paymentStatus === "paid" || paymentStatus === "partial" ? false : 2000;
     },
     retry: 1,
   });
 
-  const paid = data?.booking?.paymentStatus === "paid";
+  const paymentStatus = String(data?.booking?.paymentStatus || "");
+  const paid = paymentStatus === "paid";
+  const partial = paymentStatus === "partial";
   const failed = paymentResult === "failed";
-  const waiting = !!bookingId && !paid && !failed && !isCodFlow;
+  const waiting = !!bookingId && !paid && !partial && !failed && !isCodFlow;
 
   return (
     <div className="min-h-[70vh] bg-[#fffdf9] py-[80px] px-[16px]">
@@ -38,16 +40,20 @@ export const BoardingPaymentSuccessPage = () => {
         <h1 className="text-[30px] font-secondary text-client-secondary">
           {isLoading && bookingId
             ? "Dang xac nhan thanh toan..."
-            : paid || !bookingId || isCodFlow
-              ? "Ban da dat phong thanh cong"
+            : paid || partial || !bookingId || isCodFlow
+              ? partial
+                ? "Ban da dat coc thanh cong"
+                : "Ban da dat phong thanh cong"
               : failed
                 ? "Thanh toan chua thanh cong"
                 : "Don dat phong da tao, dang cho xac nhan thanh toan"}
         </h1>
 
         <p className="text-[14px] text-[#606060] mt-[10px]">
-          {paid || !bookingId || isCodFlow
-            ? "Cam on ban da dat khach san cho thu cung. Ban co the xem lai thong tin trong tai khoan."
+          {paid || partial || !bookingId || isCodFlow
+            ? partial
+              ? "Don luu tru da ghi nhan tien coc. Phan con lai se thanh toan tai quay khi nhan chuong."
+              : "Cam on ban da dat khach san cho thu cung. Ban co the xem lai thong tin trong tai khoan."
             : failed
               ? "Giao dich bi huy hoac khong thanh cong. Ban co the thuc hien lai thanh toan."
               : "He thong dang dong bo giao dich tu cong thanh toan. Vui long cho vai giay roi kiem tra lai."}
@@ -55,7 +61,7 @@ export const BoardingPaymentSuccessPage = () => {
 
         {!!bookingId && (
           <p className="text-[12px] text-[#6b7280] mt-[8px]">
-            Trang thai hien tai: {isCodFlow ? "thanh toan tai quay" : (data?.booking?.paymentStatus || (failed ? "failed" : "pending"))} / {data?.booking?.boardingStatus || "-"}
+            Trang thai hien tai: {isCodFlow ? "thanh toan tai quay" : (paymentStatus || (failed ? "failed" : "pending"))} / {data?.booking?.boardingStatus || "-"}
           </p>
         )}
 
