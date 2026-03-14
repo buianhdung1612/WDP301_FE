@@ -25,10 +25,10 @@ const normalizeStatus = (value?: string) => String(value || "").toLowerCase().re
 const normalizeTime = (value?: string) => String(value || "").trim();
 
 const SIZE_LABELS: Record<string, string> = {
-  S: "S (duoi 8kg)",
+  S: "S (dưới 8kg)",
   M: "M (8-15kg)",
   L: "L (15-20kg)",
-  XL_XXL: "XL/XXL (tren 20kg)",
+  XL_XXL: "XL/XXL (trên 20kg)",
   C: "S",
   B: "M",
   A: "L",
@@ -45,7 +45,7 @@ const BOARDING_STATUS_META: Record<string, { label: string; className: string }>
   confirmed: { label: "Đã xác nhận", className: "bg-blue-100 text-blue-700" },
   "checked-in": { label: "Đang lưu trú", className: "bg-violet-100 text-violet-700" },
   "checked-out": { label: "Đã trả chuồng", className: "bg-emerald-100 text-emerald-700" },
-  held: { label: "Đang giữ chỗ", className: "bg-orange-100 text-orange-700" },
+  held: { label: "Đang giữ chuồng", className: "bg-orange-100 text-orange-700" },
   pending: { label: "Chờ xử lý", className: "bg-slate-200 text-slate-700" },
   cancelled: { label: "Đã hủy", className: "bg-rose-100 text-rose-700" },
 };
@@ -73,12 +73,50 @@ const getBoardingStatusMeta = (status?: string) => {
 
 const getPetKey = (pet: any) => String(pet?._id || pet?.id || pet?.petId || pet?.name || "").trim();
 const getPetLabel = (pet: any) => String(pet?.name || pet?.petName || pet?.code || "Thú cưng").trim();
-const normalizeProofMedia = (items: any) => {
+
+const getBoardingPaymentLabel = (booking: any) => {
+  const paymentStatus = normalizeStatus(booking?.paymentStatus || "unpaid");
+  if (paymentStatus === "paid") return "Đã thanh toán";
+  if (paymentStatus === "partial") return `Đã cọc ${Number(booking?.depositPercent || 20)}%`;
+  if (paymentStatus === "refunded") return "Đã hoàn tiền";
+  return "Chưa thanh toán";
+};
+
+const getBoardingDisplaySlots = (detail: any) => {
+  if (!detail?.cage || !detail?.booking) return [];
+
+  const cage = detail.cage;
+  const booking = detail.booking;
+  const pets = Array.isArray(detail?.pets) ? detail.pets : [];
+  const requestedQuantity = Math.max(1, Number(booking?.quantity || 0) || pets.length || 1);
+  const slotCount = Math.max(requestedQuantity, pets.length || 0, 1);
+
+  return Array.from({ length: slotCount }).map((_, index) => {
+    const pet = pets[index] || null;
+    const slotLabel = slotCount > 1 ? `Phòng ${index + 1}` : "";
+    const displayCode = [cage?.cageCode || "CHUỒNG", slotLabel].filter(Boolean).join(" • ");
+
+    return {
+      ...cage,
+      _id: `${booking?._id || cage?._id || "cage"}-${pet?._id || `slot-${index + 1}`}`,
+      sourceCageId: cage?._id,
+      bookingId: booking?._id,
+      slotIndex: index + 1,
+      slotCount,
+      slotLabel,
+      displayCode,
+      lastBooking: booking,
+      pet,
+      pets: pet ? [pet] : [],
+    };
+  });
+};
+const normalizeProofMedia = (items: any): Array<{ url: string; kind: "image" | "video" }> => {
   if (!Array.isArray(items)) return [];
   return items
     .map((item: any) => ({
       url: String(item?.url || item || "").trim(),
-      kind: String(item?.kind || "").toLowerCase() === "video" ? "video" : "image",
+      kind: (String(item?.kind || "").toLowerCase() === "video" ? "video" : "image") as "image" | "video",
     }))
     .filter((item) => Boolean(item.url));
 };
@@ -207,9 +245,8 @@ const ProofGalleryOverlay = ({
                 key={`${media.url}-${mediaIndex}-thumb`}
                 type="button"
                 onClick={() => onChangeIndex(mediaIndex)}
-                className={`relative h-[78px] w-[78px] overflow-hidden rounded-[14px] border transition duration-300 ${
-                  mediaIndex === index ? "border-[#fb7185]" : "border-white/10 opacity-70 hover:opacity-100"
-                }`}
+                className={`relative h-[78px] w-[78px] overflow-hidden rounded-[14px] border transition duration-300 ${mediaIndex === index ? "border-[#fb7185]" : "border-white/10 opacity-70 hover:opacity-100"
+                  }`}
               >
                 {media.kind === "video" ? (
                   <video src={media.url} muted className="h-full w-full object-cover" />
@@ -366,7 +403,7 @@ const CageCareDetailModal = ({
     ? [...cage.lastBooking.exerciseSchedule].sort(sortCareItems)
     : [];
   const careProgress = getCareProgress(feedingSchedule, exerciseSchedule);
-  const primaryPet = Array.isArray(cage?.pets) && cage.pets.length > 0 ? cage.pets[0] : null;
+  const primaryPet = cage?.pet || (Array.isArray(cage?.pets) && cage.pets.length > 0 ? cage.pets[0] : null);
   const petMeta = [
     primaryPet?.age ? `${primaryPet.age} tuổi` : null,
     typeof primaryPet?.weight === "number" ? `${primaryPet.weight}kg` : null,
@@ -392,7 +429,7 @@ const CageCareDetailModal = ({
             <div>
               <h3 className="text-[30px] font-[800] leading-tight text-client-secondary">Lịch chăm sóc chi tiết</h3>
               <p className="mt-[4px] text-[13px] text-[#64748b]">
-                Chuồng {cage?.cageCode || "CHUỒNG"} • {dayjs().format("DD/MM/YYYY")}
+                Chuồng {cage?.displayCode || cage?.cageCode || "CHUỒNG"} • {dayjs().format("DD/MM/YYYY")}
               </p>
             </div>
           </div>
@@ -412,7 +449,7 @@ const CageCareDetailModal = ({
                 {primaryPet?.avatar || cage?.avatar ? (
                   <img
                     src={primaryPet?.avatar || cage?.avatar}
-                    alt={primaryPet?.name || cage?.cageCode}
+                    alt={primaryPet?.name || cage?.displayCode || cage?.cageCode}
                     className="h-full w-full object-cover"
                   />
                 ) : (
@@ -422,7 +459,7 @@ const CageCareDetailModal = ({
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-[8px]">
                   <h4 className="text-[30px] font-[800] leading-tight text-client-secondary">
-                    {primaryPet?.name || cage?.cageCode || "Thú cưng"}
+                    {primaryPet?.name || cage?.displayCode || cage?.cageCode || "Thú cưng"}
                   </h4>
                   {primaryPet?.breed ? (
                     <span className="rounded-full bg-[#fff2e8] px-[10px] py-[4px] text-[11px] font-[800] text-[#f97316]">
@@ -438,7 +475,7 @@ const CageCareDetailModal = ({
                   <span className="rounded-full bg-[#f8fafc] px-[10px] py-[6px]">{SIZE_LABELS[String(cage?.size || "")] || cage?.size || "Kích thước chưa rõ"}</span>
                   <span className="rounded-full bg-[#f8fafc] px-[10px] py-[6px]">{Array.isArray(cage?.pets) ? cage.pets.length : 0} thú cưng</span>
                   <span className="rounded-full bg-[#f8fafc] px-[10px] py-[6px]">
-                    {cage?.lastBooking?.paymentStatus === "paid" ? "Đã thanh toán" : "Chưa thanh toán"}
+                    {getBoardingPaymentLabel(cage?.lastBooking)}
                   </span>
                 </div>
               </div>
@@ -613,7 +650,7 @@ const CageCareDetailModal = ({
             Đóng
           </button>
           <Link
-            to={`/hotels/${cage?._id}`}
+            to={`/hotels/${cage?.sourceCageId || cage?._id}`}
             className="inline-flex items-center justify-center rounded-[16px] bg-[#f97316] px-[18px] py-[12px] text-[14px] font-[800] text-white shadow-[0_18px_35px_rgba(249,115,22,0.24)] transition duration-300 hover:bg-[#ea580c]"
           >
             Xem chi tiết chuồng
@@ -644,9 +681,9 @@ export const PetCagesPage = () => {
   const [selectedCageDetail, setSelectedCageDetail] = useState<any | null>(null);
 
   const breadcrumbs = [
-    { label: "Trang chu", to: "/" },
-    { label: "Tai khoan", to: "/dashboard/profile" },
-    { label: "Chuong thu cung", to: "/dashboard/pet-cages" },
+    { label: "Trang chủ", to: "/" },
+    { label: "Tài khoản", to: "/dashboard/profile" },
+    { label: "Chuồng thú cưng", to: "/dashboard/pet-cages" },
   ];
 
   useEffect(() => {
@@ -666,22 +703,7 @@ export const PetCagesPage = () => {
           eligibleBookings.map((b: any) => getBoardingBookingDetail(b._id).catch(() => null))
         );
 
-        const cageMap = new Map<string, any>();
-        details.forEach((detail: any) => {
-          if (!detail?.cage || !detail?.booking) return;
-          const cage = detail.cage;
-          const booking = detail.booking;
-
-          if (!cageMap.has(cage._id)) {
-            cageMap.set(cage._id, {
-              ...cage,
-              lastBooking: booking,
-              pets: Array.isArray(detail?.pets) ? detail.pets : [],
-            });
-          }
-        });
-
-        setCages(Array.from(cageMap.values()));
+        setCages(details.flatMap((detail: any) => getBoardingDisplaySlots(detail)));
       } finally {
         setLoading(false);
       }
@@ -693,7 +715,7 @@ export const PetCagesPage = () => {
   const filterOptions = useMemo(() => {
     const cageOptions = cages.map((cage: any) => ({
       id: cage._id,
-      label: `${cage.cageCode || "Chuong"} - ${SIZE_LABELS[String(cage.size || "")] || cage.size || "-"}`,
+      label: `${cage.displayCode || cage.cageCode || "Chuồng"} - ${SIZE_LABELS[String(cage.size || "")] || cage.size || "-"}`,
     }));
 
     const petMap = new Map<string, { id: string; label: string }>();
@@ -831,7 +853,7 @@ export const PetCagesPage = () => {
                     onChange={(e) => setSelectedCageId(e.target.value)}
                     className="mt-[6px] h-[42px] w-full rounded-[10px] border border-[#d1d5db] px-[10px] text-[14px] text-[#0f172a] outline-none focus:border-client-primary"
                   >
-                    <option value="all">Tất cả Chuồng</option>
+                    <option value="all">Tất cả chuồng</option>
                     {filterOptions.cageOptions.map((option) => (
                       <option key={option.id} value={option.id}>
                         {option.label}
@@ -866,7 +888,7 @@ export const PetCagesPage = () => {
                     disabled={!isFiltered}
                     className="h-[42px] rounded-[10px] border border-[#d1d5db] px-[14px] text-[13px] font-[700] text-[#334155] disabled:cursor-not-allowed disabled:opacity-60 hover:border-client-primary hover:text-client-primary transition-default"
                   >
-                    Bộ lọc
+                    Bỏ lọc
                   </button>
                 </div>
               </div>
@@ -879,18 +901,16 @@ export const PetCagesPage = () => {
                   <button
                     type="button"
                     onClick={() => setActiveCareTab("feeding")}
-                    className={`rounded-[8px] px-[14px] py-[6px] text-[13px] font-[700] transition-default ${
-                      activeCareTab === "feeding" ? "bg-client-primary text-white" : "text-[#0f172a] hover:bg-[#e2e8f0]"
-                    }`}
+                    className={`rounded-[8px] px-[14px] py-[6px] text-[13px] font-[700] transition-default ${activeCareTab === "feeding" ? "bg-client-primary text-white" : "text-[#0f172a] hover:bg-[#e2e8f0]"
+                      }`}
                   >
                     Lịch ăn
                   </button>
                   <button
                     type="button"
                     onClick={() => setActiveCareTab("exercise")}
-                    className={`rounded-[8px] px-[14px] py-[6px] text-[13px] font-[700] transition-default ${
-                      activeCareTab === "exercise" ? "bg-client-primary text-white" : "text-[#0f172a] hover:bg-[#e2e8f0]"
-                    }`}
+                    className={`rounded-[8px] px-[14px] py-[6px] text-[13px] font-[700] transition-default ${activeCareTab === "exercise" ? "bg-client-primary text-white" : "text-[#0f172a] hover:bg-[#e2e8f0]"
+                      }`}
                   >
                     Lịch vận động
                   </button>
@@ -931,7 +951,7 @@ export const PetCagesPage = () => {
                       >
                         <div className="relative h-[168px] bg-[#f3f4f6]">
                           {cage.avatar ? (
-                            <img src={cage.avatar} alt={cage.cageCode} className="w-full h-full object-cover" />
+                            <img src={cage.avatar} alt={cage.displayCode || cage.cageCode} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-[12px] text-[#9ca3af]">Không có hình</div>
                           )}
@@ -944,7 +964,7 @@ export const PetCagesPage = () => {
                             {boardingStatusMeta.label}
                           </div>
                           <div className="absolute left-[12px] bottom-[10px] text-white">
-                            <div className="text-[18px] font-[800] tracking-[0.4px]">{cage.cageCode || "CHUONG"}</div>
+                            <div className="text-[18px] font-[800] tracking-[0.4px]">{cage.displayCode || cage.cageCode || "CHUONG"}</div>
                             <div className="text-[12px] opacity-90">{SIZE_LABELS[String(cage.size || "")] || cage.size || "-"}</div>
                           </div>
                         </div>
@@ -954,9 +974,14 @@ export const PetCagesPage = () => {
                             <div>
                               <div className="text-[13px] text-[#6b7280]">
                                 {Array.isArray(cage.pets) && cage.pets.length > 0
-                                  ? `Thu cung: ${cage.pets.map((pet: any) => getPetLabel(pet)).filter(Boolean).join(", ")}`
-                                  : "Thu cung: Chua cap nhat"}
+                                  ? `Thú cưng: ${cage.pets.map((pet: any) => getPetLabel(pet)).filter(Boolean).join(", ")}`
+                                  : "Thú cưng: Chưa cập nhật"}
                               </div>
+                              {cage.slotCount > 1 ? (
+                                <div className="mt-[4px] text-[12px] font-[700] text-[#64748b]">
+                                  Khu lưu trú: {cage.slotLabel}
+                                </div>
+                              ) : null}
                               <div className="mt-[7px] flex items-center gap-[8px]">
                                 <ProgressRing percent={careProgress.percent} size={52} stroke={6} />
                                 <div>
@@ -966,7 +991,7 @@ export const PetCagesPage = () => {
                               </div>
                             </div>
                             <div className="text-[14px] font-[800] text-client-primary">
-                              {Number(cage.dailyPrice || 0).toLocaleString("vi-VN")}d/ngày
+                              {Number(cage.dailyPrice || 0).toLocaleString("vi-VN")}đ/ngày
                             </div>
                           </div>
 
@@ -977,7 +1002,7 @@ export const PetCagesPage = () => {
                           )}
 
                           <div className="mt-[6px] text-[13px] text-[#6b7280]">
-                            Thanh toán: {cage.lastBooking?.paymentStatus === "paid" ? "Đã thanh toán" : "Chưa thanh toán"}
+                            Thanh toán: {getBoardingPaymentLabel(cage.lastBooking)}
                           </div>
 
                           {activeCareTab === "feeding" ? (
@@ -994,7 +1019,7 @@ export const PetCagesPage = () => {
                                       <div key={`feed-${idx}`} className="rounded-[8px] border border-[#f1f5f9] bg-white px-[8px] py-[7px] text-[12px] text-[#475569]">
                                         <div className="flex flex-wrap items-center gap-[6px]">
                                           <span className="font-[700] text-[#0f172a]">{item?.time || "--:--"}</span>
-                                          <span>{item?.food || "Thuc an"} {item?.amount ? `(${item.amount})` : ""}</span>
+                                          <span>{item?.food || "Thức ăn"} {item?.amount ? `(${item.amount})` : ""}</span>
                                           <span className={`px-[6px] py-[2px] rounded-full text-[10px] font-[700] ${statusMeta.className}`}>{statusMeta.label}</span>
                                         </div>
                                         {(item?.staffName || item?.staffId?.fullName) && (
@@ -1022,7 +1047,7 @@ export const PetCagesPage = () => {
                                       <div key={`exercise-${idx}`} className="rounded-[8px] border border-[#e2e8f0] bg-white px-[8px] py-[7px] text-[12px] text-[#475569]">
                                         <div className="flex flex-wrap items-center gap-[6px]">
                                           <span className="font-[700] text-[#0f172a]">{item?.time || "--:--"}</span>
-                                          <span>{item?.activity || "Van dong"}{item?.durationMinutes ? ` (${item.durationMinutes} phut)` : ""}</span>
+                                          <span>{item?.activity || "Vận động"}{item?.durationMinutes ? ` (${item.durationMinutes} phút)` : ""}</span>
                                           <span className={`px-[6px] py-[2px] rounded-full text-[10px] font-[700] ${statusMeta.className}`}>{statusMeta.label}</span>
                                         </div>
                                         {(item?.staffName || item?.staffId?.fullName) && (
@@ -1040,7 +1065,7 @@ export const PetCagesPage = () => {
 
                           <div className="mt-[12px]">
                             <Link
-                              to={`/hotels/${cage._id}`}
+                              to={`/hotels/${cage?.sourceCageId || cage?._id}`}
                               onClick={(event) => event.stopPropagation()}
                               className="inline-flex items-center gap-[6px] rounded-[8px] border border-[#d4d4d8] bg-white px-[12px] py-[6px] text-[12px] font-[700] text-[#334155] hover:border-client-primary hover:text-client-primary transition-default"
                             >

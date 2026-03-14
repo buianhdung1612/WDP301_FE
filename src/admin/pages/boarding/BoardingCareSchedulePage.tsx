@@ -61,7 +61,7 @@ const MAX_PROOF_MEDIA_PER_ROW = 5;
 const MAX_IMAGE_PROOF_SIZE_MB = 5;
 const MAX_VIDEO_PROOF_SIZE_MB = 20;
 
-const taoDongLichAn = (): BoardingFeedingItem => ({
+const taoDongLichAn = (petType: "dog" | "cat" | "all" = "all"): BoardingFeedingItem => ({
     time: "",
     food: "",
     amount: "",
@@ -70,9 +70,10 @@ const taoDongLichAn = (): BoardingFeedingItem => ({
     staffId: "",
     staffName: "",
     status: "pending",
+    petType,
 });
 
-const taoDongVanDong = (): BoardingExerciseItem => ({
+const taoDongVanDong = (petType: "dog" | "cat" | "all" = "all"): BoardingExerciseItem => ({
     time: "",
     activity: "",
     durationMinutes: 0,
@@ -81,6 +82,7 @@ const taoDongVanDong = (): BoardingExerciseItem => ({
     staffId: "",
     staffName: "",
     status: "pending",
+    petType,
 });
 
 export const BoardingCareSchedulePage = () => {
@@ -112,22 +114,11 @@ export const BoardingCareSchedulePage = () => {
 
     const canAssignHotelStaff = useMemo(() => {
         const permissions = Array.isArray(user?.permissions) ? user.permissions : [];
-        if (
+        return (
             permissions.includes("account_admin_view") ||
             permissions.includes("account_admin_edit") ||
             permissions.includes("role_permissions")
-        ) {
-            return true;
-        }
-
-        const roles = Array.isArray(user?.roles) ? user.roles : [];
-        const hasNonStaffRole = roles.some((role: any) => role && typeof role === "object" && role.isStaff === false);
-        const hasStaffRole = roles.some((role: any) => role && typeof role === "object" && role.isStaff === true);
-
-        if (hasNonStaffRole) return true;
-        if (hasStaffRole) return false;
-
-        return false;
+        );
     }, [user]);
 
     const { data, isLoading } = useQuery({
@@ -165,10 +156,14 @@ export const BoardingCareSchedulePage = () => {
     const normalizeProofMedia = (items: any): BoardingProofMediaItem[] => {
         if (!Array.isArray(items)) return [];
         return items
-            .map((item: any) => ({
-                url: String(item?.url || item || "").trim(),
-                kind: String(item?.kind || "").toLowerCase() === "video" ? "video" : "image",
-            }))
+            .map((item: any) => {
+                const kindStr = String(item?.kind || "").toLowerCase();
+                const kind: "video" | "image" = kindStr === "video" ? "video" : "image";
+                return {
+                    url: String(item?.url || item || "").trim(),
+                    kind,
+                };
+            })
             .filter((item) => Boolean(item.url));
     };
 
@@ -557,94 +552,94 @@ export const BoardingCareSchedulePage = () => {
                             </Typography>
                         </Stack>
                         <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-                        {proofMedia.map((media, mediaIndex) => (
-                            <Box
-                                key={`${media.url}-${mediaIndex}`}
-                                sx={{
-                                    position: "relative",
-                                    width: 88,
-                                    height: 88,
-                                    borderRadius: "12px",
-                                    overflow: "hidden",
-                                    border: "1px solid var(--palette-divider)",
-                                    bgcolor: "#fff",
-                                    cursor: "zoom-in",
-                                }}
-                                onClick={() => setProofViewer({
-                                    open: true,
-                                    items: proofMedia,
-                                    index: mediaIndex,
-                                    title: `${type === "feeding" ? "Minh chứng lịch ăn" : "Minh chứng lịch vận động"} - dòng ${rowIndex + 1}`,
-                                })}
-                            >
-                                {media.kind === "video" ? (
-                                    <video src={media.url} controls style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                ) : (
-                                    <img src={media.url} alt="proof" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                )}
-
-                                <IconButton
-                                    size="small"
-                                    color="error"
-                                    onClick={(event) => {
-                                        event.stopPropagation();
-                                        xoaMinhChung(type, rowIndex, mediaIndex);
-                                    }}
-                                    sx={{
-                                        position: "absolute",
-                                        top: 4,
-                                        right: 4,
-                                        bgcolor: "rgba(255,255,255,0.9)",
-                                        "&:hover": { bgcolor: "#fff" },
-                                    }}
-                                >
-                                    <DeleteOutlineIcon fontSize="small" />
-                                </IconButton>
-
-                                <IconButton
-                                    size="small"
-                                    onClick={(event) => {
-                                        event.stopPropagation();
-                                        setProofViewer({
-                                            open: true,
-                                            items: proofMedia,
-                                            index: mediaIndex,
-                                            title: `${type === "feeding" ? "Minh chứng lịch ăn" : "Minh chứng lịch vận động"} - dòng ${rowIndex + 1}`,
-                                        });
-                                    }}
-                                    sx={{
-                                        position: "absolute",
-                                        top: 4,
-                                        left: 4,
-                                        bgcolor: "rgba(255,255,255,0.9)",
-                                        "&:hover": { bgcolor: "#fff" },
-                                    }}
-                                >
-                                    <OpenInFullIcon fontSize="small" />
-                                </IconButton>
-
+                            {proofMedia.map((media, mediaIndex) => (
                                 <Box
+                                    key={`${media.url}-${mediaIndex}`}
                                     sx={{
-                                        position: "absolute",
-                                        left: 6,
-                                        bottom: 6,
-                                        display: "inline-flex",
-                                        alignItems: "center",
-                                        gap: 0.5,
-                                        px: 0.75,
-                                        py: 0.25,
-                                        borderRadius: "999px",
-                                        bgcolor: "rgba(15,23,42,0.72)",
-                                        color: "#fff",
-                                        fontSize: "0.6875rem",
-                                        fontWeight: 700,
+                                        position: "relative",
+                                        width: 88,
+                                        height: 88,
+                                        borderRadius: "12px",
+                                        overflow: "hidden",
+                                        border: "1px solid var(--palette-divider)",
+                                        bgcolor: "#fff",
+                                        cursor: "zoom-in",
                                     }}
+                                    onClick={() => setProofViewer({
+                                        open: true,
+                                        items: proofMedia,
+                                        index: mediaIndex,
+                                        title: `${type === "feeding" ? "Minh chứng lịch ăn" : "Minh chứng lịch vận động"} - dòng ${rowIndex + 1}`,
+                                    })}
                                 >
-                                    {media.kind === "video" ? <PlayCircleOutlineIcon sx={{ fontSize: 14 }} /> : <ImageOutlinedIcon sx={{ fontSize: 14 }} />}
-                                    {media.kind === "video" ? "Video" : "Ảnh"}
+                                    {media.kind === "video" ? (
+                                        <video src={media.url} controls style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                    ) : (
+                                        <img src={media.url} alt="proof" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                    )}
+
+                                    <IconButton
+                                        size="small"
+                                        color="error"
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            xoaMinhChung(type, rowIndex, mediaIndex);
+                                        }}
+                                        sx={{
+                                            position: "absolute",
+                                            top: 4,
+                                            right: 4,
+                                            bgcolor: "rgba(255,255,255,0.9)",
+                                            "&:hover": { bgcolor: "#fff" },
+                                        }}
+                                    >
+                                        <DeleteOutlineIcon fontSize="small" />
+                                    </IconButton>
+
+                                    <IconButton
+                                        size="small"
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            setProofViewer({
+                                                open: true,
+                                                items: proofMedia,
+                                                index: mediaIndex,
+                                                title: `${type === "feeding" ? "Minh chứng lịch ăn" : "Minh chứng lịch vận động"} - dòng ${rowIndex + 1}`,
+                                            });
+                                        }}
+                                        sx={{
+                                            position: "absolute",
+                                            top: 4,
+                                            left: 4,
+                                            bgcolor: "rgba(255,255,255,0.9)",
+                                            "&:hover": { bgcolor: "#fff" },
+                                        }}
+                                    >
+                                        <OpenInFullIcon fontSize="small" />
+                                    </IconButton>
+
+                                    <Box
+                                        sx={{
+                                            position: "absolute",
+                                            left: 6,
+                                            bottom: 6,
+                                            display: "inline-flex",
+                                            alignItems: "center",
+                                            gap: 0.5,
+                                            px: 0.75,
+                                            py: 0.25,
+                                            borderRadius: "999px",
+                                            bgcolor: "rgba(15,23,42,0.72)",
+                                            color: "#fff",
+                                            fontSize: "0.6875rem",
+                                            fontWeight: 700,
+                                        }}
+                                    >
+                                        {media.kind === "video" ? <PlayCircleOutlineIcon sx={{ fontSize: 14 }} /> : <ImageOutlinedIcon sx={{ fontSize: 14 }} />}
+                                        {media.kind === "video" ? "Video" : "Ảnh"}
+                                    </Box>
                                 </Box>
-                            </Box>
-                        ))}
+                            ))}
                         </Stack>
                     </>
                 ) : null}
@@ -752,7 +747,7 @@ export const BoardingCareSchedulePage = () => {
                                                 </TableCell>
                                                 <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
                                                     <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.8125rem" }}>
-                                                        Ăn: {summary.soLichAn} (gán NVKS: {summary.soNhanVienLichAn}) | Vận động: {summary.soVanDong} (gán NVKS: {summary.soNhanVienVanDong})
+                                                        {canAssignHotelStaff ? `Ăn: ${summary.soLichAn} (gán NVKS: ${summary.soNhanVienLichAn}) | Vận động: ${summary.soVanDong} (gán NVKS: ${summary.soNhanVienVanDong})` : `Ăn: ${summary.soLichAn} | Vận động: ${summary.soVanDong}`}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
@@ -800,213 +795,345 @@ export const BoardingCareSchedulePage = () => {
                                 sx={{ width: 220 }}
                             />
 
-                            <Box>
-                                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-                                    <Typography variant="h6">Lịch ăn</Typography>
-                                    <Button startIcon={<AddIcon />} onClick={() => setFeedingDraft((prev) => [...prev, taoDongLichAn()])}>
-                                        Thêm dòng
-                                    </Button>
-                                </Stack>
-                                <Stack spacing={1}>
-                                    {feedingDraft.map((item, idx) => (
-                                        <Box key={`feeding-${idx}`}>
-                                            <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
-                                                <TextField
-                                                    label="Giờ"
-                                                    type="time"
-                                                    size="small"
-                                                    value={item.time || ""}
-                                                    onChange={(e) => capNhatDongLichAn(idx, { time: e.target.value })}
-                                                    sx={{ width: 130 }}
-                                                    InputLabelProps={{ shrink: true }}
-                                                />
-                                                <TextField
-                                                    label="Thức ăn"
-                                                    size="small"
-                                                    value={item.food || ""}
-                                                    onChange={(e) => capNhatDongLichAn(idx, { food: e.target.value })}
-                                                    sx={{ minWidth: 170 }}
-                                                />
-                                                <TextField
-                                                    label="Khẩu phần"
-                                                    size="small"
-                                                    value={item.amount || ""}
-                                                    onChange={(e) => capNhatDongLichAn(idx, { amount: e.target.value })}
-                                                    sx={{ minWidth: 150 }}
-                                                />
-                                                {canAssignHotelStaff ? (
-                                                    <TextField
-                                                        label="NVKS phụ trách"
-                                                        select
-                                                        size="small"
-                                                        value={String(getStaffId(item.staffId) || "")}
-                                                        onChange={(e) => capNhatDongLichAn(idx, {
-                                                            staffId: e.target.value,
-                                                            staffName: getStaffName(e.target.value),
-                                                        })}
-                                                        sx={{ minWidth: 220 }}
-                                                    >
-                                                        <MenuItem value="">Chưa gán</MenuItem>
-                                                        {hotelStaffOptions.map((staff) => (
-                                                            <MenuItem key={staff.value} value={staff.value}>{staff.label}</MenuItem>
-                                                        ))}
-                                                    </TextField>
-                                                ) : (
-                                                    <TextField
-                                                        label="NVKS phụ trách"
-                                                        size="small"
-                                                        value={
-                                                            String(
-                                                                item.staffName ||
-                                                                (getStaffId(item.staffId)
-                                                                    ? getStaffName(String(getStaffId(item.staffId) || ""), item.staffName)
-                                                                    : "Chưa gán")
-                                                            )
-                                                        }
-                                                        InputProps={{ readOnly: true }}
-                                                        sx={{ minWidth: 220 }}
-                                                    />
-                                                )}
-                                                <TextField
-                                                    label="Trạng thái"
-                                                    select
-                                                    size="small"
-                                                    value={item.status || "pending"}
-                                                    onChange={(e) => xuLyDoiTrangThai("feeding", idx, e.target.value as any)}
-                                                    sx={{ width: 170 }}
-                                                >
-                                                    {trangThaiChamSocOptions.map((opt) => (
-                                                        <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-                                                    ))}
-                                                </TextField>
-                                                <TextField
-                                                    label="Ghi chú"
-                                                    size="small"
-                                                    value={item.note || ""}
-                                                    onChange={(e) => capNhatDongLichAn(idx, { note: e.target.value })}
-                                                    sx={{ flex: 1, minWidth: 220 }}
-                                                />
-                                                <IconButton color="error" onClick={() => setFeedingDraft((prev) => prev.filter((_, i) => i !== idx))}>
-                                                    <DeleteOutlineIcon />
-                                                </IconButton>
+                            {editingBooking?.petIds?.length > 0 && (
+                                <Box sx={{ p: 2, borderRadius: 1.5, bgcolor: "var(--palette-background-neutral)", border: "1px solid var(--palette-divider)" }}>
+                                    <Typography variant="overline" sx={{ color: "var(--palette-text-secondary)", mb: 1, display: "block" }}>
+                                        Thông tin thú cưng trong đơn
+                                    </Typography>
+                                    <Stack direction="row" spacing={3} flexWrap="wrap">
+                                        {editingBooking.petIds.map((pet: any) => (
+                                            <Stack key={pet._id} direction="row" spacing={1.5} alignItems="center">
+                                                <Avatar src={pet.avatar} sx={{ width: 48, height: 48, borderRadius: 1 }} />
+                                                <Box>
+                                                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                                                        {pet.name} ({pet.type === "dog" ? "Chó" : pet.type === "cat" ? "Mèo" : pet.type})
+                                                    </Typography>
+                                                    <Typography variant="caption" sx={{ color: "var(--palette-text-secondary)", display: "block" }}>
+                                                        {pet.breed} • {pet.weight}kg
+                                                    </Typography>
+                                                </Box>
                                             </Stack>
-                                            {renderProofMediaSection("feeding", idx, item)}
-                                        </Box>
-                                    ))}
-                                </Stack>
+                                        ))}
+                                    </Stack>
+                                </Box>
+                            )}
+                            {!canAssignHotelStaff ? (
+                                <Box
+                                    sx={{
+                                        border: "1px solid var(--palette-warning-light)",
+                                        backgroundColor: "rgba(245, 158, 11, 0.08)",
+                                        color: "var(--palette-warning-dark)",
+                                        px: 1.5,
+                                        py: 1.25,
+                                        borderRadius: "var(--shape-borderRadius-md)",
+                                        fontSize: "0.8125rem",
+                                        fontWeight: 500,
+                                    }}
+                                >
+                                    {`Bạn có quyền thêm dòng, sửa nội dung và trạng thái. Trường "NVKS phụ trách" chỉ quản lý khách sạn mới được thay đổi.`}
+                                </Box>
+                            ) : null}
+
+
+                            <Box>
+                                <Typography variant="h6" sx={{ mb: 2 }}>Lịch ăn</Typography>
+
+                                {(() => {
+                                    const groups = [
+                                        { type: "dog" as const, label: "🐶 Chó", color: "#3b82f6" },
+                                        { type: "cat" as const, label: "🐱 Mèo", color: "#ec4899" },
+                                        { type: "all" as const, label: "🐾 Chung / Khác", color: "#64748b" },
+                                    ];
+
+                                    return groups.map((group) => {
+                                        const itemsInGroup = feedingDraft
+                                            .map((item, idx) => ({ item, idx }))
+                                            .filter(({ item }) => (item.petType || "all") === group.type);
+
+                                        if (itemsInGroup.length === 0 && !editingBooking?.petIds?.some((pAny: any) => pAny.type === group.type) && group.type !== "all") {
+                                            return null;
+                                        }
+
+                                        return (
+                                            <Box key={group.type} sx={{ mb: 3, p: 2, borderRadius: 2, border: `1px solid ${group.color}20`, bgcolor: `${group.color}05` }}>
+                                                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+                                                    <Typography variant="subtitle1" sx={{ fontWeight: 700, color: group.color }}>
+                                                        {group.label}
+                                                    </Typography>
+                                                    <Button
+                                                        size="small"
+                                                        startIcon={<AddIcon />}
+                                                        onClick={() => setFeedingDraft((prev) => [...prev, taoDongLichAn(group.type)])}
+                                                        sx={{ color: group.color }}
+                                                    >
+                                                        Thêm dòng
+                                                    </Button>
+                                                </Stack>
+
+                                                <Stack spacing={1.5}>
+                                                    {itemsInGroup.map(({ item, idx }) => (
+                                                        <Box key={`feeding-${idx}`}>
+                                                            <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
+                                                                <TextField
+                                                                    label="Giờ"
+                                                                    type="time"
+                                                                    size="small"
+                                                                    value={item.time || ""}
+                                                                    onChange={(e) => capNhatDongLichAn(idx, { time: e.target.value })}
+                                                                    sx={{ width: 110 }}
+                                                                    InputLabelProps={{ shrink: true }}
+                                                                />
+                                                                <TextField
+                                                                    label="Dành cho"
+                                                                    select
+                                                                    size="small"
+                                                                    value={item.petType || "all"}
+                                                                    onChange={(e) => capNhatDongLichAn(idx, { petType: e.target.value as any })}
+                                                                    sx={{ width: 100 }}
+                                                                >
+                                                                    <MenuItem value="dog">Chó</MenuItem>
+                                                                    <MenuItem value="cat">Mèo</MenuItem>
+                                                                    <MenuItem value="all">Tất cả</MenuItem>
+                                                                </TextField>
+                                                                <TextField
+                                                                    label="Thức ăn"
+                                                                    size="small"
+                                                                    value={item.food || ""}
+                                                                    onChange={(e) => capNhatDongLichAn(idx, { food: e.target.value })}
+                                                                    sx={{ minWidth: 150 }}
+                                                                />
+                                                                <TextField
+                                                                    label="Khẩu phần"
+                                                                    size="small"
+                                                                    value={item.amount || ""}
+                                                                    onChange={(e) => capNhatDongLichAn(idx, { amount: e.target.value })}
+                                                                    sx={{ minWidth: 130 }}
+                                                                />
+                                                                {canAssignHotelStaff ? (
+                                                                    <TextField
+                                                                        label="NVKS phụ trách"
+                                                                        select
+                                                                        size="small"
+                                                                        value={String(getStaffId(item.staffId) || "")}
+                                                                        onChange={(e) => capNhatDongLichAn(idx, {
+                                                                            staffId: e.target.value,
+                                                                            staffName: getStaffName(e.target.value),
+                                                                        })}
+                                                                        sx={{ minWidth: 180 }}
+                                                                    >
+                                                                        <MenuItem value="">Chưa gán</MenuItem>
+                                                                        {hotelStaffOptions.map((staff) => (
+                                                                            <MenuItem key={staff.value} value={staff.value}>{staff.label}</MenuItem>
+                                                                        ))}
+                                                                    </TextField>
+                                                                ) : (
+                                                                    <TextField
+                                                                        label="NVKS phụ trách"
+                                                                        size="small"
+                                                                        value={
+                                                                            String(
+                                                                                item.staffName ||
+                                                                                (getStaffId(item.staffId)
+                                                                                    ? getStaffName(String(getStaffId(item.staffId) || ""), item.staffName)
+                                                                                    : "Chưa gán")
+                                                                            )
+                                                                        }
+                                                                        InputProps={{ readOnly: true }}
+                                                                        disabled
+                                                                        sx={{ minWidth: 180 }}
+                                                                    />
+                                                                )}
+                                                                <TextField
+                                                                    label="Trạng thái"
+                                                                    select
+                                                                    size="small"
+                                                                    value={item.status || "pending"}
+                                                                    onChange={(e) => xuLyDoiTrangThai("feeding", idx, e.target.value as any)}
+                                                                    sx={{ width: 140 }}
+                                                                >
+                                                                    {trangThaiChamSocOptions.map((opt) => (
+                                                                        <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                                                                    ))}
+                                                                </TextField>
+                                                                <TextField
+                                                                    label="Ghi chú"
+                                                                    size="small"
+                                                                    value={item.note || ""}
+                                                                    onChange={(e) => capNhatDongLichAn(idx, { note: e.target.value })}
+                                                                    sx={{ flex: 1, minWidth: 200 }}
+                                                                />
+                                                                <IconButton color="error" size="small" onClick={() => setFeedingDraft((prev) => prev.filter((_, i) => i !== idx))}>
+                                                                    <DeleteOutlineIcon fontSize="small" />
+                                                                </IconButton>
+                                                            </Stack>
+                                                            {renderProofMediaSection("feeding", idx, item)}
+                                                        </Box>
+                                                    ))}
+                                                </Stack>
+                                            </Box>
+                                        );
+                                    });
+                                })()}
                             </Box>
 
                             <Divider />
 
                             <Box>
-                                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-                                    <Typography variant="h6">Lịch vận động</Typography>
-                                    <Button startIcon={<AddIcon />} onClick={() => setExerciseDraft((prev) => [...prev, taoDongVanDong()])}>
-                                        Thêm dòng
-                                    </Button>
-                                </Stack>
-                                <Stack spacing={1}>
-                                    {exerciseDraft.map((item, idx) => (
-                                        <Box key={`exercise-${idx}`}>
-                                            <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
-                                                <TextField
-                                                    label="Giờ"
-                                                    type="time"
-                                                    size="small"
-                                                    value={item.time || ""}
-                                                    onChange={(e) => capNhatDongVanDong(idx, { time: e.target.value })}
-                                                    sx={{ width: 130 }}
-                                                    InputLabelProps={{ shrink: true }}
-                                                />
-                                                <TextField
-                                                    label="Hoạt động"
-                                                    size="small"
-                                                    value={item.activity || ""}
-                                                    onChange={(e) => capNhatDongVanDong(idx, { activity: e.target.value })}
-                                                    sx={{ minWidth: 180 }}
-                                                />
-                                                <TextField
-                                                    label="Số phút"
-                                                    type="number"
-                                                    size="small"
-                                                    value={item.durationMinutes || 0}
-                                                    onChange={(e) => capNhatDongVanDong(idx, { durationMinutes: Number(e.target.value || 0) })}
-                                                    sx={{ width: 120 }}
-                                                />
-                                                {canAssignHotelStaff ? (
-                                                    <TextField
-                                                        label="NVKS phụ trách"
-                                                        select
+                                <Typography variant="h6" sx={{ mb: 2 }}>Lịch vận động</Typography>
+
+                                {(() => {
+                                    const groups = [
+                                        { type: "dog" as const, label: "🐶 Chó", color: "#3b82f6" },
+                                        { type: "cat" as const, label: "🐱 Mèo", color: "#ec4899" },
+                                        { type: "all" as const, label: "🐾 Chung / Khác", color: "#64748b" },
+                                    ];
+
+                                    return groups.map((group) => {
+                                        const itemsInGroup = exerciseDraft
+                                            .map((item, idx) => ({ item, idx }))
+                                            .filter(({ item }) => (item.petType || "all") === group.type);
+
+                                        if (itemsInGroup.length === 0 && !editingBooking?.petIds?.some((pAny: any) => pAny.type === group.type) && group.type !== "all") {
+                                            return null;
+                                        }
+
+                                        return (
+                                            <Box key={group.type} sx={{ mb: 3, p: 2, borderRadius: 2, border: `1px solid ${group.color}20`, bgcolor: `${group.color}05` }}>
+                                                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+                                                    <Typography variant="subtitle1" sx={{ fontWeight: 700, color: group.color }}>
+                                                        {group.label}
+                                                    </Typography>
+                                                    <Button
                                                         size="small"
-                                                        value={String(getStaffId(item.staffId) || "")}
-                                                        onChange={(e) => capNhatDongVanDong(idx, {
-                                                            staffId: e.target.value,
-                                                            staffName: getStaffName(e.target.value),
-                                                        })}
-                                                        sx={{ minWidth: 220 }}
+                                                        startIcon={<AddIcon />}
+                                                        onClick={() => setExerciseDraft((prev) => [...prev, taoDongVanDong(group.type)])}
+                                                        sx={{ color: group.color }}
                                                     >
-                                                        <MenuItem value="">Chưa gán</MenuItem>
-                                                        {hotelStaffOptions.map((staff) => (
-                                                            <MenuItem key={staff.value} value={staff.value}>{staff.label}</MenuItem>
-                                                        ))}
-                                                    </TextField>
-                                                ) : (
-                                                    <TextField
-                                                        label="NVKS phụ trách"
-                                                        size="small"
-                                                        value={
-                                                            String(
-                                                                item.staffName ||
-                                                                (getStaffId(item.staffId)
-                                                                    ? getStaffName(String(getStaffId(item.staffId) || ""), item.staffName)
-                                                                    : "Chưa gán")
-                                                            )
-                                                        }
-                                                        InputProps={{ readOnly: true }}
-                                                        sx={{ minWidth: 220 }}
-                                                    />
-                                                )}
-                                                <TextField
-                                                    label="Trạng thái"
-                                                    select
-                                                    size="small"
-                                                    value={item.status || "pending"}
-                                                    onChange={(e) => xuLyDoiTrangThai("exercise", idx, e.target.value as any)}
-                                                    sx={{ width: 170 }}
-                                                >
-                                                    {trangThaiChamSocOptions.map((opt) => (
-                                                        <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                                                        Thêm dòng
+                                                    </Button>
+                                                </Stack>
+
+                                                <Stack spacing={1.5}>
+                                                    {itemsInGroup.map(({ item, idx }) => (
+                                                        <Box key={`exercise-${idx}`}>
+                                                            <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
+                                                                <TextField
+                                                                    label="Giờ"
+                                                                    type="time"
+                                                                    size="small"
+                                                                    value={item.time || ""}
+                                                                    onChange={(e) => capNhatDongVanDong(idx, { time: e.target.value })}
+                                                                    sx={{ width: 110 }}
+                                                                    InputLabelProps={{ shrink: true }}
+                                                                />
+                                                                <TextField
+                                                                    label="Dành cho"
+                                                                    select
+                                                                    size="small"
+                                                                    value={item.petType || "all"}
+                                                                    onChange={(e) => capNhatDongVanDong(idx, { petType: e.target.value as any })}
+                                                                    sx={{ width: 100 }}
+                                                                >
+                                                                    <MenuItem value="dog">Chó</MenuItem>
+                                                                    <MenuItem value="cat">Mèo</MenuItem>
+                                                                    <MenuItem value="all">Tất cả</MenuItem>
+                                                                </TextField>
+                                                                <TextField
+                                                                    label="Hoạt động"
+                                                                    size="small"
+                                                                    value={item.activity || ""}
+                                                                    onChange={(e) => capNhatDongVanDong(idx, { activity: e.target.value })}
+                                                                    sx={{ minWidth: 160 }}
+                                                                />
+                                                                <TextField
+                                                                    label="Số phút"
+                                                                    type="number"
+                                                                    size="small"
+                                                                    value={item.durationMinutes || 0}
+                                                                    onChange={(e) => capNhatDongVanDong(idx, { durationMinutes: Number(e.target.value || 0) })}
+                                                                    sx={{ width: 100 }}
+                                                                />
+                                                                {canAssignHotelStaff ? (
+                                                                    <TextField
+                                                                        label="NVKS phụ trách"
+                                                                        select
+                                                                        size="small"
+                                                                        value={String(getStaffId(item.staffId) || "")}
+                                                                        onChange={(e) => capNhatDongVanDong(idx, {
+                                                                            staffId: e.target.value,
+                                                                            staffName: getStaffName(e.target.value),
+                                                                        })}
+                                                                        sx={{ minWidth: 180 }}
+                                                                    >
+                                                                        <MenuItem value="">Chưa gán</MenuItem>
+                                                                        {hotelStaffOptions.map((staff) => (
+                                                                            <MenuItem key={staff.value} value={staff.value}>{staff.label}</MenuItem>
+                                                                        ))}
+                                                                    </TextField>
+                                                                ) : (
+                                                                    <TextField
+                                                                        label="NVKS phụ trách"
+                                                                        size="small"
+                                                                        value={
+                                                                            String(
+                                                                                item.staffName ||
+                                                                                (getStaffId(item.staffId)
+                                                                                    ? getStaffName(String(getStaffId(item.staffId) || ""), item.staffName)
+                                                                                    : "Chưa gán")
+                                                                            )
+                                                                        }
+                                                                        InputProps={{ readOnly: true }}
+                                                                        disabled
+                                                                        sx={{ minWidth: 180 }}
+                                                                    />
+                                                                )}
+                                                                <TextField
+                                                                    label="Trạng thái"
+                                                                    select
+                                                                    size="small"
+                                                                    value={item.status || "pending"}
+                                                                    onChange={(e) => xuLyDoiTrangThai("exercise", idx, e.target.value as any)}
+                                                                    sx={{ width: 140 }}
+                                                                >
+                                                                    {trangThaiChamSocOptions.map((opt) => (
+                                                                        <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                                                                    ))}
+                                                                </TextField>
+                                                                <TextField
+                                                                    label="Ghi chú"
+                                                                    size="small"
+                                                                    value={item.note || ""}
+                                                                    onChange={(e) => capNhatDongVanDong(idx, { note: e.target.value })}
+                                                                    sx={{ flex: 1, minWidth: 200 }}
+                                                                />
+                                                                <IconButton color="error" size="small" onClick={() => setExerciseDraft((prev) => prev.filter((_, i) => i !== idx))}>
+                                                                    <DeleteOutlineIcon fontSize="small" />
+                                                                </IconButton>
+                                                            </Stack>
+                                                            {renderProofMediaSection("exercise", idx, item)}
+                                                        </Box>
                                                     ))}
-                                                </TextField>
-                                                <TextField
-                                                    label="Ghi chú"
-                                                    size="small"
-                                                    value={item.note || ""}
-                                                    onChange={(e) => capNhatDongVanDong(idx, { note: e.target.value })}
-                                                    sx={{ flex: 1, minWidth: 220 }}
-                                                />
-                                                <IconButton color="error" onClick={() => setExerciseDraft((prev) => prev.filter((_, i) => i !== idx))}>
-                                                    <DeleteOutlineIcon />
-                                                </IconButton>
-                                            </Stack>
-                                            {renderProofMediaSection("exercise", idx, item)}
-                                        </Box>
-                                    ))}
-                                </Stack>
+                                                </Stack>
+                                            </Box>
+                                        );
+                                    });
+                                })()}
                             </Box>
                         </Stack>
                     )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={dongDialogChamSoc} disabled={updateCareMut.isPending || resetCareTemplateMut.isPending}>Đóng</Button>
-                    <Button
-                        variant="outlined"
-                        startIcon={<RestartAltIcon />}
-                        onClick={taoLaiLichMau}
-                        disabled={updateCareMut.isPending || resetCareTemplateMut.isPending || !editingBooking?._id}
-                    >
-                        {resetCareTemplateMut.isPending ? "Đang tạo lại..." : "Tạo lại lịch mẫu"}
-                    </Button>
+                    {canAssignHotelStaff ? (
+                        <Button
+                            variant="outlined"
+                            startIcon={<RestartAltIcon />}
+                            onClick={taoLaiLichMau}
+                            disabled={updateCareMut.isPending || resetCareTemplateMut.isPending || !editingBooking?._id}
+                        >
+                            {resetCareTemplateMut.isPending ? "Đang tạo lại..." : "Tạo lại lịch mẫu"}
+                        </Button>
+                    ) : null}
                     <Button variant="contained" onClick={luuLichChamSoc} disabled={updateCareMut.isPending || resetCareTemplateMut.isPending || !editingBooking?._id}>
                         {updateCareMut.isPending ? "Đang lưu..." : "Lưu lịch chăm sóc"}
                     </Button>
@@ -1138,7 +1265,8 @@ export const BoardingCareSchedulePage = () => {
                     ) : null}
                 </DialogContent>
             </Dialog>
-        </Box>
+        </Box >
     );
+
 };
 

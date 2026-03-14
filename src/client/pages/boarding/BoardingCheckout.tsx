@@ -59,6 +59,8 @@ type PaymentOptionCardProps = {
 
 const DRAFT_STORAGE_KEY = "boarding-checkout-draft";
 const MAX_ROOMS_PER_CAGE = 4;
+const COUNTER_DEPOSIT_MIN_NIGHTS = 2;
+const COUNTER_DEPOSIT_PERCENT = 20;
 
 const breadcrumbs = [
   { label: "Trang chủ", to: "/" },
@@ -66,7 +68,7 @@ const breadcrumbs = [
   { label: "Thanh toán", to: "/hotels/checkout" },
 ];
 
-const formatVnd = (value: number) => `${Number(value || 0).toLocaleString()}đ`;
+const formatVnd = (value: number) => `${new Intl.NumberFormat("vi-VN").format(Number(value || 0))}đ`;
 
 const DetailInfoItem = ({ icon, label, value }: DetailInfoItemProps) => (
   <div className="rounded-[18px] border border-[#f2e6de] bg-white px-[16px] py-[14px] shadow-[0_10px_24px_rgba(42,27,17,0.04)]">
@@ -86,7 +88,7 @@ const PaymentOptionCard = ({ active, icon, title, description, onClick }: Paymen
   <button
     type="button"
     onClick={onClick}
-    className={`group flex w-full items-center justify-between gap-[18px] rounded-[24px] border px-[20px] py-[22px] text-left transition-all duration-300 ${
+    className={`flex w-full items-center justify-between gap-[18px] rounded-[24px] border px-[20px] py-[22px] text-left transition-all duration-300 ${
       active
         ? "border-client-primary bg-[#fff7f2] shadow-[0_16px_34px_rgba(237,104,34,0.12)]"
         : "border-[#ebe7e3] bg-white hover:border-[#f1c9b5] hover:shadow-[0_14px_30px_rgba(42,27,17,0.06)]"
@@ -123,7 +125,7 @@ export const BoardingCheckoutPage = () => {
   const { mutateAsync: createBoarding } = useCreateBoardingBooking();
   const { mutateAsync: payBoarding } = usePayBoardingBooking();
 
-  const stateDraft = (location.state as any)?.draft as BoardingCheckoutDraft | undefined;
+  const stateDraft = (location.state as { draft?: BoardingCheckoutDraft } | null)?.draft;
   const initialDraft = useMemo(() => {
     if (stateDraft) {
       sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(stateDraft));
@@ -142,9 +144,10 @@ export const BoardingCheckoutPage = () => {
   const [paymentMode, setPaymentMode] = useState<"full" | "deposit">(initialDraft?.paymentMode || "full");
   const [paymentGateway, setPaymentGateway] = useState<"zalopay" | "vnpay">(initialDraft?.paymentGateway || "zalopay");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const safeQuantity = Math.max(1, Math.min(MAX_ROOMS_PER_CAGE, Number(draft?.quantity || 1)));
 
-  const totalDays = useMemo(() => {
+  const stayNights = useMemo(() => {
     if (!draft) return 0;
     const start = dayjs(draft.checkInDate);
     const end = dayjs(draft.checkOutDate);
@@ -152,37 +155,49 @@ export const BoardingCheckoutPage = () => {
     return diff > 0 ? diff : 0;
   }, [draft]);
 
-  const subtotal = useMemo(() => {
-    if (!draft) return 0;
-    return Number(draft.dailyPrice || 0) * Math.max(totalDays, 1) * safeQuantity;
-  }, [draft, totalDays, safeQuantity]);
-
-  const toPay = paymentMode === "full" ? subtotal : 0;
-  const remaining = paymentMode === "full" ? 0 : subtotal;
+  const displayNights = Math.max(stayNights, 1);
 
   const petNames = useMemo(() => {
     if (!draft) return [];
     return draft.petIds.map((petId) => {
-      const pet = myPets.find((p: any) => String(p._id) === String(petId));
-      return pet ? `${pet.name}${pet.breed ? ` (${pet.breed})` : ""}` : `Pet ${petId.slice(-4)}`;
+      const pet = myPets.find((item: any) => String(item._id) === String(petId));
+      return pet ? `${pet.name}${pet.breed ? ` (${pet.breed})` : ""}` : `Thú cưng ${petId.slice(-4)}`;
     });
   }, [draft, myPets]);
 
-  const stayNights = Math.max(totalDays, 1);
-  const supportPhone = "1900-PETCARE";
+  const subtotal = useMemo(() => {
+    if (!draft) return 0;
+    return Number(draft.dailyPrice || 0) * displayNights * safeQuantity;
+  }, [draft, displayNights, safeQuantity]);
+
   const serviceFee = 0;
   const taxFee = 0;
+  const grandTotal = subtotal + serviceFee + taxFee;
+  const requiresCounterDeposit = paymentMode === "deposit" && displayNights >= COUNTER_DEPOSIT_MIN_NIGHTS;
+  const depositAmount = requiresCounterDeposit ? Math.round(subtotal * (COUNTER_DEPOSIT_PERCENT / 100)) : 0;
+  const toPay = paymentMode === "full" ? grandTotal : depositAmount;
+  const remaining = paymentMode === "full" ? 0 : Math.max(grandTotal - toPay, 0);
+  const supportPhone = "1900-PETCARE";
+
+  const paymentMethodLabel =
+    paymentMode === "full"
+      ? "Thanh toán online toàn bộ"
+      : requiresCounterDeposit
+        ? `Thanh toán tại quầy + cọc ${COUNTER_DEPOSIT_PERCENT}%`
+        : "Thanh toán tại quầy";
 
   const handleConfirmCheckout = async () => {
     if (!draft) {
-      toast.error("Thiếu dữ liệu checkout. Vui lòng đặt phòng lại.");
+      toast.error("Thiếu dữ liệu checkout. Vui lòng quay lại trang đặt phòng.");
       return;
     }
+
     if (!user) {
       toast.error("Vui lòng đăng nhập để tiếp tục.");
       navigate("/auth/login");
       return;
     }
+
     if (isSubmitting) return;
 
     setIsSubmitting(true);
@@ -205,11 +220,11 @@ export const BoardingCheckoutPage = () => {
 
       const bookingId = created?.data?.data?._id;
       if (!bookingId) {
-        toast.error("Không tạo được đơn đặt phòng.");
+        toast.error("Không thể tạo đơn đặt phòng.");
         return;
       }
 
-      if (paymentMethod === "prepaid") {
+      if (paymentMethod === "prepaid" || requiresCounterDeposit) {
         const payRes = await payBoarding({ id: bookingId, gateway: paymentGateway });
         const paymentUrl = payRes?.data?.paymentUrl;
         if (!paymentUrl) {
@@ -224,7 +239,7 @@ export const BoardingCheckoutPage = () => {
       sessionStorage.removeItem(DRAFT_STORAGE_KEY);
       navigate(`/hotels/success?bookingId=${bookingId}&payment=cod`);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || error?.message || "Thanh toán thất bại.");
+      toast.error(error?.response?.data?.message || error?.message || "Không thể xử lý thanh toán.");
     } finally {
       setIsSubmitting(false);
     }
@@ -259,11 +274,12 @@ export const BoardingCheckoutPage = () => {
                         Kiểm tra thông tin lưu trú trước khi thanh toán
                       </h1>
                       <p className="mt-[10px] max-w-[720px] text-[16px] leading-[1.75] text-[#6e7784]">
-                        Xác nhận lại chuồng, thú cưng và hình thức thanh toán. Hệ thống sẽ giữ đúng dữ liệu bạn đã chọn ở bước trước.
+                        Xác nhận lại chuồng, thú cưng và phương thức thanh toán. Nếu chọn thanh toán tại quầy từ 2 đêm trở lên,
+                        hệ thống sẽ yêu cầu cọc trước 20% để giữ chuồng.
                       </p>
                     </div>
                     <div className="inline-flex h-[42px] items-center rounded-full border border-[#f4d6c7] bg-[#fff4ee] px-[16px] text-[13px] font-[800] uppercase tracking-[0.18em] text-client-primary">
-                      Sẵn sàng thanh toán
+                      Sẵn sàng xác nhận
                     </div>
                   </div>
 
@@ -289,11 +305,11 @@ export const BoardingCheckoutPage = () => {
                               {draft.cageCode} - {draft.cageType}
                             </h2>
                             <p className="mt-[8px] text-[16px] text-[#697384]">
-                              {stayNights} {stayNights > 1 ? "đêm" : "đêm"} x {safeQuantity} phòng x {formatVnd(draft.dailyPrice)}
+                              {displayNights} {displayNights > 1 ? "đêm" : "đêm"} x {safeQuantity} phòng x {formatVnd(draft.dailyPrice)}
                             </p>
                           </div>
                           <div className="inline-flex h-[38px] items-center rounded-full border border-[#d8f1dc] bg-[#effaf1] px-[14px] text-[12px] font-[800] uppercase tracking-[0.16em] text-[#1c8c4a]">
-                            {paymentMode === "full" ? "Thanh toán online" : "Thanh toán tại quầy"}
+                            {paymentMethodLabel}
                           </div>
                         </div>
 
@@ -303,24 +319,28 @@ export const BoardingCheckoutPage = () => {
                             label="Kỳ lưu trú"
                             value={
                               <>
-                                <span>{dayjs(draft.checkInDate).format("DD/MM/YYYY")} - {dayjs(draft.checkOutDate).format("DD/MM/YYYY")}</span>
-                                <p className="mt-[4px] text-[13px] font-[600] text-[#8a94a3]">{stayNights} đêm lưu trú</p>
+                                <span>
+                                  {dayjs(draft.checkInDate).format("DD/MM/YYYY")} - {dayjs(draft.checkOutDate).format("DD/MM/YYYY")}
+                                </span>
+                                <p className="mt-[4px] text-[13px] font-[600] text-[#8a94a3]">{displayNights} đêm lưu trú</p>
                               </>
                             }
                           />
                           <DetailInfoItem
                             icon={<PawPrint className="h-[20px] w-[20px]" />}
-                            label="Thông tin thú cưng"
+                            label="Thú cưng"
                             value={
                               <>
                                 <span>{petNames.join(", ") || "-"}</span>
-                                <p className="mt-[4px] text-[13px] font-[600] text-[#8a94a3]">{draft.petIds.length} bé được gắn chuồng</p>
+                                <p className="mt-[4px] text-[13px] font-[600] text-[#8a94a3]">
+                                  {draft.petIds.length} bé được gán vào {safeQuantity} phòng
+                                </p>
                               </>
                             }
                           />
                           <DetailInfoItem
                             icon={<UserRound className="h-[20px] w-[20px]" />}
-                            label="Chủ đặt"
+                            label="Người đặt"
                             value={
                               <>
                                 <span>{draft.fullName}</span>
@@ -333,17 +353,15 @@ export const BoardingCheckoutPage = () => {
                             label="Loại chuồng"
                             value={
                               <>
-                                <span>{draft.cageType} - {draft.cageSize}</span>
+                                <span>
+                                  {draft.cageType} - {draft.cageSize}
+                                </span>
                                 <p className="mt-[4px] text-[13px] font-[600] text-[#8a94a3]">{safeQuantity} phòng đã chọn</p>
                               </>
                             }
                           />
                           {draft.email ? (
-                            <DetailInfoItem
-                              icon={<Mail className="h-[20px] w-[20px]" />}
-                              label="Email"
-                              value={<span>{draft.email}</span>}
-                            />
+                            <DetailInfoItem icon={<Mail className="h-[20px] w-[20px]" />} label="Email" value={<span>{draft.email}</span>} />
                           ) : null}
                           {draft.notes ? (
                             <DetailInfoItem
@@ -367,7 +385,7 @@ export const BoardingCheckoutPage = () => {
                       </h2>
                     </div>
                     <div className="rounded-[18px] border border-[#eceef3] bg-[#f7f8fb] px-[16px] py-[12px] text-[13px] font-[600] leading-[1.6] text-[#6f7a88]">
-                      Thanh toán online sẽ chuyển sang cổng {paymentGateway === "zalopay" ? "ZaloPay" : "VNPay"} ngay sau khi xác nhận.
+                      Nếu thanh toán online hoặc cần cọc 20%, hệ thống sẽ chuyển sang {paymentGateway === "zalopay" ? "ZaloPay" : "VNPay"} ngay sau khi xác nhận.
                     </div>
                   </div>
 
@@ -376,19 +394,32 @@ export const BoardingCheckoutPage = () => {
                       active={paymentMode === "full"}
                       icon={<WalletCards className="h-[26px] w-[26px]" />}
                       title="Thanh toán online ngay"
-                      description="Dùng thẻ, ví điện tử hoặc cổng thanh toán để chốt đơn ngay lập tức."
+                      description="Thanh toán toàn bộ đơn lưu trú bằng ví điện tử hoặc cổng thanh toán."
                       onClick={() => setPaymentMode("full")}
                     />
                     <PaymentOptionCard
                       active={paymentMode === "deposit"}
                       icon={<Store className="h-[26px] w-[26px]" />}
                       title="Thanh toán tại quầy"
-                      description="Xác nhận trước lịch lưu trú, thanh toán khi nhận phòng tại cơ sở."
+                      description="Thanh toán khi nhận chuồng. Đơn từ 2 đêm trở lên phải cọc 20% trước."
                       onClick={() => setPaymentMode("deposit")}
                     />
                   </div>
 
-                  {paymentMode === "full" ? (
+                  {requiresCounterDeposit ? (
+                    <div className="mt-[16px] rounded-[20px] border border-[#fed7aa] bg-[#fff7ed] px-[18px] py-[14px] text-[14px] leading-[1.7] text-[#9a3412]">
+                      Đơn lưu trú từ {COUNTER_DEPOSIT_MIN_NIGHTS} đêm trở lên chọn thanh toán tại quầy sẽ cần cọc trước{" "}
+                      <span className="font-[800]">{COUNTER_DEPOSIT_PERCENT}%</span>, tương đương{" "}
+                      <span className="font-[800]">{formatVnd(depositAmount)}</span>. Phần còn lại{" "}
+                      <span className="font-[800]">{formatVnd(remaining)}</span> thanh toán khi nhận chuồng.
+                    </div>
+                  ) : paymentMode === "deposit" ? (
+                    <div className="mt-[16px] rounded-[20px] border border-[#e6ebf2] bg-[#f8fafc] px-[18px] py-[14px] text-[14px] leading-[1.7] text-[#677384]">
+                      Đơn này chưa cần đặt cọc trước. Bạn có thể xác nhận đơn và thanh toán toàn bộ tại quầy khi nhận chuồng.
+                    </div>
+                  ) : null}
+
+                  {paymentMode === "full" || requiresCounterDeposit ? (
                     <div className="mt-[20px] rounded-[24px] border border-[#f1dfd4] bg-[#fff9f5] p-[20px]">
                       <div className="flex items-center gap-[10px]">
                         <CreditCard className="h-[20px] w-[20px] text-client-primary" />
@@ -418,15 +449,11 @@ export const BoardingCheckoutPage = () => {
                         })}
                       </div>
                     </div>
-                  ) : (
-                    <div className="mt-[20px] rounded-[24px] border border-[#e6ebf2] bg-[#f8fafc] p-[18px] text-[14px] leading-[1.7] text-[#677384]">
-                      Bạn chỉ cần xác nhận đơn ở bước này. Nhân viên sẽ giữ lịch lưu trú và bạn thanh toán khi nhận phòng.
-                    </div>
-                  )}
+                  ) : null}
 
                   <div className="mt-[22px] flex items-start gap-[10px] rounded-[20px] border border-[#e8edf5] bg-[#f8fafc] px-[18px] py-[16px] text-[14px] leading-[1.7] text-[#667281]">
                     <ShieldCheck className="mt-[2px] h-[18px] w-[18px] shrink-0 text-[#6d8cb2]" />
-                    Dữ liệu cá nhân của bạn được dùng để xử lý đơn đặt phòng và hỗ trợ trải nghiệm dịch vụ theo chính sách bảo mật của hệ thống.
+                    Dữ liệu cá nhân của bạn chỉ được dùng để xử lý đơn đặt chuồng và hỗ trợ dịch vụ theo chính sách của TeddyPet.
                   </div>
 
                   <div className="mt-[24px] flex items-center gap-[12px] md:flex-col">
@@ -442,7 +469,7 @@ export const BoardingCheckoutPage = () => {
                       disabled={isSubmitting}
                       className="inline-flex h-[56px] flex-1 items-center justify-center rounded-[18px] bg-client-primary px-[24px] text-[16px] font-[800] text-white shadow-[0_18px_35px_rgba(237,104,34,0.28)] transition-all hover:bg-client-secondary disabled:cursor-not-allowed disabled:opacity-70 md:w-full md:flex-none"
                     >
-                      {isSubmitting ? "Đang xử lý..." : paymentMode === "full" ? "Xác nhận và thanh toán" : "Xác nhận đặt phòng"}
+                      {isSubmitting ? "Đang xử lý..." : paymentMode === "full" || requiresCounterDeposit ? "Xác nhận và thanh toán" : "Xác nhận đặt phòng"}
                     </button>
                   </div>
                 </section>
@@ -470,25 +497,31 @@ export const BoardingCheckoutPage = () => {
                       <div className="h-px bg-[#ece3dc]" />
                       <div className="flex items-start justify-between gap-[12px] text-[15px]">
                         <span className="text-[#6f7885]">Số đêm</span>
-                        <span className="font-[700] text-client-secondary">{stayNights}</span>
+                        <span className="font-[700] text-client-secondary">{displayNights}</span>
                       </div>
                       <div className="flex items-start justify-between gap-[12px] text-[15px]">
                         <span className="text-[#6f7885]">Số phòng</span>
                         <span className="font-[700] text-client-secondary">{safeQuantity}</span>
                       </div>
                       <div className="flex items-start justify-between gap-[12px] text-[15px]">
-                        <span className="text-[#6f7885]">Hình thức thanh toán</span>
-                        <span className="font-[700] text-client-secondary">{paymentMode === "full" ? "Online ngay" : "Tại quầy"}</span>
+                        <span className="text-[#6f7885]">Phương thức</span>
+                        <span className="font-[700] text-right text-client-secondary">{paymentMethodLabel}</span>
                       </div>
+                      {requiresCounterDeposit ? (
+                        <div className="flex items-start justify-between gap-[12px] text-[15px]">
+                          <span className="text-[#6f7885]">Tiền cọc bắt buộc</span>
+                          <span className="font-[700] text-client-secondary">{formatVnd(depositAmount)}</span>
+                        </div>
+                      ) : null}
                     </div>
 
                     <div className="mt-[24px] space-y-[10px]">
                       <div className="flex items-end justify-between gap-[14px]">
                         <span className="text-[17px] font-[700] text-client-secondary">Tổng cộng</span>
-                        <span className="text-[24px] font-[800] text-client-secondary">{formatVnd(subtotal + serviceFee + taxFee)}</span>
+                        <span className="text-[24px] font-[800] text-client-secondary">{formatVnd(grandTotal)}</span>
                       </div>
                       <div className="flex items-end justify-between gap-[14px]">
-                        <span className="text-[15px] font-[700] text-[#6f7885]">Thanh toán ngay</span>
+                        <span className="text-[15px] font-[700] text-[#6f7885]">{paymentMode === "full" ? "Thanh toán ngay" : requiresCounterDeposit ? "Cần thanh toán trước" : "Thanh toán ngay"}</span>
                         <span className="text-[32px] font-[900] leading-none tracking-[-0.03em] text-client-primary">{formatVnd(toPay)}</span>
                       </div>
                       {remaining > 0 ? (
@@ -505,11 +538,11 @@ export const BoardingCheckoutPage = () => {
                       disabled={isSubmitting}
                       className="mt-[24px] inline-flex h-[58px] w-full items-center justify-center rounded-[18px] bg-client-primary px-[20px] text-[16px] font-[800] text-white shadow-[0_18px_35px_rgba(237,104,34,0.28)] transition-all hover:bg-client-secondary disabled:cursor-not-allowed disabled:opacity-70"
                     >
-                      {isSubmitting ? "Đang xử lý..." : paymentMode === "full" ? "Xác nhận đặt phòng" : "Giữ lịch lưu trú"}
+                      {isSubmitting ? "Đang xử lý..." : paymentMode === "full" || requiresCounterDeposit ? "Xác nhận và thanh toán" : "Xác nhận đặt phòng"}
                     </button>
 
                     <p className="mt-[14px] text-center text-[12px] leading-[1.65] text-[#8a94a3]">
-                      Bằng việc tiếp tục, bạn đồng ý với Điều khoản dịch vụ và Chính sách hủy đặt phòng của TeddyPet.
+                      Bằng việc tiếp tục, bạn đồng ý với Điều khoản dịch vụ và Chính sách đặt phòng của TeddyPet.
                     </p>
                   </div>
 

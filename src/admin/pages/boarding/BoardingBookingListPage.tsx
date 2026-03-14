@@ -1,11 +1,12 @@
 ﻿
-import { ChangeEvent, MouseEvent, SyntheticEvent, useMemo, useState } from "react";
+import { ChangeEvent, Fragment, MouseEvent, SyntheticEvent, useMemo, useState } from "react";
 import {
     Avatar,
     Box,
     Button,
     Card,
     Checkbox,
+    Collapse,
     CircularProgress,
     IconButton,
     Menu,
@@ -60,11 +61,23 @@ const boardingStatusOptions = [
 
 const paymentStatusOptions = [
     { value: "unpaid", label: "Chưa thanh toán" },
+    { value: "partial", label: "Đã cọc 20%" },
     { value: "paid", label: "Đã thanh toán" },
     { value: "refunded", label: "Đã hoàn tiền" },
 ];
 
 const formatCurrency = (value: number) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value || 0);
+const getPetSlotItems = (row: any) => {
+    const pets = Array.isArray(row?.petIds) ? row.petIds.filter(Boolean) : [];
+    const quantity = Math.max(1, Number(row?.quantity || 0) || pets.length || 1);
+    const slotCount = Math.max(quantity, pets.length || 0, 1);
+
+    return Array.from({ length: slotCount }).map((_, index) => ({
+        key: String(pets[index]?._id || pets[index]?.id || `${row?._id || "booking"}-${index}`),
+        petName: String(pets[index]?.name || `Thú cưng ${index + 1}`),
+        cageLabel: [row?.cageId?.cageCode || "-", slotCount > 1 ? `Phòng ${index + 1}` : ""].filter(Boolean).join(" • "),
+    }));
+};
 
 export const BoardingBookingListPage = () => {
     const navigate = useNavigate();
@@ -75,6 +88,7 @@ export const BoardingBookingListPage = () => {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [selected, setSelected] = useState<string[]>([]);
+    const [openRows, setOpenRows] = useState<string[]>([]);
     const [anchorEl, setAnchorEl] = useState<{ [key: string]: HTMLElement | null }>({});
 
     const { data, isLoading } = useQuery({
@@ -177,6 +191,10 @@ export const BoardingBookingListPage = () => {
             newSelected = [...selected.slice(0, selectedIndex), ...selected.slice(selectedIndex + 1)];
         }
         setSelected(newSelected);
+    };
+
+    const toggleRow = (id: string) => {
+        setOpenRows((prev) => (prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]));
     };
 
     return (
@@ -309,7 +327,6 @@ export const BoardingBookingListPage = () => {
                                 </TableCell>
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Mã đơn</TableCell>
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Khách hàng</TableCell>
-                                <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Thú cưng / Chuồng</TableCell>
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Thời gian</TableCell>
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Tổng tiền</TableCell>
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }} align="right">Trạng thái</TableCell>
@@ -338,17 +355,17 @@ export const BoardingBookingListPage = () => {
                                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                     .map((row: any) => {
                                         const isItemSelected = selected.indexOf(row._id) !== -1;
-                                        const petNames = Array.isArray(row.petIds)
-                                            ? row.petIds.map((pet: any) => pet?.name).filter(Boolean).join(", ")
-                                            : "";
+                                        const isOpen = openRows.includes(row._id);
+                                        const petSlotItems = getPetSlotItems(row);
 
                                         return (
+                                            <Fragment key={row._id}>
                                             <TableRow
-                                                key={row._id}
                                                 hover
                                                 selected={isItemSelected}
                                                 sx={{
                                                     "&:hover": { bgcolor: "var(--palette-action-hover)" },
+                                                    ...(isOpen && { bgcolor: "transparent" }),
                                                     transition: "background-color 0.2s",
                                                 }}
                                             >
@@ -392,14 +409,6 @@ export const BoardingBookingListPage = () => {
                                                     </Stack>
                                                 </TableCell>
 
-                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
-                                                        {petNames || "-"}
-                                                    </Typography>
-                                                    <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>
-                                                        Chuồng: {row.cageId?.cageCode || "-"}
-                                                    </Typography>
-                                                </TableCell>
 
                                                 <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
                                                     <Stack spacing={0.25}>
@@ -466,18 +475,33 @@ export const BoardingBookingListPage = () => {
                                                     </TextField>
                                                 </TableCell>
 
-                                                <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", width: 80 }}>
-                                                    <IconButton
-                                                        onClick={(event) => handleOpenMenu(event, row._id)}
-                                                        sx={{
-                                                            color: "var(--palette-text-primary)",
-                                                            "&:hover": {
-                                                                bgcolor: "rgba(var(--palette-action-activeChannel) / var(--palette-action-hoverOpacity))",
-                                                            },
-                                                        }}
-                                                    >
-                                                        <Icon icon="eva:more-vertical-fill" width={20} />
-                                                    </IconButton>
+                                                <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", width: 96 }}>
+                                                    <Stack direction="row" spacing={0} justifyContent="flex-end">
+                                                        <IconButton
+                                                            onClick={() => toggleRow(row._id)}
+                                                            sx={{
+                                                                color: "var(--palette-text-primary)",
+                                                                bgcolor: isOpen ? "var(--palette-action-hover)" : "transparent",
+                                                                "&:hover": {
+                                                                    bgcolor: "rgba(var(--palette-action-activeChannel) / var(--palette-action-hoverOpacity))",
+                                                                },
+                                                            }}
+                                                        >
+                                                            <Icon icon={isOpen ? "eva:arrow-ios-upward-fill" : "eva:arrow-ios-downward-fill"} width={20} />
+                                                        </IconButton>
+                                                        <IconButton
+                                                            onClick={(event) => handleOpenMenu(event, row._id)}
+                                                            sx={{
+                                                                color: "var(--palette-text-primary)",
+                                                                bgcolor: Boolean(anchorEl[row._id]) ? "var(--palette-action-hover)" : "transparent",
+                                                                "&:hover": {
+                                                                    bgcolor: "rgba(var(--palette-action-activeChannel) / var(--palette-action-hoverOpacity))",
+                                                                },
+                                                            }}
+                                                        >
+                                                            <Icon icon="eva:more-vertical-fill" width={20} />
+                                                        </IconButton>
+                                                    </Stack>
                                                     <Menu
                                                         anchorEl={anchorEl[row._id]}
                                                         open={Boolean(anchorEl[row._id])}
@@ -507,6 +531,73 @@ export const BoardingBookingListPage = () => {
                                                     </Menu>
                                                 </TableCell>
                                             </TableRow>
+                                            <TableRow>
+                                                <TableCell
+                                                    colSpan={9}
+                                                    sx={{
+                                                        p: 0,
+                                                        bgcolor: "var(--palette-background-neutral)",
+                                                        borderBottom: isOpen ? "1px dashed var(--palette-divider)" : "none",
+                                                    }}
+                                                >
+                                                    <Collapse in={isOpen} timeout="auto" unmountOnExit>
+                                                        <Box
+                                                            sx={{
+                                                                bgcolor: "var(--palette-background-paper)",
+                                                                borderRadius: "8px",
+                                                                m: "calc(1.5 * var(--spacing))",
+                                                                overflow: "hidden",
+                                                            }}
+                                                        >
+                                                            {petSlotItems.map((item) => (
+                                                                <Stack
+                                                                    key={`${row._id}-${item.key}`}
+                                                                    direction="row"
+                                                                    alignItems="center"
+                                                                    spacing={2}
+                                                                    sx={{
+                                                                        px: "calc(2 * var(--spacing))",
+                                                                        py: "calc(1.5 * var(--spacing))",
+                                                                        "&:not(:last-of-type)": {
+                                                                            borderBottom: "solid 2px var(--palette-background-neutral)",
+                                                                        },
+                                                                    }}
+                                                                >
+                                                                    <Avatar
+                                                                        src={(row.petIds || []).find((pet: any) => String(pet?._id || pet?.id) === item.key)?.avatar}
+                                                                        variant="rounded"
+                                                                        sx={{ width: 48, height: 48, borderRadius: "var(--shape-borderRadius-sm)" }}
+                                                                    >
+                                                                        <Icon icon="solar:dog-bold" width={22} />
+                                                                    </Avatar>
+                                                                    <Box sx={{ flexGrow: 1 }}>
+                                                                        <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
+                                                                            {item.petName}
+                                                                        </Typography>
+                                                                        <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.25 }}>
+                                                                            {item.cageLabel}
+                                                                        </Typography>
+                                                                        {row.specialCare || row.notes ? (
+                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.5 }}>
+                                                                                {row.specialCare || row.notes}
+                                                                            </Typography>
+                                                                        ) : null}
+                                                                    </Box>
+                                                                    <Box sx={{ textAlign: "right", minWidth: 132 }}>
+                                                                        <Typography sx={{ fontWeight: 600, fontSize: "0.8125rem", color: "var(--palette-text-primary)" }}>
+                                                                            {formatCurrency(Number(row.pricePerDay || 0))}/đêm
+                                                                        </Typography>
+                                                                        <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.25 }}>
+                                                                            {Number(row.numberOfDays || 0)} đêm
+                                                                        </Typography>
+                                                                    </Box>
+                                                                </Stack>
+                                                            ))}
+                                                        </Box>
+                                                    </Collapse>
+                                                </TableCell>
+                                            </TableRow>
+                                            </Fragment>
                                         );
                                     })
                             )}

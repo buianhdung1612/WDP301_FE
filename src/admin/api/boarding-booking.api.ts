@@ -60,6 +60,7 @@ export interface BoardingFeedingItem {
     staffId?: string | { _id?: string; fullName?: string } | null;
     staffName?: string;
     status?: "pending" | "done" | "skipped";
+    petType?: "dog" | "cat" | "all";
     doneAt?: string | null;
 }
 
@@ -73,6 +74,7 @@ export interface BoardingExerciseItem {
     staffId?: string | { _id?: string; fullName?: string } | null;
     staffName?: string;
     status?: "pending" | "done" | "skipped";
+    petType?: "dog" | "cat" | "all";
     doneAt?: string | null;
 }
 
