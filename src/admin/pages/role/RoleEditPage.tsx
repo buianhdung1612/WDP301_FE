@@ -35,6 +35,18 @@ import {
     createTheme,
     useTheme
 } from "@mui/material";
+const DEFAULT_STAFF_PERMISSIONS = [
+    "booking_view",
+    "booking_create",
+    "booking_edit",
+    "calendar_view",
+    "schedule_view",
+    "account_user_view",
+    "account_user_create",
+    "account_user_edit",
+    "service_view",
+    "breed_view"
+];
 
 export const RoleEditPage = () => {
     const { id } = useParams();
@@ -114,6 +126,18 @@ export const RoleEditPage = () => {
             newPermissions = newPermissions.filter(id => !groupPermissions.includes(id));
         }
         setValue("permissions", newPermissions, { shouldValidate: true });
+    };
+
+    const handleSwitchStaff = (checked: boolean) => {
+        setValue("isStaff", checked);
+        if (checked) {
+            // Tự động thêm các quyền mặc định nếu chưa có
+            let newPermissions = [...currentPermissions];
+            DEFAULT_STAFF_PERMISSIONS.forEach(id => {
+                if (!newPermissions.includes(id)) newPermissions.push(id);
+            });
+            setValue("permissions", newPermissions, { shouldValidate: true });
+        }
     };
 
     const onSubmit = (data: any) => {
@@ -304,6 +328,7 @@ export const RoleEditPage = () => {
                                                             <Switch
                                                                 {...field}
                                                                 checked={field.value}
+                                                                onChange={(e) => handleSwitchStaff(e.target.checked)}
                                                                 sx={{
                                                                     '& .MuiSwitch-switchBase.Mui-checked': {
                                                                         color: 'var(--palette-primary-main)',

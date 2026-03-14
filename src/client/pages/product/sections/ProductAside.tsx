@@ -1,136 +1,54 @@
 import SearchIcon from "@mui/icons-material/Search";
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
-import StarIcon from "@mui/icons-material/Star";
-import type { Product } from "../../../../types/products.type";
+import { Link, useSearchParams } from "react-router-dom";
 import { ProductAsideTitle } from "./ProductAsideTitle";
 import { ProductAsideList } from "./ProductAsideList";
-
-const categories = [
-    { name: "Mèo cảnh", count: 8, to: "#" },
-    { name: "Đồ chơi gặm nhấm", count: 2, to: "#" },
-    { name: "Chó cảnh", count: 11, to: "#" },
-    { name: "Nội thất thú cưng", count: 1, to: "#" },
-    { name: "Phiên bản đặc biệt", count: 4, to: "#" },
-    { name: "Đồ chơi", count: 4, to: "#" },
-];
-
-const brands = [
-    { name: "Chic Charms", count: 2, to: "#" },
-    { name: "Doggy Dive", count: 7, to: "#" },
-    { name: "Glamour Gems", count: 12, to: "#" },
-    { name: "Puppy Style", count: 4, to: "#" }
-];
-
-const products: Product[] = [
-    {
-        id: 1,
-        title: "Thẻ tên",
-        price: "360.000đ",
-        primaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-10-1000x1048.jpg",
-        secondaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-10c-1000x1048.jpg",
-        rating: 5,
-        isSale: true,
-        url: "/san-pham/the-ten",
-    },
-    {
-        id: 2,
-        title: "Vòng cổ",
-        price: "220.000đ",
-        primaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-11-1000x1048.jpg",
-        secondaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-11c-1000x1048.jpg",
-        rating: 4,
-        isSale: false,
-        url: "/san-pham/vong-co",
-    },
-    {
-        id: 3,
-        title: "Áo mưa cho chó",
-        price: "150.000đ",
-        primaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-12-1000x1048.jpg",
-        secondaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-12c-1000x1048.jpg",
-        rating: 3,
-        isSale: true,
-        url: "/san-pham/do-choi-meo",
-    },
-    {
-        id: 4,
-        title: "Nệm nylon",
-        price: "540.000đ",
-        primaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-9-1000x1048.jpg",
-        secondaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-9a-1000x1048.jpg",
-        rating: 4,
-        isSale: true,
-        url: "/san-pham/nem-nylon",
-    },
-]
-
-const filterTags = [
-    {
-        title: "Xương gà",
-        url: "/san-pham-the/xuong-ga",
-    },
-    {
-        title: "Xương chó",
-        url: "/san-pham-the/xuong-cho",
-    },
-    {
-        title: "Nệm ấm",
-        url: "/san-pham-the/nem-am",
-    },
-    {
-        title: "Thẻ tên",
-        url: "/san-pham-the/the-ten",
-    },
-    {
-        title: "Dinh dưỡng chim",
-        url: "/san-pham-the/dinh-duong-chim",
-    },
-    {
-        title: "Đồ chơi tạ",
-        url: "/san-pham-the/do-choi-ta",
-    },
-    {
-        title: "Thức ăn",
-        url: "/san-pham-the/thuc-an",
-    },
-    {
-        title: "Lồng Hamster",
-        url: "/san-pham-the/long-hamster",
-    },
-    {
-        title: "Thức ăn mèo con",
-        url: "/san-pham-the/thuc-an-meo-con",
-    },
-    {
-        title: "Phụ kiện",
-        url: "/san-pham-the/phu-kien",
-    },
-    {
-        title: "Đồ dùng cần thiết",
-        url: "/san-pham-the/do-dung-can-thiet",
-    },
-    {
-        title: "Chó con",
-        url: "/san-pham-the/cho-con",
-    },
-    {
-        title: "Đồ nhai cho chó con",
-        url: "/san-pham-the/do-nhai-cho-cho-con",
-    },
-    {
-        title: "Thức ăn vặt",
-        url: "/san-pham-the/thuc-an-vat",
-    },
-];
+import { useCategories, useBrands, useProducts } from "../../../hooks/useProduct";
+import StarIcon from "@mui/icons-material/Star";
 
 const maxPrice = 5000000;
 
 export const ProductAside = () => {
-    const [minPriceRange, setMinPriceRange] = useState(0);
-    const [maxPriceRange, setMaxPriceRange] = useState(100);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const { data: categoriesData } = useCategories();
+    const { data: brandsData } = useBrands();
+
+    // Lấy 3 sản phẩm mới nhất
+    const { data: newestProductsData } = useProducts({
+        limit: 3,
+        sortKey: "createdAt",
+        sortValue: "desc"
+    });
+
+    // State cho tìm kiếm local
+    const [localKeyword, setLocalKeyword] = useState(searchParams.get("keyword") || "");
+
+    // State cho khoảng giá
+    const [minPriceRange, setMinPriceRange] = useState(() => {
+        const min = parseInt(searchParams.get("minPrice") || "0");
+        return Math.round((min / maxPrice) * 100);
+    });
+    const [maxPriceRange, setMaxPriceRange] = useState(() => {
+        const max = parseInt(searchParams.get("maxPrice") || maxPrice.toString());
+        return Math.round((max / maxPrice) * 100);
+    });
+
     const trackRef = useRef<HTMLDivElement>(null);
     const [dragging, setDragging] = useState<null | "min" | "max">(null);
+
+    const categories = categoriesData?.map((cat: any) => ({
+        name: cat.name,
+        count: cat.productCount || 0,
+        to: `/shop?category=${cat.slug}`
+    })) || [];
+
+    const brands = brandsData?.map((brand: any) => ({
+        name: brand.name,
+        count: brand.productCount || 0,
+        to: `/shop?brand=${brand.slug}`
+    })) || [];
+
+    const newestProducts = newestProductsData?.products || [];
 
     const handleMouseDown = (type: "min" | "max") => {
         setDragging(type);
@@ -162,14 +80,30 @@ export const ProductAside = () => {
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("mouseup", handleMouseUp);
         };
-    });
+    }, [dragging, minPriceRange, maxPriceRange]);
+
+    const handleSearchSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        searchParams.set("keyword", localKeyword);
+        searchParams.set("page", "1");
+        setSearchParams(searchParams);
+    };
+
+    const handlePriceFilter = () => {
+        searchParams.set("minPrice", Math.round(minPriceRange / 100 * maxPrice).toString());
+        searchParams.set("maxPrice", Math.round(maxPriceRange / 100 * maxPrice).toString());
+        searchParams.set("page", "1");
+        setSearchParams(searchParams);
+    };
 
     return (
         <aside className="w-[400px] 2xl:w-[300px] pb-[120px] 2xl:pb-[100px] sticky top-0 self-start">
             {/* Tìm kiếm */}
-            <form className="relative mb-[40px]" action="">
+            <form className="relative mb-[40px]" onSubmit={handleSearchSubmit}>
                 <input
                     type="text"
+                    value={localKeyword}
+                    onChange={(e) => setLocalKeyword(e.target.value)}
                     placeholder="Tìm kiếm sản phẩm..."
                     className="w-full outline-none text-client-text border border-[#d7d7d7] px-[32px] py-[16px] bg-white rounded-[40px]"
                 />
@@ -231,6 +165,7 @@ export const ProductAside = () => {
                 </div>
                 <div className="relative block min-w-[135px] mt-[15px]">
                     <button
+                        onClick={handlePriceFilter}
                         className={`button-text cursor-pointer before:bg-white after:bg-white bg-client-primary hover:bg-client-secondary text-white hover:[box-shadow:0_0_30px_#ffffff33] inline-block relative mask-[url('/mask-bg-button.svg')] mask-no-repeat mask-center mask-[size:100%] rounded-[10px] px-[40px] py-[10px] text-[16px] font-secondary transition-default`}
                     >
                         Lọc
@@ -238,52 +173,41 @@ export const ProductAside = () => {
                 </div>
             </div>
 
-            {/* Danh sách sản phẩm */}
+            {/* Thương hiệu */}
+            <div className="mb-[40px]">
+                <ProductAsideTitle title="Thương hiệu" />
+                <ProductAsideList categories={brands} />
+            </div>
+
+            {/* Sản phẩm mới nhất */}
             <div className="mb-[40px]">
                 <ProductAsideTitle title="Sản phẩm" />
                 <ul className="mt-[25px]">
-                    {products.map((item) => (
-                        <li className="p-[15px] mb-[15px] rounded-[10px] bg-[#fff0f066] flex">
-                            <Link to="#" className="mr-[20px] rounded-[10px] overflow-hidden">
-                                <img src={item.primaryImage} alt="" width={80} height={84} />
+                    {newestProducts.map((item: any) => (
+                        <li key={item._id} className="p-[15px] mb-[15px] rounded-[10px] bg-[#fff0f066] flex">
+                            <Link to={`/product/detail/${item.slug}`} className="mr-[20px] rounded-[10px] overflow-hidden w-[80px] h-[84px] flex-shrink-0">
+                                <img src={item.images?.[0]} alt="" className="w-full h-full object-cover" />
                             </Link>
                             <div>
-                                <Link to="#" className="block text-[17px] font-secondary text-client-secondary hover:text-[#10293799] transition-default mb-[2px] line-clamp-1">{item.title}</Link>
+                                <Link to={`/product/detail/${item.slug}`} className="block text-[17px] font-secondary text-client-secondary hover:text-client-primary transition-default mb-[2px] line-clamp-1">{item.name}</Link>
                                 <div className="flex items-center mb-[7px] ml-[-5px]">
                                     {[...Array(5)].map((_, i) => (
                                         <StarIcon
                                             key={i}
                                             sx={{
                                                 fontSize: "18px !important",
-                                                color: i < item.rating ? "#ffbb00 !important" : "#ccc !important",
+                                                color: "#ffbb00 !important",
                                             }}
                                         />
                                     ))}
                                 </div>
-                                <p className="text-client-text">{item.price}</p>
+                                <p className="text-client-text">{(item.priceNew || 0).toLocaleString()}đ</p>
                             </div>
                         </li>
                     ))}
                 </ul>
             </div>
 
-            {/* Thương hiệu sản phẩm */}
-            <div className="mb-[40px]">
-                <ProductAsideTitle title="Thương hiệu" />
-                <ProductAsideList categories={brands} />
-            </div>
-
-            {/* Lọc theo thẻ */}
-            <div>
-                <ProductAsideTitle title="Lọc theo thẻ" />
-                <div className="gap-[15px] mt-[10px] p-[20px] bg-[#fff0f066] rounded-[20px] flex flex-wrap">
-                    {filterTags.map(item => (
-                        <Link to={item.url} className="text-client-secondary bg-white hover:text-white hover:bg-client-secondary transition-default py-[8px] px-[16px] text-[14px] border border-[#10293726] rounded-[35px]">
-                            {item.title}
-                        </Link>
-                    ))}
-                </div>
-            </div>
         </aside>
     )
 }

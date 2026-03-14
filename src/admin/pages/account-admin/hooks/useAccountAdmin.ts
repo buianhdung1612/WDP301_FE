@@ -5,7 +5,7 @@ export const useAccounts = (params?: any) => {
     return useQuery({
         queryKey: ["accounts-admin", params],
         queryFn: () => getAccounts(params),
-        select: (res: any) => res.data || [],
+        // select: (res: any) => res.data?.recordList || [],
     });
 };
 

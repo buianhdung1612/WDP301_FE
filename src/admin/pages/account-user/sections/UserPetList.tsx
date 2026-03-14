@@ -37,7 +37,8 @@ interface UserPetListProps {
 }
 
 export const UserPetList = ({ userId }: UserPetListProps) => {
-    const { data: pets = [], isLoading } = usePets({ userId });
+    const { data: resPets, isLoading } = usePets({ userId });
+    const pets = resPets?.data?.recordList || [];
     const { mutate: createPet } = useCreatePet();
     const { mutate: updatePet } = useUpdatePet();
     const { mutate: deletePet } = useDeletePet();
@@ -58,7 +59,8 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const { data: breeds = [] } = useBreeds(formData.type) as { data: BreedOption[] };
+    const { data: resBreeds } = useBreeds({ type: formData.type });
+    const breeds = resBreeds?.data?.recordList || [];
     const { mutate: createBreedMutate } = useCreateBreed();
 
     interface BreedOption {

@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
-import { IProduct } from '../configs/types';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { getProducts, deleteProduct } from '../../../api/product.api';
 
 interface IProductFilters {
     status?: string[];
     stock?: string[];
     search?: string;
+    page: number;
+    limit: number;
 }
 
 export const useProducts = () => {
@@ -15,14 +16,19 @@ export const useProducts = () => {
         status: [],
         stock: [],
         search: '',
+        page: 1,
+        limit: 10,
     });
 
     const { data, isLoading, error } = useQuery({
         queryKey: ['products', filters],
         queryFn: () => getProducts({
             keyword: filters.search,
-            status: filters.status?.[0], // Backend supports one status filter at a time usually, or we can adjust BE
+            status: filters.status && filters.status.length > 0 ? filters.status.join(',') : undefined,
+            page: filters.page,
+            limit: filters.limit,
         }),
+        placeholderData: keepPreviousData,
     });
 
     const products = useMemo(() => {
@@ -40,30 +46,12 @@ export const useProducts = () => {
         }));
     }, [data]);
 
-    // Filter by stock is handled locally for now as BE might not support all stock filters yet
-    const filteredProducts = useMemo(() => {
-        return products.filter((product: IProduct) => {
-            // Filter by stock
-            if (filters.stock && filters.stock.length > 0) {
-                const isInStock = product.stock > 20;
-                const isLowStock = product.stock > 0 && product.stock <= 20;
-                const isOutOfStock = product.stock === 0;
-
-                const matchesStock = filters.stock.some((stock) => {
-                    if (stock === 'instock') return isInStock;
-                    if (stock === 'lowstock') return isLowStock;
-                    if (stock === 'outofstock') return isOutOfStock;
-                    return false;
-                });
-
-                if (!matchesStock) {
-                    return false;
-                }
-            }
-
-            return true;
-        });
-    }, [products, filters.stock]);
+    const pagination = data?.data?.pagination || {
+        totalRecords: 0,
+        totalPages: 0,
+        currentPage: 1,
+        limit: 10,
+    };
 
     const deleteMutation = useMutation({
         mutationFn: deleteProduct,
@@ -73,15 +61,23 @@ export const useProducts = () => {
     });
 
     const setStatusFilter = (status: string[]) => {
-        setFilters((prev) => ({ ...prev, status }));
+        setFilters((prev) => ({ ...prev, status, page: 1 }));
     };
 
     const setStockFilter = (stock: string[]) => {
-        setFilters((prev) => ({ ...prev, stock }));
+        setFilters((prev) => ({ ...prev, stock, page: 1 }));
     };
 
     const setSearchFilter = (search: string) => {
-        setFilters((prev) => ({ ...prev, search }));
+        setFilters((prev) => ({ ...prev, search, page: 1 }));
+    };
+
+    const setPage = (page: number) => {
+        setFilters((prev) => ({ ...prev, page }));
+    };
+
+    const setLimit = (limit: number) => {
+        setFilters((prev) => ({ ...prev, limit, page: 1 }));
     };
 
     const clearFilters = () => {
@@ -89,17 +85,22 @@ export const useProducts = () => {
             status: [],
             stock: [],
             search: '',
+            page: 1,
+            limit: 10,
         });
     };
 
     return {
-        products: filteredProducts,
+        products,
+        pagination,
         isLoading,
         error,
         filters,
         setStatusFilter,
         setStockFilter,
         setSearchFilter,
+        setPage,
+        setLimit,
         clearFilters,
         deleteProduct: deleteMutation.mutate
     };

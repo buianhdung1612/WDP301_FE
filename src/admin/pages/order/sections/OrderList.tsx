@@ -67,8 +67,16 @@ export const OrderList = () => {
         setAnchorEl({ ...anchorEl, [id]: null });
     };
 
-    const { data: ordersRes, isLoading } = useOrders();
-    const allRows = ordersRes?.data || [];
+    const params = useMemo(() => ({
+        page: page + 1,
+        limit: rowsPerPage,
+        keyword: searchQuery,
+        status: tabStatus === 'all' ? undefined : tabStatus,
+    }), [page, rowsPerPage, searchQuery, tabStatus]);
+
+    const { data: ordersRes, isLoading } = useOrders(params);
+    const rows = ordersRes?.data?.recordList || [];
+    const pagination = ordersRes?.data?.pagination || { totalRecords: 0 };
 
     const { mutate: updateStatus } = useUpdateOrderStatus();
 
@@ -84,23 +92,8 @@ export const OrderList = () => {
 
     const handleTabChange = (_event: SyntheticEvent, newValue: string) => {
         setTabStatus(newValue);
+        setPage(0);
     };
-
-    const rows = useMemo(() => {
-        let filtered = allRows;
-        if (tabStatus !== 'all') {
-            filtered = filtered.filter((row: any) => row.orderStatus === tabStatus);
-        }
-        if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            filtered = filtered.filter((row: any) =>
-                row.code?.toLowerCase().includes(query) ||
-                row.fullName?.toLowerCase().includes(query) ||
-                row.phone?.includes(query)
-            );
-        }
-        return filtered;
-    }, [allRows, tabStatus, searchQuery]);
 
     const handleChangePage = (_event: unknown, newPage: number) => {
         setPage(newPage);
@@ -145,13 +138,13 @@ export const OrderList = () => {
         );
     };
 
-    const statusCounts = {
-        all: allRows.length,
-        pending: allRows.filter((r: any) => r.orderStatus === 'pending').length,
-        confirmed: allRows.filter((r: any) => r.orderStatus === 'confirmed').length,
-        shipping: allRows.filter((r: any) => r.orderStatus === 'shipping').length,
-        completed: allRows.filter((r: any) => r.orderStatus === 'completed').length,
-        cancelled: allRows.filter((r: any) => r.orderStatus === 'cancelled').length,
+    const statusCounts = ordersRes?.data?.statusCounts || {
+        all: 0,
+        pending: 0,
+        confirmed: 0,
+        shipping: 0,
+        completed: 0,
+        cancelled: 0,
     };
 
     return (
@@ -226,7 +219,7 @@ export const OrderList = () => {
                 <Search
                     placeholder="Tìm theo mã đơn, khách hàng, số điện thoại..."
                     value={searchQuery}
-                    onChange={setSearchQuery}
+                    onChange={(val) => { setSearchQuery(val); setPage(0); }}
                     maxWidth="25rem"
                 />
             </Box>
@@ -269,7 +262,7 @@ export const OrderList = () => {
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row: any) => {
+                            rows.map((row: any) => {
                                 const isItemSelected = selected.indexOf(row._id) !== -1;
                                 const isOpen = openRows.includes(row._id);
                                 const totalItemsCount = row.items?.reduce((acc: number, item: any) => acc + (item.quantity || 0), 0) || 0;
@@ -541,7 +534,7 @@ export const OrderList = () => {
             <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
-                count={rows.length}
+                count={pagination.totalRecords || 0}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}

@@ -50,16 +50,6 @@ export const updateSchedule = async (id: string, data: any) => {
     return response.data;
 };
 
-export const checkInSchedule = async (id: string) => {
-    const response = await apiApp.post(`${BASE_URL}/${id}/check-in`, {}, withAuth());
-    return response.data;
-};
-
-export const checkOutSchedule = async (id: string) => {
-    const response = await apiApp.post(`${BASE_URL}/${id}/check-out`, {}, withAuth());
-    return response.data;
-};
-
 export const deleteSchedule = async (id: string) => {
     const response = await apiApp.delete(`${BASE_URL}/${id}`, withAuth());
     return response.data;

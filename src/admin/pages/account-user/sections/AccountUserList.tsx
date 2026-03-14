@@ -46,17 +46,22 @@ export const AccountUserList = ({ createdBy }: { createdBy?: string }) => {
     const navigate = useNavigate();
     const [status, setStatus] = useState('all');
     const [search, setSearch] = useState('');
+    const [page, setPage] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
 
     const filters = {
         ...(status !== 'all' && { status }),
         ...(search && { q: search }),
         ...(createdBy && { createdBy }),
+        page: page + 1,
+        limit: pageSize,
     };
 
-    const { data: usersRaw = [], isLoading } = useUsers(filters);
+    const { data: res, isLoading } = useUsers(filters);
     const { mutate: deleteUser } = useDeleteUser();
 
-    const users = Array.isArray(usersRaw) ? usersRaw : [];
+    const users = res?.data?.recordList || [];
+    const pagination = res?.data?.pagination || { totalRecords: 0 };
 
     const handleDelete = (id: string) => {
         if (window.confirm("Bạn có chắc chắn muốn xóa tài khoản khách hàng này?")) {
@@ -84,12 +89,13 @@ export const AccountUserList = ({ createdBy }: { createdBy?: string }) => {
 
     const handleStatusChange = (_event: React.SyntheticEvent, newValue: string) => {
         setStatus(newValue);
+        setPage(0);
     };
 
-    const counts = {
-        all: users.length,
-        active: users.filter(a => a.status === 'active').length,
-        inactive: users.filter(a => a.status === 'inactive').length,
+    const counts = res?.data?.statusCounts || {
+        all: 0,
+        active: 0,
+        inactive: 0,
     };
 
     return (
@@ -128,7 +134,7 @@ export const AccountUserList = ({ createdBy }: { createdBy?: string }) => {
                                         : (option.value === 'all' ? 'var(--palette-text-secondary)' : (option.value === 'active' ? 'var(--palette-success-dark)' : 'var(--palette-error-dark)')),
                                 }}
                             >
-                                {counts[option.value as keyof typeof counts] || 0}
+                                {option.value === 'all' ? (pagination.totalRecords || 0) : counts[option.value as keyof typeof counts]}
                             </TabBadge>
                         }
                         iconPosition="end"
@@ -156,7 +162,7 @@ export const AccountUserList = ({ createdBy }: { createdBy?: string }) => {
                         maxWidth="100%"
                         placeholder="Tìm kiếm khách hàng..."
                         value={search}
-                        onChange={setSearch}
+                        onChange={(val) => { setSearch(val); setPage(0); }}
                     />
                     <ExportImport />
                 </Box>
@@ -180,6 +186,16 @@ export const AccountUserList = ({ createdBy }: { createdBy?: string }) => {
                     }}
                     localeText={DATA_GRID_LOCALE_VN}
                     pagination
+                    paginationMode="server"
+                    rowCount={pagination.totalRecords || 0}
+                    paginationModel={{
+                        page,
+                        pageSize,
+                    }}
+                    onPaginationModelChange={(model) => {
+                        setPage(model.page);
+                        setPageSize(model.pageSize);
+                    }}
                     pageSizeOptions={[5, 10, 20]}
                     initialState={columnsInitialState}
                     getRowHeight={() => 'auto'}

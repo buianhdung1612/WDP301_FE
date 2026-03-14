@@ -2,30 +2,34 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getBlogs, createBlog, getBlogById, updateBlog, deleteBlog } from '../../../api/blog.api';
 import { ApiResponse } from '../../../config/type';
 
-export const useBlogs = () => {
+export const useBlogs = (params?: any) => {
     return useQuery({
-        queryKey: ['blogs'],
-        queryFn: getBlogs,
+        queryKey: ['blogs', params],
+        queryFn: () => getBlogs(params),
         select: (res: ApiResponse<any>) => {
             const data = res.data;
             let records: any[] = [];
+            let pagination = { totalRecords: 0 };
 
-            // BE mới trả về { recordList, pagination }
-            if (data && typeof data === 'object' && 'recordList' in data && Array.isArray(data.recordList)) {
-                records = data.recordList;
+            if (data && typeof data === 'object' && 'recordList' in data) {
+                records = data.recordList || [];
+                pagination = data.pagination || { totalRecords: 0 };
             } else if (Array.isArray(data)) {
                 records = data;
             }
 
-            return records.map((item: any) => ({
-                ...item,
-                id: item._id,
-                title: item.name,
-                excerpt: item.description,
-                featuredImage: item.avatar,
-                viewCount: item.view || 0,
-                status: (item.status || 'draft').toLowerCase(),
-            }));
+            return {
+                recordList: records.map((item: any) => ({
+                    ...item,
+                    id: item._id,
+                    title: item.name,
+                    excerpt: item.description,
+                    featuredImage: item.avatar,
+                    viewCount: item.view || 0,
+                    status: (item.status || 'draft').toLowerCase(),
+                })),
+                pagination
+            };
         },
     });
 };

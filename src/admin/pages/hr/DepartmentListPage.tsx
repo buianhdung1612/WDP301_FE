@@ -21,9 +21,20 @@ import { SortAscendingIcon, SortDescendingIcon, UnsortedIcon } from '../../asset
 export const DepartmentListPage = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [selectedItem, setSelectedItem] = useState<any>(null);
+    const [page, setPage] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [search, setSearch] = useState('');
     const localeText = useDataGridLocale();
 
-    const { data: departments = [], isLoading } = useDepartments();
+    const params = {
+        page: page + 1,
+        limit: pageSize,
+        keyword: search,
+    };
+
+    const { data: res, isLoading } = useDepartments(params);
+    const departments = res?.data?.recordList || [];
+    const pagination = res?.data?.pagination || { totalRecords: 0 };
 
     const { mutate: createDept } = useCreateDepartment();
     const { mutate: updateDept } = useUpdateDepartment();
@@ -112,11 +123,30 @@ export const DepartmentListPage = () => {
                         disableRowSelectionOnClick
                         localeText={localeText}
                         slots={{
-                            toolbar: () => <HRToolbar searchPlaceholder="Tìm kiếm phòng ban..." />,
+                            toolbar: HRToolbar as any,
                             columnSortedAscendingIcon: SortAscendingIcon,
                             columnSortedDescendingIcon: SortDescendingIcon,
                             columnUnsortedIcon: UnsortedIcon,
                         }}
+                        slotProps={{
+                            toolbar: {
+                                searchPlaceholder: "Tìm kiếm phòng ban...",
+                                search,
+                                onSearchChange: (val: string) => { setSearch(val); setPage(0); }
+                            } as any
+                        }}
+                        pagination
+                        paginationMode="server"
+                        rowCount={pagination.totalRecords || 0}
+                        paginationModel={{
+                            page,
+                            pageSize,
+                        }}
+                        onPaginationModelChange={(model) => {
+                            setPage(model.page);
+                            setPageSize(model.pageSize);
+                        }}
+                        pageSizeOptions={[5, 10, 20]}
                         sx={dataGridStyles}
                     />
                 </Box>

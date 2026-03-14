@@ -13,11 +13,23 @@ import { toolbarStyles } from "../configs/styles.config";
 interface ToolbarProps {
     settings: IGridSettings;
     onSettingsChange: Dispatch<SetStateAction<IGridSettings>>;
+    filters: {
+        status?: string[];
+        stock?: string[];
+        search?: string;
+    };
+    onStatusChange: (status: string[]) => void;
+    onStockChange: (stock: string[]) => void;
+    onSearchChange: (search: string) => void;
 }
 
 export const ProductToolbar = ({
     settings,
     onSettingsChange,
+    filters,
+    onStatusChange,
+    onStockChange,
+    onSearchChange,
 }: ToolbarProps) => {
     const { t } = useTranslation();
     const statusOptions = useMemo(() => [
@@ -35,9 +47,22 @@ export const ProductToolbar = ({
     return (
         <Toolbar style={toolbarStyles.root}>
             <div className='flex gap-[calc(2*var(--spacing))] items-stretch'>
-                <SelectMulti label={t("admin.product.toolbar.status")} options={statusOptions} />
-                <SelectMulti label={t("admin.product.toolbar.stock")} options={stockOptions} />
-                <Search />
+                <SelectMulti
+                    label={t("admin.product.toolbar.status")}
+                    options={statusOptions}
+                    value={filters.status || []}
+                    onChange={onStatusChange}
+                />
+                <SelectMulti
+                    label={t("admin.product.toolbar.stock")}
+                    options={stockOptions}
+                    value={filters.stock || []}
+                    onChange={onStockChange}
+                />
+                <Search
+                    value={filters.search || ''}
+                    onChange={onSearchChange}
+                />
             </div>
             <div>
                 <Columns />

@@ -16,8 +16,12 @@ const withAuth = () => {
 };
 
 /** Lấy tất cả bài viết */
-export const getBlogs = async (): Promise<ApiResponse<any>> => {
-    const response = await apiApp.get(`${BASE_URL}/list`, withAuth());
+export const getBlogs = async (params?: any): Promise<ApiResponse<any>> => {
+    const config = {
+        ...withAuth(),
+        params
+    };
+    const response = await apiApp.get(`${BASE_URL}/list`, config);
     return response.data;
 };
 

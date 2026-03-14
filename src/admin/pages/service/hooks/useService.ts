@@ -11,13 +11,6 @@ export const useServices = (params?: any) => {
     return useQuery({
         queryKey: ['services', params],
         queryFn: () => getServices(params),
-        select: (res: any) => {
-            const data = res.data;
-            if (data && typeof data === 'object' && 'recordList' in data) {
-                return data.recordList;
-            }
-            return data || [];
-        },
     });
 };
 

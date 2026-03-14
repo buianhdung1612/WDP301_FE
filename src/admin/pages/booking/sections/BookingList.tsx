@@ -1,4 +1,4 @@
-import { useState, SyntheticEvent, useMemo } from "react";
+import { useState, SyntheticEvent } from "react";
 import {
     Box,
     Card,
@@ -21,8 +21,7 @@ import {
     Avatar,
     Chip,
     Menu,
-    MenuItem,
-    alpha
+    MenuItem
 } from "@mui/material";
 import { Icon } from "@iconify/react";
 import dayjs from "dayjs";
@@ -70,10 +69,17 @@ export const BookingList = () => {
         setAnchorEl({ ...anchorEl, [id]: null });
     };
 
-    const { data: bookingsRes, isLoading } = useBookings(
-        isStaff ? { staffId: user?.id } : {}
-    );
-    const allRows = bookingsRes?.data || [];
+    const filters = {
+        ...(isStaff && { staffId: user?.id }),
+        ...(tabStatus !== 'all' && { status: tabStatus }),
+        ...(searchQuery && { keyword: searchQuery }),
+        page: page + 1,
+        limit: rowsPerPage,
+    };
+
+    const { data: res, isLoading } = useBookings(filters);
+    const bookings = res?.data?.recordList || [];
+    const pagination = res?.data?.pagination || { totalRecords: 0 };
 
     const { mutate: updateStatus } = useUpdateBookingStatus();
 
@@ -93,23 +99,8 @@ export const BookingList = () => {
 
     const handleTabChange = (_event: SyntheticEvent, newValue: string) => {
         setTabStatus(newValue);
+        setPage(0);
     };
-
-    const rows = useMemo(() => {
-        let filtered = allRows;
-        if (tabStatus !== 'all') {
-            filtered = filtered.filter((row: any) => row.bookingStatus === tabStatus);
-        }
-        if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            filtered = filtered.filter((row: any) =>
-                row.code?.toLowerCase().includes(query) ||
-                row.userId?.fullName?.toLowerCase().includes(query) ||
-                row.userId?.phone?.includes(query)
-            );
-        }
-        return filtered;
-    }, [allRows, tabStatus, searchQuery]);
 
     const handleChangePage = (_event: unknown, newPage: number) => {
         setPage(newPage);
@@ -120,9 +111,14 @@ export const BookingList = () => {
         setPage(0);
     };
 
+    const handleSearchChange = (value: string) => {
+        setSearchQuery(value);
+        setPage(0);
+    };
+
     const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
-            const newSelected = rows.map((n: any) => n._id);
+            const newSelected = bookings.map((n: any) => n._id);
             setSelected(newSelected);
             return;
         }
@@ -154,13 +150,13 @@ export const BookingList = () => {
         );
     };
 
-    const statusCounts = {
-        all: allRows.length,
-        pending: allRows.filter((r: any) => r.bookingStatus === 'pending').length,
-        confirmed: allRows.filter((r: any) => r.bookingStatus === 'confirmed').length,
-        "in-progress": allRows.filter((r: any) => r.bookingStatus === 'in-progress').length,
-        completed: allRows.filter((r: any) => r.bookingStatus === 'completed').length,
-        cancelled: allRows.filter((r: any) => r.bookingStatus === 'cancelled').length,
+    const statusCounts = res?.data?.statusCounts || {
+        all: 0,
+        pending: 0,
+        confirmed: 0,
+        "in-progress": 0,
+        completed: 0,
+        cancelled: 0,
     };
 
     return (
@@ -235,7 +231,7 @@ export const BookingList = () => {
                 <Search
                     placeholder="Tìm theo mã đơn, khách hàng, số điện thoại..."
                     value={searchQuery}
-                    onChange={setSearchQuery}
+                    onChange={handleSearchChange}
                     maxWidth="25rem"
                 />
             </Box>
@@ -246,8 +242,8 @@ export const BookingList = () => {
                         <TableRow>
                             <TableCell padding="checkbox" sx={{ borderBottom: 'none', textAlign: 'center' }}>
                                 <Checkbox
-                                    indeterminate={selected.length > 0 && selected.length < rows.length}
-                                    checked={rows.length > 0 && selected.length === rows.length}
+                                    indeterminate={selected.length > 0 && selected.length < bookings.length}
+                                    checked={bookings.length > 0 && selected.length === bookings.length}
                                     onChange={handleSelectAllClick}
                                     sx={{ color: 'var(--palette-text-disabled)', p: 0 }}
                                 />
@@ -269,7 +265,7 @@ export const BookingList = () => {
                                     <CircularProgress size={32} />
                                 </TableCell>
                             </TableRow>
-                        ) : rows.length === 0 ? (
+                        ) : bookings.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={8} align="center" sx={{ py: 10 }}>
                                     <Typography sx={{ color: 'var(--palette-text-secondary)' }}>
@@ -278,7 +274,7 @@ export const BookingList = () => {
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row: any) => {
+                            bookings.map((row: any) => {
                                 const isItemSelected = selected.indexOf(row._id) !== -1;
                                 const isOpen = openRows.includes(row._id);
 
@@ -558,7 +554,7 @@ export const BookingList = () => {
             <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
-                count={rows.length}
+                count={pagination.totalRecords || 0}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}

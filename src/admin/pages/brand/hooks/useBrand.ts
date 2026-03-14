@@ -1,22 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getBrands, createBrand, getBrandById, updateBrand, deleteBrand } from '../../../api/brand.api';
-import { ApiResponse } from '../../../config/type';
 
-export const useBrands = () => {
+
+export const useBrands = (params?: any) => {
     return useQuery({
-        queryKey: ['brands'],
-        queryFn: getBrands,
-        select: (res: ApiResponse<any>) => {
-            const data = res.data;
-            // BE trả về array trực tiếp
-            if (Array.isArray(data)) {
-                return data.map((item: any) => ({
-                    ...item,
-                    id: item._id,
-                }));
-            }
-            return [];
-        },
+        queryKey: ['brands', params],
+        queryFn: () => getBrands(params),
     });
 };
 

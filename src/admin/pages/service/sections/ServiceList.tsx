@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
@@ -10,7 +11,21 @@ import { dataGridCardStyles, dataGridContainerStyles, dataGridStyles } from '../
 import { useServices } from '../hooks/useService';
 
 export const ServiceList = () => {
-    const { data: services = [], isLoading } = useServices();
+    const [page, setPage] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [search, setSearch] = useState('');
+    const [status, setStatus] = useState<string[]>([]);
+
+    const params = {
+        page: page + 1,
+        limit: pageSize,
+        keyword: search,
+        status: status[0],
+    };
+
+    const { data: res, isLoading } = useServices(params);
+    const services = res?.data?.recordList || [];
+    const pagination = res?.data?.pagination || { totalRecords: 0 };
 
     return (
         <Card elevation={0} sx={dataGridCardStyles}>
@@ -22,7 +37,7 @@ export const ServiceList = () => {
                     columns={columnsConfig}
                     density="comfortable"
                     slots={{
-                        toolbar: ServiceToolbar,
+                        toolbar: ServiceToolbar as any,
                         columnSortedAscendingIcon: SortAscendingIcon,
                         columnSortedDescendingIcon: SortDescendingIcon,
                         columnUnsortedIcon: UnsortedIcon,
@@ -32,8 +47,26 @@ export const ServiceList = () => {
                             </Box>
                         )
                     }}
+                    slotProps={{
+                        toolbar: {
+                            search,
+                            onSearchChange: (val: string) => { setSearch(val); setPage(0); },
+                            status,
+                            onStatusChange: (val: string[]) => { setStatus(val); setPage(0); }
+                        } as any
+                    }}
                     localeText={DATA_GRID_LOCALE_VN}
                     pagination
+                    paginationMode="server"
+                    rowCount={pagination.totalRecords || 0}
+                    paginationModel={{
+                        page,
+                        pageSize,
+                    }}
+                    onPaginationModelChange={(model) => {
+                        setPage(model.page);
+                        setPageSize(model.pageSize);
+                    }}
                     pageSizeOptions={[5, 10, 20]}
                     initialState={columnsInitialState}
                     getRowHeight={() => 'auto'}

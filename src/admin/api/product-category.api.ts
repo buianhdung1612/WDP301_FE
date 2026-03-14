@@ -17,8 +17,12 @@ const withAuth = () => {
 };
 
 /** Danh sách (flat) */
-export const getCategories = async (): Promise<ApiResponse<any[]>> => {
-    const response = await apiApp.get(`${BASE_URL}/list`, withAuth());
+export const getCategories = async (params?: any): Promise<ApiResponse<any>> => {
+    const config = {
+        ...withAuth(),
+        params
+    };
+    const response = await apiApp.get(`${BASE_URL}/list`, config);
     return response.data;
 };
 

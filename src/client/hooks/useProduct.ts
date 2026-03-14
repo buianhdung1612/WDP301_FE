@@ -1,13 +1,29 @@
 import { useQuery } from '@tanstack/react-query';
-import { getProducts, getProductBySlug } from '../api/product.api';
+import { getProducts, getProductBySlug, getCategories, getBrands } from '../api/product.api';
 
-export const useProducts = () => {
+export const useProducts = (params: any = {}) => {
     return useQuery({
-        queryKey: ['client-products'],
-        queryFn: getProducts,
+        queryKey: ['client-products', params],
+        queryFn: () => getProducts(params),
         select: (res) => res.data,
     });
 };
+
+export const useCategories = () => {
+    return useQuery({
+        queryKey: ['client-categories'],
+        queryFn: getCategories,
+        select: (res) => res.data,
+    });
+}
+
+export const useBrands = () => {
+    return useQuery({
+        queryKey: ['client-brands'],
+        queryFn: getBrands,
+        select: (res) => res.data,
+    });
+}
 
 export const useProductDetail = (slug: string) => {
     return useQuery({

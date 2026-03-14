@@ -51,18 +51,23 @@ export const AccountAdminList = () => {
     const [status, setStatus] = useState('all');
     const [search, setSearch] = useState('');
     const [roleIds, setRoleIds] = useState<string[]>([]);
+    const [page, setPage] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
 
     const filters = {
         ...(status !== 'all' && { status }),
         ...(search && { q: search }),
         ...(roleIds.length > 0 && { roleIds: roleIds.join(',') }),
+        page: page + 1,
+        limit: pageSize,
     };
 
-    const { data: accountsRaw = [], isLoading } = useAccounts(filters);
+    const { data: res, isLoading } = useAccounts(filters);
     const { data: roles = [] } = useRoles();
     const { mutate: deleteAccount } = useDeleteAccount();
 
-    const accounts = Array.isArray(accountsRaw) ? accountsRaw : [];
+    const accounts = res?.data?.recordList || [];
+    const pagination = res?.data?.pagination || { totalRecords: 0 };
 
     const roleOptions = roles.map((role: any) => ({
         value: role._id,
@@ -91,13 +96,15 @@ export const AccountAdminList = () => {
 
     const handleStatusChange = (_event: React.SyntheticEvent, newValue: string) => {
         setStatus(newValue);
+        setPage(0);
     };
 
-    // Calculate counts for badges
-    const counts = {
-        all: accounts.length,
-        active: accounts.filter(a => a.status === 'active').length,
-        inactive: accounts.filter(a => a.status === 'inactive').length,
+    // Calculate counts for badges - Note: This is local counts on current page OR we need another API for totals.
+    // For simplicity, I'll use the recordList length or total from pagination if available.
+    const counts = res?.data?.statusCounts || {
+        all: 0,
+        active: 0,
+        inactive: 0,
     };
 
     return (
@@ -136,7 +143,7 @@ export const AccountAdminList = () => {
                                         : (option.value === 'all' ? 'var(--palette-text-secondary)' : (option.value === 'active' ? 'var(--palette-success-dark)' : 'var(--palette-error-dark)')),
                                 }}
                             >
-                                {counts[option.value as keyof typeof counts] || 0}
+                                {option.value === 'all' ? (pagination.totalRecords || 0) : counts[option.value as keyof typeof counts]}
                             </TabBadge>
                         }
                         iconPosition="end"
@@ -163,7 +170,7 @@ export const AccountAdminList = () => {
                     label="Vai trò"
                     options={roleOptions}
                     value={roleIds}
-                    onChange={setRoleIds}
+                    onChange={(val) => { setRoleIds(val); setPage(0); }}
                     sx={{ minWidth: 160 }}
                 />
                 <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -171,7 +178,7 @@ export const AccountAdminList = () => {
                         maxWidth="100%"
                         placeholder="Tìm kiếm tài khoản..."
                         value={search}
-                        onChange={setSearch}
+                        onChange={(val) => { setSearch(val); setPage(0); }}
                     />
                     <ExportImport />
                 </Box>
@@ -195,6 +202,16 @@ export const AccountAdminList = () => {
                     }}
                     localeText={DATA_GRID_LOCALE_VN}
                     pagination
+                    paginationMode="server"
+                    rowCount={pagination.totalRecords || 0}
+                    paginationModel={{
+                        page,
+                        pageSize,
+                    }}
+                    onPaginationModelChange={(model) => {
+                        setPage(model.page);
+                        setPageSize(model.pageSize);
+                    }}
                     pageSizeOptions={[5, 10, 20]}
                     initialState={columnsInitialState}
                     getRowHeight={() => 'auto'}

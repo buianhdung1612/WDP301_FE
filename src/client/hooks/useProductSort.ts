@@ -13,8 +13,8 @@ const normalize = (str: string) =>
         .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase();
 
-export const useProductSort = (options: OptionType[]) => {
-    const [selectedOption, setSelectedOption] = useState<OptionType>(options[0]);
+export const useProductSort = (options: OptionType[], initialValue?: OptionType) => {
+    const [selectedOption, setSelectedOption] = useState<OptionType>(initialValue || options[0]);
     const [hoveredOption, setHoveredOption] = useState<string | null>(null);
     const [searchValue, setSearchValue] = useState("");
     const [menuOpen, setMenuOpen] = useState(false);

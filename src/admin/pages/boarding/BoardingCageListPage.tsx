@@ -156,33 +156,30 @@ export const BoardingCageListPage = () => {
     const [form, setForm] = useState<any>(initForm);
     const selectedSizeConfig = useMemo(() => getSizeConfig(form.size) || kichThuocChuongOptions[1], [form.size]);
 
-    const { data, isLoading } = useQuery({
-        queryKey: ["admin-boarding-cages"],
-        queryFn: () => getBoardingCages(),
+    const filters = useMemo(() => ({
+        page: page + 1,
+        limit: rowsPerPage,
+        status: tabStatus === "all" ? undefined : tabStatus,
+        search: searchQuery || undefined,
+    }), [page, rowsPerPage, tabStatus, searchQuery]);
+
+    const { data: res, isLoading } = useQuery({
+        queryKey: ["admin-boarding-cages", filters],
+        queryFn: () => getBoardingCages(filters),
     });
 
-    const allRows = useMemo(() => (Array.isArray(data?.data) ? data.data : []), [data]);
+    const cages = useMemo(() => (Array.isArray(res?.data?.recordList) ? res.data.recordList : []), [res]);
+    const pagination = res?.data?.pagination || { totalRecords: 0 };
 
-    const statusCounts = useMemo(() => ({
-        all: allRows.length,
-        available: allRows.filter((item: any) => item.status === "available").length,
-        occupied: allRows.filter((item: any) => item.status === "occupied").length,
-        maintenance: allRows.filter((item: any) => item.status === "maintenance").length,
-    }), [allRows]);
-
-    const filteredRows = useMemo(() => {
-        const q = searchQuery.trim().toLowerCase();
-        return allRows.filter((item: any) => {
-            if (tabStatus !== "all" && String(item.status || "") !== tabStatus) return false;
-            if (!q) return true;
-            return (
-                String(item.cageCode || "").toLowerCase().includes(q) ||
-                String(item.description || "").toLowerCase().includes(q) ||
-                String(item.type || "").toLowerCase().includes(q) ||
-                String(item.size || "").toLowerCase().includes(q)
-            );
-        });
-    }, [allRows, searchQuery, tabStatus]);
+    const statusCounts = useMemo(() => {
+        const total = pagination.totalRecords || 0;
+        return {
+            all: tabStatus === "all" ? total : 0,
+            available: tabStatus === "available" ? total : 0,
+            occupied: tabStatus === "occupied" ? total : 0,
+            maintenance: tabStatus === "maintenance" ? total : 0,
+        };
+    }, [pagination.totalRecords, tabStatus]);
 
     const createMut = useMutation({
         mutationFn: createBoardingCage,
@@ -276,9 +273,14 @@ export const BoardingCageListPage = () => {
         setPage(0);
     };
 
+    const handleSearchChange = (value: string) => {
+        setSearchQuery(value);
+        setPage(0);
+    };
+
     const handleSelectAllClick = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
-            setSelected(filteredRows.map((row: any) => row._id));
+            setSelected(cages.map((row: any) => row._id));
             return;
         }
         setSelected([]);
@@ -400,7 +402,7 @@ export const BoardingCageListPage = () => {
                 </Tabs>
 
                 <Box sx={{ p: "20px", display: "flex", alignItems: "center", gap: 2, borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                    <Search placeholder="Tìm theo mã chuồng hoặc mô tả..." value={searchQuery} onChange={setSearchQuery} maxWidth="24rem" />
+                    <Search placeholder="Tìm theo mã chuồng hoặc mô tả..." value={searchQuery} onChange={handleSearchChange} maxWidth="24rem" />
                 </Box>
 
                 <TableContainer sx={{ position: "relative", overflow: "unset" }}>
@@ -409,8 +411,8 @@ export const BoardingCageListPage = () => {
                             <TableRow>
                                 <TableCell padding="checkbox" sx={{ borderBottom: "none", textAlign: "center" }}>
                                     <Checkbox
-                                        indeterminate={selected.length > 0 && selected.length < filteredRows.length}
-                                        checked={filteredRows.length > 0 && selected.length === filteredRows.length}
+                                        indeterminate={selected.length > 0 && selected.length < cages.length}
+                                        checked={cages.length > 0 && selected.length === cages.length}
                                         onChange={handleSelectAllClick}
                                         sx={{ color: "var(--palette-text-disabled)", p: 0 }}
                                     />
@@ -431,15 +433,14 @@ export const BoardingCageListPage = () => {
                                         <Typography sx={{ color: "var(--palette-text-secondary)" }}>Đang tải dữ liệu...</Typography>
                                     </TableCell>
                                 </TableRow>
-                            ) : filteredRows.length === 0 ? (
+                            ) : cages.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={8} align="center" sx={{ py: 10 }}>
                                         <Typography sx={{ color: "var(--palette-text-secondary)" }}>Không có dữ liệu</Typography>
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                filteredRows
-                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                cages
                                     .map((row: any) => {
                                         const isItemSelected = selected.indexOf(row._id) !== -1;
                                         const statusMeta = getCageStatusMeta(row.status);
@@ -562,7 +563,7 @@ export const BoardingCageListPage = () => {
                 <TablePagination
                     rowsPerPageOptions={[10, 20, 50]}
                     component="div"
-                    count={filteredRows.length}
+                    count={pagination.totalRecords || 0}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}

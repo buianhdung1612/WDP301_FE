@@ -16,8 +16,12 @@ const withAuth = () => {
 };
 
 /** Lấy tất cả thương hiệu sản phẩm */
-export const getBrands = async (): Promise<ApiResponse<any[]>> => {
-    const response = await apiApp.get(BASE_URL, withAuth());
+export const getBrands = async (params?: any): Promise<ApiResponse<any>> => {
+    const config = {
+        ...withAuth(),
+        params
+    };
+    const response = await apiApp.get(BASE_URL, config);
     return response.data;
 };
 

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import {
     getOrders,
     getOrderDetail,
@@ -11,6 +11,7 @@ export const useOrders = (params?: any) => {
     return useQuery<any>({
         queryKey: ["orders", params],
         queryFn: () => getOrders(params),
+        placeholderData: keepPreviousData,
     });
 };
 

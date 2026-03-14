@@ -5,7 +5,6 @@ export const useDepartments = (params?: any) => {
     return useQuery({
         queryKey: ["departments", params],
         queryFn: () => api.getDepartments(params),
-        select: (res: any) => res.data || [],
     });
 };
 

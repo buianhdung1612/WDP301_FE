@@ -14,9 +14,23 @@ import {
     dataGridStyles
 } from '../configs/styles.config';
 
+import { useState } from 'react';
+
 export const ProductAttributeList = () => {
     const { t } = useTranslation();
-    const { data: attributes = [], isLoading } = useProductAttributes();
+    const [page, setPage] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [search, setSearch] = useState('');
+
+    const params = {
+        page: page + 1,
+        limit: pageSize,
+        keyword: search,
+    };
+
+    const { data: res, isLoading } = useProductAttributes(params);
+    const attributes = res?.data?.recordList || [];
+    const pagination = res?.data?.pagination || { totalRecords: 0 };
     const localeText = useDataGridLocale();
 
     return (
@@ -30,7 +44,7 @@ export const ProductAttributeList = () => {
                     columns={columnsConfig}
                     density="comfortable"
                     slots={{
-                        toolbar: ProductAttributeToolbar,
+                        toolbar: ProductAttributeToolbar as any,
                         columnSortedAscendingIcon: SortAscendingIcon,
                         columnSortedDescendingIcon: SortDescendingIcon,
                         columnUnsortedIcon: UnsortedIcon,
@@ -40,9 +54,25 @@ export const ProductAttributeList = () => {
                             </Box>
                         )
                     }}
+                    slotProps={{
+                        toolbar: {
+                            search,
+                            onSearchChange: (val: string) => { setSearch(val); setPage(0); }
+                        } as any
+                    }}
                     localeText={localeText}
                     pagination
-                    pageSizeOptions={[5, 10, 20, { value: -1, label: t("admin.common.tabs.all") }]}
+                    paginationMode="server"
+                    rowCount={pagination.totalRecords || 0}
+                    paginationModel={{
+                        page,
+                        pageSize,
+                    }}
+                    onPaginationModelChange={(model) => {
+                        setPage(model.page);
+                        setPageSize(model.pageSize);
+                    }}
+                    pageSizeOptions={[5, 10, 20]}
                     initialState={columnsInitialState}
                     getRowHeight={() => 'auto'}
                     disableRowSelectionOnClick

@@ -1,12 +1,20 @@
 import { Handbag, Heart, Search, User } from "iconoir-react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Button } from "../ui/Button"
 import { useCartStore } from "../../../stores/useCartStore";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { logout as logoutApi } from "../../api/auth.api";
+import { getSuggestions } from "../../api/product.api";
 import { toast } from "react-toastify";
+import { useState, useEffect, useRef } from "react";
 
 export const MainHeader = () => {
+    const navigate = useNavigate();
+    const [keyword, setKeyword] = useState("");
+    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const suggestionRef = useRef<HTMLDivElement>(null);
+
     const totalItemsCount = useCartStore((state) => state.totalItems());
     const totalAmount = useCartStore((state) => state.totalAmount());
     const items = useCartStore((state) => state.items);
@@ -18,6 +26,36 @@ export const MainHeader = () => {
 
     const cartCount = isCartHydrated ? totalItemsCount : 0;
     const removeFromCart = useCartStore((state) => state.removeFromCart);
+
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            if (keyword.trim().length > 1) {
+                try {
+                    const res = await getSuggestions(keyword);
+                    setSuggestions(res.data);
+                    setShowSuggestions(true);
+                } catch (error) {
+                    setSuggestions([]);
+                }
+            } else {
+                setSuggestions([]);
+                setShowSuggestions(false);
+            }
+        };
+
+        const timer = setTimeout(fetchSuggestions, 300);
+        return () => clearTimeout(timer);
+    }, [keyword]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (suggestionRef.current && !suggestionRef.current.contains(event.target as Node)) {
+                setShowSuggestions(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const handleRemove = (productId: string, variant?: any) => {
         setTimeout(() => {
@@ -36,6 +74,14 @@ export const MainHeader = () => {
         }
     };
 
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (keyword.trim()) {
+            navigate(`/shop?keyword=${encodeURIComponent(keyword.trim())}`);
+            setShowSuggestions(false);
+        }
+    };
+
     return (
         <>
             <div className="p-[30px] bg-white border-b border-[#1029371A] z-50 relative">
@@ -48,12 +94,47 @@ export const MainHeader = () => {
                     </div>
 
                     {/* Form Search */}
-                    <form action="" className="w-[34.2%] flex">
-                        <input type="text" name="keyword" placeholder="Tìm kiếm sản phẩm" className="w-[95.2%] bg-[#10293708] rounded-l-[40px] h-[50px] border border-[#d7d7d7] px-[32px] py-[16px] focus:outline-none focus:border-[#102937] transition-[border] duration-300 ease-linear" />
-                        <div className="ml-[-25px] w-[50px] h-[50px] rounded-full bg-client-secondary flex items-center justify-center text-white cursor-pointer hover:bg-client-primary transition-[background] duration-300 ease-linear">
-                            <Search stroke="3" width={24} height={24} />
-                        </div>
-                    </form>
+                    <div className="w-[34.2%] relative" ref={suggestionRef}>
+                        <form onSubmit={handleSearch} className="flex">
+                            <input
+                                type="text"
+                                value={keyword}
+                                onChange={(e) => setKeyword(e.target.value)}
+                                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                                placeholder="Tìm kiếm sản phẩm"
+                                className="w-[95.2%] bg-[#10293708] rounded-l-[40px] h-[50px] border border-[#d7d7d7] px-[32px] py-[16px] focus:outline-none focus:border-[#102937] transition-[border] duration-300 ease-linear"
+                            />
+                            <button type="submit" className="ml-[-25px] w-[50px] h-[50px] rounded-full bg-client-secondary flex items-center justify-center text-white cursor-pointer hover:bg-client-primary transition-[background] duration-300 ease-linear border-none">
+                                <Search stroke="3" width={24} height={24} />
+                            </button>
+                        </form>
+
+                        {/* Gợi ý tìm kiếm */}
+                        {showSuggestions && suggestions.length > 0 && (
+                            <div className="absolute top-[60px] left-0 w-full bg-white border border-[#eee] shadow-xl rounded-[20px] z-[100] overflow-hidden py-[10px]">
+                                {suggestions.map((item) => (
+                                    <Link
+                                        key={item._id}
+                                        to={`/product/detail/${item.slug}`}
+                                        onClick={() => setShowSuggestions(false)}
+                                        className="flex items-center gap-[15px] px-[20px] py-[10px] hover:bg-[#fafafa] transition-default"
+                                    >
+                                        <img src={item.images?.[0]} alt="" className="w-[40px] h-[40px] object-cover rounded-[5px]" />
+                                        <div className="flex-1">
+                                            <p className="text-[14px] font-secondary text-client-secondary line-clamp-1">{item.name}</p>
+                                            <p className="text-[12px] text-client-primary font-bold">{(item.priceNew || 0).toLocaleString()}đ</p>
+                                        </div>
+                                    </Link>
+                                ))}
+                                <div
+                                    onClick={handleSearch}
+                                    className="p-[10px] text-center text-[13px] text-gray-400 hover:text-client-primary cursor-pointer transition-default border-t border-[#eee]"
+                                >
+                                    Xem tất cả kết quả cho "{keyword}"
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Actions */}
                     <div className="flex items-center gap-[30px] w-[34.2%] justify-end mr-[16px]">

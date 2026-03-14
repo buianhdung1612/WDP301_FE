@@ -15,6 +15,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createProductSchema } from "../../schemas/product.schema";
 import { LoadingButton } from "../../components/ui/LoadingButton";
+import { useBrands } from "../brand/hooks/useBrand";
 
 interface CustomFile extends File {
     preview: string;
@@ -62,6 +63,7 @@ export const ProductEditPage = () => {
             attributes: [],
             variants: [],
             images: [],
+            brandId: "",
         }
     });
 
@@ -79,6 +81,7 @@ export const ProductEditPage = () => {
 
     const { data: createData } = useCreateProductData();
     const { data: detailData, isLoading, error } = useProductDetail(id);
+    const { data: brands = [] } = useBrands();
     const { mutate: update, isPending } = useUpdateProduct();
 
     const actualDetail = detailData?.productDetail || null;
@@ -177,6 +180,7 @@ export const ProductEditPage = () => {
                 stock: String(actualDetail.stock || "0"),
                 status: actualDetail.status || "active",
                 category: actualDetail.category || [],
+                brandId: actualDetail.brandId || "",
                 attributes: actualDetail.attributes || [],
                 variants: initialVariants,
                 images: actualDetail.images || [],
@@ -370,13 +374,45 @@ export const ProductEditPage = () => {
                             onToggle={toggle(setExpandedExtra)}
                         >
                             <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
-                                <CategoryTreeSelectGeneric
-                                    multiple
-                                    name="category"
-                                    control={control}
-                                    categories={nestedCategories}
-                                    label={t('admin.product.fields.select_category')}
-                                />
+                                <Box
+                                    sx={{
+                                        display: "grid",
+                                        gridTemplateColumns: "repeat(2, 1fr)",
+                                        gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))",
+                                    }}
+                                >
+                                    <CategoryTreeSelectGeneric
+                                        multiple
+                                        name="category"
+                                        control={control}
+                                        categories={nestedCategories}
+                                        label={t('admin.product.fields.select_category')}
+                                    />
+
+                                    <Controller
+                                        name="brandId"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <FormControl fullWidth>
+                                                <InputLabel shrink>{t('admin.product.fields.brand') || "Thương hiệu"}</InputLabel>
+                                                <Select
+                                                    {...field}
+                                                    displayEmpty
+                                                    input={<OutlinedInput label={"Thương hiệu"} notched />}
+                                                >
+                                                    <MenuItem value="">
+                                                        <Box sx={{ color: "#919EAB" }}>Chọn thương hiệu</Box>
+                                                    </MenuItem>
+                                                    {brands.map((brand: any) => (
+                                                        <MenuItem key={brand.id} value={brand.id}>
+                                                            {brand.name}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        )}
+                                    />
+                                </Box>
                                 <Box
                                     sx={{
                                         display: "grid",

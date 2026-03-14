@@ -25,6 +25,12 @@ export const useProductColumns = () => {
             renderCell: RenderCreatedAtCell,
         },
         {
+            field: "brandName",
+            headerName: t("admin.product.fields.brand") || "Thương hiệu",
+            width: 140,
+            filterable: true,
+        },
+        {
             field: "stock",
             headerName: t("admin.product.fields.stock") || "Stock",
             width: 160,

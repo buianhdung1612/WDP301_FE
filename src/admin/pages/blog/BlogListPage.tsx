@@ -10,7 +10,7 @@ import { SortButton } from "../../components/ui/SortButton";
 import { TabList } from "../../components/ui/TabList";
 import { BlogList } from "./sections/BlogList";
 import { useBlogs } from "./hooks/useBlog";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 
 
 import { useTranslation } from "react-i18next";
@@ -18,51 +18,29 @@ import { useTranslation } from "react-i18next";
 export const BlogListPage = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { data: allBlogs = [], isLoading } = useBlogs();
-
-
     const [sortBy, setSortBy] = useState("latest");
     const [tabStatus, setTabStatus] = useState(0); // 0: All, 1: Published, 2: Draft, 3: Archived
+    const [search, setSearch] = useState("");
+    const [page, setPage] = useState(1);
 
-    // Filter Logic
-    const filteredBlogs = useMemo(() => {
-        let result = [...allBlogs];
+    const filters = {
+        page,
+        limit: 10,
+        keyword: search,
+        status: tabStatus === 1 ? 'published' : (tabStatus === 2 ? 'draft' : (tabStatus === 3 ? 'archived' : undefined)),
+        sort: sortBy
+    };
 
-        // 1. Filter by Status
-        if (tabStatus === 1) {
-            result = result.filter(blog => blog.status === 'published');
-        } else if (tabStatus === 2) {
-            result = result.filter(blog => blog.status === 'draft');
-        } else if (tabStatus === 3) {
-            result = result.filter(blog => blog.status === 'archived');
-        }
+    const { data, isLoading } = useBlogs(filters);
+    const blogs = data?.recordList || [];
+    const pagination = data?.pagination || { totalRecords: 0 };
 
-
-
-        // 3. Sort
-        result.sort((a, b) => {
-            if (sortBy === 'latest') {
-                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-            } else if (sortBy === 'oldest') {
-                return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-            } else if (sortBy === 'popular') {
-                return (b.viewCount || 0) - (a.viewCount || 0);
-            }
-            return 0;
-        });
-
-        return result;
-    }, [allBlogs, tabStatus, sortBy]);
-
-    // Counts Logic
-    const counts = useMemo(() => {
-        return {
-            all: allBlogs.length,
-            published: allBlogs.filter((b: any) => b.status?.toLowerCase() === 'published').length,
-            draft: allBlogs.filter((b: any) => b.status?.toLowerCase() === 'draft').length,
-            archived: allBlogs.filter((b: any) => b.status?.toLowerCase() === 'archived').length,
-        };
-    }, [allBlogs]);
+    const counts = {
+        all: pagination.totalRecords || 0,
+        published: blogs.filter((b: any) => b.status === 'published').length,
+        draft: blogs.filter((b: any) => b.status === 'draft').length,
+        archived: blogs.filter((b: any) => b.status === 'archived').length,
+    };
 
     // Inline removeVietnameseTones if not available globally
 
@@ -106,22 +84,28 @@ export const BlogListPage = () => {
             </div>
 
             <Box sx={{ mb: "40px", display: 'flex', justifyContent: "space-between" }}>
-                <Search />
+                <Search
+                    value={search}
+                    onChange={(val) => { setSearch(val); setPage(1); }}
+                />
                 <SortButton
                     value={sortBy}
-                    onChange={setSortBy}
+                    onChange={(val) => { setSortBy(val); setPage(1); }}
                 />
             </Box>
 
             <TabList
                 value={tabStatus}
-                onChange={(_, newVal) => setTabStatus(newVal)}
+                onChange={(_, newVal) => { setTabStatus(newVal); setPage(1); }}
                 counts={counts}
             />
 
             <BlogList
-                blogs={filteredBlogs}
+                blogs={blogs}
                 isLoading={isLoading}
+                page={page}
+                onPageChange={setPage}
+                pagination={pagination}
             />
         </>
     )

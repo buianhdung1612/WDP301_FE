@@ -3,7 +3,8 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import { Icon } from '@iconify/react';
 import { useTranslation } from 'react-i18next';
-
+import { useState, useEffect, useCallback } from 'react';
+import debounce from 'lodash/debounce';
 
 interface SearchProps {
     maxWidth?: string | number;
@@ -14,7 +15,27 @@ interface SearchProps {
 
 export const Search = ({ maxWidth = 260, placeholder, value, onChange }: SearchProps) => {
     const { t } = useTranslation();
+    const [internalValue, setInternalValue] = useState(value || '');
     const displayPlaceholder = placeholder || t("admin.common.search");
+
+    // Sync internal value with prop value (e.g. when cleared from outside)
+    useEffect(() => {
+        setInternalValue(value || '');
+    }, [value]);
+
+    // Create a debounced version of the onChange callback
+    const debouncedOnChange = useCallback(
+        debounce((val: string) => {
+            onChange?.(val);
+        }, 500),
+        [onChange]
+    );
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newVal = e.target.value;
+        setInternalValue(newVal);
+        debouncedOnChange(newVal);
+    };
 
     return (
         <Box sx={{ width: '100%', maxWidth: maxWidth }}>
@@ -22,8 +43,8 @@ export const Search = ({ maxWidth = 260, placeholder, value, onChange }: SearchP
                 fullWidth
                 variant="outlined"
                 placeholder={displayPlaceholder}
-                value={value || ''}
-                onChange={(e) => onChange?.(e.target.value)}
+                value={internalValue}
+                onChange={handleInputChange}
                 slotProps={{
                     input: {
                         startAdornment: (

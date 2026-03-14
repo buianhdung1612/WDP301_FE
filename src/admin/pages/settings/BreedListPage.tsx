@@ -3,7 +3,7 @@ import { DataGrid, GridColDef, GridActionsCell, GridActionsCellItem } from "@mui
 import { Icon } from "@iconify/react";
 import { Title } from "../../components/ui/Title";
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useBreeds, useCreateBreed, useUpdateBreed, useDeleteBreed } from "../account-user/hooks/useBreed";
 import { toast } from "react-toastify";
 import { prefixAdmin } from "../../constants/routes";
@@ -30,12 +30,8 @@ const TabBadge = styled('span')(() => ({
 export const BreedListPage = () => {
     const [search, setSearch] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
-
-    const { data: breedsRaw = [], isLoading } = useBreeds();
-    const { mutate: createBreed } = useCreateBreed();
-    const { mutate: updateBreed } = useUpdateBreed();
-    const { mutate: deleteBreed } = useDeleteBreed();
-
+    const [page, setPage] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
     const [openDialog, setOpenDialog] = useState(false);
     const [selectedBreed, setSelectedBreed] = useState<any>(null);
     const [formData, setFormData] = useState({
@@ -44,23 +40,26 @@ export const BreedListPage = () => {
         description: ""
     });
 
-    const breeds = useMemo(() => {
-        const list = Array.isArray(breedsRaw) ? breedsRaw : [];
-        return list.filter((b: any) => {
-            const matchesSearch = b.name.toLowerCase().includes(search.toLowerCase());
-            const matchesType = typeFilter === "all" || b.type === typeFilter;
-            return matchesSearch && matchesType;
-        });
-    }, [breedsRaw, search, typeFilter]);
+    const params = {
+        page: page + 1,
+        limit: pageSize,
+        keyword: search,
+        type: typeFilter === "all" ? undefined : typeFilter,
+    };
 
-    const counts = useMemo(() => {
-        const list = Array.isArray(breedsRaw) ? breedsRaw : [];
-        return {
-            all: list.length,
-            dog: list.filter((b: any) => b.type === "dog").length,
-            cat: list.filter((b: any) => b.type === "cat").length,
-        };
-    }, [breedsRaw]);
+    const { data: res, isLoading } = useBreeds(params);
+    const { mutate: createBreed } = useCreateBreed();
+    const { mutate: updateBreed } = useUpdateBreed();
+    const { mutate: deleteBreed } = useDeleteBreed();
+
+    const breeds = res?.data?.recordList || [];
+    const pagination = res?.data?.pagination || { totalRecords: 0 };
+
+    const counts = {
+        all: pagination.totalRecords || 0,
+        dog: breeds.filter((b: any) => b.type === "dog").length,
+        cat: breeds.filter((b: any) => b.type === "cat").length,
+    };
 
     const handleOpenDialog = (breed: any = null) => {
         if (breed) {
@@ -244,7 +243,7 @@ export const BreedListPage = () => {
             }}>
                 <Tabs
                     value={typeFilter}
-                    onChange={(_e, val) => setTypeFilter(val)}
+                    onChange={(_e, val) => { setTypeFilter(val); setPage(0); }}
                     sx={{
                         px: '20px',
                         minHeight: "48px",
@@ -294,7 +293,7 @@ export const BreedListPage = () => {
                             maxWidth="100%"
                             placeholder="Tìm kiếm theo tên giống..."
                             value={search}
-                            onChange={setSearch}
+                            onChange={(val) => { setSearch(val); setPage(0); }}
                         />
                         <ExportImport />
                     </Box>
@@ -321,12 +320,17 @@ export const BreedListPage = () => {
                         }}
                         localeText={DATA_GRID_LOCALE_VN}
                         pagination
-                        pageSizeOptions={[5, 10, 25]}
-                        initialState={{
-                            pagination: {
-                                paginationModel: { pageSize: 10 },
-                            },
+                        paginationMode="server"
+                        rowCount={pagination.totalRecords || 0}
+                        paginationModel={{
+                            page,
+                            pageSize,
                         }}
+                        onPaginationModelChange={(model) => {
+                            setPage(model.page);
+                            setPageSize(model.pageSize);
+                        }}
+                        pageSizeOptions={[5, 10, 25]}
                         sx={{
                             ...dataGridStyles,
                             border: 'none',

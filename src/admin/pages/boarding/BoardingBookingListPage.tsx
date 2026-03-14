@@ -91,12 +91,20 @@ export const BoardingBookingListPage = () => {
     const [openRows, setOpenRows] = useState<string[]>([]);
     const [anchorEl, setAnchorEl] = useState<{ [key: string]: HTMLElement | null }>({});
 
-    const { data, isLoading } = useQuery({
-        queryKey: ["admin-boarding-bookings"],
-        queryFn: () => getBoardingBookings(),
+    const filters = useMemo(() => ({
+        page: page + 1,
+        limit: rowsPerPage,
+        status: tabStatus === "all" ? undefined : tabStatus,
+        search: searchQuery || undefined,
+    }), [page, rowsPerPage, tabStatus, searchQuery]);
+
+    const { data: res, isLoading } = useQuery({
+        queryKey: ["admin-boarding-bookings", filters],
+        queryFn: () => getBoardingBookings(filters),
     });
 
-    const allRows = useMemo(() => (Array.isArray(data?.data) ? data.data : []), [data]);
+    const bookings = useMemo(() => (Array.isArray(res?.data?.recordList) ? res.data.recordList : []), [res]);
+    const pagination = res?.data?.pagination || { totalRecords: 0 };
 
     const updateStatusMut = useMutation({
         mutationFn: ({ id, status }: { id: string; status: string }) => updateBoardingBookingStatus(id, status),
@@ -120,33 +128,15 @@ export const BoardingBookingListPage = () => {
         },
     });
 
-    const statusCounts = useMemo(() => ({
-        all: allRows.length,
-        pending: allRows.filter((row: any) => row.boardingStatus === "pending").length,
-        held: allRows.filter((row: any) => row.boardingStatus === "held").length,
-        confirmed: allRows.filter((row: any) => row.boardingStatus === "confirmed").length,
-        "checked-in": allRows.filter((row: any) => row.boardingStatus === "checked-in").length,
-        "checked-out": allRows.filter((row: any) => row.boardingStatus === "checked-out").length,
-        cancelled: allRows.filter((row: any) => row.boardingStatus === "cancelled").length,
-    }), [allRows]);
-
-    const filteredRows = useMemo(() => {
-        const q = searchQuery.trim().toLowerCase();
-        return allRows.filter((row: any) => {
-            if (tabStatus !== "all" && String(row.boardingStatus || "") !== tabStatus) return false;
-            if (!q) return true;
-            const petNames = Array.isArray(row.petIds)
-                ? row.petIds.map((pet: any) => String(pet?.name || "")).join(" ")
-                : "";
-            return (
-                String(row.code || "").toLowerCase().includes(q) ||
-                String(row.fullName || row.userId?.fullName || "").toLowerCase().includes(q) ||
-                String(row.phone || row.userId?.phone || "").toLowerCase().includes(q) ||
-                String(row.cageId?.cageCode || "").toLowerCase().includes(q) ||
-                petNames.toLowerCase().includes(q)
-            );
-        });
-    }, [allRows, searchQuery, tabStatus]);
+    const statusCounts = res?.data?.statusCounts || {
+        all: 0,
+        pending: 0,
+        held: 0,
+        confirmed: 0,
+        "checked-in": 0,
+        "checked-out": 0,
+        cancelled: 0,
+    };
 
     const handleOpenMenu = (event: MouseEvent<HTMLElement>, id: string) => {
         setAnchorEl((prev) => ({ ...prev, [id]: event.currentTarget }));
@@ -170,9 +160,14 @@ export const BoardingBookingListPage = () => {
         setPage(0);
     };
 
+    const handleSearchChange = (value: string) => {
+        setSearchQuery(value);
+        setPage(0);
+    };
+
     const handleSelectAllClick = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
-            setSelected(filteredRows.map((row: any) => row._id));
+            setSelected(bookings.map((row: any) => row._id));
             return;
         }
         setSelected([]);
@@ -308,7 +303,7 @@ export const BoardingBookingListPage = () => {
                     <Search
                         placeholder="Tìm theo mã đơn, khách hàng, số điện thoại, mã chuồng..."
                         value={searchQuery}
-                        onChange={setSearchQuery}
+                        onChange={handleSearchChange}
                         maxWidth="26rem"
                     />
                 </Box>
@@ -319,8 +314,8 @@ export const BoardingBookingListPage = () => {
                             <TableRow>
                                 <TableCell padding="checkbox" sx={{ borderBottom: "none", textAlign: "center" }}>
                                     <Checkbox
-                                        indeterminate={selected.length > 0 && selected.length < filteredRows.length}
-                                        checked={filteredRows.length > 0 && selected.length === filteredRows.length}
+                                        indeterminate={selected.length > 0 && selected.length < bookings.length}
+                                        checked={bookings.length > 0 && selected.length === bookings.length}
                                         onChange={handleSelectAllClick}
                                         sx={{ color: "var(--palette-text-disabled)", p: 0 }}
                                     />
@@ -342,7 +337,7 @@ export const BoardingBookingListPage = () => {
                                         <CircularProgress size={32} />
                                     </TableCell>
                                 </TableRow>
-                            ) : filteredRows.length === 0 ? (
+                            ) : bookings.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={9} align="center" sx={{ py: 10 }}>
                                         <Typography sx={{ color: "var(--palette-text-secondary)" }}>
@@ -351,8 +346,7 @@ export const BoardingBookingListPage = () => {
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                filteredRows
-                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                bookings
                                     .map((row: any) => {
                                         const isItemSelected = selected.indexOf(row._id) !== -1;
                                         const isOpen = openRows.includes(row._id);
@@ -360,243 +354,243 @@ export const BoardingBookingListPage = () => {
 
                                         return (
                                             <Fragment key={row._id}>
-                                            <TableRow
-                                                hover
-                                                selected={isItemSelected}
-                                                sx={{
-                                                    "&:hover": { bgcolor: "var(--palette-action-hover)" },
-                                                    ...(isOpen && { bgcolor: "transparent" }),
-                                                    transition: "background-color 0.2s",
-                                                }}
-                                            >
-                                                <TableCell padding="checkbox" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", textAlign: "center" }}>
-                                                    <Checkbox
-                                                        checked={isItemSelected}
-                                                        onClick={() => handleSelectRow(row._id)}
-                                                        sx={{ color: "var(--palette-text-disabled)", p: 0 }}
-                                                    />
-                                                </TableCell>
-
-                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <Typography
-                                                        sx={{
-                                                            fontWeight: 600,
-                                                            fontSize: "0.875rem",
-                                                            color: "var(--palette-text-primary)",
-                                                            textDecoration: "underline",
-                                                        }}
-                                                    >
-                                                        #{row.code?.slice(-6).toUpperCase() || "N/A"}
-                                                    </Typography>
-                                                </TableCell>
-
-                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <Stack direction="row" spacing={2} alignItems="center">
-                                                        <Avatar
-                                                            src={row.userId?.avatar}
-                                                            sx={{ width: 40, height: 40, borderRadius: "var(--shape-borderRadius-sm)" }}
-                                                        >
-                                                            <Icon icon="eva:person-fill" width={22} />
-                                                        </Avatar>
-                                                        <Stack spacing={0.25}>
-                                                            <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
-                                                                {row.fullName || row.userId?.fullName || "Khách vãng lai"}
-                                                            </Typography>
-                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>
-                                                                {row.phone || row.userId?.phone || row.userId?.email || "Không có thông tin"}
-                                                            </Typography>
-                                                        </Stack>
-                                                    </Stack>
-                                                </TableCell>
-
-
-                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <Stack spacing={0.25}>
-                                                        <Typography sx={{ fontWeight: 500, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
-                                                            {dayjs(row.checkInDate).format("DD/MM/YYYY")} - {dayjs(row.checkOutDate).format("DD/MM/YYYY")}
-                                                        </Typography>
-                                                        <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>
-                                                            {Number(row.numberOfDays || 0)} đêm
-                                                        </Typography>
-                                                    </Stack>
-                                                </TableCell>
-
-                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
-                                                        {formatCurrency(Number(row.total || 0))}
-                                                    </Typography>
-                                                </TableCell>
-
-                                                <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <TextField
-                                                        select
-                                                        size="small"
-                                                        value={String(row.boardingStatus || "")}
-                                                        onChange={(event) => {
-                                                            const nextStatus = String(event.target.value || "");
-                                                            if (!nextStatus || nextStatus === String(row.boardingStatus || "")) return;
-                                                            updateStatusMut.mutate({ id: row._id, status: nextStatus });
-                                                        }}
-                                                        disabled={updateStatusMut.isPending}
-                                                        sx={{
-                                                            minWidth: 170,
-                                                            "& .MuiInputBase-input": { py: "6px", fontSize: "0.8125rem", fontWeight: 600 },
-                                                        }}
-                                                    >
-                                                        {boardingStatusOptions.map((option) => (
-                                                            <MenuItem key={option.value} value={option.value}>
-                                                                {option.label}
-                                                            </MenuItem>
-                                                        ))}
-                                                    </TextField>
-                                                </TableCell>
-
-                                                <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <TextField
-                                                        select
-                                                        size="small"
-                                                        value={String(row.paymentStatus || "")}
-                                                        onChange={(event) => {
-                                                            const nextStatus = String(event.target.value || "");
-                                                            if (!nextStatus || nextStatus === String(row.paymentStatus || "")) return;
-                                                            updatePaymentMut.mutate({ id: row._id, status: nextStatus });
-                                                        }}
-                                                        disabled={updatePaymentMut.isPending}
-                                                        sx={{
-                                                            minWidth: 160,
-                                                            "& .MuiInputBase-input": { py: "6px", fontSize: "0.8125rem", fontWeight: 600 },
-                                                        }}
-                                                    >
-                                                        {paymentStatusOptions.map((option) => (
-                                                            <MenuItem key={option.value} value={option.value}>
-                                                                {option.label}
-                                                            </MenuItem>
-                                                        ))}
-                                                    </TextField>
-                                                </TableCell>
-
-                                                <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", width: 96 }}>
-                                                    <Stack direction="row" spacing={0} justifyContent="flex-end">
-                                                        <IconButton
-                                                            onClick={() => toggleRow(row._id)}
-                                                            sx={{
-                                                                color: "var(--palette-text-primary)",
-                                                                bgcolor: isOpen ? "var(--palette-action-hover)" : "transparent",
-                                                                "&:hover": {
-                                                                    bgcolor: "rgba(var(--palette-action-activeChannel) / var(--palette-action-hoverOpacity))",
-                                                                },
-                                                            }}
-                                                        >
-                                                            <Icon icon={isOpen ? "eva:arrow-ios-upward-fill" : "eva:arrow-ios-downward-fill"} width={20} />
-                                                        </IconButton>
-                                                        <IconButton
-                                                            onClick={(event) => handleOpenMenu(event, row._id)}
-                                                            sx={{
-                                                                color: "var(--palette-text-primary)",
-                                                                bgcolor: Boolean(anchorEl[row._id]) ? "var(--palette-action-hover)" : "transparent",
-                                                                "&:hover": {
-                                                                    bgcolor: "rgba(var(--palette-action-activeChannel) / var(--palette-action-hoverOpacity))",
-                                                                },
-                                                            }}
-                                                        >
-                                                            <Icon icon="eva:more-vertical-fill" width={20} />
-                                                        </IconButton>
-                                                    </Stack>
-                                                    <Menu
-                                                        anchorEl={anchorEl[row._id]}
-                                                        open={Boolean(anchorEl[row._id])}
-                                                        onClose={() => handleCloseMenu(row._id)}
-                                                        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                                                        transformOrigin={{ vertical: "top", horizontal: "right" }}
-                                                        slotProps={{
-                                                            paper: {
-                                                                sx: {
-                                                                    width: 240,
-                                                                    boxShadow: "var(--customShadows-z20)",
-                                                                    borderRadius: "var(--shape-borderRadius-md)",
-                                                                    p: 0.5,
-                                                                },
-                                                            },
-                                                        }}
-                                                    >
-                                                        <MenuItem
-                                                            onClick={() => {
-                                                                handleCloseMenu(row._id);
-                                                                navigate(`/${prefixAdmin}/boarding/care-schedule`);
-                                                            }}
-                                                        >
-                                                            <Icon icon="solar:calendar-mark-bold" width={18} style={{ marginRight: 8 }} />
-                                                            Lịch chăm sóc
-                                                        </MenuItem>
-                                                    </Menu>
-                                                </TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell
-                                                    colSpan={9}
+                                                <TableRow
+                                                    hover
+                                                    selected={isItemSelected}
                                                     sx={{
-                                                        p: 0,
-                                                        bgcolor: "var(--palette-background-neutral)",
-                                                        borderBottom: isOpen ? "1px dashed var(--palette-divider)" : "none",
+                                                        "&:hover": { bgcolor: "var(--palette-action-hover)" },
+                                                        ...(isOpen && { bgcolor: "transparent" }),
+                                                        transition: "background-color 0.2s",
                                                     }}
                                                 >
-                                                    <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                                                        <Box
+                                                    <TableCell padding="checkbox" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", textAlign: "center" }}>
+                                                        <Checkbox
+                                                            checked={isItemSelected}
+                                                            onClick={() => handleSelectRow(row._id)}
+                                                            sx={{ color: "var(--palette-text-disabled)", p: 0 }}
+                                                        />
+                                                    </TableCell>
+
+                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                        <Typography
                                                             sx={{
-                                                                bgcolor: "var(--palette-background-paper)",
-                                                                borderRadius: "8px",
-                                                                m: "calc(1.5 * var(--spacing))",
-                                                                overflow: "hidden",
+                                                                fontWeight: 600,
+                                                                fontSize: "0.875rem",
+                                                                color: "var(--palette-text-primary)",
+                                                                textDecoration: "underline",
                                                             }}
                                                         >
-                                                            {petSlotItems.map((item) => (
-                                                                <Stack
-                                                                    key={`${row._id}-${item.key}`}
-                                                                    direction="row"
-                                                                    alignItems="center"
-                                                                    spacing={2}
-                                                                    sx={{
-                                                                        px: "calc(2 * var(--spacing))",
-                                                                        py: "calc(1.5 * var(--spacing))",
-                                                                        "&:not(:last-of-type)": {
-                                                                            borderBottom: "solid 2px var(--palette-background-neutral)",
-                                                                        },
-                                                                    }}
-                                                                >
-                                                                    <Avatar
-                                                                        src={(row.petIds || []).find((pet: any) => String(pet?._id || pet?.id) === item.key)?.avatar}
-                                                                        variant="rounded"
-                                                                        sx={{ width: 48, height: 48, borderRadius: "var(--shape-borderRadius-sm)" }}
-                                                                    >
-                                                                        <Icon icon="solar:dog-bold" width={22} />
-                                                                    </Avatar>
-                                                                    <Box sx={{ flexGrow: 1 }}>
-                                                                        <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
-                                                                            {item.petName}
-                                                                        </Typography>
-                                                                        <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.25 }}>
-                                                                            {item.cageLabel}
-                                                                        </Typography>
-                                                                        {row.specialCare || row.notes ? (
-                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.5 }}>
-                                                                                {row.specialCare || row.notes}
-                                                                            </Typography>
-                                                                        ) : null}
-                                                                    </Box>
-                                                                    <Box sx={{ textAlign: "right", minWidth: 132 }}>
-                                                                        <Typography sx={{ fontWeight: 600, fontSize: "0.8125rem", color: "var(--palette-text-primary)" }}>
-                                                                            {formatCurrency(Number(row.pricePerDay || 0))}/đêm
-                                                                        </Typography>
-                                                                        <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.25 }}>
-                                                                            {Number(row.numberOfDays || 0)} đêm
-                                                                        </Typography>
-                                                                    </Box>
-                                                                </Stack>
+                                                            #{row.code?.slice(-6).toUpperCase() || "N/A"}
+                                                        </Typography>
+                                                    </TableCell>
+
+                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                        <Stack direction="row" spacing={2} alignItems="center">
+                                                            <Avatar
+                                                                src={row.userId?.avatar}
+                                                                sx={{ width: 40, height: 40, borderRadius: "var(--shape-borderRadius-sm)" }}
+                                                            >
+                                                                <Icon icon="eva:person-fill" width={22} />
+                                                            </Avatar>
+                                                            <Stack spacing={0.25}>
+                                                                <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
+                                                                    {row.fullName || row.userId?.fullName || "Khách vãng lai"}
+                                                                </Typography>
+                                                                <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>
+                                                                    {row.phone || row.userId?.phone || row.userId?.email || "Không có thông tin"}
+                                                                </Typography>
+                                                            </Stack>
+                                                        </Stack>
+                                                    </TableCell>
+
+
+                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                        <Stack spacing={0.25}>
+                                                            <Typography sx={{ fontWeight: 500, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
+                                                                {dayjs(row.checkInDate).format("DD/MM/YYYY")} - {dayjs(row.checkOutDate).format("DD/MM/YYYY")}
+                                                            </Typography>
+                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>
+                                                                {Number(row.numberOfDays || 0)} đêm
+                                                            </Typography>
+                                                        </Stack>
+                                                    </TableCell>
+
+                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                        <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
+                                                            {formatCurrency(Number(row.total || 0))}
+                                                        </Typography>
+                                                    </TableCell>
+
+                                                    <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                        <TextField
+                                                            select
+                                                            size="small"
+                                                            value={String(row.boardingStatus || "")}
+                                                            onChange={(event) => {
+                                                                const nextStatus = String(event.target.value || "");
+                                                                if (!nextStatus || nextStatus === String(row.boardingStatus || "")) return;
+                                                                updateStatusMut.mutate({ id: row._id, status: nextStatus });
+                                                            }}
+                                                            disabled={updateStatusMut.isPending}
+                                                            sx={{
+                                                                minWidth: 170,
+                                                                "& .MuiInputBase-input": { py: "6px", fontSize: "0.8125rem", fontWeight: 600 },
+                                                            }}
+                                                        >
+                                                            {boardingStatusOptions.map((option) => (
+                                                                <MenuItem key={option.value} value={option.value}>
+                                                                    {option.label}
+                                                                </MenuItem>
                                                             ))}
-                                                        </Box>
-                                                    </Collapse>
-                                                </TableCell>
-                                            </TableRow>
+                                                        </TextField>
+                                                    </TableCell>
+
+                                                    <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                        <TextField
+                                                            select
+                                                            size="small"
+                                                            value={String(row.paymentStatus || "")}
+                                                            onChange={(event) => {
+                                                                const nextStatus = String(event.target.value || "");
+                                                                if (!nextStatus || nextStatus === String(row.paymentStatus || "")) return;
+                                                                updatePaymentMut.mutate({ id: row._id, status: nextStatus });
+                                                            }}
+                                                            disabled={updatePaymentMut.isPending}
+                                                            sx={{
+                                                                minWidth: 160,
+                                                                "& .MuiInputBase-input": { py: "6px", fontSize: "0.8125rem", fontWeight: 600 },
+                                                            }}
+                                                        >
+                                                            {paymentStatusOptions.map((option) => (
+                                                                <MenuItem key={option.value} value={option.value}>
+                                                                    {option.label}
+                                                                </MenuItem>
+                                                            ))}
+                                                        </TextField>
+                                                    </TableCell>
+
+                                                    <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", width: 96 }}>
+                                                        <Stack direction="row" spacing={0} justifyContent="flex-end">
+                                                            <IconButton
+                                                                onClick={() => toggleRow(row._id)}
+                                                                sx={{
+                                                                    color: "var(--palette-text-primary)",
+                                                                    bgcolor: isOpen ? "var(--palette-action-hover)" : "transparent",
+                                                                    "&:hover": {
+                                                                        bgcolor: "rgba(var(--palette-action-activeChannel) / var(--palette-action-hoverOpacity))",
+                                                                    },
+                                                                }}
+                                                            >
+                                                                <Icon icon={isOpen ? "eva:arrow-ios-upward-fill" : "eva:arrow-ios-downward-fill"} width={20} />
+                                                            </IconButton>
+                                                            <IconButton
+                                                                onClick={(event) => handleOpenMenu(event, row._id)}
+                                                                sx={{
+                                                                    color: "var(--palette-text-primary)",
+                                                                    bgcolor: Boolean(anchorEl[row._id]) ? "var(--palette-action-hover)" : "transparent",
+                                                                    "&:hover": {
+                                                                        bgcolor: "rgba(var(--palette-action-activeChannel) / var(--palette-action-hoverOpacity))",
+                                                                    },
+                                                                }}
+                                                            >
+                                                                <Icon icon="eva:more-vertical-fill" width={20} />
+                                                            </IconButton>
+                                                        </Stack>
+                                                        <Menu
+                                                            anchorEl={anchorEl[row._id]}
+                                                            open={Boolean(anchorEl[row._id])}
+                                                            onClose={() => handleCloseMenu(row._id)}
+                                                            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                                                            transformOrigin={{ vertical: "top", horizontal: "right" }}
+                                                            slotProps={{
+                                                                paper: {
+                                                                    sx: {
+                                                                        width: 240,
+                                                                        boxShadow: "var(--customShadows-z20)",
+                                                                        borderRadius: "var(--shape-borderRadius-md)",
+                                                                        p: 0.5,
+                                                                    },
+                                                                },
+                                                            }}
+                                                        >
+                                                            <MenuItem
+                                                                onClick={() => {
+                                                                    handleCloseMenu(row._id);
+                                                                    navigate(`/${prefixAdmin}/boarding/care-schedule`);
+                                                                }}
+                                                            >
+                                                                <Icon icon="solar:calendar-mark-bold" width={18} style={{ marginRight: 8 }} />
+                                                                Lịch chăm sóc
+                                                            </MenuItem>
+                                                        </Menu>
+                                                    </TableCell>
+                                                </TableRow>
+                                                <TableRow>
+                                                    <TableCell
+                                                        colSpan={9}
+                                                        sx={{
+                                                            p: 0,
+                                                            bgcolor: "var(--palette-background-neutral)",
+                                                            borderBottom: isOpen ? "1px dashed var(--palette-divider)" : "none",
+                                                        }}
+                                                    >
+                                                        <Collapse in={isOpen} timeout="auto" unmountOnExit>
+                                                            <Box
+                                                                sx={{
+                                                                    bgcolor: "var(--palette-background-paper)",
+                                                                    borderRadius: "8px",
+                                                                    m: "calc(1.5 * var(--spacing))",
+                                                                    overflow: "hidden",
+                                                                }}
+                                                            >
+                                                                {petSlotItems.map((item) => (
+                                                                    <Stack
+                                                                        key={`${row._id}-${item.key}`}
+                                                                        direction="row"
+                                                                        alignItems="center"
+                                                                        spacing={2}
+                                                                        sx={{
+                                                                            px: "calc(2 * var(--spacing))",
+                                                                            py: "calc(1.5 * var(--spacing))",
+                                                                            "&:not(:last-of-type)": {
+                                                                                borderBottom: "solid 2px var(--palette-background-neutral)",
+                                                                            },
+                                                                        }}
+                                                                    >
+                                                                        <Avatar
+                                                                            src={(row.petIds || []).find((pet: any) => String(pet?._id || pet?.id) === item.key)?.avatar}
+                                                                            variant="rounded"
+                                                                            sx={{ width: 48, height: 48, borderRadius: "var(--shape-borderRadius-sm)" }}
+                                                                        >
+                                                                            <Icon icon="solar:dog-bold" width={22} />
+                                                                        </Avatar>
+                                                                        <Box sx={{ flexGrow: 1 }}>
+                                                                            <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
+                                                                                {item.petName}
+                                                                            </Typography>
+                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.25 }}>
+                                                                                {item.cageLabel}
+                                                                            </Typography>
+                                                                            {row.specialCare || row.notes ? (
+                                                                                <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.5 }}>
+                                                                                    {row.specialCare || row.notes}
+                                                                                </Typography>
+                                                                            ) : null}
+                                                                        </Box>
+                                                                        <Box sx={{ textAlign: "right", minWidth: 132 }}>
+                                                                            <Typography sx={{ fontWeight: 600, fontSize: "0.8125rem", color: "var(--palette-text-primary)" }}>
+                                                                                {formatCurrency(Number(row.pricePerDay || 0))}/đêm
+                                                                            </Typography>
+                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.25 }}>
+                                                                                {Number(row.numberOfDays || 0)} đêm
+                                                                            </Typography>
+                                                                        </Box>
+                                                                    </Stack>
+                                                                ))}
+                                                            </Box>
+                                                        </Collapse>
+                                                    </TableCell>
+                                                </TableRow>
                                             </Fragment>
                                         );
                                     })
@@ -608,7 +602,7 @@ export const BoardingBookingListPage = () => {
                 <TablePagination
                     rowsPerPageOptions={[10, 20, 50]}
                     component="div"
-                    count={filteredRows.length}
+                    count={pagination.totalRecords || 0}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}

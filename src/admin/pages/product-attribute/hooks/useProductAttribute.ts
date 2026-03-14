@@ -6,13 +6,12 @@ import {
     updateProductAttribute,
     createProductAttribute
 } from '../../../api/product-attribute.api';
-import { ApiResponse } from '../../../config/type';
 
-export const useProductAttributes = () => {
+
+export const useProductAttributes = (params?: any) => {
     return useQuery({
-        queryKey: ['product-attributes'],
-        queryFn: getProductAttributes,
-        select: (res: ApiResponse<any>) => res.data?.recordList || [],
+        queryKey: ['product-attributes', params],
+        queryFn: () => getProductAttributes(params),
     });
 };
 
@@ -21,7 +20,7 @@ export const useProductAttributeDetail = (id: string | undefined) => {
         queryKey: ['product-attribute-detail', id],
         queryFn: () => getProductAttributeDetail(id!),
         enabled: !!id,
-        select: (res: ApiResponse<any>) => res.data,
+        select: (res: any) => res.data,
     });
 };
 

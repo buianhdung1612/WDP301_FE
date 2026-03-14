@@ -2,9 +2,9 @@ import axios from "axios";
 
 const API_URL = "http://localhost:3000/api/v1/admin/breed";
 
-export const getBreeds = async (type?: string) => {
+export const getBreeds = async (params?: any) => {
     const response = await axios.get(API_URL, {
-        params: { type },
+        params,
         withCredentials: true
     });
     return response.data;

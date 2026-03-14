@@ -27,6 +27,7 @@ export const createProductSchema = z.object({
     images: z.array(z.any()).min(2, "Vui lòng chọn tối thiểu 2 hình ảnh"),
     status: z.string().default("active"),
     category: z.array(z.string()).optional().default([]),
+    brandId: z.string().optional().default(""),
     attributes: z.array(z.string()).optional().default([]),
     variants: z.array(variantSchema).optional().default([]),
 });

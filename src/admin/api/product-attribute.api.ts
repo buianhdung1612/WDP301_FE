@@ -17,8 +17,12 @@ const withAuth = () => {
 };
 
 /** Lấy danh sách thuộc tính */
-export const getProductAttributes = async (): Promise<ApiResponse<any[]>> => {
-    const response = await apiApp.get(`${BASE_URL}/list`, withAuth());
+export const getProductAttributes = async (params?: any): Promise<ApiResponse<any>> => {
+    const config = {
+        ...withAuth(),
+        params
+    };
+    const response = await apiApp.get(`${BASE_URL}/list`, config);
     return response.data;
 };
 

@@ -5,7 +5,6 @@ export const useUsers = (params?: any) => {
     return useQuery({
         queryKey: ["accounts-user", params],
         queryFn: () => getUsers(params),
-        select: (res: any) => res.data || [],
     });
 };
 

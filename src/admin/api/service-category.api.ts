@@ -14,8 +14,12 @@ const withAuth = () => {
     };
 };
 
-export const getCategories = async (): Promise<ApiResponse<any[]>> => {
-    const response = await apiApp.get(BASE_URL, withAuth());
+export const getCategories = async (params?: any): Promise<ApiResponse<any>> => {
+    const config = {
+        ...withAuth(),
+        params
+    };
+    const response = await apiApp.get(BASE_URL, config);
     return response.data;
 };
 

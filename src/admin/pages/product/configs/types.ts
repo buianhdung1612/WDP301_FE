@@ -10,6 +10,7 @@ export interface IProduct {
     stock: number;
     price: number;
     status: 'active' | 'inactive' | 'draft';
+    brandName?: string;
 }
 
 // Định nghĩa kiểu dữ liệu cho Settings của Grid

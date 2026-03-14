@@ -13,8 +13,22 @@ import {
 } from '../configs/styles.config';
 import { useServiceCategories } from '../hooks/useServiceCategory';
 
+import { useState } from 'react';
+
 export const ServiceCategoryList = () => {
-    const { data: categories = [], isLoading } = useServiceCategories();
+    const [page, setPage] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [search, setSearch] = useState('');
+
+    const params = {
+        page: page + 1,
+        limit: pageSize,
+        keyword: search,
+    };
+
+    const { data: res, isLoading } = useServiceCategories(params);
+    const categories = res?.data?.recordList || [];
+    const pagination = res?.data?.pagination || { totalRecords: 0 };
 
     return (
         <Card elevation={0} sx={dataGridCardStyles}>
@@ -27,7 +41,7 @@ export const ServiceCategoryList = () => {
                     columns={columnsConfig}
                     density="comfortable"
                     slots={{
-                        toolbar: ServiceCategoryToolbar,
+                        toolbar: ServiceCategoryToolbar as any,
                         columnSortedAscendingIcon: SortAscendingIcon,
                         columnSortedDescendingIcon: SortDescendingIcon,
                         columnUnsortedIcon: UnsortedIcon,
@@ -37,9 +51,25 @@ export const ServiceCategoryList = () => {
                             </Box>
                         )
                     }}
+                    slotProps={{
+                        toolbar: {
+                            search,
+                            onSearchChange: (val: string) => { setSearch(val); setPage(0); }
+                        } as any
+                    }}
                     localeText={DATA_GRID_LOCALE_VN}
                     pagination
-                    pageSizeOptions={[5, 10, 20, { value: -1, label: 'Tất cả' }]}
+                    paginationMode="server"
+                    rowCount={pagination.totalRecords || 0}
+                    paginationModel={{
+                        page,
+                        pageSize,
+                    }}
+                    onPaginationModelChange={(model) => {
+                        setPage(model.page);
+                        setPageSize(model.pageSize);
+                    }}
+                    pageSizeOptions={[5, 10, 20]}
                     initialState={columnsInitialState}
                     getRowHeight={() => 'auto'}
                     checkboxSelection

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import {
     getBookings,
     getBookingDetail,
@@ -28,6 +28,7 @@ export const useBookings = (params?: any) => {
     return useQuery<any>({
         queryKey: ["bookings", params],
         queryFn: () => getBookings(params),
+        placeholderData: keepPreviousData,
     });
 };
 
@@ -110,6 +111,7 @@ export const useStaffTasks = (params?: any) => {
     return useQuery<any>({
         queryKey: ["staff-tasks", params],
         queryFn: () => getStaffTasks(params),
+        placeholderData: keepPreviousData,
     });
 };
 

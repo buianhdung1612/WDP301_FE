@@ -5,7 +5,6 @@ export const usePets = (params?: any) => {
     return useQuery({
         queryKey: ["pets", params],
         queryFn: () => getPets(params),
-        select: (res: any) => res.data || [],
     });
 };
 

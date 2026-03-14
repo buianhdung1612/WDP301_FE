@@ -3,7 +3,6 @@ import {
     GridColDef,
 } from '@mui/x-data-grid';
 import Card from '@mui/material/Card';
-import { useTranslation } from 'react-i18next';
 import { SortAscendingIcon, SortDescendingIcon, UnsortedIcon } from '../../../assets/icons';
 import { columnsInitialState } from '../configs/column.config';
 import { IGridSettings } from '../configs/types';
@@ -28,9 +27,19 @@ declare module '@mui/x-data-grid' {
 }
 
 export const ProductList = () => {
-    const { t } = useTranslation();
     const { settings, setSettings } = useSettings();
-    const { products, isLoading, error } = useProducts();
+    const {
+        products,
+        pagination,
+        isLoading,
+        error,
+        filters,
+        setStatusFilter,
+        setStockFilter,
+        setSearchFilter,
+        setPage,
+        setLimit,
+    } = useProducts();
     const columns = useProductColumns();
     const localeText = useDataGridLocale();
 
@@ -56,7 +65,7 @@ export const ProductList = () => {
                     showColumnVerticalBorder={settings.showColumnBorders}
                     showToolbar
                     slots={{
-                        toolbar: ProductToolbar,
+                        toolbar: ProductToolbar as any,
                         columnSortedAscendingIcon: SortAscendingIcon,
                         columnSortedDescendingIcon: SortDescendingIcon,
                         columnUnsortedIcon: UnsortedIcon,
@@ -76,11 +85,27 @@ export const ProductList = () => {
                         toolbar: {
                             settings,
                             onSettingsChange: setSettings,
-                        },
+                            // Pass filter handlers to toolbar
+                            filters,
+                            onStatusChange: setStatusFilter,
+                            onStockChange: setStockFilter,
+                            onSearchChange: setSearchFilter,
+                        } as any,
                     }}
                     localeText={localeText}
+                    // Pagination
                     pagination
-                    pageSizeOptions={[5, 10, 20, { value: -1, label: t("admin.common.tabs.all") }]}
+                    paginationMode="server"
+                    rowCount={pagination.totalRecords}
+                    paginationModel={{
+                        page: pagination.currentPage - 1,
+                        pageSize: pagination.limit,
+                    }}
+                    onPaginationModelChange={(model) => {
+                        setPage(model.page + 1);
+                        setLimit(model.pageSize);
+                    }}
+                    pageSizeOptions={[5, 10, 20, 50]}
                     initialState={columnsInitialState}
                     getRowHeight={() => 'auto'}
                     checkboxSelection

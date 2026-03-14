@@ -1,22 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCoupons, createCoupon, getCouponById, updateCoupon, deleteCoupon } from '../../../api/coupon.api';
-import { ApiResponse } from '../../../config/type';
 
-export const useCoupons = () => {
+export const useCoupons = (params?: { page?: number; limit?: number; keyword?: string; status?: string }) => {
     return useQuery({
-        queryKey: ['coupons'],
-        queryFn: getCoupons,
-        select: (res: ApiResponse<any>) => {
-            const data = res.data;
-            // BE trả về array trực tiếp với startDateFormat, endDateFormat
-            if (Array.isArray(data)) {
-                return data.map((item: any) => ({
-                    ...item,
-                    id: item._id,
-                }));
-            }
-            return [];
-        },
+        queryKey: ['coupons', params],
+        queryFn: () => getCoupons(params),
     });
 };
 
@@ -36,7 +24,7 @@ export const useUpdateCoupon = () => {
 
     return useMutation({
         mutationFn: ({ id, data }: { id: string | number; data: any }) => updateCoupon(id, data),
-        onSuccess: (response) => {
+        onSuccess: (response: any) => {
             if (response.success) {
                 queryClient.invalidateQueries({ queryKey: ['coupons'] });
                 queryClient.invalidateQueries({ queryKey: ['coupon'] });
@@ -73,7 +61,3 @@ export const useDeleteCoupon = () => {
         },
     });
 };
-
-
-
-

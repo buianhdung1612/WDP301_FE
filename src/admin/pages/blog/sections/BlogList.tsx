@@ -15,21 +15,20 @@ import { Link } from "react-router-dom";
 interface BlogListProps {
     blogs: any[];
     isLoading?: boolean;
+    page: number;
+    onPageChange: (page: number) => void;
+    pagination: any;
 }
 
-export const BlogList = ({ blogs = [], isLoading = false }: BlogListProps) => {
+export const BlogList = ({ blogs = [], isLoading = false, page, onPageChange, pagination }: BlogListProps) => {
     const { t } = useTranslation();
-    const [page, setPage] = useState(1);
-    const itemsPerPage = 10;
 
     const handleChangePage = (_event: React.ChangeEvent<unknown>, value: number) => {
-        setPage(value);
+        onPageChange(value);
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    const startIndex = (page - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const currentData = blogs.slice(startIndex, endIndex);
+    const currentData = blogs;
 
     const navigate = useNavigate();
     const { mutate: deleteBlog } = useDeleteBlog();
@@ -276,7 +275,7 @@ export const BlogList = ({ blogs = [], isLoading = false }: BlogListProps) => {
             </Popover>
 
             <Pagination
-                count={Math.ceil(blogs.length / itemsPerPage)}
+                count={pagination.totalPages || 0}
                 page={page}
                 onChange={handleChangePage}
                 shape="circular"

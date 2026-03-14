@@ -1,18 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCategories, createCategory, getNestedCategories, getCategoryById, deleteCategory, updateCategory } from '../../../api/blog-category.api';
-import { ApiResponse } from '../../../config/type';
 
-export const useBlogCategories = () => {
+
+export const useBlogCategories = (params?: any) => {
     return useQuery({
-        queryKey: ['blog-categories'],
-        queryFn: getCategories,
-        select: (res: ApiResponse<any>) => {
-            const data = res.data;
-            if (data && typeof data === 'object' && 'recordList' in data) {
-                return data.recordList;
-            }
-            return data || [];
-        },
+        queryKey: ['blog-categories', params],
+        queryFn: () => getCategories(params),
     });
 };
 

@@ -5,7 +5,6 @@ export const useShifts = (params?: any) => {
     return useQuery({
         queryKey: ["shifts", params],
         queryFn: () => api.getShifts(params),
-        select: (res: any) => res.data || []
     });
 };
 

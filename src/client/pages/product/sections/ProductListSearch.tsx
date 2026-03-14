@@ -2,7 +2,8 @@ import TuneIcon from '@mui/icons-material/Tune';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { useProductSort } from '../../../hooks/useProductSort';
 import StarIcon from "@mui/icons-material/Star";
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 type OptionType = {
     value: string;
@@ -10,14 +11,19 @@ type OptionType = {
 };
 
 const options: OptionType[] = [
-    { value: 'a', label: 'Sắp xếp mặc định' },
-    { value: 'b', label: 'Theo độ phổ biến' },
-    { value: 'd', label: 'Sản phẩm mới nhất' },
-    { value: 'e', label: 'Giá: thấp đến cao' },
-    { value: 'f', label: 'Giá: cao đến thấp' },
+    { value: 'position:desc', label: 'Sắp xếp mặc định' },
+    { value: 'createdAt:desc', label: 'Sản phẩm mới nhất' },
+    { value: 'priceNew:asc', label: 'Giá: thấp đến cao' },
+    { value: 'priceNew:desc', label: 'Giá: cao đến thấp' },
 ];
 
-export const ProductListSearch = () => {
+export const ProductListSearch = ({ totalItems = 0, currentLimit = 9, currentPage = 1 }) => {
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // Tìm option đang được chọn từ URL
+    const currentSort = `${searchParams.get("sortKey") || "position"}:${searchParams.get("sortValue") || "desc"}`;
+    const initialOption = options.find(opt => opt.value === currentSort) || options[0];
+
     const {
         selectedOption,
         hoveredOption,
@@ -29,11 +35,21 @@ export const ProductListSearch = () => {
         filteredOptions,
         handleSelectChange,
         toggleMenu,
-    } = useProductSort(options);
+    } = useProductSort(options, initialOption);
+
+    // Khi chọn option mới, cập nhật URL
+    useEffect(() => {
+        if (selectedOption && selectedOption.value !== currentSort) {
+            const [key, val] = selectedOption.value.split(":");
+            searchParams.set("sortKey", key);
+            searchParams.set("sortValue", val);
+            searchParams.set("page", "1");
+            setSearchParams(searchParams);
+        }
+    }, [selectedOption]);
 
     // Hiển thị danh sách lọc
     const [isFilterOpen, setIsFilterOpen] = useState(false);
-
     const toggleFilter = () => setIsFilterOpen(prev => !prev);
 
     const filterClasses = useMemo(() => {
@@ -41,13 +57,17 @@ export const ProductListSearch = () => {
             ? 'max-h-[500px] opacity-100 py-[20px] mb-[30px]'
             : 'max-h-0 opacity-0 py-0 mb-0';
     }, [isFilterOpen]);
-    // Hết Hiển thị danh sách lọc
+
+    const start = (currentPage - 1) * currentLimit + 1;
+    const end = Math.min(currentPage * currentLimit, totalItems);
 
     return (
         <>
             {/* Search */}
             <div className="px-[30px] py-[15px] mb-[40px] flex items-center justify-between bg-[#e67e201a] rounded-[192px]">
-                <div className="text-client-secondary">Showing 1–12 of 18 results</div>
+                <div className="text-client-secondary">
+                    {totalItems > 0 ? `Hiển thị ${start}–${end} trong số ${totalItems} kết quả` : 'Không có kết quả nào'}
+                </div>
                 <div className="flex items-center">
                     <div onClick={toggleFilter} className='cursor-pointer flex items-center'>
                         <div className="text-client-secondary">Bộ lọc</div>

@@ -8,18 +8,10 @@ import {
     updateCategory
 } from '../../../api/service-category.api';
 
-export const useServiceCategories = () => {
+export const useServiceCategories = (params?: any) => {
     return useQuery({
-        queryKey: ['service-categories'],
-        queryFn: getCategories,
-        select: (res: any) => {
-            // Adjust based on backend response format
-            const data = res.data;
-            if (data && typeof data === 'object' && 'recordList' in data) {
-                return data.recordList;
-            }
-            return data || [];
-        },
+        queryKey: ['service-categories', params],
+        queryFn: () => getCategories(params),
     });
 };
 
