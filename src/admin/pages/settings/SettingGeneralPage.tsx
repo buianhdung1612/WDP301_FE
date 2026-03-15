@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { settingGeneralSchema, SettingGeneralFormValues } from "../../schemas/setting.schema";
+import { settingGeneralSchema } from "../../schemas/setting.schema";
 import { Title } from "../../components/ui/Title";
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { toast } from "react-toastify";
@@ -13,6 +13,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { useSettingGeneral, useUpdateSettingGeneral } from "./hooks/useSettingGeneral";
 import { useServices } from "../service/hooks/useService";
 import { LoadingButton } from "../../components/ui/LoadingButton";
+import { Tiptap } from "../../components/layouts/titap/Tiptap";
 
 const PREDEFINED_COLORS = [
     "var(--palette-primary-main)", // Green
@@ -42,7 +43,7 @@ export const SettingGeneralPage = () => {
         watch,
         reset,
         formState: { isSubmitting }
-    } = useForm<SettingGeneralFormValues>({
+    } = useForm<any>({
         resolver: zodResolver(settingGeneralSchema),
         defaultValues: {
             websiteName: "",
@@ -55,14 +56,19 @@ export const SettingGeneralPage = () => {
             facebook: "",
             instagram: "",
             youtube: "",
-            serviceColors: []
+            serviceColors: [],
+            breeds: [],
+            privacyPolicy: "",
+            termsOfUse: "",
+            conditions: ""
         },
     });
 
     useEffect(() => {
-        if (initialData && services.length > 0) {
+        const serviceList = (services as any)?.data || [];
+        if (initialData && serviceList.length > 0) {
             // Merge existing service colors with all services
-            const mergedServiceColors = services.map((service: any) => {
+            const mergedServiceColors = serviceList.map((service: any) => {
                 const existingColor = initialData.serviceColors?.find(
                     (sc: any) => sc.serviceId === service._id || sc.serviceId === service.id
                 );
@@ -75,7 +81,11 @@ export const SettingGeneralPage = () => {
 
             reset({
                 ...initialData,
-                serviceColors: mergedServiceColors
+                breeds: initialData.breeds || [],
+                serviceColors: mergedServiceColors,
+                privacyPolicy: initialData.privacyPolicy || "",
+                termsOfUse: initialData.termsOfUse || "",
+                conditions: initialData.conditions || ""
             });
         }
     }, [initialData, services, reset]);
@@ -124,7 +134,7 @@ export const SettingGeneralPage = () => {
     };
 
     const onSubmit = async (data: any) => {
-        const formData = data as SettingGeneralFormValues;
+        const formData = data;
         // Only save serviceId and color
         const formattedData = {
             ...formData,
@@ -199,7 +209,7 @@ export const SettingGeneralPage = () => {
                                         </Box>
                                     ) : (
                                         <Stack spacing={1} alignItems="center" sx={{ color: 'var(--palette-text-secondary)' }}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 10.25a.75.75 0 0 1 .75.75v1.25H14a.75.75 0 0 1 0 1.5h-1.25V15a.75.75 0 0 1-1.5 0v-1.25H10a.75.75 0 0 1 0-1.5h1.25V11a.75.75 0 0 1 .75-.75"></path><path fill="currentColor" d="M9.778 21h4.444c3.121 0 4.682 0 5.803-.735a4.4 4.4 0 0 0 1.226-1.204c.749-1.1.749-2.633.749-5.697s0-4.597-.749-5.697a4.4 4.4 0 0 0-1.226-1.204c-.72-.473-1.622-.642-3.003-.702c-.659 0-1.226-.49-1.355-1.125A2.064 2.064 0 0 0 13.634 3h-3.268c-.988 0-1.839.685-2.033 1.636c-.129.635-.696 1.125-1.355 1.125c-1.38.06-2.282.23-3.003.702A4.4 4.4 0 0 0 2.75 7.667C2 8.767 2 10.299 2 13.364s0 4.596.749 5.697c.324.476.74.885 1.226 1.204C5.096 21 6.657 21 9.778 21M16 13a4 4 0 1 1-8 0a4 4 0 0 1 8 0m2-3.75a.75.75 0 0 0 0 1.5h1a.75.75 0 0 0 0-1.5z"></path></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m12 10.25a.75.75 0 0 1 .75.75v1.25H14a.75.75 0 0 1 0 1.5h-1.25V15a.75.75 0 0 1-1.5 0v-1.25H10a.75.75 0 0 1 0-1.5h1.25V11a.75.75 0 0 1 .75-.75"></path><path fill="currentColor" d="M9.778 21h4.444c3.121 0 4.682 0 5.803-.735a4.4 4.4 0 0 0 1.226-1.204c.749-1.1.749-2.633.749-5.697s0-4.597-.749-5.697a4.4 4.4 0 0 0-1.226-1.204c-.72-.473-1.622-.642-3.003-.702c-.659 0-1.226-.49-1.355-1.125A2.064 2.064 0 0 0 13.634 3h-3.268c-.988 0-1.839.685-2.033 1.636c-.129.635-.696 1.125-1.355 1.125c-1.38.06-2.282.23-3.003.702A4.4 4.4 0 0 0 2.75 7.667C2 8.767 2 10.299 2 13.364s0 4.596.749 5.697c.324.476.74.885 1.226 1.204C5.096 21 6.657 21 9.778 21M16 13a4 4 0 1 1-8 0a4 4 0 0 1 8 0m2-3.75a.75.75 0 0 0 0 1.5h1a.75.75 0 0 0 0-1.5z"></path></svg>
                                             <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>{isUploading ? "Đang tải..." : "Tải logo"}</Typography>
                                         </Stack>
                                     )}
@@ -438,6 +448,42 @@ export const SettingGeneralPage = () => {
                                 </Stack>
                             </Box>
 
+                            <Box sx={{ mt: 5 }}>
+                                <Typography variant="subtitle1" sx={{ mb: 3, fontWeight: 700, fontSize: '0.875rem' }}>Các điều khoản & Chính sách</Typography>
+                                <Stack spacing={3}>
+                                    <Box>
+                                        <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600 }}>Chính sách bảo mật (Privacy Policy)</Typography>
+                                        <Controller
+                                            name="privacyPolicy"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <Tiptap value={field.value} onChange={field.onChange} />
+                                            )}
+                                        />
+                                    </Box>
+                                    <Box>
+                                        <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600 }}>Điều khoản sử dụng (Terms of Use)</Typography>
+                                        <Controller
+                                            name="termsOfUse"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <Tiptap value={field.value} onChange={field.onChange} />
+                                            )}
+                                        />
+                                    </Box>
+                                    <Box>
+                                        <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600 }}>Điều kiện & Quy định (Conditions)</Typography>
+                                        <Controller
+                                            name="conditions"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <Tiptap value={field.value} onChange={field.onChange} />
+                                            )}
+                                        />
+                                    </Box>
+                                </Stack>
+                            </Box>
+
                             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
                                 <LoadingButton
                                     type="submit"
@@ -455,7 +501,7 @@ export const SettingGeneralPage = () => {
                     </Grid>
                 </Grid>
             </form>
-        </Box>
+        </Box >
     );
 };
 

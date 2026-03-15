@@ -9,7 +9,6 @@ import {
     SpeedDialAction,
     Tooltip,
     Typography,
-    Chip,
     CircularProgress,
     Stack,
     Divider
@@ -332,11 +331,6 @@ export const BlogDetailPage = () => {
                     <div dangerouslySetInnerHTML={{ __html: blog.content }} />
                 </Box>
 
-                <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mt: 5 }}>
-                    {blog.tags?.map((tag: any) => (
-                        <Chip key={tag.tagId} label={`Tag ${tag.tagId}`} sx={{ borderRadius: "var(--shape-borderRadius)" }} />
-                    ))}
-                </Stack>
             </Container>
         </>
 

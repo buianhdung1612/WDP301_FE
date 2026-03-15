@@ -93,45 +93,7 @@ export const useDeleteBlog = () => {
     });
 };
 
-// --- TAGS HOOKS ---
-// Note: BE mới chưa có API cho blog tags, tạm thời return empty
-export const useBlogTags = () => {
-    return useQuery({
-        queryKey: ['blog-tags'],
-        queryFn: async () => ({ success: true, message: 'Success', timestamp: new Date().toISOString(), data: [] }),
-        select: (res: ApiResponse<any>) => res.data || [],
-    });
-};
 
-export const useCreateBlogTag = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: async (data: { name: string }) => {
-            // TODO: Implement when BE API is ready
-            console.log('Creating blog tag:', data);
-            return { success: true, message: 'Tag created' };
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['blog-tags'] });
-        },
-    });
-};
-
-export const useDeleteBlogTag = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: async (id: string | number) => {
-            // TODO: Implement when BE API is ready
-            console.log('Deleting blog tag:', id);
-            return { success: true, message: 'Tag deleted' };
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['blog-tags'] });
-        },
-    });
-};
 
 
 

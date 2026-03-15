@@ -1,13 +1,15 @@
-import { Grid, Box, Typography, useTheme } from "@mui/material";
+import { Grid, Box, Typography, useTheme, CircularProgress } from "@mui/material";
 import Chart from 'react-apexcharts';
 import DashboardCard from "../../components/dashboard/DashboardCard";
 import AnalyticsWidget from "../../components/dashboard/AnalyticsWidget";
+import { useState, useEffect } from "react";
+import { getAnalyticsStats } from "../../api/dashboard.api";
 
-const CurrentVisits = () => {
+const CurrentVisits = ({ data }: { data: any[] }) => {
     const theme = useTheme();
     const chartOptions: any = {
         chart: { type: 'pie' },
-        labels: ['America', 'Asia', 'Europe', 'Africa'],
+        labels: data?.map(d => d.label) || [],
         stroke: { show: true, width: 2, colors: [theme.palette.background.paper] },
         legend: {
             position: 'bottom',
@@ -35,15 +37,15 @@ const CurrentVisits = () => {
                 dataLabels: { offset: -10 }
             }
         },
-        colors: ['#00a76f', '#ffab00', '#007867', '#FF5630'],
+        colors: ['#00a76f', '#ffab00', '#007867', '#FF5630', '#FFC107', '#2196F3'],
     };
 
-    const series = [18.8, 31.3, 43.8, 6.3];
+    const series = data?.map(d => d.value) || [];
 
     return (
         <DashboardCard sx={{ p: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ p: 3, pb: 0 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>Current visits</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>Trạng thái đơn hàng</Typography>
             </Box>
             <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
                 <Chart options={chartOptions} series={series} type="pie" width="100%" height={344} />
@@ -52,7 +54,7 @@ const CurrentVisits = () => {
     );
 };
 
-const WebsiteVisits = () => {
+const WebsiteVisits = ({ data }: { data: number[] }) => {
     const chartOptions: any = {
         chart: { type: 'bar', toolbar: { show: false } },
         plotOptions: {
@@ -63,7 +65,7 @@ const WebsiteVisits = () => {
         },
         stroke: { show: true, width: 2, colors: ['transparent'] },
         xaxis: {
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+            categories: ['Thg 1', 'Thg 2', 'Thg 3', 'Thg 4', 'Thg 5', 'Thg 6', 'Thg 7', 'Thg 8', 'Thg 9', 'Thg 10', 'Thg 11', 'Thg 12'],
             axisBorder: { show: false },
             axisTicks: { show: false },
             labels: { style: { colors: 'var(--palette-text-disabled)', fontSize: '12px' } }
@@ -88,15 +90,14 @@ const WebsiteVisits = () => {
     };
 
     const series = [
-        { name: 'Team A', data: [44, 33, 22, 37, 67, 68, 37, 24, 55] },
-        { name: 'Team B', data: [51, 70, 47, 67, 40, 37, 24, 70, 26] }
+        { name: 'Khách truy cập', data: data || Array(12).fill(0) }
     ];
 
     return (
         <DashboardCard sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>Website visits</Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>(+43%) than last year</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>Lượt truy cập hệ thống</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Thống kê theo từng tháng (dựa trên đơn hàng)</Typography>
             </Box>
             <Box sx={{ flexGrow: 1, width: '100%' }}>
                 <Chart options={chartOptions} series={series} type="bar" width="100%" height={364} />
@@ -106,10 +107,37 @@ const WebsiteVisits = () => {
 };
 
 export const AnalyticsPage = () => {
+    const [stats, setStats] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await getAnalyticsStats();
+                if (res.success) {
+                    setStats(res.data);
+                }
+            } catch (error) {
+                console.error("Error fetching analytics stats:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchStats();
+    }, []);
+
+    if (loading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
+
     return (
         <Box sx={{ p: 1 }}>
             <Typography variant="h4" sx={{ fontWeight: 700, mb: 5 }}>
-                Hi, Welcome back 👋
+                Phân tích hệ thống 👋
             </Typography>
 
             <Grid
@@ -139,9 +167,9 @@ export const AnalyticsPage = () => {
                     }}
                 >
                     <AnalyticsWidget
-                        title="Weekly sales" total="714k" percent={2.6} color="#00a76f" colorType="primary"
+                        title="Doanh số tuần" total={`${stats?.weeklySales.total.toLocaleString()}đ` || "0đ"} percent={2.6} color="#00a76f" colorType="primary"
                         icon="https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/icons/glass/ic-glass-bag.svg"
-                        chartData={[20, 41, 63, 33, 28, 35, 50, 46, 11, 26]}
+                        chartData={stats?.weeklySales.data || [0]}
                     />
                 </Grid>
                 <Grid
@@ -152,7 +180,7 @@ export const AnalyticsPage = () => {
                     }}
                 >
                     <AnalyticsWidget
-                        title="New users" total="1.35m" percent={-0.1} color="#8e33ff" colorType="secondary"
+                        title="Người dùng mới" total={stats?.newUsers.toString() || "0"} percent={-0.1} color="#8e33ff" colorType="secondary"
                         icon="https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/icons/glass/ic-glass-users.svg"
                         chartData={[15, 32, 45, 32, 56, 30, 44, 32, 20]}
                     />
@@ -165,7 +193,7 @@ export const AnalyticsPage = () => {
                     }}
                 >
                     <AnalyticsWidget
-                        title="Purchase orders" total="1.72m" percent={2.8} color="#ffab00" colorType="warning"
+                        title="Tổng đơn hàng" total={stats?.purchaseOrders.toString() || "0"} percent={2.8} color="#ffab00" colorType="warning"
                         icon="https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/icons/glass/ic-glass-buy.svg"
                         chartData={[10, 25, 40, 20, 45, 35, 50, 40, 60]}
                     />
@@ -178,7 +206,7 @@ export const AnalyticsPage = () => {
                     }}
                 >
                     <AnalyticsWidget
-                        title="Messages" total="234" percent={3.6} color="#ff5630" colorType="error"
+                        title="Tin nhắn" total={stats?.messages.toString() || "234"} percent={3.6} color="#ff5630" colorType="error"
                         icon="https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/icons/glass/ic-glass-message.svg"
                         chartData={[5, 18, 12, 51, 68, 11, 39, 37, 27, 20]}
                     />
@@ -191,7 +219,7 @@ export const AnalyticsPage = () => {
                         '@media (min-width: 900px)': { width: 'calc(100% * 4 / var(--Grid-parent-columns) - (var(--Grid-parent-columns) - 4) * (var(--Grid-parent-columnSpacing) / var(--Grid-parent-columns)))' }
                     }}
                 >
-                    <CurrentVisits />
+                    <CurrentVisits data={stats?.orderDistribution} />
                 </Grid>
 
                 {/* Website Visits (Span 8) */}
@@ -201,7 +229,7 @@ export const AnalyticsPage = () => {
                         '@media (min-width: 900px)': { width: 'calc(100% * 8 / var(--Grid-parent-columns) - (var(--Grid-parent-columns) - 8) * (var(--Grid-parent-columnSpacing) / var(--Grid-parent-columns)))' }
                     }}
                 >
-                    <WebsiteVisits />
+                    <WebsiteVisits data={stats?.websiteVisits} />
                 </Grid>
             </Grid>
         </Box>

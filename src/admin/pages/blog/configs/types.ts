@@ -16,11 +16,6 @@ export interface IBlogPost {
         altImage: string;
         displayOrder: number;
     };
-    tags: {
-        tagId: number;
-        name: string;
-        slug: string;
-    }[];
     parentId: number;
     displayOrder: number;
     metaTitle: string;

@@ -17,6 +17,13 @@ export const settingGeneralSchema = z.object({
         name: z.string().min(1, "Vui lòng nhập tên giống"),
         type: z.enum(["dog", "cat", "other"])
     })).default([]),
+    serviceColors: z.array(z.object({
+        serviceId: z.string(),
+        color: z.string()
+    })).optional(),
+    privacyPolicy: z.string().optional().or(z.literal("")),
+    termsOfUse: z.string().optional().or(z.literal("")),
+    conditions: z.string().optional().or(z.literal("")),
 });
 
 export type SettingGeneralFormValues = z.infer<typeof settingGeneralSchema>;

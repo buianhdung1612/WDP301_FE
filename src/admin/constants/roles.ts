@@ -16,7 +16,6 @@ export const PERMISSIONS_GROUPED = [
             { id: "blog_category_create", name: "Tạo danh mục bài viết" },
             { id: "blog_category_edit", name: "Sửa danh mục bài viết" },
             { id: "blog_category_delete", name: "Xóa danh mục bài viết" },
-            { id: "blog_tag_view", name: "Quản lý thẻ (Tags)" },
         ]
     },
     {

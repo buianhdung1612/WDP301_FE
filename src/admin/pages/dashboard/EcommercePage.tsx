@@ -5,13 +5,19 @@ import SummaryWidget from "../../components/dashboard/SummaryWidget";
 import DashboardCard from "../../components/dashboard/DashboardCard";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { Icon } from '@iconify/react';
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getEcommerceStats } from "../../api/dashboard.api";
+import dayjs from "dayjs";
 import Chart from 'react-apexcharts';
 
-const SalesByCategory = () => {
+const SalesByCategory = ({ data }: { data: any[] }) => {
+    const total = data?.reduce((acc, curr) => acc + curr.total, 0) || 0;
+    const labels = data?.map(item => item.label) || ['Trống', 'Trống'];
+    const series = data?.map(item => (total > 0 ? (item.total / total) * 100 : 0)) || [0, 0];
+
     const chartOptions: any = {
         chart: { type: 'radialBar' },
-        labels: ['Chó', 'Mèo'],
+        labels: labels,
         stroke: { lineCap: 'round' },
         plotOptions: {
             radialBar: {
@@ -32,26 +38,28 @@ const SalesByCategory = () => {
                         fontWeight: 700,
                         color: 'var(--palette-text-primary)',
                         offsetY: 5,
-                        formatter: (val: number) => val.toLocaleString(),
+                        formatter: (val: number) => `${Math.round(val)}%`,
                     },
                     total: {
                         show: true,
-                        label: 'Tổng cộng',
-                        formatter: () => '2,324',
+                        label: 'Tổng thu',
+                        formatter: () => {
+                            if (total >= 1000000) return (total / 1000000).toFixed(1) + 'M';
+                            if (total >= 1000) return (total / 1000).toFixed(1) + 'K';
+                            return total.toString();
+                        },
                     }
                 }
             }
         },
-        colors: ['#00a76f', '#ffab00'],
+        colors: ['#00a76f', '#ffab00', '#00b8d9'],
         legend: { show: false }
     };
-
-    const series = [65, 35];
 
     return (
         <DashboardCard>
             <Box sx={{ p: 3, pb: 0 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.125rem' }}>Doanh số Chó & Mèo</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.125rem' }}>Doanh số theo danh mục</Typography>
             </Box>
 
             <Box sx={{ height: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -61,7 +69,7 @@ const SalesByCategory = () => {
             <Divider sx={{ borderStyle: 'dashed' }} />
 
             <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
-                {chartOptions.labels.map((label: string, index: number) => (
+                {labels.map((label: string, index: number) => (
                     <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: chartOptions.colors[index] }} />
                         <Typography sx={{ fontSize: '0.813rem', fontWeight: 600, color: 'var(--palette-text-secondary)' }}>{label}</Typography>
@@ -72,9 +80,9 @@ const SalesByCategory = () => {
     );
 };
 
-const YearlySales = () => {
+const YearlySales = ({ data }: { data: number[] }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [selectedYear, setSelectedYear] = useState('2023');
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
 
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -90,14 +98,6 @@ const YearlySales = () => {
             type: 'area',
             toolbar: { show: false },
             zoom: { enabled: false },
-            dropShadow: {
-                enabled: true,
-                top: 10,
-                left: 0,
-                blur: 10,
-                color: ['#00A76F', '#FFAB00'],
-                opacity: 0.1,
-            }
         },
         dataLabels: { enabled: false },
         stroke: { curve: 'smooth', width: 3 },
@@ -110,28 +110,17 @@ const YearlySales = () => {
                 stops: [0, 100]
             }
         },
-        markers: {
-            size: 0,
-            strokeColors: 'var(--palette-background-paper)',
-            strokeWidth: 3,
-            hover: {
-                size: 7,
-            }
-        },
         xaxis: {
             categories: ['Thg 1', 'Thg 2', 'Thg 3', 'Thg 4', 'Thg 5', 'Thg 6', 'Thg 7', 'Thg 8', 'Thg 9', 'Thg 10', 'Thg 11', 'Thg 12'],
-            axisBorder: { show: false },
-            axisTicks: { show: false },
         },
         yaxis: { labels: { show: true } },
         grid: { strokeDashArray: 3, borderColor: 'var(--palette-divider)' },
         legend: { show: false },
-        colors: ['#00A76F', '#FFAB00'],
+        colors: ['#00A76F'],
     };
 
     const series = [
-        { name: 'Tổng thu nhập', data: [50, 40, 45, 10, 80, 70, 65, 150, 90, 70, 60, 50] },
-        { name: 'Tổng chi phí', data: [55, 15, 35, 10, 75, 100, 85, 45, 80, 100, 90, 80] }
+        { name: 'Doanh thu', data: data || Array(12).fill(0) }
     ];
 
     return (
@@ -180,17 +169,15 @@ const YearlySales = () => {
             </Box>
 
             <Box sx={{ display: 'flex', gap: 3, mb: 3 }}>
-                {series.map((item, index) => (
-                    <Box key={item.name}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                            <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: chartOptions.colors[index] }} />
-                            <Typography sx={{ fontSize: '0.813rem', fontWeight: 500, color: 'var(--palette-text-secondary)' }}>{item.name}</Typography>
-                        </Box>
-                        <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                            {index === 0 ? '1.23k' : '6.79k'}
-                        </Typography>
+                <Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                        <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'var(--palette-primary-main)' }} />
+                        <Typography sx={{ fontSize: '0.813rem', fontWeight: 500, color: 'var(--palette-text-secondary)' }}>Doanh thu</Typography>
                     </Box>
-                ))}
+                    <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                        {data?.reduce((a, b) => a + b, 0).toLocaleString()}đ
+                    </Typography>
+                </Box>
             </Box>
 
             <Chart options={chartOptions} series={series} type="area" height={280} />
@@ -198,31 +185,57 @@ const YearlySales = () => {
     );
 };
 
-const SalesOverview = () => {
-    const data = [
-        { label: 'Tổng lợi nhuận', value: 8374, percent: 10.1, color: '#00a76f' },
-        { label: 'Tổng thu nhập', value: 9714, percent: 13.6, color: '#00b8d9' },
-        { label: 'Tổng chi phí', value: 6871, percent: 28.2, color: '#ffab00' },
-    ];
-
+const TopCustomers = ({ customers }: { customers: any[] }) => {
     return (
-        <DashboardCard sx={{ p: 3, pb: 4 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.125rem', mb: 4 }}>Doanh số tổng quan</Typography>
-            <Stack spacing={4}>
-                {data.map((item) => (
-                    <Box key={item.label}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{item.label}</Typography>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                                ${item.value.toLocaleString()} <Box component="span" sx={{ color: 'var(--palette-text-secondary)', fontWeight: 400 }}>({item.percent}%)</Box>
-                            </Typography>
-                        </Box>
-                        <Box sx={{ height: 8, bgcolor: 'rgba(145, 158, 171, 0.16)', borderRadius: 1, overflow: 'hidden' }}>
-                            <Box sx={{ height: '100%', width: `${item.percent}%`, bgcolor: item.color, borderRadius: 1 }} />
-                        </Box>
-                    </Box>
-                ))}
-            </Stack>
+        <DashboardCard sx={{ p: 0 }}>
+            <Box sx={{ p: 3, pb: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.125rem' }}>Khách hàng thân thiết</Typography>
+            </Box>
+            <TableContainer>
+                <Table sx={{ minWidth: 640 }}>
+                    <TableHead sx={{ bgcolor: 'var(--palette-background-neutral)' }}>
+                        <TableRow>
+                            <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }}>Khách hàng</TableCell>
+                            <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }}>Số đơn</TableCell>
+                            <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }}>Tổng chi tiêu</TableCell>
+                            <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }} align="right">Hạng</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {customers?.map((row, index) => (
+                            <TableRow key={row._id}>
+                                <TableCell sx={{ borderBottom: '1px dashed rgba(145, 158, 171, 0.2)' }}>
+                                    <Stack direction="row" alignItems="center" spacing={2}>
+                                        <Avatar src={row.avatar} sx={{ width: 40, height: 40 }} />
+                                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{row.fullName}</Typography>
+                                    </Stack>
+                                </TableCell>
+                                <TableCell sx={{ fontSize: '0.875rem', borderBottom: '1px dashed rgba(145, 158, 171, 0.2)' }}>{row.totalOrders}</TableCell>
+                                <TableCell sx={{ fontSize: '0.875rem', borderBottom: '1px dashed rgba(145, 158, 171, 0.2)' }}>{row.totalSpent?.toLocaleString()}đ</TableCell>
+                                <TableCell align="right" sx={{ borderBottom: '1px dashed rgba(145, 158, 171, 0.2)' }}>
+                                    <Box
+                                        sx={{
+                                            height: 24,
+                                            minWidth: 24,
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            borderRadius: '6px',
+                                            px: 1,
+                                            fontSize: '0.75rem',
+                                            fontWeight: 700,
+                                            color: index === 0 ? 'var(--palette-primary-dark)' : 'var(--palette-text-secondary)',
+                                            bgcolor: index === 0 ? 'rgba(0, 167, 111, 0.16)' : 'rgba(145, 158, 171, 0.16)',
+                                        }}
+                                    >
+                                        Top {index + 1}
+                                    </Box>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
         </DashboardCard>
     );
 };
@@ -300,50 +313,35 @@ const CurrentBalance = () => {
     );
 };
 
-const TopCustomers = () => {
-    const customers = [
-        { id: 1, name: 'Jayvion Simon', product: 'CAP', country: 'DE', total: '$83.74', rank: 'Top 1', color: 'var(--palette-primary-dark)' },
-        { id: 2, name: 'Lucian Obrien', product: 'Branded shoes', country: 'GB', total: '$97.14', rank: 'Top 2', color: 'var(--palette-secondary-dark)' },
-        { id: 3, name: 'Deja Brady', product: 'Headphone', country: 'FR', total: '$68.71', rank: 'Top 3', color: 'var(--palette-info-dark)' },
-        { id: 4, name: 'Harrison Stein', product: 'Cell phone', country: 'KR', total: '$85.21', rank: 'Top 4', color: 'var(--palette-warning-dark)' },
-        { id: 5, name: 'Reece Chung', product: 'Earings', country: 'US', total: '$52.17', rank: 'Top 5', color: 'var(--palette-error-dark)' },
-    ];
-
-    const getFlag = (code: string) => {
-        const flags: any = {
-            'DE': '🇩🇪', 'GB': '🇬🇧', 'FR': '🇫🇷', 'KR': '🇰🇷', 'US': '🇺🇸'
-        };
-        return flags[code] || '🌐';
-    };
-
+const RecentOrders = ({ orders }: { orders: any[] }) => {
     return (
         <DashboardCard sx={{ p: 0 }}>
             <Box sx={{ p: 3, pb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.125rem' }}>Khách hàng mua nhiều nhất</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.125rem' }}>Đơn hàng gần đây</Typography>
             </Box>
             <TableContainer>
                 <Table sx={{ minWidth: 640 }}>
                     <TableHead sx={{ bgcolor: 'var(--palette-background-neutral)' }}>
                         <TableRow>
                             <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }}>Người mua</TableCell>
-                            <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }}>Sản phẩm</TableCell>
-                            <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }}>Quốc gia</TableCell>
-                            <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }}>Tổng cộng</TableCell>
-                            <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }} align="right">Hạng</TableCell>
+                            <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }}>Mã đơn</TableCell>
+                            <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }}>Thời gian</TableCell>
+                            <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }}>Số tiền</TableCell>
+                            <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }} align="right">Trạng thái</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {customers.map((row) => (
-                            <TableRow key={row.id}>
+                        {orders?.map((row) => (
+                            <TableRow key={row._id}>
                                 <TableCell sx={{ borderBottom: '1px dashed rgba(145, 158, 171, 0.2)' }}>
                                     <Stack direction="row" alignItems="center" spacing={2}>
-                                        <Avatar sx={{ width: 40, height: 40 }} />
-                                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{row.name}</Typography>
+                                        <Avatar src={row.userId?.avatar} sx={{ width: 40, height: 40 }} />
+                                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{row.userId?.fullName || 'Khách vãng lai'}</Typography>
                                     </Stack>
                                 </TableCell>
-                                <TableCell sx={{ fontSize: '0.875rem', borderBottom: '1px dashed rgba(145, 158, 171, 0.2)' }}>{row.product}</TableCell>
-                                <TableCell sx={{ fontSize: '1.25rem', borderBottom: '1px dashed rgba(145, 158, 171, 0.2)' }}>{getFlag(row.country)}</TableCell>
-                                <TableCell sx={{ fontSize: '0.875rem', borderBottom: '1px dashed rgba(145, 158, 171, 0.2)' }}>{row.total}</TableCell>
+                                <TableCell sx={{ fontSize: '0.875rem', borderBottom: '1px dashed rgba(145, 158, 171, 0.2)' }}>#{row._id.slice(-6).toUpperCase()}</TableCell>
+                                <TableCell sx={{ fontSize: '0.875rem', borderBottom: '1px dashed rgba(145, 158, 171, 0.2)' }}>{dayjs(row.createdAt).format('DD/MM/YYYY')}</TableCell>
+                                <TableCell sx={{ fontSize: '0.875rem', borderBottom: '1px dashed rgba(145, 158, 171, 0.2)' }}>{row.total?.toLocaleString()}đ</TableCell>
                                 <TableCell align="right" sx={{ borderBottom: '1px dashed rgba(145, 158, 171, 0.2)' }}>
                                     <Box
                                         sx={{
@@ -356,11 +354,11 @@ const TopCustomers = () => {
                                             px: 1,
                                             fontSize: '0.75rem',
                                             fontWeight: 700,
-                                            color: row.color,
-                                            bgcolor: row.color.replace('-dark)', '-mainChannel) / 0.16)').replace('var(--', 'rgba(var(--'),
+                                            color: row.orderStatus === 'completed' ? 'var(--palette-success-dark)' : 'var(--palette-warning-dark)',
+                                            bgcolor: row.orderStatus === 'completed' ? 'rgba(34, 197, 94, 0.16)' : 'rgba(255, 171, 0, 0.16)',
                                         }}
                                     >
-                                        {row.rank}
+                                        {row.orderStatus}
                                     </Box>
                                 </TableCell>
                             </TableRow>
@@ -372,38 +370,85 @@ const TopCustomers = () => {
     );
 };
 
-const LatestProducts = () => {
-    const products = [
-        { name: 'Urban Explorer Sneakers', price: '$83.74', image: 'https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/images/mock/cover/cover-1.webp', colors: ['#00A76F', '#FFAB00', '#FF5630'] },
-        { name: 'Classic Leather Loafers', price: '$97.14', oldPrice: '$97.14', image: 'https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/images/mock/cover/cover-2.webp', colors: ['#00B8D9', '#007867'] },
-        { name: 'Mountain Trekking Boots', price: '$68.71', image: 'https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/images/mock/cover/cover-3.webp', colors: ['#8E33FF', '#454F5B', '#212B36'] },
-        { name: 'Elegance Stiletto Heels', price: '$85.21', oldPrice: '$85.21', image: 'https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/images/mock/cover/cover-4.webp', colors: ['#8E33FF', '#FF5630', '#FFAB00'] },
-        { name: 'Comfy Running Shoes', price: '$52.17', image: 'https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/images/mock/cover/cover-5.webp', colors: ['#003768'] },
-    ];
-
+const LatestProducts = ({ products }: { products: any[] }) => {
     return (
         <DashboardCard sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, fontSize: '18px' }}>Sản phẩm mới nhất</Typography>
             <Stack spacing={3}>
-                {products.map((item) => (
-                    <Stack key={item.name} direction="row" spacing={2} alignItems="center">
-                        <Avatar variant="rounded" src={item.image} sx={{ width: 48, height: 48, borderRadius: '12px' }} />
+                {products?.map((item) => (
+                    <Stack key={item._id} direction="row" spacing={2} alignItems="center">
+                        <Avatar variant="rounded" src={item.images?.[0]} sx={{ width: 48, height: 48, borderRadius: '12px' }} />
                         <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                             <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600 }}>{item.name}</Typography>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                                {item.oldPrice && <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', textDecoration: 'line-through', fontSize: '14px', fontWeight: 400 }}>{item.oldPrice}</Typography>}
-                                <Typography variant="caption" sx={{ fontWeight: 400, color: item.oldPrice ? 'var(--palette-error-main)' : 'var(--palette-text-secondary)', fontSize: '14px' }}>{item.price}</Typography>
+                                {item.priceOld > item.priceNew && (
+                                    <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', textDecoration: 'line-through', fontSize: '14px', fontWeight: 400 }}>
+                                        {item.priceOld?.toLocaleString()}đ
+                                    </Typography>
+                                )}
+                                <Typography variant="caption" sx={{ fontWeight: 400, color: item.priceOld > item.priceNew ? 'var(--palette-error-main)' : 'var(--palette-text-secondary)', fontSize: '14px' }}>
+                                    {item.priceNew?.toLocaleString()}đ
+                                </Typography>
                             </Box>
                         </Box>
-                        <Stack direction="row" spacing={-0.8}>
-                            {item.colors.slice(0, 3).map((c, i) => (
-                                <Box key={i} sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: c, border: '2px solid var(--palette-background-paper)' }} />
-                            ))}
-                            {item.colors.length > 3 && <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', ml: 0.5 }}>+{item.colors.length - 3}</Typography>}
-                        </Stack>
+                        <Box sx={{ p: 0.5, px: 1, borderRadius: '6px', bgcolor: 'var(--palette-background-neutral)', fontSize: '12px', fontWeight: 600 }}>
+                            Mới
+                        </Box>
                     </Stack>
                 ))}
             </Stack>
+        </DashboardCard>
+    );
+};
+
+const TopSellingProducts = ({ products }: { products: any[] }) => {
+    return (
+        <DashboardCard sx={{ p: 0 }}>
+            <Box sx={{ p: 3, pb: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.125rem' }}>Top sản phẩm bán chạy</Typography>
+            </Box>
+            <TableContainer>
+                <Table sx={{ minWidth: 640 }}>
+                    <TableHead sx={{ bgcolor: 'var(--palette-background-neutral)' }}>
+                        <TableRow>
+                            <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }}>Sản phẩm</TableCell>
+                            <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }}>Số lượng</TableCell>
+                            <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }}>Doanh thu</TableCell>
+                            <TableCell sx={{ color: 'var(--palette-text-secondary)', fontWeight: 600, fontSize: '0.875rem', borderBottom: 'none' }} align="right">Hạng</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {products?.map((row, index) => (
+                            <TableRow key={row._id}>
+                                <TableCell sx={{ borderBottom: '1px dashed rgba(145, 158, 171, 0.2)' }}>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{row.name}</Typography>
+                                </TableCell>
+                                <TableCell sx={{ fontSize: '0.875rem', borderBottom: '1px dashed rgba(145, 158, 171, 0.2)' }}>{row.totalQuantity}</TableCell>
+                                <TableCell sx={{ fontSize: '0.875rem', borderBottom: '1px dashed rgba(145, 158, 171, 0.2)' }}>{row.totalRevenue?.toLocaleString()}đ</TableCell>
+                                <TableCell align="right" sx={{ borderBottom: '1px dashed rgba(145, 158, 171, 0.2)' }}>
+                                    <Box
+                                        sx={{
+                                            height: 24,
+                                            minWidth: 24,
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            borderRadius: '6px',
+                                            px: 1,
+                                            fontSize: '0.75rem',
+                                            fontWeight: 700,
+                                            color: index < 3 ? 'var(--palette-success-dark)' : 'var(--palette-text-secondary)',
+                                            bgcolor: index < 3 ? 'rgba(34, 197, 94, 0.16)' : 'rgba(145, 158, 171, 0.16)',
+                                        }}
+                                    >
+                                        #{index + 1}
+                                    </Box>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
         </DashboardCard>
     );
 };
@@ -413,6 +458,22 @@ const LatestProducts = () => {
 export const EcommercePage = () => {
     const { user } = useAuthStore();
     const [activeIndex, setActiveIndex] = useState(0);
+    const [stats, setStats] = useState<any>(null);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const response = await getEcommerceStats();
+                if (response.success) {
+                    setStats(response.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch ecommerce stats:", error);
+            } finally {
+            }
+        };
+        fetchStats();
+    }, []);
 
     const featuredProducts = [
         {
@@ -464,7 +525,7 @@ export const EcommercePage = () => {
             >
                 <WelcomeWidget
                     title={`Chúc mừng 🎉\n${user?.fullName || 'Super Admin'}`}
-                    description="Người bán hàng xuất sắc nhất tháng, bạn đã đạt thêm 57.6% doanh số hôm nay."
+                    description={`Tháng này bạn đã đạt ${stats?.summary.monthlyRevenue.toLocaleString() || '0'}đ doanh thu.`}
                     img="https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/illustrations/characters/character-present.webp"
                     bgImg="https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/background/background-5.webp"
                     action={
@@ -596,7 +657,6 @@ export const EcommercePage = () => {
                 </DashboardCard>
             </Grid>
 
-            {/* Summary Widgets */}
             <Grid
                 sx={{
                     flexGrow: 0,
@@ -605,8 +665,8 @@ export const EcommercePage = () => {
                 }}
             >
                 <SummaryWidget
-                    title="Sản phẩm đã bán"
-                    total="765"
+                    title="Tổng sản phẩm"
+                    total={stats?.summary.totalProducts.toString() || "0"}
                     percent={2.6}
                     color="#00a76f"
                     chartData={[25, 66, 41, 89, 63, 25, 44, 12]}
@@ -621,9 +681,9 @@ export const EcommercePage = () => {
                 }}
             >
                 <SummaryWidget
-                    title="Tổng số dư"
-                    total="18,765"
-                    percent={-0.1}
+                    title="Tổng đơn hàng"
+                    total={stats?.summary.totalOrders.toString() || "0"}
+                    percent={stats?.summary.orderTodayPercent || 0}
                     color="#ffab00"
                     chartData={[15, 32, 45, 32, 56, 32, 44, 55]}
                 />
@@ -637,11 +697,59 @@ export const EcommercePage = () => {
                 }}
             >
                 <SummaryWidget
-                    title="Lợi nhuận bán hàng"
-                    total="4,876"
-                    percent={0.6}
+                    title="Doanh thu tháng này"
+                    total={`${stats?.summary.monthlyRevenue.toLocaleString() || "0"}đ`}
+                    percent={stats?.summary.revenueMonthPercent || 0}
                     color="#00b8d9"
                     chartData={[56, 44, 32, 45, 32, 15, 25, 12]}
+                />
+            </Grid>
+
+            <Grid
+                sx={{
+                    flexGrow: 0,
+                    flexBasis: 'auto',
+                    width: 'calc(100% * 4 / var(--Grid-parent-columns) - (var(--Grid-parent-columns) - 4) * (var(--Grid-parent-columnSpacing) / var(--Grid-parent-columns)))',
+                }}
+            >
+                <SummaryWidget
+                    title="Dịch vụ đã đặt"
+                    total={stats?.summary.totalServiceBookings.toString() || "0"}
+                    percent={1.2}
+                    color="#8e33ff"
+                    chartData={[10, 20, 15, 25, 30, 22, 18, 25]}
+                />
+            </Grid>
+
+            <Grid
+                sx={{
+                    flexGrow: 0,
+                    flexBasis: 'auto',
+                    width: 'calc(100% * 4 / var(--Grid-parent-columns) - (var(--Grid-parent-columns) - 4) * (var(--Grid-parent-columnSpacing) / var(--Grid-parent-columns)))',
+                }}
+            >
+                <SummaryWidget
+                    title="Khách sạn đã đặt"
+                    total={stats?.summary.totalBoardingBookings.toString() || "0"}
+                    percent={0.8}
+                    color="#ff5630"
+                    chartData={[5, 10, 8, 12, 10, 15, 12, 20]}
+                />
+            </Grid>
+
+            <Grid
+                sx={{
+                    flexGrow: 0,
+                    flexBasis: 'auto',
+                    width: 'calc(100% * 4 / var(--Grid-parent-columns) - (var(--Grid-parent-columns) - 4) * (var(--Grid-parent-columnSpacing) / var(--Grid-parent-columns)))',
+                }}
+            >
+                <SummaryWidget
+                    title="Tổng khách hàng"
+                    total={stats?.summary.totalUsers.toString() || "0"}
+                    percent={3.5}
+                    color="#00b8d9"
+                    chartData={[40, 50, 45, 60, 55, 70, 65, 80]}
                 />
             </Grid>
 
@@ -653,7 +761,7 @@ export const EcommercePage = () => {
                     width: 'calc(100% * 4 / var(--Grid-parent-columns) - (var(--Grid-parent-columns) - 4) * (var(--Grid-parent-columnSpacing) / var(--Grid-parent-columns)))',
                 }}
             >
-                <SalesByCategory />
+                <SalesByCategory data={stats?.topCategories} />
             </Grid>
 
             <Grid
@@ -663,7 +771,7 @@ export const EcommercePage = () => {
                     width: 'calc(100% * 8 / var(--Grid-parent-columns) - (var(--Grid-parent-columns) - 8) * (var(--Grid-parent-columnSpacing) / var(--Grid-parent-columns)))',
                 }}
             >
-                <YearlySales />
+                <YearlySales data={stats?.yearlyRevenueChart} />
             </Grid>
 
             {/* New Sections */}
@@ -674,7 +782,7 @@ export const EcommercePage = () => {
                     width: 'calc(100% * 8 / var(--Grid-parent-columns) - (var(--Grid-parent-columns) - 8) * (var(--Grid-parent-columnSpacing) / var(--Grid-parent-columns)))',
                 }}
             >
-                <SalesOverview />
+                <TopSellingProducts products={stats?.topSellingProducts} />
             </Grid>
 
             <Grid
@@ -694,7 +802,7 @@ export const EcommercePage = () => {
                     width: 'calc(100% * 8 / var(--Grid-parent-columns) - (var(--Grid-parent-columns) - 8) * (var(--Grid-parent-columnSpacing) / var(--Grid-parent-columns)))',
                 }}
             >
-                <TopCustomers />
+                <TopCustomers customers={stats?.topCustomers} />
             </Grid>
 
             <Grid
@@ -704,7 +812,17 @@ export const EcommercePage = () => {
                     width: 'calc(100% * 4 / var(--Grid-parent-columns) - (var(--Grid-parent-columns) - 4) * (var(--Grid-parent-columnSpacing) / var(--Grid-parent-columns)))',
                 }}
             >
-                <LatestProducts />
+                <LatestProducts products={stats?.recentProducts} />
+            </Grid>
+
+            <Grid
+                sx={{
+                    flexGrow: 0,
+                    flexBasis: 'auto',
+                    width: '100%',
+                }}
+            >
+                <RecentOrders orders={stats?.recentOrders} />
             </Grid>
 
 
