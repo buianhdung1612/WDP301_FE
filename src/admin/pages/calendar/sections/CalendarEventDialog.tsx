@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -36,8 +36,24 @@ export const CalendarEventDialog: React.FC<CalendarEventDialogProps> = ({
     onSave,
     initialDate,
 }) => {
-    const { data: services = [] } = useServices();
-    const { data: staffList = [] } = useAccounts();
+    const servicesRes = useServices();
+    const staffListRes = useAccounts();
+
+    const services = useMemo(() => {
+        const data = (servicesRes.data as any);
+        if (!data) return [];
+        return Array.isArray(data.recordList)
+            ? data.recordList
+            : (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
+    }, [servicesRes.data]);
+
+    const staffList = useMemo(() => {
+        const data = (staffListRes.data as any);
+        if (!data) return [];
+        return Array.isArray(data.recordList)
+            ? data.recordList
+            : (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
+    }, [staffListRes.data]);
 
     const [serviceId, setServiceId] = useState('');
     const [staffId, setStaffId] = useState('');
@@ -338,7 +354,7 @@ export const CalendarEventDialog: React.FC<CalendarEventDialogProps> = ({
                                 date={startDate || dayjs()}
                                 selectionStart={startDate || undefined}
                                 selectionEnd={endDate || undefined}
-                                selectedStaffId={staffId}
+                                selectedStaffIds={staffId ? [staffId] : []}
                             />
                         </Box>
                     </Stack>

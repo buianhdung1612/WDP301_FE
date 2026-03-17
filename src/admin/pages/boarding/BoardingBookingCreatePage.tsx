@@ -76,8 +76,16 @@ export const BoardingBookingCreatePage = () => {
         boardingStatus: "confirmed",
     });
 
-    const { data: users = [] } = useUsers({ limit: 1000 });
-    const { data: pets = [] } = usePets({ userId: formData.userId, limit: 1000 });
+    const { data: usersRes } = useUsers({ limit: 1000 });
+    const users = useMemo(() => {
+        return (usersRes as any)?.recordList || (Array.isArray(usersRes?.data) ? usersRes.data : (Array.isArray(usersRes) ? usersRes : []));
+    }, [usersRes]);
+
+    const { data: petsRes } = usePets({ userId: formData.userId, limit: 1000 });
+    const pets = useMemo(() => {
+        return (petsRes as any)?.recordList || (Array.isArray(petsRes?.data) ? petsRes.data : (Array.isArray(petsRes) ? petsRes : []));
+    }, [petsRes]);
+
     const { data: cageRes } = useQuery({
         queryKey: ["admin-boarding-cages"],
         queryFn: () => getBoardingCages(),
