@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -52,7 +52,13 @@ export const ScheduleCalendarPage = () => {
     const [selectedEvent, setSelectedEvent] = useState<any>(null);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
-    const { data: departments = [] } = useDepartments();
+    const departmentsRes = useDepartments();
+    const departments = useMemo(() => {
+        if (!departmentsRes.data) return [];
+        return Array.isArray(departmentsRes.data.recordList)
+            ? departmentsRes.data.recordList
+            : (Array.isArray(departmentsRes.data.data) ? departmentsRes.data.data : (Array.isArray(departmentsRes.data) ? departmentsRes.data : []));
+    }, [departmentsRes.data]);
 
     // Set default tab when departments load
     useEffect(() => {

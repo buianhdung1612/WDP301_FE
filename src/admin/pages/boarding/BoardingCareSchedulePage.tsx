@@ -1,6 +1,7 @@
 ﻿import { ChangeEvent, useMemo, useState } from "react";
 import {
     Avatar,
+    Autocomplete,
     Box,
     Button,
     Card,
@@ -21,6 +22,7 @@ import {
     TablePagination,
     TableRow,
     TextField,
+    Tooltip,
     Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -28,6 +30,7 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
@@ -60,6 +63,48 @@ const trangThaiChamSocOptions: Array<{ value: "pending" | "done" | "skipped"; la
 const MAX_PROOF_MEDIA_PER_ROW = 5;
 const MAX_IMAGE_PROOF_SIZE_MB = 5;
 const MAX_VIDEO_PROOF_SIZE_MB = 20;
+
+const DOG_FOOD_OPTIONS = [
+    "Hạt (Royal Canin)",
+    "Hạt + Pate",
+    "Gà luộc + Cơm",
+    "Thịt bò + Rau củ",
+    "Bánh thưởng / Snack",
+    "Theo chủ cung cấp",
+];
+
+const CAT_FOOD_OPTIONS = [
+    "Hạt (Royal Canin)",
+    "Pate (Gói/Lon)",
+    "Hạt + Pate",
+    "Súp thưởng (Churu)",
+    "Cá luộc / Gà xé",
+    "Theo chủ cung cấp",
+];
+
+const GENERAL_FOOD_OPTIONS = [
+    "Hạt khô",
+    "Thức ăn ướt (Pate)",
+    "Thức ăn tự nấu",
+    "Theo chủ cung cấp",
+];
+
+const getFoodOptions = (petType: string) => {
+    if (petType === "dog") return DOG_FOOD_OPTIONS;
+    if (petType === "cat") return CAT_FOOD_OPTIONS;
+    return GENERAL_FOOD_OPTIONS;
+};
+
+const calculateRecommendedPortion = (pets: any[], petType: "dog" | "cat" | "all", ratio: number = 0.02) => {
+    const targetPets = pets.filter(p => petType === "all" || p.type === petType);
+    if (!targetPets.length) return "";
+
+    const totalWeight = targetPets.reduce((sum, p) => sum + Number(p.weight || 0), 0);
+    const gramPerMeal = Math.round((totalWeight * 1000 * ratio) / 2); // Giả sử ăn 2 bữa chính
+
+    if (gramPerMeal <= 0) return "";
+    return `${gramPerMeal}g`;
+};
 
 const taoDongLichAn = (petType: "dog" | "cat" | "all" = "all"): BoardingFeedingItem => ({
     time: "",
@@ -123,7 +168,7 @@ export const BoardingCareSchedulePage = () => {
 
     const { data, isLoading } = useQuery({
         queryKey: ["admin-boarding-bookings"],
-        queryFn: () => getBoardingBookings(),
+        queryFn: () => getBoardingBookings({ limit: 1000 }),
     });
 
     const { data: hotelStaffRes } = useQuery({
@@ -349,7 +394,9 @@ export const BoardingCareSchedulePage = () => {
         },
     });
 
-    const allRows = useMemo(() => (Array.isArray(data?.data) ? data.data : []), [data]);
+    const allRows = useMemo(() => {
+        return (data as any)?.data?.recordList || (Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []));
+    }, [data]);
 
     const eligibleRows = useMemo(() => {
         return allRows.filter((item: any) => {
@@ -656,6 +703,11 @@ export const BoardingCareSchedulePage = () => {
         setPage(0);
     };
 
+    const handleSearchChange = (value: string) => {
+        setSearchQuery(value);
+        setPage(0);
+    };
+
     const currentProofMedia = proofViewer.items[proofViewer.index];
 
     return (
@@ -686,7 +738,7 @@ export const BoardingCareSchedulePage = () => {
                     <Search
                         placeholder="Tìm theo mã đơn, khách hàng, số điện thoại..."
                         value={searchQuery}
-                        onChange={setSearchQuery}
+                        onChange={handleSearchChange}
                         maxWidth="26rem"
                     />
                 </Box>
@@ -836,7 +888,58 @@ export const BoardingCareSchedulePage = () => {
 
 
                             <Box>
-                                <Typography variant="h6" sx={{ mb: 2 }}>Lịch ăn</Typography>
+                                <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
+                                    <Typography variant="h6">Lịch ăn</Typography>
+                                    <Typography variant="body2" sx={{ color: "var(--palette-text-secondary)", flexGrow: 1 }}>
+                                        (Áp dụng mẫu nhanh để tiết kiệm thời gian)
+                                    </Typography>
+                                    <Stack direction="row" spacing={1}>
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            color="primary"
+                                            onClick={() => {
+                                                const template = [
+                                                    { time: "06:30", food: "Hạt (Royal Canin)", amount: calculateRecommendedPortion(editingBooking?.petIds || [], "dog", 0.012), note: "Ăn sáng. Sau ăn nghỉ 30p.", petType: "dog", status: "pending" },
+                                                    { time: "12:00", food: "Snack nhẹ", amount: "10g", note: "Bữa phụ.", petType: "dog", status: "pending" },
+                                                    { time: "18:00", food: "Hạt + Pate", amount: calculateRecommendedPortion(editingBooking?.petIds || [], "dog", 0.015), note: "Ăn tối.", petType: "dog", status: "pending" },
+                                                ];
+                                                setFeedingDraft(template as any);
+                                            }}
+                                        >
+                                            Mẫu Chó Nhỏ
+                                        </Button>
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            color="primary"
+                                            onClick={() => {
+                                                const template = [
+                                                    { time: "07:00", food: "Hạt (Royal Canin)", amount: calculateRecommendedPortion(editingBooking?.petIds || [], "dog", 0.015), note: "Ăn sáng.", petType: "dog", status: "pending" },
+                                                    { time: "17:00", food: "Hạt + Thịt luộc", amount: calculateRecommendedPortion(editingBooking?.petIds || [], "dog", 0.02), note: "Ăn tối.", petType: "dog", status: "pending" },
+                                                ];
+                                                setFeedingDraft(template as any);
+                                            }}
+                                        >
+                                            Mẫu Chó Lớn
+                                        </Button>
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            color="secondary"
+                                            onClick={() => {
+                                                const template = [
+                                                    { time: "07:00", food: "Hạt (Royal Canin)", amount: "30g", note: "Sáng.", petType: "cat", status: "pending" },
+                                                    { time: "14:00", food: "Súp thưởng/Snack", amount: "1 thanh", note: "Chiều.", petType: "cat", status: "pending" },
+                                                    { time: "19:00", food: "Pate", amount: "1 gói", note: "Tối.", petType: "cat", status: "pending" },
+                                                ];
+                                                setFeedingDraft(template as any);
+                                            }}
+                                        >
+                                            Mẫu Mèo
+                                        </Button>
+                                    </Stack>
+                                </Stack>
 
                                 {(() => {
                                     const groups = [
@@ -880,7 +983,7 @@ export const BoardingCareSchedulePage = () => {
                                                                     size="small"
                                                                     value={item.time || ""}
                                                                     onChange={(e) => capNhatDongLichAn(idx, { time: e.target.value })}
-                                                                    sx={{ width: 110 }}
+                                                                    sx={{ width: 135 }}
                                                                     InputLabelProps={{ shrink: true }}
                                                                 />
                                                                 <TextField
@@ -895,20 +998,38 @@ export const BoardingCareSchedulePage = () => {
                                                                     <MenuItem value="cat">Mèo</MenuItem>
                                                                     <MenuItem value="all">Tất cả</MenuItem>
                                                                 </TextField>
-                                                                <TextField
-                                                                    label="Thức ăn"
+                                                                <Autocomplete
+                                                                    freeSolo
                                                                     size="small"
+                                                                    options={getFoodOptions(item.petType || "all")}
                                                                     value={item.food || ""}
-                                                                    onChange={(e) => capNhatDongLichAn(idx, { food: e.target.value })}
-                                                                    sx={{ minWidth: 150 }}
+                                                                    onInputChange={(_e, val) => capNhatDongLichAn(idx, { food: val })}
+                                                                    sx={{ minWidth: 200 }}
+                                                                    renderInput={(params) => (
+                                                                        <TextField {...params} label="Thức ăn" />
+                                                                    )}
                                                                 />
-                                                                <TextField
-                                                                    label="Khẩu phần"
-                                                                    size="small"
-                                                                    value={item.amount || ""}
-                                                                    onChange={(e) => capNhatDongLichAn(idx, { amount: e.target.value })}
-                                                                    sx={{ minWidth: 130 }}
-                                                                />
+                                                                <Box sx={{ position: "relative", display: "flex", alignItems: "center" }}>
+                                                                    <TextField
+                                                                        label="Khẩu phần"
+                                                                        size="small"
+                                                                        value={item.amount || ""}
+                                                                        onChange={(e) => capNhatDongLichAn(idx, { amount: e.target.value })}
+                                                                        sx={{ width: 140 }}
+                                                                    />
+                                                                    <Tooltip title={`Gợi ý: ${calculateRecommendedPortion(editingBooking?.petIds || [], item.petType || "all")} (khoảng 1% trọng lượng cơ thể mỗi bữa). Click để áp dụng.`}>
+                                                                        <IconButton
+                                                                            size="small"
+                                                                            sx={{ ml: 0.5 }}
+                                                                            onClick={() => {
+                                                                                const suggestion = calculateRecommendedPortion(editingBooking?.petIds || [], item.petType || "all");
+                                                                                if (suggestion) capNhatDongLichAn(idx, { amount: suggestion });
+                                                                            }}
+                                                                        >
+                                                                            <HelpOutlineIcon fontSize="small" />
+                                                                        </IconButton>
+                                                                    </Tooltip>
+                                                                </Box>
                                                                 {canAssignHotelStaff ? (
                                                                     <TextField
                                                                         label="NVKS phụ trách"
@@ -1023,7 +1144,7 @@ export const BoardingCareSchedulePage = () => {
                                                                     size="small"
                                                                     value={item.time || ""}
                                                                     onChange={(e) => capNhatDongVanDong(idx, { time: e.target.value })}
-                                                                    sx={{ width: 110 }}
+                                                                    sx={{ width: 135 }}
                                                                     InputLabelProps={{ shrink: true }}
                                                                 />
                                                                 <TextField

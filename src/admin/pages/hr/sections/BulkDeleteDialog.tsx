@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -41,7 +41,13 @@ export const BulkDeleteDialog = ({
     departmentId,
     loading = false,
 }: BulkDeleteDialogProps) => {
-    const { data: accounts = [] } = useAccounts({ departmentId, status: 'active' });
+    const accountsRes = useAccounts({ departmentId, status: 'active' });
+    const accounts = useMemo(() => {
+        if (!accountsRes.data) return [];
+        return Array.isArray(accountsRes.data.recordList)
+            ? accountsRes.data.recordList
+            : (Array.isArray(accountsRes.data.data) ? accountsRes.data.data : (Array.isArray(accountsRes.data) ? accountsRes.data : []));
+    }, [accountsRes.data]);
 
     const { control, handleSubmit, reset } = useForm({
         defaultValues: {

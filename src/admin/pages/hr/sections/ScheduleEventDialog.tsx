@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -44,8 +44,22 @@ export const ScheduleEventDialog = ({
     departmentId,
     loading = false,
 }: ScheduleEventDialogProps) => {
-    const { data: accounts = [] } = useAccounts({ departmentId, status: 'active' });
-    const { data: shifts = [] } = useShifts({ departmentId, status: 'active' });
+    const accountsRes = useAccounts({ departmentId, status: 'active' });
+    const shiftsRes = useShifts({ departmentId, status: 'active' });
+
+    const accounts = useMemo(() => {
+        if (!accountsRes.data) return [];
+        return Array.isArray(accountsRes.data.recordList)
+            ? accountsRes.data.recordList
+            : (Array.isArray(accountsRes.data.data) ? accountsRes.data.data : (Array.isArray(accountsRes.data) ? accountsRes.data : []));
+    }, [accountsRes.data]);
+
+    const shifts = useMemo(() => {
+        if (!shiftsRes.data) return [];
+        return Array.isArray(shiftsRes.data.recordList)
+            ? shiftsRes.data.recordList
+            : (Array.isArray(shiftsRes.data.data) ? shiftsRes.data.data : (Array.isArray(shiftsRes.data) ? shiftsRes.data : []));
+    }, [shiftsRes.data]);
 
     const filteredAccounts = accounts;
     const filteredShifts = shifts;
@@ -64,7 +78,12 @@ export const ScheduleEventDialog = ({
         date: watchDate?.format('YYYY-MM-DD'),
         departmentId
     });
-    const busyStaffIds = schedulesRes?.data?.map((s: any) => s.staffId?._id) || [];
+    const busyStaffIds = useMemo(() => {
+        const records = Array.isArray(schedulesRes?.data?.recordList)
+            ? schedulesRes.data.recordList
+            : (Array.isArray(schedulesRes?.data) ? schedulesRes.data : []);
+        return records.map((s: any) => s.staffId?._id || s.staffId);
+    }, [schedulesRes]);
 
     useEffect(() => {
         if (selectedEvent) {
