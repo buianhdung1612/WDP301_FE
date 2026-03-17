@@ -136,7 +136,6 @@ export const UploadFiles = memo(({ files, onFilesChange }: UploadFilesProps) => 
     const errorMessage = useMemo(() => {
         if (!isTouched) return null;
         if (files.length === 0) return t("admin.upload.validation_min_1");
-        if (files.length === 1) return t("admin.upload.validation_min_2");
         return null;
     }, [isTouched, files.length, t]);
 

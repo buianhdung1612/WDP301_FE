@@ -6,6 +6,7 @@ export const useBrands = (params?: any) => {
     return useQuery({
         queryKey: ['brands', params],
         queryFn: () => getBrands(params),
+        select: (res: any) => res.data || [],
     });
 };
 

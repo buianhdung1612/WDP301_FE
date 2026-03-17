@@ -24,7 +24,7 @@ export const createProductSchema = z.object({
     priceOld: z.string().or(z.number()).transform(v => String(v)),
     priceNew: z.string().or(z.number()).transform(v => String(v)),
     stock: z.string().or(z.number()).transform(v => String(v)),
-    images: z.array(z.any()).min(2, "Vui lòng chọn tối thiểu 2 hình ảnh"),
+    images: z.array(z.any()).min(1, "Vui lòng chọn tối thiểu 1 hình ảnh"),
     status: z.string().default("active"),
     category: z.array(z.string()).optional().default([]),
     brandId: z.string().optional().default(""),

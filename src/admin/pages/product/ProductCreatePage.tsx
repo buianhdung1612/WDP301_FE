@@ -185,7 +185,10 @@ export const ProductCreatePage = () => {
     };
 
     const generateVariants = () => {
-        const selectedAttrs = attributes.filter((attr: any) => selectedAttributeIds.includes((attr.id || attr._id).toString()));
+        const selectedAttrs = attributes.filter((attr: any) => {
+            const attrId = (attr.id || attr._id)?.toString();
+            return attrId && selectedAttributeIds.includes(attrId);
+        });
         if (selectedAttrs.length === 0) return;
 
         const cartesian = (arrays: any[][]): any[][] => {
@@ -203,6 +206,11 @@ export const ProductCreatePage = () => {
             }))
         );
 
+        if (attrValues.some(arr => arr.length === 0)) {
+            toast.warn("Một số thuộc tính đã chọn không có tùy chọn để tạo biến thể");
+            return;
+        }
+
         const combinations = cartesian(attrValues);
         const priceOldField = watch("priceOld");
         const priceNewField = watch("priceNew");
@@ -210,8 +218,8 @@ export const ProductCreatePage = () => {
         const newVariants: Variant[] = combinations.map((combo, index) => ({
             id: `v-${Date.now()}-${index}`,
             attributeValue: combo,
-            priceOld: String(priceOldField),
-            priceNew: String(priceNewField),
+            priceOld: String(priceOldField || "0"),
+            priceNew: String(priceNewField || "0"),
             stock: "0",
             status: true
         }));
@@ -390,11 +398,14 @@ export const ProductCreatePage = () => {
                                                     <MenuItem value="">
                                                         <Box sx={{ color: "#919EAB" }}>Chọn thương hiệu</Box>
                                                     </MenuItem>
-                                                    {brands.map((brand: any) => (
-                                                        <MenuItem key={brand.id} value={brand.id}>
-                                                            {brand.name}
-                                                        </MenuItem>
-                                                    ))}
+                                                    {brands.map((brand: any) => {
+                                                        const brandId = brand.id || brand._id;
+                                                        return (
+                                                            <MenuItem key={brandId} value={brandId}>
+                                                                {brand.name}
+                                                            </MenuItem>
+                                                        );
+                                                    })}
                                                 </Select>
                                             </FormControl>
                                         )}
