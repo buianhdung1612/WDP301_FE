@@ -42,26 +42,26 @@ export const BoardingPaymentSuccessPage = () => {
             ? "Dang xac nhan thanh toan..."
             : paid || partial || !bookingId || isCodFlow
               ? partial
-                ? "Ban da dat coc thanh cong"
-                : "Ban da dat phong thanh cong"
+                ? "Bạn đã đặt cọc thành công"
+                : "Bạn đã đặt phòng thành công"
               : failed
-                ? "Thanh toan chua thanh cong"
-                : "Don dat phong da tao, dang cho xac nhan thanh toan"}
+                ? "Thanh toán chưa thành công"
+                : "Đơn đặt phòng đã tạo, đang chờ xác nhận thanh toán"}
         </h1>
 
         <p className="text-[14px] text-[#606060] mt-[10px]">
           {paid || partial || !bookingId || isCodFlow
             ? partial
-              ? "Don luu tru da ghi nhan tien coc. Phan con lai se thanh toan tai quay khi nhan chuong."
-              : "Cam on ban da dat khach san cho thu cung. Ban co the xem lai thong tin trong tai khoan."
+              ? "Đơn lưu trú đã ghi nhận tiền cọc. Phần còn lại sẽ thanh toán tại quầy khi nhận chuồng."
+              : "Cảm ơn bạn đã đặt khách sạn cho thú cưng. Bạn có thể xem lại thông tin trong tài khoản."
             : failed
-              ? "Giao dich bi huy hoac khong thanh cong. Ban co the thuc hien lai thanh toan."
-              : "He thong dang dong bo giao dich tu cong thanh toan. Vui long cho vai giay roi kiem tra lai."}
+              ? "Giao dịch bị hủy hoặc không thành công. Bạn có thể thực hiện lại thanh toán."
+              : "Hệ thống đang đồng bộ giao dịch từ cổng thanh toán. Vui lòng chờ vài giây rồi kiểm tra lại."}
         </p>
 
         {!!bookingId && (
           <p className="text-[12px] text-[#6b7280] mt-[8px]">
-            Trang thai hien tai: {isCodFlow ? "thanh toan tai quay" : (paymentStatus || (failed ? "failed" : "pending"))} / {data?.booking?.boardingStatus || "-"}
+            Trạng thái hiện tại: {isCodFlow ? "thanh toán tại quầy" : (paymentStatus || (failed ? "failed" : "pending"))} / {data?.booking?.boardingStatus || "-"}
           </p>
         )}
 
@@ -70,14 +70,14 @@ export const BoardingPaymentSuccessPage = () => {
             to="/dashboard/pet-cages"
             className="inline-flex items-center gap-[8px] px-[16px] py-[10px] rounded-[10px] bg-client-primary text-white text-[14px] font-[700] hover:bg-client-secondary transition-default"
           >
-            Xem chuong thu cung
+            Xem chuồng thú cưng
           </Link>
           <Link
             to="/hotels"
             className="inline-flex items-center gap-[8px] px-[16px] py-[10px] rounded-[10px] border border-[#d8d8d8] text-[14px] font-[700] text-client-secondary hover:border-client-primary transition-default"
           >
             <Home className="w-4 h-4" />
-            Ve trang khach san
+            Về trang khách sạn
           </Link>
         </div>
       </div>
