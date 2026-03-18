@@ -7,11 +7,12 @@ import { getOrderDetail } from "../../api/dashboard.api";
 import { formatCurrency } from "../../helpers";
 import dayjs from "dayjs";
 
-import { exportInvoicePdf } from "../../api/order.api";
+import { exportInvoicePdf, cancelOrder } from "../../api/order.api";
 import { toast } from "react-toastify";
 import { createReview } from "../../api/review.api";
 import { useMutation } from "@tanstack/react-query";
 import { uploadImagesToCloudinary } from "../../../admin/api/uploadCloudinary.api";
+import { CancelModal } from "../../components/ui/CancelModal";
 
 export const OrderDetailPage = () => {
     const { id } = useParams();
@@ -24,6 +25,8 @@ export const OrderDetailPage = () => {
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [exporting, setExporting] = useState(false);
+    const [isCanceling, setIsCanceling] = useState(false);
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const createReviewMutation = useMutation({
@@ -146,6 +149,29 @@ export const OrderDetailPage = () => {
         }
     };
 
+    const handleCancelOrder = () => {
+        setIsCancelModalOpen(true);
+    };
+
+    const onConfirmCancel = async (reason: string) => {
+        if (!id || !order) return;
+        setIsCancelModalOpen(false);
+        setIsCanceling(true);
+        try {
+            const res = await cancelOrder(id, reason);
+            if (res.code === "success") {
+                toast.success(res.message || "Hủy đơn hàng thành công!");
+                fetchOrder();
+            } else {
+                toast.error(res.message || "Hủy đơn hàng thất bại!");
+            }
+        } catch (error) {
+            toast.error("Đã có lỗi xảy ra!");
+        } finally {
+            setIsCanceling(false);
+        }
+    };
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case "completed":
@@ -158,6 +184,8 @@ export const OrderDetailPage = () => {
             case "cancelled":
             case "returned":
                 return "text-[#ff0000]";
+            case "request_cancel":
+                return "text-[#f97316]";
             default:
                 return "text-[#7d7b7b]";
         }
@@ -173,7 +201,8 @@ export const OrderDetailPage = () => {
             "returned": "Trả hàng",
             "unpaid": "Chưa thanh toán",
             "paid": "Đã thanh toán",
-            "refunded": "Đã hoàn tiền"
+            "refunded": "Đã hoàn tiền",
+            "request_cancel": "Chờ duyệt hủy/hoàn tiền"
         };
         return map[status] || status;
     };
@@ -225,15 +254,33 @@ export const OrderDetailPage = () => {
                                                 <span className="text-[#7d7b7b]">Thanh toán: </span>
                                                 <span className={`font-[500] ${getStatusColor(order.paymentStatus)}`}>{getStatusText(order.paymentStatus)}</span>
                                             </p>
+                                            {order.orderStatus === "cancelled" && order.cancelledReason && (
+                                                <p className="text-[14px] bg-red-50 text-red-600 p-3 rounded-lg border border-red-100 mt-2">
+                                                    <span className="font-bold">Lý do hủy:</span> {order.cancelledReason}
+                                                </p>
+                                            )}
                                         </div>
-                                        <button
-                                            onClick={handleExportInvoice}
-                                            disabled={exporting}
-                                            className="bg-client-primary hover:bg-client-secondary transition-default text-white font-[600] text-[14px] py-[15px] px-[25px] rounded-[6px] cursor-pointer disabled:opacity-50 flex items-center gap-2"
-                                        >
-                                            {exporting && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
-                                            Xuất hóa đơn
-                                        </button>
+                                        <div className="flex flex-col gap-3">
+                                            <button
+                                                onClick={handleExportInvoice}
+                                                disabled={exporting}
+                                                className="bg-client-primary hover:bg-client-secondary transition-default text-white font-[600] text-[14px] py-[15px] px-[25px] rounded-[6px] cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 w-full"
+                                            >
+                                                {exporting && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
+                                                Xuất hóa đơn
+                                            </button>
+
+                                            {(order.orderStatus === "pending" || order.orderStatus === "confirmed") && (
+                                                <button
+                                                    onClick={handleCancelOrder}
+                                                    disabled={isCanceling}
+                                                    className="bg-red-500 hover:bg-red-600 transition-default text-white font-[600] text-[14px] py-[15px] px-[25px] rounded-[6px] cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 w-full"
+                                                >
+                                                    {isCanceling && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
+                                                    Hủy đơn hàng
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -395,6 +442,13 @@ export const OrderDetailPage = () => {
                     </div>
                 </div>
             )}
+
+            <CancelModal
+                isOpen={isCancelModalOpen}
+                onClose={() => setIsCancelModalOpen(false)}
+                onConfirm={onConfirmCancel}
+                paymentStatus={order?.paymentStatus}
+            />
         </>
     );
 };

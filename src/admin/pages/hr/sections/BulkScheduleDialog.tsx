@@ -88,9 +88,10 @@ export const BulkScheduleDialog = ({
     });
 
     const busyStaffIds = useMemo(() => {
-        const records = Array.isArray(schedulesRes?.data?.recordList)
-            ? schedulesRes.data.recordList
-            : (Array.isArray(schedulesRes?.data) ? schedulesRes.data : []);
+        const data = schedulesRes?.data;
+        const records = Array.isArray(data?.recordList)
+            ? data.recordList
+            : (Array.isArray(data) ? data : []);
         return [...new Set(records.map((s: any) => s.staffId?._id || s.staffId))];
     }, [schedulesRes]);
 
@@ -124,7 +125,7 @@ export const BulkScheduleDialog = ({
             fullWidth
             sx={dialogStyles}
         >
-            <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <DialogTitle component="div" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
                     Phân ca hàng loạt
                 </Typography>

@@ -55,9 +55,11 @@ export const ScheduleCalendarPage = () => {
     const departmentsRes = useDepartments();
     const departments = useMemo(() => {
         if (!departmentsRes.data) return [];
-        return Array.isArray(departmentsRes.data.recordList)
-            ? departmentsRes.data.recordList
-            : (Array.isArray(departmentsRes.data.data) ? departmentsRes.data.data : (Array.isArray(departmentsRes.data) ? departmentsRes.data : []));
+        const data = departmentsRes.data;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        return Array.isArray(data) ? data : [];
     }, [departmentsRes.data]);
 
     // Set default tab when departments load
@@ -71,7 +73,7 @@ export const ScheduleCalendarPage = () => {
     const month = date.month() + 1;
     const year = date.year();
 
-    const { data: calendarRes } = useCalendarData(month, year);
+    const { data: calendarRes } = useCalendarData(month, year, currentTab);
     const allEvents = calendarRes?.data || [];
 
     const events = allEvents.filter((event: any) => {

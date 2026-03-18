@@ -87,7 +87,7 @@ export const BulkDeleteDialog = ({
             fullWidth
             sx={dialogStyles}
         >
-            <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <DialogTitle component="div" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Stack direction="row" spacing={1.5} alignItems="center">
                     <Icon icon="solar:trash-bin-trash-bold-duotone" width={24} color="var(--palette-error-main)" />
                     <Typography variant="h6" sx={{ fontWeight: 700 }}>

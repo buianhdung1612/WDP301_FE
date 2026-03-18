@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { ProductBanner } from "../product/sections/ProductBanner";
 import { Sidebar } from "./sections/Sidebar";
-import { useParams, Link } from "react-router-dom";
-import { getMyBooking, exportBookingPdf } from "../../api/booking.api";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { getMyBooking, exportBookingPdf, cancelBooking } from "../../api/booking.api";
 import { formatCurrency } from "../../helpers";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@iconify/react";
+import { CancelModal } from "../../components/ui/CancelModal";
 
 // Timer component to check overtime locally every few seconds
 const OvertimeTimer = ({ startedAt, maxDuration }: { startedAt: string, maxDuration: number }) => {
@@ -37,7 +38,10 @@ const OvertimeTimer = ({ startedAt, maxDuration }: { startedAt: string, maxDurat
 
 export const BookingDetailPage = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [exporting, setExporting] = useState(false);
+    const [isCanceling, setIsCanceling] = useState(false);
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
     const { data: bookingRes, isLoading: loading } = useQuery<any>({
         queryKey: ["booking", id],
@@ -77,6 +81,29 @@ export const BookingDetailPage = () => {
         }
     };
 
+    const handleCancelBooking = () => {
+        setIsCancelModalOpen(true);
+    };
+
+    const onConfirmCancel = async (reason: string) => {
+        if (!booking) return;
+        setIsCancelModalOpen(false);
+        setIsCanceling(true);
+        try {
+            const res = await cancelBooking(booking._id, reason);
+            if (res.code === 200) {
+                toast.success(res.message || "Hủy đặt lịch thành công!");
+                navigate("/dashboard/bookings");
+            } else {
+                toast.error(res.message || "Hủy đặt lịch thất bại!");
+            }
+        } catch (error) {
+            toast.error("Đã có lỗi xảy ra!");
+        } finally {
+            setIsCanceling(false);
+        }
+    };
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case "completed": return "text-[#05A845]";
@@ -85,6 +112,7 @@ export const BookingDetailPage = () => {
             case "cancelled": return "text-[#ff0000]";
             case "in-progress": return "text-[#FFAB00]";
             case "delayed": return "text-[#FF5630]";
+            case "request_cancel": return "text-[#f97316]";
             default: return "text-[#7d7b7b]";
         }
     };
@@ -96,7 +124,8 @@ export const BookingDetailPage = () => {
             "completed": "Hoàn thành",
             "cancelled": "Đã hủy",
             "delayed": "Trễ giờ",
-            "in-progress": "Đang làm"
+            "in-progress": "Đang làm",
+            "request_cancel": "Chờ duyệt hủy/hoàn tiền"
         };
         return map[status] || status;
     };
@@ -154,11 +183,21 @@ export const BookingDetailPage = () => {
                                     <button
                                         onClick={handleExportPdf}
                                         disabled={exporting}
-                                        className="bg-client-primary hover:bg-client-secondary transition-default text-white font-[600] text-[14px] py-[15px] px-[25px] rounded-[6px] cursor-pointer disabled:opacity-50 flex items-center gap-2 ml-auto"
+                                        className="bg-client-primary hover:bg-client-secondary transition-default text-white font-[600] text-[14px] py-[15px] px-[25px] rounded-[6px] cursor-pointer disabled:opacity-50 flex items-center gap-2 ml-auto mb-2"
                                     >
                                         {exporting && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
                                         Xuất hóa đơn PDF
                                     </button>
+                                    {(booking.bookingStatus === "pending" || booking.bookingStatus === "confirmed") && (
+                                        <button
+                                            onClick={handleCancelBooking}
+                                            disabled={isCanceling}
+                                            className="bg-red-500 hover:bg-red-600 transition-default text-white font-[600] text-[14px] py-[15px] px-[25px] rounded-[6px] cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 ml-auto"
+                                        >
+                                            {isCanceling && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
+                                            Hủy đặt lịch
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -174,9 +213,40 @@ export const BookingDetailPage = () => {
                                 <div>
                                     <h4 className="font-bold text-client-secondary mb-3 uppercase text-[14px] tracking-wider text-client-primary">Trạng thái & Thanh toán</h4>
                                     <div className="space-y-2">
-                                        <p className="text-[15px]"><span className="text-[#7d7b7b] w-[120px] inline-block font-[500]">Trạng thái:</span> <span className={`font-bold ${getStatusColor(booking.bookingStatus)}`}>{getStatusText(booking.bookingStatus)}</span></p>
-                                        <p className="text-[15px]"><span className="text-[#7d7b7b] w-[120px] inline-block font-[500]">Thanh toán:</span> <span className="font-bold text-[#05A845] uppercase">{booking.paymentStatus === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}</span></p>
-                                        <p className="text-[15px]"><span className="text-[#7d7b7b] w-[120px] inline-block font-[500]">Phương thức:</span> <span className="font-semibold text-client-secondary">{booking.paymentMethod === 'money' ? 'Tiền mặt' : booking.paymentMethod}</span></p>
+                                        <p className="text-[15px]"><span className="text-[#7d7b7b] w-[140px] inline-block font-[500]">Trạng thái:</span> <span className={`font-bold ${getStatusColor(booking.bookingStatus)}`}>{getStatusText(booking.bookingStatus)}</span></p>
+                                        <p className="text-[15px]">
+                                            <span className="text-[#7d7b7b] w-[140px] inline-block font-[500]">Thanh toán:</span>
+                                            <span className={`font-bold uppercase ${booking.paymentStatus === 'paid' ? 'text-[#05A845]' : booking.paymentStatus === 'partially_paid' ? 'text-[#007BFF]' : 'text-red-500'}`}>
+                                                {booking.paymentStatus === 'paid' ? 'Đã hoàn thành' : booking.paymentStatus === 'partially_paid' ? 'Đã đặt cọc' : 'Chưa thanh toán'}
+                                            </span>
+                                        </p>
+                                        <p className="text-[15px]">
+                                            <span className="text-[#7d7b7b] w-[140px] inline-block font-[500]">Phương thức:</span>
+                                            <span className="font-semibold text-client-secondary">
+                                                {booking.paymentMethod === 'money' ? 'Tiền mặt tại quầy' : booking.paymentMethod === 'vnpay' ? 'Ví VNPAY' : booking.paymentMethod === 'zalopay' ? 'Ví ZaloPay' : booking.paymentMethod}
+                                            </span>
+                                        </p>
+                                        {booking.depositAmount > 0 && (
+                                            <>
+                                                <p className="text-[15px]">
+                                                    <span className="text-[#7d7b7b] w-[140px] inline-block font-[500]">Tiền đã cọc:</span>
+                                                    <span className="font-bold text-[#05A845]">
+                                                        {formatCurrency(booking.depositAmount)}
+                                                        {booking.depositMethod && (
+                                                            <span className="ml-2 text-[12px] font-medium text-gray-400 capitalize bg-gray-100 px-2 py-0.5 rounded italic">
+                                                                (Qua {booking.depositMethod})
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                </p>
+                                                {booking.paymentStatus === 'partially_paid' && (
+                                                    <p className="text-[15px]">
+                                                        <span className="text-[#7d7b7b] w-[140px] inline-block font-[500]">Số tiền còn lại:</span>
+                                                        <span className="font-bold text-[#FF5630]">{formatCurrency(booking.total - booking.depositAmount)}</span>
+                                                    </p>
+                                                )}
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -201,7 +271,6 @@ export const BookingDetailPage = () => {
                                                     );
                                                     const petStatus = mapping?.status || 'pending';
                                                     const surcharge = mapping?.surchargeAmount || 0;
-                                                    const petPrice = mapping?.price || (booking.total / (booking.petIds?.length || 1));
 
                                                     return (
                                                         <div key={pet._id} className="bg-gray-50 p-2.5 rounded-xl border border-gray-100">
@@ -272,7 +341,7 @@ export const BookingDetailPage = () => {
                                         </div>
                                         <h4 className="font-bold text-client-secondary text-[16px]">Quy trình dịch vụ</h4>
                                     </div>
-                                    <div 
+                                    <div
                                         className="text-[15px] text-[#505050] leading-relaxed prose prose-sm max-w-none"
                                         dangerouslySetInnerHTML={{ __html: booking.serviceId.procedure }}
                                     />
@@ -282,6 +351,16 @@ export const BookingDetailPage = () => {
                     </div>
                 </div>
             </div>
+
+            <CancelModal
+                isOpen={isCancelModalOpen}
+                onClose={() => setIsCancelModalOpen(false)}
+                onConfirm={onConfirmCancel}
+                title="Lý Do Hủy Lịch"
+                confirmText="HỦY LỊCH ĐẶT"
+                isBooking={true}
+                paymentStatus={booking?.paymentStatus}
+            />
         </>
     );
 };

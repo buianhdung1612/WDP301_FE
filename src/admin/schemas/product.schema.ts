@@ -35,12 +35,13 @@ export const createProductSchema = z.object({
 }).refine((data) => {
     if (data.isFood && !data.expiryDate) return false;
     if (data.isFood && data.expiryDate) {
-        const today = new Date().toISOString().split('T')[0];
-        return data.expiryDate >= today;
+        const expiry = new Date(data.expiryDate);
+        const now = new Date();
+        return expiry >= now;
     }
     return true;
 }, {
-    message: "Vui lòng chọn ngày hết hạn từ hôm nay trở đi",
+    message: "Thời gian hết hạn phải từ thời điểm hiện tại trở đi",
     path: ["expiryDate"],
 });
 

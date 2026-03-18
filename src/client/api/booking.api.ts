@@ -13,6 +13,15 @@ export const getAvailableTimeSlots = async (date: string, serviceId?: string, co
     }
 };
 
+export const getBookingConfig = async () => {
+    try {
+        const response = await apiApp.get(`${API_BOOKING}/config`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
 export const createBooking = async (data: any) => {
     try {
         const response = await apiApp.post(`${API_BOOKING}/bookings`, data);
@@ -55,6 +64,15 @@ export const exportBookingPdf = async (bookingCode: string, phone: string) => {
             params: { bookingCode, phone },
             responseType: 'blob'
         });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const cancelBooking = async (id: string, reason?: string) => {
+    try {
+        const response = await apiApp.patch(`${API_BOOKING}/bookings/${id}/cancel`, { reason });
         return response.data;
     } catch (error) {
         throw error;

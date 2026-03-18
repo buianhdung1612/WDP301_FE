@@ -480,10 +480,10 @@ export const ProductCreatePage = () => {
                                                 <TextField
                                                     {...field}
                                                     label="Ngày hết hạn"
-                                                    type="date"
+                                                    type="datetime-local"
                                                     fullWidth
                                                     InputLabelProps={{ shrink: true }}
-                                                    inputProps={{ min: new Date().toISOString().split('T')[0] }}
+                                                    inputProps={{ min: new Date().toISOString().slice(0, 16) }}
                                                     error={!!fieldState.error}
                                                     helperText={fieldState.error?.message}
                                                 />

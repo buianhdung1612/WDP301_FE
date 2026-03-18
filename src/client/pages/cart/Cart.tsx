@@ -214,7 +214,7 @@ export const CartPage = () => {
                                                                         item.variant
                                                                     )
                                                                 }
-                                                                className={`w-[40px] h-full rounded-l-[40px] text-[40px] bg-[#e67e2033] text-center transition-[color] duration-200 ease-linear ${item.quantity <= 1
+                                                                className={`w-[40px] h-full rounded-l-[40px] text-[20px] bg-[#e67e2033] text-center transition-[color] duration-200 ease-linear ${item.quantity <= 1
                                                                     ? "cursor-not-allowed"
                                                                     : "cursor-pointer hover:text-client-primary"
                                                                     }`}
@@ -238,7 +238,7 @@ export const CartPage = () => {
                                                                         item.variant
                                                                     )
                                                                 }
-                                                                className={`w-[40px] h-full rounded-r-[40px] text-[40px] bg-[#e67e2033] text-center transition-[color] duration-200 ease-linear ${item.quantity >= maxStock
+                                                                className={`w-[40px] h-full rounded-r-[40px] text-[20px] bg-[#e67e2033] text-center transition-[color] duration-200 ease-linear ${item.quantity >= maxStock
                                                                     ? "cursor-not-allowed"
                                                                     : "cursor-pointer hover:text-client-primary"
                                                                     }`}

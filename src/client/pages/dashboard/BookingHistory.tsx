@@ -2,14 +2,18 @@ import { ProductBanner } from "../product/sections/ProductBanner";
 import { Link } from "react-router-dom";
 import { Sidebar } from "./sections/Sidebar";
 import { useEffect, useState } from "react";
-import { getMyBookings } from "../../api/booking.api";
+import { getMyBookings, cancelBooking } from "../../api/booking.api";
 import { formatCurrency } from "../../helpers";
 import dayjs from "dayjs";
+import { toast } from "react-toastify";
+import { CancelModal } from "../../components/ui/CancelModal";
 
 
 export const BookingHistoryPage = () => {
     const [bookings, setBookings] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isCanceling, setIsCanceling] = useState(false);
+    const [cancelModal, setCancelModal] = useState<{ isOpen: boolean; booking: any }>({ isOpen: false, booking: null });
 
     const breadcrumbs = [
         { label: "Trang chủ", to: "/" },
@@ -17,22 +21,47 @@ export const BookingHistoryPage = () => {
         { label: "Lịch sử dịch vụ", to: "/dashboard/bookings" },
     ];
 
-    useEffect(() => {
-        const fetchBookings = async () => {
-            try {
-                const response = await getMyBookings();
-                if (response.code === 200) {
-                    setBookings(response.data);
-                }
-            } catch (error) {
-                console.error("Failed to fetch bookings:", error);
-            } finally {
-                setLoading(false);
+    const fetchBookings = async () => {
+        setLoading(true);
+        try {
+            const response = await getMyBookings();
+            if (response.code === 200) {
+                setBookings(response.data);
             }
-        };
+        } catch (error) {
+            console.error("Failed to fetch bookings:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchBookings();
     }, []);
+
+    const handleCancelBooking = (booking: any) => {
+        setCancelModal({ isOpen: true, booking });
+    };
+
+    const onConfirmCancel = async (reason: string) => {
+        const booking = cancelModal.booking;
+        if (!booking) return;
+        setIsCanceling(true);
+        setCancelModal({ isOpen: false, booking: null });
+        try {
+            const res = await cancelBooking(booking._id, reason);
+            if (res.code === 200) {
+                toast.success(res.message || "Hủy lịch đặt thành công!");
+                fetchBookings();
+            } else {
+                toast.error(res.message || "Hủy lịch đặt thất bại!");
+            }
+        } catch (error) {
+            toast.error("Đã có lỗi xảy ra!");
+        } finally {
+            setIsCanceling(false);
+        }
+    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -50,6 +79,8 @@ export const BookingHistoryPage = () => {
                 return "bg-purple-100 text-purple-700";
             case "no-show":
                 return "bg-gray-100 text-gray-700";
+            case "request_cancel":
+                return "bg-orange-100 text-orange-700 border border-orange-200";
             default:
                 return "bg-gray-100 text-gray-700";
         }
@@ -63,7 +94,8 @@ export const BookingHistoryPage = () => {
             "cancelled": "Đã hủy",
             "no-show": "Không đến",
             "in-progress": "Đang thực hiện",
-            "delayed": "Trễ hẹn"
+            "delayed": "Trễ hẹn",
+            "request_cancel": "Chờ duyệt hủy/hoàn tiền"
         };
         return map[status] || status;
     };
@@ -136,12 +168,23 @@ export const BookingHistoryPage = () => {
                                                     {formatCurrency(booking.total || 0)}
                                                 </td>
                                                 <td className="p-[20px]">
-                                                    <Link
-                                                        to={`/dashboard/booking/detail/${booking._id}`}
-                                                        className="text-[14px] text-client-primary hover:underline font-[500]"
-                                                    >
-                                                        Chi tiết
-                                                    </Link>
+                                                    <div className="flex flex-col gap-2">
+                                                        <Link
+                                                            to={`/dashboard/booking/detail/${booking._id}`}
+                                                            className="text-[14px] text-client-primary hover:underline font-[500]"
+                                                        >
+                                                            Chi tiết
+                                                        </Link>
+                                                        {(booking.bookingStatus === "pending" || booking.bookingStatus === "confirmed") && (
+                                                            <button
+                                                                onClick={() => handleCancelBooking(booking)}
+                                                                disabled={isCanceling}
+                                                                className="text-[14px] text-red-500 hover:underline font-[500] cursor-pointer text-left disabled:opacity-50"
+                                                            >
+                                                                Hủy lịch
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))
@@ -152,6 +195,16 @@ export const BookingHistoryPage = () => {
                     </div>
                 </div>
             </div>
+
+            <CancelModal
+                isOpen={cancelModal.isOpen}
+                onClose={() => setCancelModal({ isOpen: false, booking: null })}
+                onConfirm={onConfirmCancel}
+                title="Lý Do Hủy Lịch"
+                confirmText="HỦY LỊCH ĐẶT"
+                isBooking={true}
+                paymentStatus={cancelModal.booking?.paymentStatus}
+            />
         </>
     );
 };
