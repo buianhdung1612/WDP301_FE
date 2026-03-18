@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { Button } from "../ui/Button"
 import { useCartStore } from "../../../stores/useCartStore";
 import { useAuthStore } from "../../../stores/useAuthStore";
+import { useWishlistStore } from "../../../stores/useWishlistStore";
 import { logout as logoutApi } from "../../api/auth.api";
 import { getSuggestions } from "../../api/product.api";
 import { toast } from "react-toastify";
@@ -23,6 +24,9 @@ export const MainHeader = () => {
     const user = useAuthStore((state) => state.user);
     const logoutStore = useAuthStore((state) => state.logout);
     const isAuthHydrated = useAuthStore((state) => state.isHydrated);
+
+    const wishlistCount = useWishlistStore((state) => state.items.length);
+    const isWishlistHydrated = useWishlistStore((state) => state.isHydrated);
 
     const cartCount = isCartHydrated ? totalItemsCount : 0;
     const removeFromCart = useCartStore((state) => state.removeFromCart);
@@ -138,9 +142,12 @@ export const MainHeader = () => {
 
                     {/* Actions */}
                     <div className="flex items-center gap-[30px] w-[34.2%] justify-end mr-[16px]">
-                        <div className="w-[35px] h-[35px] flex items-center justify-center text-[#102937] hover:text-client-primary transition-[color] duration-300 cursor-pointer">
+                        <Link to="/dashboard/wishlist" className="relative w-[35px] h-[35px] flex items-center justify-center text-[#102937] hover:text-client-primary transition-[color] duration-300 cursor-pointer group">
                             <Heart stroke="2" className="w-[25px] h-[25px]" />
-                        </div>
+                            {isWishlistHydrated && wishlistCount > 0 && (
+                                <span className="absolute right-[-1px] top-[-5px] w-[18px] h-[18px] text-[10px] bg-client-primary text-white rounded-full flex items-center justify-center animate-bounce-short">{wishlistCount}</span>
+                            )}
+                        </Link>
                         <div className="group relative w-[35px] h-[35px] flex items-center justify-center cursor-pointer">
                             <Link to="/cart">
                                 <Handbag stroke="2" className="w-[25px] h-[25px] text-[#102937] group-hover:text-client-primary transition-default" />

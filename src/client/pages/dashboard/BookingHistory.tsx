@@ -82,7 +82,7 @@ export const BookingHistoryPage = () => {
                     <Sidebar />
                 </div>
                 <div className="w-[75%] px-[12px]">
-                    <div className="mt-[100px] p-[35px] bg-white shadow-[0px_8px_24px_#959da533] rounded-[32px]">
+                    <div className="mt-[100px] p-[35px] bg-white shadow-[0px_8px_24px_#959da533] rounded-[12px]">
                         <div className="flex items-center justify-between mb-8">
                             <h3 className="text-[24px] font-black text-[#181818]">
                                 Lịch sử đặt lịch

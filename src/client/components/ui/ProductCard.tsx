@@ -1,11 +1,61 @@
 import StarIcon from "@mui/icons-material/Star";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
-import { Link } from "react-router-dom";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import { Link, useNavigate } from "react-router-dom";
 import type { Product } from "../../../types/products.type";
+import { useWishlistStore } from "../../../stores/useWishlistStore";
+import { toast } from "react-toastify";
 
-export const ProductCard = ({ product }: { product: Product }) => {
+export const ProductCard = ({ product, rawData }: { product: Product, rawData?: any }) => {
+    const navigate = useNavigate();
+    const { toggleWishlist, isInWishlist } = useWishlistStore();
+    const isFavorite = isInWishlist(product.id.toString());
+
+    const handleToggleWishlist = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // If product has variants, require detail page selection
+        if (rawData?.variants?.length > 0) {
+            toast.info("Sản phẩm này có nhiều lựa chọn, vui lòng chọn thuộc tính trong trang chi tiết!");
+            navigate(product.url);
+            return;
+        }
+
+        // Prepare the detail object from available data
+        const itemToSave = {
+            productId: product.id.toString(),
+            quantity: 1,
+            detail: {
+                images: rawData?.images || [product.primaryImage],
+                slug: product.url.split("/").pop() || "",
+                name: product.title,
+                priceNew: parseInt(product.price.replace(/\D/g, "")),
+                priceOld: rawData?.priceOld || parseInt(product.price.replace(/\D/g, "")),
+                stock: rawData?.stock || 99,
+                attributeList: rawData?.attributes || [],
+                variants: rawData?.variants || [],
+            }
+        };
+
+        toggleWishlist(itemToSave);
+    };
+
     return (
-        <div className="bg-[#fff0f0] rounded-[20px] overflow-hidden product-item transition-all duration-300 ease-linear hover:bg-client-primary group">
+        <div className="bg-[#fff0f0] rounded-[20px] overflow-hidden product-item transition-all duration-300 ease-linear hover:bg-client-primary group relative">
+            {/* Wishlist Toggle Button */}
+            <div
+                onClick={handleToggleWishlist}
+                className="absolute top-[25px] left-[25px] z-10 w-[40px] h-[40px] rounded-full bg-white/80 flex items-center justify-center cursor-pointer hover:bg-white transition-all shadow-sm"
+            >
+                {isFavorite ? (
+                    <FavoriteIcon sx={{ color: "#FF6262", fontSize: "24px" }} />
+                ) : (
+                    <FavoriteBorderIcon sx={{ color: "#FF6262", fontSize: "24px" }} />
+                )}
+            </div>
+
             <div className="p-[15px]">
                 <Link to={product.url} className="block relative rounded-[20px] overflow-hidden aspect-[327/343]">
                     {/*Primary Image */}
@@ -61,7 +111,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
                 <div className="mt-[15px]">
                     <div className="mt-[53px]">
                         <div className="w-[61px] h-[61px] pt-[10px] pr-[1px] pb-[1px] pl-[10px] relative rounded-tl-[30px] bg-white cart-button">
-                            <div className="w-[50px] h-[50px] rounded-full bg-client-primary flex items-center justify-center duration-[375ms] ease-[cubic-bezier(0.7,0,0.3,1)] group-hover:bg-client-secondary">
+                            <div className="w-[50px] h-[50px] rounded-full bg-client-primary flex items-center justify-center duration-[375ms] ease-[cubic-bezier(0.7,0,0.3,1)] group-hover:bg-client-secondary cursor-pointer">
                                 <ShoppingCartOutlinedIcon
                                     className="text-white"
                                     sx={{ fontSize: "40px" }}

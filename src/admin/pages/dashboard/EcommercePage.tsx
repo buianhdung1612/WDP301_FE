@@ -745,11 +745,27 @@ export const EcommercePage = () => {
                 }}
             >
                 <SummaryWidget
-                    title="Tổng khách hàng"
+                    title="Khách hàng"
                     total={stats?.summary.totalUsers.toString() || "0"}
                     percent={3.5}
                     color="#00b8d9"
                     chartData={[40, 50, 45, 60, 55, 70, 65, 80]}
+                />
+            </Grid>
+
+            <Grid
+                sx={{
+                    flexGrow: 0,
+                    flexBasis: 'auto',
+                    width: 'calc(100% * 4 / var(--Grid-parent-columns) - (var(--Grid-parent-columns) - 4) * (var(--Grid-parent-columnSpacing) / var(--Grid-parent-columns)))',
+                }}
+            >
+                <SummaryWidget
+                    title="Đánh giá chờ duyệt"
+                    total={stats?.summary.totalPendingReviews.toString() || "0"}
+                    percent={0}
+                    color="#ffab00"
+                    chartData={[10, 15, 8, 12, 18, 14, 20, 16]}
                 />
             </Grid>
 

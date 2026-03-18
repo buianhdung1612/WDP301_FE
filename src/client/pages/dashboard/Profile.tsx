@@ -42,8 +42,8 @@ export const ProfilePage = () => {
         className="bg-top"
       />
 
-      <div className="mt-[-150px] mb-[100px] app-container flex">
-        <div className="w-[25%] px-[12px]">
+      <div className="mt-[-150px] mb-[100px] app-container flex items-stretch">
+        <div className="w-[25%] px-[12px] flex">
           <Sidebar />
         </div>
         <div className="w-[75%] px-[12px]">

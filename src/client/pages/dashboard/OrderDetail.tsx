@@ -1,22 +1,64 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ProductBanner } from "../product/sections/ProductBanner";
 import { Sidebar } from "./sections/Sidebar";
 import { useParams, Link } from "react-router-dom";
-import { MessageText, Star, Xmark, NavArrowRight, MediaImage } from "iconoir-react";
+import { MessageText, Star, Xmark, NavArrowRight, MediaImage, Trash } from "iconoir-react";
 import { getOrderDetail } from "../../api/dashboard.api";
 import { formatCurrency } from "../../helpers";
 import dayjs from "dayjs";
 
 import { exportInvoicePdf } from "../../api/order.api";
 import { toast } from "react-toastify";
+import { createReview } from "../../api/review.api";
+import { useMutation } from "@tanstack/react-query";
+import { uploadImagesToCloudinary } from "../../../admin/api/uploadCloudinary.api";
 
 export const OrderDetailPage = () => {
     const { id } = useParams();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [rating, setRating] = useState(0);
+    const [rating, setRating] = useState(5);
+    const [comment, setComment] = useState("");
+    const [images, setImages] = useState<string[]>([]);
+    const [isUploading, setIsUploading] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<any>(null);
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [exporting, setExporting] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const createReviewMutation = useMutation({
+        mutationFn: createReview,
+        onSuccess: (res: any) => {
+            if (res.success) {
+                toast.success(res.message || "Đánh giá thành công!");
+                setIsModalOpen(false);
+                setComment("");
+                setRating(5);
+                setImages([]);
+                // Refresh order data
+                fetchOrder();
+            } else {
+                toast.error(res.message || "Gửi đánh giá thất bại!");
+            }
+        },
+        onError: () => {
+            toast.error("Đã có lỗi xảy ra!");
+        }
+    });
+
+    const fetchOrder = async () => {
+        if (!id) return;
+        try {
+            const response = await getOrderDetail(id);
+            if (response.success) {
+                setOrder(response.order);
+            }
+        } catch (error) {
+            console.error("Failed to fetch order detail:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const breadcrumbs = [
         { label: "Trang chủ", to: "/" },
@@ -25,22 +67,55 @@ export const OrderDetailPage = () => {
     ];
 
     useEffect(() => {
-        const fetchOrder = async () => {
-            if (!id) return;
-            try {
-                const response = await getOrderDetail(id);
-                if (response.success) {
-                    setOrder(response.order);
-                }
-            } catch (error) {
-                console.error("Failed to fetch order detail:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchOrder();
     }, [id]);
+
+    const handleOpenReview = (item: any) => {
+        setSelectedItem(item);
+        setIsModalOpen(true);
+        setRating(5);
+        setComment("");
+        setImages([]);
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        setIsUploading(true);
+        try {
+            const uploadedUrls = await uploadImagesToCloudinary(Array.from(files));
+            setImages(prev => [...prev, ...uploadedUrls]);
+            toast.success("Tải ảnh lên thành công!");
+        } catch (error) {
+            toast.error("Lỗi khi tải ảnh lên!");
+        } finally {
+            setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    };
+
+    const handleRemoveImage = (index: number) => {
+        setImages(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const handleSubmitReview = () => {
+        if (!selectedItem) return;
+        if (!comment.trim()) {
+            toast.warn("Vui lòng nhập nhận xét!");
+            return;
+        }
+
+        createReviewMutation.mutate({
+            productId: selectedItem.productId,
+            orderId: order._id,
+            orderItemId: selectedItem._id,
+            rating,
+            comment,
+            images,
+            variant: selectedItem.variant
+        });
+    };
 
     const handleExportInvoice = async () => {
         if (!order) return;
@@ -174,19 +249,30 @@ export const OrderDetailPage = () => {
                                     <tbody className="divide-y divide-[#eee] border-b border-[#eee]">
                                         {order.items?.map((item: any, idx: number) => (
                                             <tr key={idx}>
-                                                <td className="py-[15px] px-[20px] text-[15px] text-[#7d7b7b] border-r border-[#eee] underline cursor-pointer hover:text-client-primary transition-colors">{item.product_id || item.productName || "Sản phẩm"}</td>
+                                                <td className="py-[15px] px-[20px] text-[15px] text-[#7d7b7b] border-r border-[#eee] underline cursor-pointer hover:text-client-primary transition-colors">{item.name || "Sản phẩm"}</td>
                                                 <td className="py-[15px] px-[20px] text-[15px] text-[#7d7b7b] border-r border-[#eee]">{formatCurrency(item.price)}</td>
                                                 <td className="py-[15px] px-[20px] text-[15px] text-[#7d7b7b] border-r border-[#eee] text-center">{item.quantity}</td>
                                                 <td className="py-[15px] px-[20px] text-[15px] text-[#7d7b7b]">
-                                                    <div className="flex items-center justify-between">
+                                                    <div className="flex items-center justify-between gap-2">
                                                         <span>{formatCurrency(item.price * item.quantity)}</span>
-                                                        <button
-                                                            onClick={() => setIsModalOpen(true)}
-                                                            className="flex items-center gap-[5px] transition-colors font-[500] group cursor-pointer"
-                                                        >
-                                                            <MessageText className="w-[16px] h-[16px] text-client-primary" />
-                                                            <span className="text-client-secondary group-hover:text-client-primary transition-colors">Viết đánh giá</span>
-                                                        </button>
+                                                        {order.orderStatus === "completed" && (
+                                                            item.reviewed ? (
+                                                                <div className="flex items-center gap-[5px] text-[#05A845] font-[500] text-[14px]">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-[16px] h-[16px]">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                                                    </svg>
+                                                                    <span>{item.reviewStatus === 'pending' ? 'Đã gửi (Chờ duyệt)' : 'Đã đánh giá'}</span>
+                                                                </div>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => handleOpenReview(item)}
+                                                                    className="flex items-center gap-[5px] transition-colors font-[500] group cursor-pointer"
+                                                                >
+                                                                    <MessageText className="w-[16px] h-[16px] text-client-primary" />
+                                                                    <span className="text-client-secondary group-hover:text-client-primary transition-colors text-[14px]">Viết đánh giá</span>
+                                                                </button>
+                                                            )
+                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -213,21 +299,21 @@ export const OrderDetailPage = () => {
             {/* Review Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-[999] flex items-center justify-center p-[20px] bg-black/50 backdrop-blur-[2px]">
-                    <div className="bg-white w-full max-w-[800px] rounded-[15px] shadow-[0px_20px_60px_rgba(0,0,0,0.15)] relative overflow-visible flex flex-col items-center">
+                    <div className="bg-white w-full max-w-[700px] rounded-[15px] shadow-[0px_20px_60px_rgba(0,0,0,0.15)] relative overflow-visible">
                         {/* Close Button */}
                         <button
                             onClick={() => setIsModalOpen(false)}
-                            className="absolute -top-[15px] -right-[15px] w-[30px] h-[30px] bg-[#E1554E] text-white flex items-center justify-center rounded-[4px] hover:bg-[#c94b45] transition-colors shadow-lg z-10 cursor-pointer"
+                            className="absolute -top-[15px] -right-[15px] w-[35px] h-[35px] bg-[#E1554E] text-white flex items-center justify-center rounded-[8px] hover:bg-[#c94b45] transition-colors shadow-lg z-10 cursor-pointer"
                         >
                             <Xmark strokeWidth={3} className="w-[18px] h-[18px]" />
                         </button>
 
                         <div className="w-full p-[40px]">
-                            <h2 className="text-[28px] font-[700] text-[#333] mb-[25px]">Đánh giá sản phẩm</h2>
+                            <h2 className="text-[26px] font-[700] text-client-secondary mb-[25px]">Đánh giá sản phẩm</h2>
 
                             {/* Star Rating */}
-                            <div className="flex items-center gap-[15px] mb-[30px]">
-                                <span className="text-[16px] text-[#777] font-[500]">Đánh giá của bạn:</span>
+                            <div className="flex items-center gap-[15px] mb-[25px]">
+                                <span className="text-[15px] text-[#777] font-[500]">Đánh giá của bạn:</span>
                                 <div className="flex gap-[5px]">
                                     {[1, 2, 3, 4, 5].map((star) => (
                                         <button
@@ -236,7 +322,7 @@ export const OrderDetailPage = () => {
                                             className="transition-transform active:scale-90 cursor-pointer"
                                         >
                                             <Star
-                                                className={`w-[22px] h-[22px] ${star <= rating ? "fill-orange-400 text-orange-400" : "text-gray-300"}`}
+                                                className={`w-[22px] h-[22px] ${star <= rating ? "fill-[#F9A61C] text-[#F9A61C]" : "text-gray-300"}`}
                                                 strokeWidth={2}
                                             />
                                         </button>
@@ -245,24 +331,64 @@ export const OrderDetailPage = () => {
                             </div>
 
                             {/* Comment Textarea */}
-                            <div className="relative mb-[30px]">
+                            <div className="relative mb-[25px]">
                                 <textarea
-                                    placeholder="Viết đánh giá của bạn tại đây"
-                                    className="w-full h-[200px] p-[20px] border border-[#ddd] rounded-[8px] text-[15px] text-[#333] outline-none transition-all resize-none"
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                    placeholder="Sản phẩm xịn lắm..."
+                                    className="w-full h-[150px] p-[20px] border border-[#eee] rounded-[10px] text-[15px] text-[#333] outline-none transition-all resize-none focus:border-client-primary bg-[#fcfcfc]"
                                 />
                             </div>
 
-                            {/* Image Upload Placeholder */}
-                            <div className="mb-[40px]">
-                                <div className="w-[70px] h-[70px] border-[2px] border-dashed border-[#ddd] rounded-[8px] flex items-center justify-center text-[#999] cursor-pointer hover:border-client-primary hover:text-client-primary transition-all">
-                                    <MediaImage className="w-[24px] h-[24px]" strokeWidth={1.5} />
-                                </div>
+                            {/* Image Selection & Previews */}
+                            <div className="flex flex-wrap gap-[15px] mb-[30px]">
+                                {images.map((img, index) => (
+                                    <div key={index} className="relative w-[80px] h-[80px] rounded-[10px] border border-[#eee] overflow-hidden group">
+                                        <img src={img} alt="" className="w-full h-full object-cover" />
+                                        <button
+                                            onClick={() => handleRemoveImage(index)}
+                                            className="absolute top-[3px] right-[3px] bg-red-500 text-white p-[3px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                        >
+                                            <Trash className="w-[12px] h-[12px]" />
+                                        </button>
+                                    </div>
+                                ))}
+
+                                {images.length < 5 && (
+                                    <div
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="w-[80px] h-[80px] border-[2px] border-dashed border-[#ddd] rounded-[10px] flex flex-col items-center justify-center text-[#999] cursor-pointer hover:border-client-primary hover:text-client-primary transition-all bg-gray-50"
+                                    >
+                                        {isUploading ? (
+                                            <div className="w-6 h-6 border-2 border-client-primary border-t-transparent rounded-full animate-spin"></div>
+                                        ) : (
+                                            <>
+                                                <MediaImage className="w-[24px] h-[24px]" strokeWidth={1.5} />
+                                                <span className="text-[11px] mt-1">Thêm ảnh</span>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleFileChange}
+                                    multiple
+                                    hidden
+                                    accept="image/*"
+                                />
                             </div>
 
                             {/* Nút Gửi */}
-                            <button className="relative overflow-hidden group bg-client-primary rounded-[8px] px-[25px] py-[15px] font-[600] text-[16px] text-white flex items-center gap-[10px] cursor-pointer transition-all">
-                                <span className="relative z-10">Gửi đánh giá</span>
-                                <NavArrowRight strokeWidth={3} className="relative z-10 w-[18px] h-[18px] transition-transform duration-300 rotate-[-45deg] group-hover:rotate-0" />
+                            <button
+                                onClick={handleSubmitReview}
+                                disabled={createReviewMutation.isPending || isUploading}
+                                className="relative overflow-hidden group bg-client-primary rounded-[8px] px-[35px] py-[15px] font-[600] text-[15px] text-white flex items-center gap-[10px] cursor-pointer transition-all disabled:opacity-50"
+                            >
+                                <span className="relative z-10">
+                                    {createReviewMutation.isPending ? "Đang gửi..." : "Gửi đánh giá"}
+                                </span>
+                                <NavArrowRight strokeWidth={3} className="relative z-10 w-[16px] h-[16px] transition-transform duration-300 rotate-[-45deg] group-hover:rotate-0" />
                                 <div className="absolute top-0 left-0 w-full h-full bg-client-secondary transition-transform duration-500 ease-in-out transform scale-x-0 origin-left group-hover:scale-x-100"></div>
                             </button>
                         </div>

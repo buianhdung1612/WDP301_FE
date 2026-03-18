@@ -11,10 +11,14 @@ import { FooterSub } from "../../components/layouts/FooterSub";
 import { useCartStore, CartItem } from "../../../stores/useCartStore";
 import { useProductDetail } from "../../hooks/useProduct";
 import { Typography, Skeleton } from "@mui/material";
+import { useProductReviews } from "../../hooks/useProductReviews";
+import { useWishlistStore } from "../../../stores/useWishlistStore";
+import { toast } from "react-toastify";
 
 export const ProductDetailPage = () => {
     const { slug } = useParams();
     const { data: productData, isLoading, error } = useProductDetail(slug || "");
+    const { avgRating, totalReviews } = useProductReviews(productData?.productDetail?._id || "");
 
     const product = productData?.productDetail;
     const attributeList = productData?.attributeList || [];
@@ -49,6 +53,7 @@ export const ProductDetailPage = () => {
     const [showToast, setShowToast] = useState(false);
 
     const addToCart = useCartStore((state) => state.addToCart);
+    const { toggleWishlist, isInWishlist } = useWishlistStore();
 
     // Xác định variant hiện tại dựa trên các option đã chọn
     const currentVariant = useMemo(() => {
@@ -228,13 +233,13 @@ export const ProductDetailPage = () => {
                                             key={i}
                                             sx={{
                                                 fontSize: "20px !important",
-                                                color: i < 5 ? "#ffbb00 !important" : "#ccc !important",
+                                                color: i < Math.round(avgRating) ? "#ffbb00 !important" : "#ccc !important",
                                             }}
                                         />
                                     ))}
                                 </div>
                                 <span className="text-[20px] mx-[20px] text-[#ccc]">|</span>
-                                <p className="text-[16px] text-[#505050]">(1 đánh giá từ khách hàng)</p>
+                                <p className="text-[16px] text-[#505050]">({totalReviews} đánh giá từ khách hàng)</p>
                             </div>
                             <div className="flex items-center text-[16px]">
                                 <strong className="text-client-secondary mr-[8px]">SKU:</strong>
@@ -315,8 +320,32 @@ export const ProductDetailPage = () => {
                                 >
                                     {maxStock === 0 ? "Hết hàng" : "Thêm vào giỏ hàng"}
                                 </button>
-                                <div className="w-[60px] h-full flex items-center justify-center text-client-secondary hover:text-client-primary transition-all border border-[#eee] rounded-full cursor-pointer">
-                                    <Heart className="w-[28px] h-[28px]" />
+                                <div
+                                    onClick={() => {
+                                        if (!product) return;
+                                        if (attributeList.length > 0 && !canAddToCart) {
+                                            toast.warning("Vui lòng chọn đầy đủ các thuộc tính để lưu vào danh sách yêu thích!");
+                                            return;
+                                        }
+                                        toggleWishlist({
+                                            productId: product._id,
+                                            quantity: quantity,
+                                            variant: currentVariant ? currentVariant.attributeValue : undefined,
+                                            detail: {
+                                                images: product.images || [],
+                                                slug: product.slug,
+                                                name: product.name,
+                                                priceNew: currentVariant ? parseInt(currentVariant.priceNew) : (product.priceNew || 0),
+                                                priceOld: currentVariant ? parseInt(currentVariant.priceOld) : (product.priceOld || 0),
+                                                stock: currentVariant ? parseInt(currentVariant.stock) : (product.stock || 0),
+                                                attributeList: attributeList,
+                                                variants: product.variants
+                                            }
+                                        });
+                                    }}
+                                    className={`w-[60px] h-full flex items-center justify-center transition-all border border-[#eee] rounded-full cursor-pointer ${isInWishlist(product?._id, currentVariant?.attributeValue) ? 'bg-client-primary text-white border-client-primary' : 'text-client-secondary hover:text-client-primary hover:bg-[#fff0f0]'}`}
+                                >
+                                    <Heart className="w-[28px] h-[28px]" fill={isInWishlist(product?._id, currentVariant?.attributeValue) ? "currentColor" : "none"} />
                                 </div>
                             </div>
                             <Link to={"/cart"} className="text-center font-secondary h-[60px] rounded-[40px] flex items-center justify-center text-[20px] text-white bg-client-primary hover:bg-client-secondary transition-all">Mua ngay</Link>
@@ -335,8 +364,8 @@ export const ProductDetailPage = () => {
                 </div>
             </section>
             <ProductDesc description={product.description || ""} content={product.content || ""} />
-            <ProductComment />
-            <ProductRelated />
+            <ProductComment productId={product._id} />
+            <ProductRelated productId={product._id} categoryIds={product.category || []} />
             <FooterSub />
 
             {showToast && (

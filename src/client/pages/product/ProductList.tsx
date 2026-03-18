@@ -1,7 +1,6 @@
 import { FooterSub } from "../../components/layouts/FooterSub"
 import { ProductAside } from "./sections/ProductAside"
 import { ProductBanner } from "./sections/ProductBanner"
-import type { Product } from "../../../types/products.type"
 import { ProductCard } from "../../components/ui/ProductCard"
 import { ProductListSearch } from "./sections/ProductListSearch"
 import { useSearchParams } from "react-router-dom"
@@ -32,16 +31,6 @@ export const ProductListPage = () => {
 
     const { data: productsData, isLoading } = useProducts(params);
 
-    const products: Product[] = productsData?.products?.map((item: any) => ({
-        id: item._id,
-        title: item.name,
-        price: `${(item.priceNew || item.priceOld || 0).toLocaleString("vi-VN")}đ`,
-        primaryImage: item.images?.[0] || "",
-        secondaryImage: item.images?.[1] || item.images?.[0] || "",
-        rating: 5,
-        isSale: item.priceOld > item.priceNew,
-        url: `/product/detail/${item.slug}`,
-    })) || [];
 
     const handlePageChange = (_: any, value: number) => {
         searchParams.set("page", value.toString());
@@ -70,9 +59,22 @@ export const ProductListPage = () => {
                                     <Skeleton variant="text" width="40%" height={20} />
                                 </div>
                             ))
-                        ) : products.length > 0 ? (
-                            products.map((item) => (
-                                <ProductCard key={item.id} product={item} />
+                        ) : productsData?.products?.length > 0 ? (
+                            productsData.products.map((item: any) => (
+                                <ProductCard
+                                    key={item._id}
+                                    product={{
+                                        id: item._id,
+                                        title: item.name,
+                                        price: `${(item.priceNew || item.priceOld || 0).toLocaleString("vi-VN")}đ`,
+                                        primaryImage: item.images?.[0] || "",
+                                        secondaryImage: item.images?.[1] || item.images?.[0] || "",
+                                        rating: 5,
+                                        isSale: item.priceOld > item.priceNew,
+                                        url: `/product/detail/${item.slug}`,
+                                    }}
+                                    rawData={item}
+                                />
                             ))
                         ) : (
                             <div className="col-span-3 text-center py-[100px] text-gray-500">

@@ -67,6 +67,7 @@ import { OrderDetailPage } from "../pages/order/OrderDetailPage";
 import { OrderCreatePage } from "../pages/order/OrderCreatePage";
 import { OrderEditPage } from "../pages/order/OrderEditPage";
 import { ChatPage } from "../pages/chat/ChatPage";
+import { ReviewListPage } from "../pages/review/ReviewListPage";
 import { PermissionGuard } from "../components/auth/PermissionGuard";
 import { BoardingBookingListPage } from "../pages/boarding/BoardingBookingListPage";
 import { BoardingBookingCreatePage } from "../pages/boarding/BoardingBookingCreatePage";
@@ -148,6 +149,7 @@ export const AdminRoutes = [
     { path: "staff/schedule", element: <StaffWorkSchedulePage /> },
     { path: "staff/customers", element: <StaffCustomerListPage /> },
     { path: "chat", element: <ChatPage /> },
+    { path: "review", element: <ReviewListPage /> },
 ];
 
 export const AdminAuthRoutes = [

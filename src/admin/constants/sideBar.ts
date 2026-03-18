@@ -14,6 +14,7 @@ import ChatIcon from "@mui/icons-material/Chat";
 import HomeWorkIcon from "@mui/icons-material/HomeWork";
 
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import RateReviewIcon from "@mui/icons-material/RateReview";
 
 export const menuOverviewData = [
     {
@@ -74,6 +75,13 @@ export const menuManagementData = [
             { id: "category", label: "Danh mục", tKey: "admin.sidebar.category", path: `/${prefixAdmin}/product-category/list`, permission: "product_category_view" },
             { id: "attribute", label: "Thuộc tính", tKey: "admin.sidebar.attribute", path: `/${prefixAdmin}/product/attribute/list`, permission: "product_attribute_view" },
         ]
+    },
+    {
+        id: "reviews",
+        label: "Đánh giá",
+        Icon: RateReviewIcon,
+        path: `/${prefixAdmin}/review`,
+        permission: "product_view"
     },
     {
         id: "orders",

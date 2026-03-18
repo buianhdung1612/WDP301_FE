@@ -1,89 +1,66 @@
 import { Navigation } from "swiper/modules";
-import type { Product } from "../../../../types/products.type";
 import { ProductCard } from "../../../components/ui/ProductCard"
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperType } from "swiper";
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
+import { useProducts } from "../../../hooks/useProduct";
+import { Skeleton } from "@mui/material";
 
-const products: Product[] = [
-    {
-        id: 1,
-        title: "Thẻ tên",
-        price: "360.000đ",
-        primaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-10-1000x1048.jpg",
-        secondaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-10c-1000x1048.jpg",
-        rating: 5,
-        isSale: true,
-        url: "/product/detail/the-ten",
-    },
-    {
-        id: 2,
-        title: "Vòng cổ",
-        price: "220.000đ",
-        primaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-11-1000x1048.jpg",
-        secondaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-11c-1000x1048.jpg",
-        rating: 4,
-        isSale: false,
-        url: "/product/detail/vong-co",
-    },
-    {
-        id: 3,
-        title: "Đồ chơi mèo",
-        price: "150.000đ",
-        primaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-12-1000x1048.jpg",
-        secondaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-12c-1000x1048.jpg",
-        rating: 3,
-        isSale: true,
-        url: "/product/detail/do-choi-meo",
-    },
-    {
-        id: 4,
-        title: "Nệm nylon",
-        price: "540.000đ",
-        primaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-9-1000x1048.jpg",
-        secondaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-9a-1000x1048.jpg",
-        rating: 4,
-        isSale: true,
-        url: "/product/detail/nem-nylon",
-    },
-    {
-        id: 5,
-        title: "Đồ chơi mèo",
-        price: "150.000đ",
-        primaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-12-1000x1048.jpg",
-        secondaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-12c-1000x1048.jpg",
-        rating: 3,
-        isSale: true,
-        url: "/product/detail/do-choi-meo",
-    },
-    {
-        id: 6,
-        title: "Đồ chơi mèo",
-        price: "150.000đ",
-        primaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-12-1000x1048.jpg",
-        secondaryImage: "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-12c-1000x1048.jpg",
-        rating: 3,
-        isSale: true,
-        url: "/product/detail/do-choi-meo",
-    },
-];
+interface ProductRelatedProps {
+    productId: string;
+    categoryIds: string[];
+}
 
-export const ProductRelated = () => {
+export const ProductRelated = ({ productId, categoryIds }: ProductRelatedProps) => {
     const prevButtonRef = useRef<HTMLDivElement>(null);
     const nextButtonRef = useRef<HTMLDivElement>(null);
+
+    const { data: productsData, isLoading } = useProducts({
+        category: categoryIds,
+        limit: 13, // Fetch one extra since we'll filter out the current product
+    });
+
+    const relatedProducts = useMemo(() => {
+        if (!productsData?.products) return [];
+        return productsData.products.filter((p: any) => p._id !== productId).slice(0, 12);
+    }, [productsData, productId]);
+
+    if (isLoading) {
+        return (
+            <div className="app-container pb-[150px] 2xl:pb-[120px]">
+                <h2 className="text-[35px] 2xl:text-[17.5px] font-secondary text-client-secondary mb-[40px]">Sản phẩm liên quan</h2>
+                <div className="grid grid-cols-4 gap-[30px]">
+                    {[...Array(4)].map((_, i) => (
+                        <Skeleton key={i} variant="rectangular" height={300} sx={{ borderRadius: '20px' }} />
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    if (relatedProducts.length === 0) return null;
 
     return (
         <div className="app-container pb-[150px] 2xl:pb-[120px] relative">
             <h2 className="text-[35px] 2xl:text-[17.5px] font-secondary text-client-secondary mb-[40px]">Sản phẩm liên quan</h2>
-            <div className="flex gap-[10px] absolute top-[-3%] right-0">
-                <div ref={prevButtonRef} className="w-[50px] h-[50px] rounded-full bg-client-primary hover:bg-client-secondary cursor-pointer transition-default flex items-center justify-center prev-button"></div>
-                <div ref={nextButtonRef} className="w-[50px] h-[50px] rounded-full bg-client-primary hover:bg-client-secondary cursor-pointer transition-default flex items-center justify-center next-button"></div>
+            <div className="flex gap-[10px] absolute top-[0] right-[30px] z-10">
+                <div ref={prevButtonRef} className="w-[40px] h-[40px] rounded-full bg-client-primary hover:bg-client-secondary cursor-pointer transition-default flex items-center justify-center prev-button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
+                </div>
+                <div ref={nextButtonRef} className="w-[40px] h-[40px] rounded-full bg-client-primary hover:bg-client-secondary cursor-pointer transition-default flex items-center justify-center next-button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
+                </div>
             </div>
 
             <Swiper
                 modules={[Navigation]}
                 slidesPerView={4}
                 spaceBetween={30}
+                breakpoints={{
+                    320: { slidesPerView: 1.5, spaceBetween: 15 },
+                    640: { slidesPerView: 2.5, spaceBetween: 20 },
+                    1024: { slidesPerView: 4, spaceBetween: 30 }
+                }}
                 navigation={{
                     prevEl: prevButtonRef.current,
                     nextEl: nextButtonRef.current,
@@ -99,9 +76,21 @@ export const ProductRelated = () => {
                 }}
                 className="mySwiper"
             >
-                {products.map((item: Product) => (
-                    <SwiperSlide key={item.id}>
-                        <ProductCard product={item} />
+                {relatedProducts.map((item: any) => (
+                    <SwiperSlide key={item._id}>
+                        <ProductCard
+                            product={{
+                                id: item._id,
+                                title: item.name,
+                                price: `${item.priceNew.toLocaleString('vi-VN')}đ`,
+                                primaryImage: item.images?.[0],
+                                secondaryImage: item.images?.[1] || item.images?.[0],
+                                rating: 5, // We can calculate this from reviews if needed
+                                isSale: item.discount > 0,
+                                url: `/product/detail/${item.slug}`,
+                            }}
+                            rawData={item}
+                        />
                     </SwiperSlide>
                 ))}
             </Swiper>
