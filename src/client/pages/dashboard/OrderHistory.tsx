@@ -5,10 +5,15 @@ import { useEffect, useState } from "react";
 import { getOrderList } from "../../api/dashboard.api";
 import { formatCurrency } from "../../helpers";
 import dayjs from "dayjs";
+import { cancelOrder } from "../../api/order.api";
+import { toast } from "react-toastify";
+import { CancelModal } from "../../components/ui/CancelModal";
 
 export const OrderHistoryPage = () => {
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isCanceling, setIsCanceling] = useState(false);
+    const [cancelModal, setCancelModal] = useState<{ isOpen: boolean; order: any }>({ isOpen: false, order: null });
 
     const breadcrumbs = [
         { label: "Trang chủ", to: "/" },
@@ -16,22 +21,47 @@ export const OrderHistoryPage = () => {
         { label: "Lịch sử đơn hàng", to: "/dashboard/orders" },
     ];
 
-    useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                const response = await getOrderList();
-                if (response.success) {
-                    setOrders(response.orders);
-                }
-            } catch (error) {
-                console.error("Failed to fetch orders:", error);
-            } finally {
-                setLoading(false);
+    const fetchOrders = async () => {
+        setLoading(true);
+        try {
+            const response = await getOrderList();
+            if (response.success) {
+                setOrders(response.orders);
             }
-        };
+        } catch (error) {
+            console.error("Failed to fetch orders:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchOrders();
     }, []);
+
+    const handleCancelOrder = (order: any) => {
+        setCancelModal({ isOpen: true, order });
+    };
+
+    const onConfirmCancel = async (reason: string) => {
+        const order = cancelModal.order;
+        if (!order) return;
+        setIsCanceling(true);
+        setCancelModal({ isOpen: false, order: null });
+        try {
+            const res = await cancelOrder(order._id, reason);
+            if (res.code === "success") {
+                toast.success(res.message || "Hủy đơn hàng thành công!");
+                fetchOrders();
+            } else {
+                toast.error(res.message || "Hủy đơn hàng thất bại!");
+            }
+        } catch (error) {
+            toast.error("Đã có lỗi xảy ra!");
+        } finally {
+            setIsCanceling(false);
+        }
+    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -47,6 +77,8 @@ export const OrderHistoryPage = () => {
             case "returned":
             case "refunded":
                 return "text-[#ff0000]";
+            case "request_cancel":
+                return "text-[#f97316]";
             default:
                 return "text-[#7d7b7b]";
         }
@@ -62,7 +94,8 @@ export const OrderHistoryPage = () => {
             "returned": "Trả hàng",
             "unpaid": "Chưa thanh toán",
             "paid": "Đã thanh toán",
-            "refunded": "Đã hoàn tiền"
+            "refunded": "Đã hoàn tiền",
+            "request_cancel": "Chờ duyệt hủy/hoàn tiền"
         };
         return map[status] || status;
     };
@@ -137,6 +170,18 @@ export const OrderHistoryPage = () => {
                                                             </svg>
                                                             Xem chi tiết
                                                         </Link>
+                                                        {(order.orderStatus === "pending" || order.orderStatus === "confirmed") && (
+                                                            <button
+                                                                onClick={() => handleCancelOrder(order)}
+                                                                disabled={isCanceling}
+                                                                className="flex items-center gap-[6px] text-[13px] text-red-500 hover:text-red-600 transition-default font-[500] cursor-pointer disabled:opacity-50"
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.8" stroke="currentColor" className="w-[16px] h-[16px]">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                                </svg>
+                                                                Hủy đơn hàng
+                                                            </button>
+                                                        )}
                                                         {order.orderStatus === "completed" && (
                                                             <Link
                                                                 to={`/dashboard/order/detail/${order._id}`}
@@ -159,6 +204,13 @@ export const OrderHistoryPage = () => {
                     </div>
                 </div>
             </div>
+
+            <CancelModal
+                isOpen={cancelModal.isOpen}
+                onClose={() => setCancelModal({ isOpen: false, order: null })}
+                onConfirm={onConfirmCancel}
+                paymentStatus={cancelModal.order?.paymentStatus}
+            />
         </>
     );
 };

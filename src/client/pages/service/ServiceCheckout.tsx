@@ -41,8 +41,11 @@ export const ServiceCheckoutPage = () => {
     const [booking, setBooking] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [paymentMethod, setPaymentMethod] = useState<string>("money");
+    const [depositGateway, setDepositGateway] = useState<string>("zalopay");
     const [isProcessing, setIsProcessing] = useState(false);
     const [showNotes, setShowNotes] = useState(false);
+    const [depositPercentage, setDepositPercentage] = useState(0);
+
     const [notes, setNotes] = useState("");
     const [totalDuration, setTotalDuration] = useState<number>(0);
 
@@ -119,6 +122,15 @@ export const ServiceCheckoutPage = () => {
                 navigate("/services");
             }
         }
+
+        // Lấy cấu hình đặt lịch
+        import("../../api/booking.api").then(({ getBookingConfig }) => {
+            getBookingConfig().then(res => {
+                if (res.code === 200) {
+                    setDepositPercentage(res.data.depositPercentage || 0);
+                }
+            });
+        });
     }, [id, navigate, user, storeService, storePets, storeStartTime, storeEndTime, storeDuration, storeNote]);
 
     const handlePayment = async () => {
@@ -133,7 +145,8 @@ export const ServiceCheckoutPage = () => {
                     serviceId: booking.serviceId?._id,
                     petIds: booking.petIds?.map((p: any) => p._id),
                     startTime: booking.start,
-                    notes: showNotes ? notes : ""
+                    notes: showNotes ? notes : "",
+                    paymentMethod: paymentMethod
                 };
 
                 const response = await createBooking(bookingData);
@@ -149,13 +162,16 @@ export const ServiceCheckoutPage = () => {
             }
 
             const phone: string = booking.customerPhone || user?.phone || "";
+            const isBooking = bookingCode.startsWith("BK");
 
-            if (paymentMethod === "zalopay") {
+            const gateway = (paymentMethod === "money" && depositPercentage > 0) ? depositGateway : paymentMethod;
+
+            if (gateway === "zalopay") {
                 resetBooking();
-                window.location.href = `http://localhost:3000/api/v1/client/order/payment-zalopay?bookingCode=${bookingCode}&phone=${phone}`;
-            } else if (paymentMethod === "vnpay") {
+                window.location.href = `${import.meta.env.VITE_BACKEND_URL || "http://localhost:3000"}/api/v1/client/order/payment-zalopay?${isBooking ? "bookingCode" : "orderCode"}=${bookingCode}&phone=${phone}`;
+            } else if (gateway === "vnpay") {
                 resetBooking();
-                window.location.href = `http://localhost:3000/api/v1/client/order/payment-vnpay?bookingCode=${bookingCode}&phone=${phone}`;
+                window.location.href = `${import.meta.env.VITE_BACKEND_URL || "http://localhost:3000"}/api/v1/client/order/payment-vnpay?${isBooking ? "bookingCode" : "orderCode"}=${bookingCode}&phone=${phone}`;
             } else {
                 toast.success("Đặt lịch thành công! TeddyPet đang đợi bé ạ.");
                 resetBooking(); // Xóa dữ liệu store sau khi đã đặt lịch thành công
@@ -381,17 +397,44 @@ export const ServiceCheckoutPage = () => {
                                 </h3>
                                 <div className="space-y-[15px]">
                                     {[
-                                        { id: 'money', label: 'Thanh toán tại quầy' },
+                                        { id: 'money', label: depositPercentage > 0 ? 'Thanh toán cọc online, còn lại tại quầy' : 'Thanh toán tại quầy' },
                                         { id: 'zalopay', label: 'Ví điện tử ZaloPay' },
                                         { id: 'vnpay', label: 'Cổng thanh toán VNPAY' }
                                     ].map((method) => (
-                                        <div key={method.id} onClick={() => setPaymentMethod(method.id)} className="flex items-center gap-[12px] cursor-pointer group">
-                                            <div className={`w-[20px] h-[20px] rounded-full border-2 flex items-center justify-center transition-all ${paymentMethod === method.id ? 'border-client-primary bg-white' : 'border-[#ddd]'}`}>
-                                                {paymentMethod === method.id && <div className="w-[10px] h-[10px] rounded-full bg-client-primary"></div>}
+                                        <div key={method.id} className="space-y-3">
+                                            <div onClick={() => setPaymentMethod(method.id)} className="flex items-center gap-[12px] cursor-pointer group">
+                                                <div className={`w-[20px] h-[20px] rounded-full border-2 flex items-center justify-center transition-all ${paymentMethod === method.id ? 'border-client-primary bg-white' : 'border-[#ddd]'}`}>
+                                                    {paymentMethod === method.id && <div className="w-[10px] h-[10px] rounded-full bg-client-primary"></div>}
+                                                </div>
+                                                <span className={`text-[15px] font-medium transition-colors ${paymentMethod === method.id ? 'text-client-secondary font-bold' : 'text-gray-600'}`}>
+                                                    {method.label}
+                                                </span>
                                             </div>
-                                            <span className={`text-[15px] font-medium transition-colors ${paymentMethod === method.id ? 'text-client-secondary font-bold' : 'text-gray-600'}`}>
-                                                {method.label}
-                                            </span>
+
+                                            {/* Sub-options for deposit gateway when choosing "money" */}
+                                            {method.id === 'money' && paymentMethod === 'money' && depositPercentage > 0 && (
+                                                <div className="ml-8 p-3 bg-gray-50 rounded-xl border border-dashed border-gray-200 space-y-3">
+                                                    <div className="text-[12px] font-bold text-gray-400 uppercase tracking-tight">Chọn cổng thanh toán cọc:</div>
+                                                    <div className="flex gap-4">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setDepositGateway('zalopay')}
+                                                            className={`flex-1 py-3 px-3 rounded-lg border-2 transition-all flex items-center justify-center gap-2
+                                                                ${depositGateway === 'zalopay' ? 'border-client-primary bg-white shadow-sm ring-1 ring-client-primary/10' : 'border-transparent bg-white/50 grayscale opacity-60'}`}
+                                                        >
+                                                            <span className="text-[13px] font-bold">ZaloPay</span>
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setDepositGateway('vnpay')}
+                                                            className={`flex-1 py-3 px-3 rounded-lg border-2 transition-all flex items-center justify-center gap-2
+                                                                ${depositGateway === 'vnpay' ? 'border-client-primary bg-white shadow-sm ring-1 ring-client-primary/10' : 'border-transparent bg-white/50 grayscale opacity-60'}`}
+                                                        >
+                                                            <span className="text-[13px] font-bold">VNPay</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -410,9 +453,23 @@ export const ServiceCheckoutPage = () => {
                                     </div>
                                 )}
 
-                                <div className="pt-[20px] border-t border-[#eee] flex justify-between items-center">
-                                    <span className="text-[16px] font-bold text-client-secondary uppercase tracking-tight">Tổng thanh toán</span>
-                                    <div className="text-[26px] text-client-primary font-bold tracking-tighter leading-none">{booking.total?.toLocaleString()}đ</div>
+                                <div className="pt-[20px] border-t border-[#eee]">
+                                    {depositPercentage > 0 && (
+                                        <div className="flex justify-between items-center mb-[15px] p-[15px] bg-orange-50 rounded-[15px] border border-orange-100">
+                                            <div className="text-[14px]">
+                                                <div className="font-bold text-orange-800">Cần thanh toán cọc ({depositPercentage}%)</div>
+                                                <div className="text-orange-600 text-[12px]">Xác nhận lịch ngay khi cọc</div>
+                                            </div>
+                                            <div className="text-[18px] font-bold text-orange-800">
+                                                {Math.round((booking.total || 0) * depositPercentage / 100).toLocaleString()}đ
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[16px] font-bold text-client-secondary uppercase tracking-tight">Tổng cộng</span>
+                                        <div className="text-[26px] text-client-primary font-bold tracking-tighter leading-none">{booking.total?.toLocaleString()}đ</div>
+                                    </div>
                                 </div>
 
                                 <button

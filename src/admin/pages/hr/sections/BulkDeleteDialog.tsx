@@ -44,9 +44,11 @@ export const BulkDeleteDialog = ({
     const accountsRes = useAccounts({ departmentId, status: 'active' });
     const accounts = useMemo(() => {
         if (!accountsRes.data) return [];
-        return Array.isArray(accountsRes.data.recordList)
-            ? accountsRes.data.recordList
-            : (Array.isArray(accountsRes.data.data) ? accountsRes.data.data : (Array.isArray(accountsRes.data) ? accountsRes.data : []));
+        const data = accountsRes.data;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        return Array.isArray(data) ? data : [];
     }, [accountsRes.data]);
 
     const { control, handleSubmit, reset } = useForm({
@@ -84,7 +86,7 @@ export const BulkDeleteDialog = ({
             fullWidth
             sx={dialogStyles}
         >
-            <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <DialogTitle component="div" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Stack direction="row" spacing={1.5} alignItems="center">
                     <Icon icon="solar:trash-bin-trash-bold-duotone" width={24} color="var(--palette-error-main)" />
                     <Typography variant="h6" sx={{ fontWeight: 700 }}>

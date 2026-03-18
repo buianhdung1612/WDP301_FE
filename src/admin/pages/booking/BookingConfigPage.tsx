@@ -24,7 +24,8 @@ export const BookingConfigPage = () => {
             bookingCancelPeriod: 60,
             allowEarlyStartMinutes: 30,
             autoCancelEnabled: false,
-            autoConfirmEnabled: false
+            autoConfirmEnabled: false,
+            depositPercentage: 0
         },
     });
 
@@ -113,6 +114,22 @@ export const BookingConfigPage = () => {
                                             type="number"
                                             onChange={(e) => field.onChange(Number(e.target.value))}
                                             helperText="Cho phép nhân viên bắt đầu làm sớm hơn lịch hẹn"
+                                        />
+                                    )}
+                                />
+                            </Grid>
+                            <Grid size={{ xs: 12, md: 4 }}>
+                                <Controller
+                                    name="depositPercentage"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            label="Phần trăm đặt cọc (%)"
+                                            fullWidth
+                                            type="number"
+                                            onChange={(e) => field.onChange(Number(e.target.value))}
+                                            helperText="Tỉ lệ % khách cần thanh toán trước để xác nhận lịch"
                                         />
                                     )}
                                 />

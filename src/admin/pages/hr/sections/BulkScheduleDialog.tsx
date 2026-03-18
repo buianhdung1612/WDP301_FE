@@ -46,16 +46,20 @@ export const BulkScheduleDialog = ({
 
     const accounts = useMemo(() => {
         if (!accountsRes.data) return [];
-        return Array.isArray(accountsRes.data.recordList)
-            ? accountsRes.data.recordList
-            : (Array.isArray(accountsRes.data.data) ? accountsRes.data.data : (Array.isArray(accountsRes.data) ? accountsRes.data : []));
+        const data = accountsRes.data;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        return Array.isArray(data) ? data : [];
     }, [accountsRes.data]);
 
     const shifts = useMemo(() => {
         if (!shiftsRes.data) return [];
-        return Array.isArray(shiftsRes.data.recordList)
-            ? shiftsRes.data.recordList
-            : (Array.isArray(shiftsRes.data.data) ? shiftsRes.data.data : (Array.isArray(shiftsRes.data) ? shiftsRes.data : []));
+        const data = shiftsRes.data;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        return Array.isArray(data) ? data : [];
     }, [shiftsRes.data]);
 
     const filteredAccounts = accounts;
@@ -82,9 +86,10 @@ export const BulkScheduleDialog = ({
     });
 
     const busyStaffIds = useMemo(() => {
-        const records = Array.isArray(schedulesRes?.data?.recordList)
-            ? schedulesRes.data.recordList
-            : (Array.isArray(schedulesRes?.data) ? schedulesRes.data : []);
+        const data = schedulesRes?.data;
+        const records = Array.isArray(data?.recordList)
+            ? data.recordList
+            : (Array.isArray(data) ? data : []);
         return [...new Set(records.map((s: any) => s.staffId?._id || s.staffId))];
     }, [schedulesRes]);
 
@@ -118,7 +123,7 @@ export const BulkScheduleDialog = ({
             fullWidth
             sx={dialogStyles}
         >
-            <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <DialogTitle component="div" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
                     Phân ca hàng loạt
                 </Typography>

@@ -9,7 +9,7 @@ import { FooterSub } from "../../components/layouts/FooterSub";
 import { Skeleton, Typography, Box } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    Clock, Heart,
+    Clock,
     X, Plus, Calendar
 } from "lucide-react";
 import StarIcon from "@mui/icons-material/Star";
@@ -769,7 +769,7 @@ export const ServiceDetailPage = () => {
                                                         <div className="flex items-center justify-between mb-3">
                                                             <div className="flex items-center gap-2">
                                                                 <div className="w-1.5 h-6 bg-client-primary rounded-full"></div>
-                                                                <h4 className="font-bold text-client-secondary text-[16px]">Lộ trình thực hiện</h4>
+                                                                <h4 className="font-bold text-client-secondary text-[16px]">Lộ trình thực hiện (Dự kiến)</h4>
                                                             </div>
                                                             <button
                                                                 onClick={() => setBookingPreview(null)}
@@ -804,11 +804,11 @@ export const ServiceDetailPage = () => {
 
                                                         <div className="mt-4 pt-4 border-t border-orange-100/30 flex items-center justify-between">
                                                             <div className="flex flex-col">
-                                                                <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Hoàn tất vào lúc:</span>
+                                                                <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Dự kiến hoàn tất:</span>
                                                                 <span className="text-[16px] font-bold text-client-primary">{bookingPreview.endTime}</span>
                                                             </div>
                                                             <div className="text-right">
-                                                                <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Tổng thời gian:</span>
+                                                                <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Tổng thời gian dự kiến:</span>
                                                                 <p className="text-[16px] font-bold text-client-secondary">{bookingPreview.totalDuration} phút</p>
                                                             </div>
                                                         </div>
