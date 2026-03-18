@@ -30,6 +30,18 @@ export const createProductSchema = z.object({
     brandId: z.string().optional().default(""),
     attributes: z.array(z.string()).optional().default([]),
     variants: z.array(variantSchema).optional().default([]),
+    isFood: z.boolean().optional().default(false),
+    expiryDate: z.string().optional().default(""),
+}).refine((data) => {
+    if (data.isFood && !data.expiryDate) return false;
+    if (data.isFood && data.expiryDate) {
+        const today = new Date().toISOString().split('T')[0];
+        return data.expiryDate >= today;
+    }
+    return true;
+}, {
+    message: "Vui lòng chọn ngày hết hạn từ hôm nay trở đi",
+    path: ["expiryDate"],
 });
 
 export type CreateProductFormValues = z.infer<typeof createProductSchema>;

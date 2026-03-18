@@ -1,6 +1,7 @@
 import { ProductListPage } from "../pages/product/ProductListPage";
 import { ProductCreatePage } from "../pages/product/ProductCreatePage";
 import { ProductEditPage } from "../pages/product/ProductEditPage";
+import { ExpiredProductListPage } from "../pages/product/ExpiredProductListPage";
 import { ProductCategoryListPage } from "../pages/product-category/ProductCategoryListPage";
 import { ProductCategoryCreatePage } from "../pages/product-category/ProductCategoryCreatePage";
 import { ProductCategoryEditPage } from "../pages/product-category/ProductCategoryEditPage";
@@ -82,6 +83,7 @@ export const AdminRoutes = [
     { path: "product/list", element: <PermissionGuard permission="product_view"><ProductListPage /></PermissionGuard> },
     { path: "product/create", element: <PermissionGuard permission="product_create"><ProductCreatePage /></PermissionGuard> },
     { path: "product/edit/:id", element: <PermissionGuard permission="product_edit"><ProductEditPage /></PermissionGuard> },
+    { path: "product/expired", element: <PermissionGuard permission="product_view"><ExpiredProductListPage /></PermissionGuard> },
     { path: "product-category/list", element: <PermissionGuard permission="product_category_view"><ProductCategoryListPage /></PermissionGuard> },
     { path: "product-category/create", element: <PermissionGuard permission="product_category_create"><ProductCategoryCreatePage /></PermissionGuard> },
     { path: "product-category/edit/:id", element: <PermissionGuard permission="product_category_edit"><ProductCategoryEditPage /></PermissionGuard> },

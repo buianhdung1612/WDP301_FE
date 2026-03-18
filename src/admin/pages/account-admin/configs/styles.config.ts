@@ -133,14 +133,9 @@ export const dataGridStyles: SxProps<Theme> = {
 
     // CHECKBOX
     '& .MuiCheckbox-root': {
-        '&.Mui-checked .MuiSvgIcon-root': {
-            color: COLORS.success,
-        },
-        '&.MuiCheckbox-indeterminate .MuiSvgIcon-root': {
-            color: COLORS.success,
-        },
-        '& .MuiSvgIcon-root': {
-            color: COLORS.secondary,
+        color: 'var(--palette-text-disabled)',
+        '&.Mui-checked, &.Mui-indeterminate': {
+            color: 'var(--palette-primary-main)',
         },
     },
 

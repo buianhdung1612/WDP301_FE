@@ -5,7 +5,8 @@ import {
     createProduct,
     getProductById,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    scanExpiredProducts
 } from '../../../api/product.api';
 import { ApiResponse } from '../../../config/type';
 
@@ -64,6 +65,19 @@ export const useDeleteProduct = () => {
         mutationFn: deleteProduct,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['products'] });
+        },
+    });
+};
+
+export const useScanExpiredProducts = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: scanExpiredProducts,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            queryClient.invalidateQueries({ queryKey: ['expired-products'] });
+            queryClient.invalidateQueries({ queryKey: ['product-expired-list'] });
         },
     });
 };

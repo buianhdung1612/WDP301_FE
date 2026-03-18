@@ -56,4 +56,16 @@ export const deleteProduct = async (id: string | number): Promise<ApiResponse<an
     const response = await apiApp.patch(`${BASE_URL}/delete/${id}`, {}, withAuth());
     return response.data;
 };
-
+/** Lấy danh sách sản phẩm hết hạn */
+export const getExpiredProducts = async (params?: any): Promise<ApiResponse<any>> => {
+    const response = await apiApp.get(`${BASE_URL}/expired/list`, {
+        ...withAuth(),
+        params
+    });
+    return response.data;
+};
+/** Quét sản phẩm hết hạn thủ công */
+export const scanExpiredProducts = async (): Promise<ApiResponse<any>> => {
+    const response = await apiApp.post(`${BASE_URL}/expired/scan`, {}, withAuth());
+    return response.data;
+};

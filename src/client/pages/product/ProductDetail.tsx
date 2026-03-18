@@ -245,6 +245,15 @@ export const ProductDetailPage = () => {
                                 <strong className="text-client-secondary mr-[8px]">SKU:</strong>
                                 <span className="text-[#505050]">{product.sku || "N/A"}</span>
                             </div>
+                            {product.isFood && product.expiryDate && (
+                                <div className="flex items-center text-[16px] mt-[5px]">
+                                    <strong className="text-client-secondary mr-[8px]">Hạn sử dụng:</strong>
+                                    <span style={{ color: new Date(product.expiryDate) < new Date() ? 'red' : '#505050' }}>
+                                        {new Date(product.expiryDate).toLocaleDateString("vi-VN")}
+                                        {new Date(product.expiryDate) < new Date() && " (Hết hạn)"}
+                                    </span>
+                                </div>
+                            )}
                             <div className="mt-[20px] text-client-secondary text-[28px] font-secondary">
                                 <p>{currentVariant ? `${parseInt(currentVariant.priceNew).toLocaleString("vi-VN")}đ` : priceRange}</p>
                             </div>

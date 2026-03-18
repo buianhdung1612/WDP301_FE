@@ -64,6 +64,8 @@ export const ProductEditPage = () => {
             variants: [],
             images: [],
             brandId: "",
+            isFood: false,
+            expiryDate: "",
         }
     });
 
@@ -184,6 +186,8 @@ export const ProductEditPage = () => {
                 attributes: actualDetail.attributes || [],
                 variants: initialVariants,
                 images: actualDetail.images || [],
+                isFood: actualDetail.isFood || false,
+                expiryDate: actualDetail.expiryDate ? new Date(actualDetail.expiryDate).toISOString().split('T')[0] : "",
             });
             setVariants(initialVariants);
             // For files, if they are strings (URLs), UploadFiles handles it
@@ -403,7 +407,7 @@ export const ProductEditPage = () => {
                                                     <MenuItem value="">
                                                         <Box sx={{ color: "#919EAB" }}>Chọn thương hiệu</Box>
                                                     </MenuItem>
-                                                    {brands.map((brand: any) => (
+                                                    {Array.isArray(brands) && brands.map((brand: any) => (
                                                         <MenuItem key={brand.id} value={brand.id}>
                                                             {brand.name}
                                                         </MenuItem>
@@ -452,6 +456,44 @@ export const ProductEditPage = () => {
                                             />
                                         )}
                                     />
+                                </Box>
+                                <Box
+                                    sx={{
+                                        display: "grid",
+                                        gridTemplateColumns: "repeat(2, 1fr)",
+                                        gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))",
+                                        alignItems: "center"
+                                    }}
+                                >
+                                    <Controller
+                                        name="isFood"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <FormControlLabel
+                                                control={<Checkbox {...field} checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+                                                label="Sản phẩm là thực phẩm (Có hạn sử dụng)"
+                                            />
+                                        )}
+                                    />
+
+                                    {watch("isFood") && (
+                                        <Controller
+                                            name="expiryDate"
+                                            control={control}
+                                            render={({ field, fieldState }) => (
+                                                <TextField
+                                                    {...field}
+                                                    label="Ngày hết hạn"
+                                                    type="date"
+                                                    fullWidth
+                                                    InputLabelProps={{ shrink: true }}
+                                                    inputProps={{ min: new Date().toISOString().split('T')[0] }}
+                                                    error={!!fieldState.error}
+                                                    helperText={fieldState.error?.message}
+                                                />
+                                            )}
+                                        />
+                                    )}
                                 </Box>
                             </Stack>
                         </CollapsibleCard>

@@ -74,6 +74,7 @@ export const menuManagementData = [
             { id: "brand", label: "Thương hiệu", tKey: "admin.sidebar.brand", path: `/${prefixAdmin}/brand/list`, permission: "brand_view" },
             { id: "category", label: "Danh mục", tKey: "admin.sidebar.category", path: `/${prefixAdmin}/product-category/list`, permission: "product_category_view" },
             { id: "attribute", label: "Thuộc tính", tKey: "admin.sidebar.attribute", path: `/${prefixAdmin}/product/attribute/list`, permission: "product_attribute_view" },
+            { id: "expired", label: "Sản phẩm hết hạn", path: `/${prefixAdmin}/product/expired`, permission: "product_view" },
         ]
     },
     {
