@@ -49,16 +49,22 @@ export const ScheduleEventDialog = ({
 
     const accounts = useMemo(() => {
         if (!accountsRes.data) return [];
-        return Array.isArray(accountsRes.data.recordList)
-            ? accountsRes.data.recordList
-            : (Array.isArray(accountsRes.data.data) ? accountsRes.data.data : (Array.isArray(accountsRes.data) ? accountsRes.data : []));
+        const data = accountsRes.data;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
     }, [accountsRes.data]);
 
     const shifts = useMemo(() => {
         if (!shiftsRes.data) return [];
-        return Array.isArray(shiftsRes.data.recordList)
-            ? shiftsRes.data.recordList
-            : (Array.isArray(shiftsRes.data.data) ? shiftsRes.data.data : (Array.isArray(shiftsRes.data) ? shiftsRes.data : []));
+        const data = shiftsRes.data;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
     }, [shiftsRes.data]);
 
     const filteredAccounts = accounts;

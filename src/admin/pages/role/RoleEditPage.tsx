@@ -53,8 +53,27 @@ export const RoleEditPage = () => {
     const navigate = useNavigate();
     const { data: role, isLoading } = useRoleDetail(id);
     const { mutate: update, isPending } = useUpdateRole();
-    const { data: services = [] } = useServices();
-    const { data: departments = [] } = useDepartments();
+    const servicesRes = useServices();
+    const services = useMemo(() => {
+        if (!servicesRes.data) return [];
+        const data = servicesRes.data;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [servicesRes.data]);
+
+    const departmentsRes = useDepartments();
+    const departments = useMemo(() => {
+        if (!departmentsRes.data) return [];
+        const data = departmentsRes.data;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [departmentsRes.data]);
 
     const [expandedInfo, setExpandedInfo] = useState(true);
     const [expandedPermissions, setExpandedPermissions] = useState(true);

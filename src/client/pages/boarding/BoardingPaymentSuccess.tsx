@@ -1,7 +1,7 @@
 ﻿import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, Home, Loader2 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
-import { getBoardingBookingDetail } from "../../api/dashboard.api";
+import { checkBoardingPaymentStatus, getBoardingBookingDetail } from "../../api/dashboard.api";
 
 export const BoardingPaymentSuccessPage = () => {
   const [searchParams] = useSearchParams();
@@ -11,11 +11,17 @@ export const BoardingPaymentSuccessPage = () => {
 
   const { data, isLoading } = useQuery<any>({
     queryKey: ["boarding-payment-success", bookingId],
-    queryFn: () => getBoardingBookingDetail(bookingId),
+    queryFn: async () => {
+      if (bookingId) {
+        // Chủ động check kết quả từ ZaloPay
+        await checkBoardingPaymentStatus(bookingId).catch(() => null);
+      }
+      return getBoardingBookingDetail(bookingId);
+    },
     enabled: !!bookingId,
     refetchInterval: (query) => {
       const paymentStatus = String(query.state.data?.booking?.paymentStatus || "");
-      return paymentStatus === "paid" || paymentStatus === "partial" ? false : 2000;
+      return paymentStatus === "paid" || paymentStatus === "partial" ? false : 3000;
     },
     retry: 1,
   });

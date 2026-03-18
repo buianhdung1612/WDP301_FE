@@ -1,4 +1,4 @@
-﻿import { Box, Card, Grid, TextField, Typography, Stack, alpha, Switch, FormControlLabel } from "@mui/material";
+import { Box, Card, Grid, TextField, Typography, Stack, alpha, Switch, FormControlLabel } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useForm, Controller } from "react-hook-form";
 import { Title } from "../../components/ui/Title";
@@ -39,18 +39,18 @@ export const BookingConfigPage = () => {
     };
 
     if (isLoading) {
-        return <Typography sx={{ p: 4 }}>Đang tải dữ liệu...</Typography>;
+        return <Typography sx={{ p: 4 }}>�ang t?i d? li?u...</Typography>;
     }
 
     return (
         <Box sx={{ maxWidth: '800px', mx: 'auto', p: "calc(3 * var(--spacing))" }}>
             <Box sx={{ mb: 5 }}>
-                <Title title="Cấu hình hệ thống đặt lịch" />
+                <Title title="C?u h�nh h? th?ng d?t l?ch" />
                 <Breadcrumb
                     items={[
                         { label: "Dashboard", to: `/${prefixAdmin}` },
-                        { label: "Đơn dịch vụ", to: `/${prefixAdmin}/booking/list` },
-                        { label: "Cấu hình" }
+                        { label: "�on d?ch v?", to: `/${prefixAdmin}/booking/list` },
+                        { label: "C?u h�nh" }
                     ]}
                 />
             </Box>
@@ -65,7 +65,7 @@ export const BookingConfigPage = () => {
                     }}>
                         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 4 }}>
                             <Icon icon="solar:settings-bold-duotone" width={24} color={COLORS.primary} />
-                            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.125rem' }}>Quy tắc thời gian</Typography>
+                            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.125rem' }}>Quy t?c th?i gian</Typography>
                         </Stack>
 
                         <Grid container spacing={4}>
@@ -76,11 +76,11 @@ export const BookingConfigPage = () => {
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
-                                            label="Thời gian trễ tối đa (phút)"
+                                            label="Th?i gian tr? t?i da (ph�t)"
                                             fullWidth
                                             type="number"
                                             onChange={(e) => field.onChange(Number(e.target.value))}
-                                            helperText="Sau thời gian này khách chưa đến đơn sẽ báo 'Trễ'"
+                                            helperText="Sau th?i gian n�y kh�ch chua d?n don s? b�o 'Tr?'"
                                         />
                                     )}
                                 />
@@ -92,11 +92,11 @@ export const BookingConfigPage = () => {
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
-                                            label="Thời gian tự động hủy (phút)"
+                                            label="Th?i gian t? d?ng h?y (ph�t)"
                                             fullWidth
                                             type="number"
                                             onChange={(e) => field.onChange(Number(e.target.value))}
-                                            helperText="Thời gian trễ tối đa trước khi bị hủy"
+                                            helperText="Th?i gian tr? t?i da tru?c khi b? h?y"
                                         />
                                     )}
                                 />
@@ -108,11 +108,11 @@ export const BookingConfigPage = () => {
                                     render={({ field }) => (
                                         <TextField
                                             {...field}
-                                            label="Bắt đầu sớm tối đa (phút)"
+                                            label="B?t d?u s?m t?i da (ph�t)"
                                             fullWidth
                                             type="number"
                                             onChange={(e) => field.onChange(Number(e.target.value))}
-                                            helperText="Cho phép nhân viên bắt đầu làm sớm hơn lịch hẹn"
+                                            helperText="Cho ph�p nh�n vi�n b?t d?u l�m s?m hon l?ch h?n"
                                         />
                                     )}
                                 />
@@ -128,7 +128,7 @@ export const BookingConfigPage = () => {
                     }}>
                         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 4 }}>
                             <Icon icon="solar:Bell-bold-duotone" width={24} color={COLORS.primary} />
-                            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.125rem' }}>Tự động hóa</Typography>
+                            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.125rem' }}>T? d?ng h�a</Typography>
                         </Stack>
 
                         <Stack spacing={2}>
@@ -140,8 +140,8 @@ export const BookingConfigPage = () => {
                                         control={<Switch checked={field.value} onChange={field.onChange} />}
                                         label={
                                             <Box>
-                                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Tự động xác nhận đơn</Typography>
-                                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>Chấp nhận tất cả đơn đặt mới mà không cần duyệt thủ công</Typography>
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>T? d?ng x�c nh?n don</Typography>
+                                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>Ch?p nh?n t?t c? don d?t m?i m� kh�ng c?n duy?t th? c�ng</Typography>
                                             </Box>
                                         }
                                     />
@@ -155,8 +155,8 @@ export const BookingConfigPage = () => {
                                         control={<Switch checked={field.value} onChange={field.onChange} />}
                                         label={
                                             <Box>
-                                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Tự động hủy khi quá hạn</Typography>
-                                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>Hủy đơn nếu khách hàng không đến sau thời gian hủy (Cancel Period)</Typography>
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>T? d?ng h?y khi qu� h?n</Typography>
+                                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>H?y don n?u kh�ch h�ng kh�ng d?n sau th?i gian h?y (Cancel Period)</Typography>
                                             </Box>
                                         }
                                     />
@@ -169,8 +169,8 @@ export const BookingConfigPage = () => {
                         <LoadingButton
                             type="submit"
                             loading={isPending || isSubmitting}
-                            label="Lưu cấu hình"
-                            loadingLabel="Đang lưu..."
+                            label="Luu c?u h�nh"
+                            loadingLabel="�ang luu..."
                             sx={{ px: 4, py: 1.5, borderRadius: "var(--shape-borderRadius-md)", fontSize: '1rem' }}
                         />
                     </Box>
