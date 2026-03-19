@@ -22,6 +22,11 @@ export const createBoardingBooking = async (payload: any) => {
     return response.data;
 };
 
+export const batchCreateBoardingBooking = async (payload: any) => {
+    const response = await apiApp.post(`${BASE_URL}/batch-create`, payload, withAuth());
+    return response.data;
+};
+
 export const getBoardingBookingDetail = async (id: string) => {
     const response = await apiApp.get(`${BASE_URL}/${id}`, withAuth());
     return response.data;

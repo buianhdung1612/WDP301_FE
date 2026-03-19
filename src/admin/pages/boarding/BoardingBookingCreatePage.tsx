@@ -7,6 +7,7 @@ import {
     CardContent,
     Chip,
     Divider,
+    IconButton,
     MenuItem,
     Stack,
     TextField,
@@ -21,7 +22,7 @@ import { toast } from "react-toastify";
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { Title } from "../../components/ui/Title";
 import { prefixAdmin } from "../../constants/routes";
-import { createBoardingBooking } from "../../api/boarding-booking.api";
+import { batchCreateBoardingBooking, createBoardingBooking } from "../../api/boarding-booking.api";
 import { getBoardingCages } from "../../api/boarding-cage.api";
 import { useUsers } from "../account-user/hooks/useAccountUser";
 import { usePets } from "../account-user/hooks/usePet";
@@ -61,20 +62,19 @@ export const BoardingBookingCreatePage = () => {
 
     const [formData, setFormData] = useState({
         userId: "",
-        petId: "",
-        cageId: "",
         checkInDate: dayjs().format("YYYY-MM-DD"),
         checkOutDate: dayjs().add(1, "day").format("YYYY-MM-DD"),
         fullName: "",
         phone: "",
         email: "",
-        notes: "",
-        specialCare: "",
-        discount: 0,
         paymentMethod: "pay_at_site",
         paymentStatus: "unpaid",
         boardingStatus: "confirmed",
     });
+
+    const [items, setItems] = useState<any[]>([
+        { petId: "", cageId: "", discount: 0, notes: "", specialCare: "" }
+    ]);
 
     const { data: usersRes } = useUsers({ limit: 1000 });
     const users = useMemo(() => {
@@ -104,18 +104,10 @@ export const BoardingBookingCreatePage = () => {
     });
 
     const cages = useMemo(() => {
-        const list = Array.isArray(cageRes?.data) ? cageRes.data : [];
+        const list = Array.isArray(cageRes?.data?.recordList) ? cageRes.data.recordList : (Array.isArray(cageRes?.recordList) ? cageRes.recordList : (Array.isArray(cageRes?.data) ? cageRes.data : []));
         return list.filter((item: any) => item.status !== "maintenance");
     }, [cageRes]);
 
-    const selectedPet = useMemo(
-        () => pets.find((item: any) => item._id === formData.petId),
-        [pets, formData.petId]
-    );
-    const selectedCage = useMemo(
-        () => cages.find((item: any) => item._id === formData.cageId),
-        [cages, formData.cageId]
-    );
 
     const totalDays = useMemo(() => {
         const start = dayjs(formData.checkInDate);
@@ -125,15 +117,22 @@ export const BoardingBookingCreatePage = () => {
     }, [formData.checkInDate, formData.checkOutDate]);
 
     const pricing = useMemo(() => {
-        const pricePerDay = Number(selectedCage?.dailyPrice || 0);
-        const subTotal = totalDays * pricePerDay;
-        const discount = Math.max(Number(formData.discount || 0), 0);
-        const total = Math.max(subTotal - discount, 0);
-        return { pricePerDay, subTotal, discount, total };
-    }, [selectedCage, totalDays, formData.discount]);
+        let subTotal = 0;
+        let totalDiscount = 0;
+
+        items.forEach((item) => {
+            const cage = cages.find((c: any) => c._id === item.cageId);
+            const pricePerDay = Number(cage?.dailyPrice || 0);
+            subTotal += totalDays * pricePerDay;
+            totalDiscount += Math.max(Number(item.discount || 0), 0);
+        });
+
+        const total = Math.max(subTotal - totalDiscount, 0);
+        return { subTotal, totalDiscount, total };
+    }, [items, cages, totalDays]);
 
     const createMut = useMutation({
-        mutationFn: createBoardingBooking,
+        mutationFn: items.length > 1 ? batchCreateBoardingBooking : createBoardingBooking,
         onSuccess: () => {
             toast.success("Tạo đơn khách sạn thành công");
             navigate(`/${prefixAdmin}/boarding/booking-list`);
@@ -148,29 +147,58 @@ export const BoardingBookingCreatePage = () => {
         setFormData((prev) => ({
             ...prev,
             userId,
-            petId: "",
             fullName: user?.fullName || "",
             phone: user?.phone || "",
             email: user?.email || "",
         }));
+        setItems([{ petId: "", cageId: "", discount: 0, notes: "", specialCare: "" }]);
+    };
+
+    const handleAddItem = () => {
+        setItems([...items, { petId: "", cageId: "", discount: 0, notes: "", specialCare: "" }]);
+    };
+
+    const handleRemoveItem = (index: number) => {
+        if (items.length > 1) {
+            const newItems = [...items];
+            newItems.splice(index, 1);
+            setItems(newItems);
+        }
+    };
+
+    const handleUpdateItem = (index: number, field: string, value: any) => {
+        const newItems = [...items];
+        newItems[index] = { ...newItems[index], [field]: value };
+        setItems(newItems);
     };
 
     const handleSubmit = () => {
-        if (!formData.userId || !formData.petId || !formData.cageId) {
-            toast.error("Vui lòng chọn khách hàng, thú cưng và chuồng");
-            return;
-        }
-        if (totalDays <= 0) {
-            toast.error("Ngày trả chuồng phải sau ngày nhận chuồng");
-            return;
-        }
+        if (!formData.userId) return toast.error("Vui lòng chọn khách hàng");
+        if (items.some(i => !i.petId || !i.cageId)) return toast.error("Vui lòng chọn thú cưng và chuồng cho tất cả các mục");
+        if (totalDays <= 0) return toast.error("Ngày trả chuồng phải sau ngày nhận chuồng");
 
-        createMut.mutate({
+        const commonPayload = {
             ...formData,
-            discount: Math.max(Number(formData.discount || 0), 0),
             checkInDate: dayjs(formData.checkInDate).startOf("day").toISOString(),
             checkOutDate: dayjs(formData.checkOutDate).startOf("day").toISOString(),
-        });
+        };
+
+        if (items.length > 1) {
+            createMut.mutate({
+                ...commonPayload,
+                items,
+            } as any);
+        } else {
+            const item = items[0];
+            createMut.mutate({
+                ...commonPayload,
+                petId: item.petId,
+                cageId: item.cageId,
+                notes: item.notes,
+                specialCare: item.specialCare,
+                discount: item.discount,
+            } as any);
+        }
     };
 
     return (
@@ -240,67 +268,117 @@ export const BoardingBookingCreatePage = () => {
                                         </TextField>
                                     </Grid>
                                     <Grid size={{ xs: 12, md: 6 }}>
-                                        <TextField
-                                            fullWidth
-                                            select
-                                            label="Thú cưng"
-                                            value={formData.petId}
-                                            onChange={(e) => setFormData((prev) => ({ ...prev, petId: e.target.value }))}
-                                            disabled={!formData.userId}
-                                        >
-                                            {pets.map((pet: any) => (
-                                                <MenuItem key={pet._id} value={pet._id}>
-                                                    {pet.name} ({pet.breed || pet.type || "Không rõ"}) - {pet.weight || 0}kg
-                                                </MenuItem>
-                                            ))}
-                                        </TextField>
-                                    </Grid>
-                                    <Grid size={{ xs: 12, md: 6 }}>
-                                        <TextField
-                                            fullWidth
-                                            type="date"
-                                            label="Ngày nhận chuồng"
-                                            value={formData.checkInDate}
-                                            onChange={(e) => setFormData((prev) => ({ ...prev, checkInDate: e.target.value }))}
-                                            InputLabelProps={{ shrink: true }}
-                                        />
-                                    </Grid>
-                                    <Grid size={{ xs: 12, md: 6 }}>
-                                        <TextField
-                                            fullWidth
-                                            type="date"
-                                            label="Ngày trả chuồng"
-                                            value={formData.checkOutDate}
-                                            onChange={(e) => setFormData((prev) => ({ ...prev, checkOutDate: e.target.value }))}
-                                            InputLabelProps={{ shrink: true }}
-                                        />
+                                        <Stack direction="row" spacing={1}>
+                                            <TextField
+                                                fullWidth
+                                                type="date"
+                                                label="Ngày nhận chuồng"
+                                                value={formData.checkInDate}
+                                                onChange={(e) => setFormData((prev) => ({ ...prev, checkInDate: e.target.value }))}
+                                                InputLabelProps={{ shrink: true }}
+                                            />
+                                            <TextField
+                                                fullWidth
+                                                type="date"
+                                                label="Ngày trả chuồng"
+                                                value={formData.checkOutDate}
+                                                onChange={(e) => setFormData((prev) => ({ ...prev, checkOutDate: e.target.value }))}
+                                                InputLabelProps={{ shrink: true }}
+                                            />
+                                        </Stack>
                                     </Grid>
                                 </Grid>
 
-                                <TextField
-                                    fullWidth
-                                    select
-                                    label="Chuồng"
-                                    value={formData.cageId}
-                                    onChange={(e) => setFormData((prev) => ({ ...prev, cageId: e.target.value }))}
-                                >
-                                    {cages.map((cage: any) => (
-                                        <MenuItem key={cage._id} value={cage._id}>
-                                            {cage.cageCode} - {String(cage.type || "").toUpperCase()} - {normalizeCageSizeLabel(cage.size)} - {Number(cage.dailyPrice || 0).toLocaleString("vi-VN")}đ/ngày
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-
                                 <Divider />
 
+                                {items.map((item, index) => (
+                                    <Box key={index} sx={{ p: 2, border: "1px dashed var(--palette-divider)", borderRadius: 1.5, bgcolor: "rgba(0,0,0,0.02)", position: "relative" }}>
+                                        <Typography sx={{ fontWeight: 700, fontSize: 15, mb: 1.5, color: "var(--palette-primary-main)" }}>
+                                            Thú cưng & chuồng #{index + 1}
+                                        </Typography>
+
+                                        {items.length > 1 && (
+                                            <IconButton
+                                                size="small"
+                                                color="error"
+                                                sx={{ position: "absolute", top: 8, right: 8 }}
+                                                onClick={() => handleRemoveItem(index)}
+                                            >
+                                                <Icon icon="solar:trash-bin-minimalistic-bold" />
+                                            </IconButton>
+                                        )}
+
+                                        <Grid container spacing={2}>
+                                            <Grid size={{ xs: 12, md: 6 }}>
+                                                <TextField
+                                                    fullWidth
+                                                    select
+                                                    label="Thú cưng"
+                                                    value={item.petId}
+                                                    onChange={(e) => handleUpdateItem(index, "petId", e.target.value)}
+                                                    disabled={!formData.userId}
+                                                >
+                                                    {pets.map((pet: any) => (
+                                                        <MenuItem key={pet._id} value={pet._id}>
+                                                            {pet.name} ({pet.breed || pet.type || "Không rõ"}) - {pet.weight || 0}kg
+                                                        </MenuItem>
+                                                    ))}
+                                                </TextField>
+                                            </Grid>
+                                            <Grid size={{ xs: 12, md: 6 }}>
+                                                <TextField
+                                                    fullWidth
+                                                    select
+                                                    label="Chuồng"
+                                                    value={item.cageId}
+                                                    onChange={(e) => handleUpdateItem(index, "cageId", e.target.value)}
+                                                >
+                                                    {cages.map((cage: any) => (
+                                                        <MenuItem key={cage._id} value={cage._id}>
+                                                            {cage.cageCode} - {String(cage.type || "").toUpperCase()} - {normalizeCageSizeLabel(cage.size)}
+                                                        </MenuItem>
+                                                    ))}
+                                                </TextField>
+                                            </Grid>
+                                            <Grid size={{ xs: 12, md: 4 }}>
+                                                <TextField
+                                                    fullWidth
+                                                    type="number"
+                                                    label="Giảm giá riêng (VNĐ)"
+                                                    value={item.discount}
+                                                    onChange={(e) => handleUpdateItem(index, "discount", Number(e.target.value) || 0)}
+                                                />
+                                            </Grid>
+                                            <Grid size={{ xs: 12, md: 8 }}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Ghi chú & CS đặc biệt"
+                                                    value={item.notes}
+                                                    onChange={(e) => handleUpdateItem(index, "notes", e.target.value)}
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
+                                ))}
+
+                                <Button
+                                    variant="outlined"
+                                    startIcon={<Icon icon="solar:add-circle-bold" />}
+                                    onClick={handleAddItem}
+                                    sx={{ alignSelf: "flex-start", borderRadius: 2 }}
+                                    disabled={!formData.userId}
+                                >
+                                    Thêm thú cưng/chuồng
+                                </Button>
+
                                 <Typography sx={{ fontWeight: 800, fontSize: 17, color: "#0f766e" }}>
-                                    Liên hệ khách hàng
+                                    Thông tin người nhận
                                 </Typography>
                                 <Grid container spacing={2}>
                                     <Grid size={{ xs: 12, md: 4 }}>
                                         <TextField
                                             fullWidth
-                                            label="Họ tên liên hệ"
+                                            label="Họ tên"
                                             value={formData.fullName}
                                             onChange={(e) => setFormData((prev) => ({ ...prev, fullName: e.target.value }))}
                                         />
@@ -322,22 +400,6 @@ export const BoardingBookingCreatePage = () => {
                                         />
                                     </Grid>
                                 </Grid>
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    minRows={2}
-                                    label="Chăm sóc đặc biệt"
-                                    value={formData.specialCare}
-                                    onChange={(e) => setFormData((prev) => ({ ...prev, specialCare: e.target.value }))}
-                                />
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    minRows={2}
-                                    label="Ghi chú đơn"
-                                    value={formData.notes}
-                                    onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
-                                />
                             </Stack>
                         </CardContent>
                     </Card>
@@ -384,13 +446,6 @@ export const BoardingBookingCreatePage = () => {
                                             <MenuItem key={item.value} value={item.value}>{item.label}</MenuItem>
                                         ))}
                                     </TextField>
-                                    <TextField
-                                        fullWidth
-                                        type="number"
-                                        label="Giảm giá (VNĐ)"
-                                        value={formData.discount}
-                                        onChange={(e) => setFormData((prev) => ({ ...prev, discount: Number(e.target.value) || 0 }))}
-                                    />
                                 </Stack>
                             </CardContent>
                         </Card>
@@ -402,16 +457,8 @@ export const BoardingBookingCreatePage = () => {
                                 </Typography>
                                 <Stack spacing={1}>
                                     <Stack direction="row" justifyContent="space-between">
-                                        <Typography color="text.secondary">Thú cưng</Typography>
-                                        <Typography fontWeight={700}>{selectedPet?.name || "-"}</Typography>
-                                    </Stack>
-                                    <Stack direction="row" justifyContent="space-between">
-                                        <Typography color="text.secondary">Chuồng</Typography>
-                                        <Typography fontWeight={700}>{selectedCage?.cageCode || "-"}</Typography>
-                                    </Stack>
-                                    <Stack direction="row" justifyContent="space-between">
-                                        <Typography color="text.secondary">Đơn giá/ngày</Typography>
-                                        <Typography fontWeight={700}>{pricing.pricePerDay.toLocaleString("vi-VN")}VNĐ</Typography>
+                                        <Typography color="text.secondary">Số lượng thú cưng</Typography>
+                                        <Typography fontWeight={700}>{items.length}</Typography>
                                     </Stack>
                                     <Stack direction="row" justifyContent="space-between">
                                         <Typography color="text.secondary">Số đêm</Typography>
@@ -419,16 +466,16 @@ export const BoardingBookingCreatePage = () => {
                                     </Stack>
                                     <Divider />
                                     <Stack direction="row" justifyContent="space-between">
-                                        <Typography color="text.secondary">Tạm tính</Typography>
-                                        <Typography fontWeight={700}>{pricing.subTotal.toLocaleString("vi-VN")}VNĐ</Typography>
+                                        <Typography color="text.secondary">Tổng tạm tính</Typography>
+                                        <Typography fontWeight={700}>{pricing.subTotal.toLocaleString("vi-VN")} VNĐ</Typography>
                                     </Stack>
                                     <Stack direction="row" justifyContent="space-between">
-                                        <Typography color="text.secondary">Giảm giá</Typography>
-                                        <Typography fontWeight={700} color="error.main">-{pricing.discount.toLocaleString("vi-VN")}VNĐ</Typography>
+                                        <Typography color="text.secondary">Tổng giảm giá</Typography>
+                                        <Typography fontWeight={700} color="error.main">-{pricing.totalDiscount.toLocaleString("vi-VN")} VNĐ</Typography>
                                     </Stack>
                                     <Stack direction="row" justifyContent="space-between">
-                                        <Typography fontWeight={800}>Tổng cộng</Typography>
-                                        <Typography fontWeight={800} color="primary.main">{pricing.total.toLocaleString("vi-VN")}VNĐ</Typography>
+                                        <Typography fontWeight={800} fontSize={18}>Tổng cộng</Typography>
+                                        <Typography fontWeight={800} fontSize={18} color="primary.main">{pricing.total.toLocaleString("vi-VN")} VNĐ</Typography>
                                     </Stack>
                                 </Stack>
                             </CardContent>
