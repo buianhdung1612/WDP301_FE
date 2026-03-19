@@ -325,7 +325,9 @@
                 "confirmed": "Đã xác nhận",
                 "in_progress": "Đang làm",
                 "completed": "Hoàn thành",
-                "cancelled": "Đã hủy"
+                "cancelled": "Đã hủy",
+                "returned": "Trả đơn (Hoàn)",
+                "request_cancel": "Yêu cầu hủy"
             }
         },
         "schedule": {

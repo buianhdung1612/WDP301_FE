@@ -11,13 +11,12 @@ import {
     MenuItem,
     Select,
     CircularProgress,
-    alpha,
-    Divider
+    alpha
 } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
-import { useBookingDetail, useUpdateBookingStatus } from "./hooks/useBookingManagement";
+import { useBookingDetail, useUpdateBookingStatus, useUpdateBooking } from "./hooks/useBookingManagement";
 import { toast } from "react-toastify";
 import { prefixAdmin } from "../../constants/routes";
 
@@ -28,6 +27,15 @@ const STATUS_OPTIONS: { [key: string]: { label: string; color: string; bg: strin
     "in-progress": { label: "Đang thực hiện", color: "var(--palette-primary-dark)", bg: "var(--palette-primary-lighter)" },
     completed: { label: "Hoàn thành", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
     cancelled: { label: "Đã hủy", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
+    returned: { label: "Trả đơn (Hoàn)", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
+    request_cancel: { label: "Yêu cầu hủy", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
+};
+
+const PAYMENT_STATUS_OPTIONS: { [key: string]: { label: string; color: string; bg: string } } = {
+    unpaid: { label: "Chưa thanh toán", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
+    partially_paid: { label: "Thanh toán một phần", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)" },
+    paid: { label: "Đã thanh toán", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
+    refunded: { label: "Đã hoàn tiền", color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)" },
 };
 
 export const BookingDetailPage = () => {
@@ -36,6 +44,7 @@ export const BookingDetailPage = () => {
     const { data: bookingRes, isLoading } = useBookingDetail(id || "");
     const booking = bookingRes?.data;
     const { mutate: updateStatus } = useUpdateBookingStatus();
+    const { mutate: updateBooking } = useUpdateBooking();
 
     if (isLoading) {
         return (
@@ -58,6 +67,17 @@ export const BookingDetailPage = () => {
     const handleStatusChange = (newStatus: string) => {
         updateStatus({ id: booking._id, status: newStatus }, {
             onSuccess: () => toast.success("Cập nhật trạng thái thành công")
+        });
+    };
+
+    const handlePaymentStatusChange = (newStatus: string) => {
+        if (["paid", "partially_paid"].includes(booking.paymentStatus) && newStatus === "unpaid") {
+            toast.error("Không thể chuyển đơn đã thanh toán (toàn bộ hoặc một phần) về chưa thanh toán!");
+            return;
+        }
+
+        updateBooking({ id: booking._id, data: { paymentStatus: newStatus } }, {
+            onSuccess: () => toast.success("Cập nhật trạng thái thanh toán thành công")
         });
     };
 
@@ -491,6 +511,35 @@ export const BookingDetailPage = () => {
                         <Card sx={{ p: 3, borderRadius: 'var(--shape-borderRadius-lg)', boxShadow: 'var(--customShadows-card)' }}>
                             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
                                 <Typography sx={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--palette-text-primary)' }}>Thanh toán</Typography>
+                                <Select
+                                    size="small"
+                                    value={booking.paymentStatus || 'unpaid'}
+                                    onChange={(e) => handlePaymentStatusChange(e.target.value)}
+                                    sx={{
+                                        minWidth: 140,
+                                        height: 32,
+                                        borderRadius: '8px',
+                                        '& .MuiSelect-select': {
+                                            fontSize: '0.75rem',
+                                            fontWeight: 700,
+                                            py: 0.5,
+                                            px: 1,
+                                            color: (PAYMENT_STATUS_OPTIONS[booking.paymentStatus] || PAYMENT_STATUS_OPTIONS.unpaid).color,
+                                            bgcolor: (PAYMENT_STATUS_OPTIONS[booking.paymentStatus] || PAYMENT_STATUS_OPTIONS.unpaid).bg,
+                                        }
+                                    }}
+                                >
+                                    {Object.entries(PAYMENT_STATUS_OPTIONS).map(([value, opt]) => (
+                                        <MenuItem
+                                            key={value}
+                                            value={value}
+                                            sx={{ fontSize: '0.875rem' }}
+                                            disabled={(booking.paymentStatus === 'paid' || booking.paymentStatus === 'partially_paid') && value === 'unpaid'}
+                                        >
+                                            {opt.label}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
                             </Stack>
                             <Stack direction="row" alignItems="center" spacing={1} justifyContent="space-between">
                                 <Typography variant="body2" sx={{ color: 'var(--palette-text-disabled)' }}>Phương thức</Typography>
@@ -510,15 +559,6 @@ export const BookingDetailPage = () => {
                                         style={{ filter: booking.paymentMethod === 'money' ? 'grayscale(1)' : 'none', opacity: booking.paymentMethod === 'money' ? 0.7 : 1 }}
                                     />
                                 </Stack>
-                            </Stack>
-                            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 2 }}>
-                                <Typography variant="body2" sx={{ color: 'var(--palette-text-disabled)' }}>Trạng thái</Typography>
-                                <Chip
-                                    size="small"
-                                    label={booking.paymentStatus === 'paid' ? "Đã thanh toán" : "Chưa thanh toán"}
-                                    color={booking.paymentStatus === 'paid' ? "success" : "warning"}
-                                    sx={{ fontWeight: 700 }}
-                                />
                             </Stack>
                         </Card>
                     </Stack>

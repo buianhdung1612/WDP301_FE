@@ -157,6 +157,8 @@ export const BookingList = () => {
         "in-progress": 0,
         completed: 0,
         cancelled: 0,
+        returned: 0,
+        request_cancel: 0,
     };
 
     return (
@@ -188,6 +190,8 @@ export const BookingList = () => {
                     { value: 'in-progress', label: t("admin.booking.status.in_progress"), color: 'var(--palette-primary-dark)', bg: 'var(--palette-primary-lighter)', activeColor: 'var(--palette-primary-contrastText)', activeBg: 'var(--palette-primary-main)' },
                     { value: 'completed', label: t("admin.booking.status.completed"), color: 'var(--palette-success-dark)', bg: 'var(--palette-success-lighter)', activeColor: 'var(--palette-success-contrastText)', activeBg: 'var(--palette-success-main)' },
                     { value: 'cancelled', label: t("admin.booking.status.cancelled"), color: 'var(--palette-error-dark)', bg: 'var(--palette-error-lighter)', activeColor: 'var(--palette-error-contrastText)', activeBg: 'var(--palette-error-main)' },
+                    { value: 'returned', label: "Trả đơn (Hoàn)", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)", activeColor: "var(--palette-error-contrastText)", activeBg: "var(--palette-error-main)" },
+                    { value: 'request_cancel', label: t("admin.booking.status.request_cancel"), color: 'var(--palette-error-dark)', bg: 'var(--palette-error-lighter)', activeColor: 'var(--palette-error-contrastText)', activeBg: 'var(--palette-error-main)' },
                 ].map((tab) => (
                     <Tab
                         key={tab.value}
@@ -365,7 +369,9 @@ export const BookingList = () => {
                                                         confirmed: { label: t("admin.booking.status.confirmed"), color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)" },
                                                         "in-progress": { label: t("admin.booking.status.in_progress"), color: "var(--palette-primary-dark)", bg: "var(--palette-primary-lighter)" },
                                                         completed: { label: t("admin.booking.status.completed"), color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
-                                                        cancelled: { label: t("admin.booking.status.cancelled"), color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" }
+                                                        cancelled: { label: t("admin.booking.status.cancelled"), color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
+                                                        returned: { label: "Trả đơn (Hoàn)", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
+                                                        request_cancel: { label: t("admin.booking.status.request_cancel"), color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" }
                                                     };
                                                     const status = statusMap[row.bookingStatus] || { label: row.bookingStatus, color: 'var(--palette-text-disabled)', bg: "var(--palette-background-neutral)" };
                                                     return (
