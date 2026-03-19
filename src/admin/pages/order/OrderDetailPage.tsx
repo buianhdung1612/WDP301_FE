@@ -16,7 +16,7 @@ import {
 import { Icon } from "@iconify/react";
 import { useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
-import { useOrderDetail, useUpdateOrderStatus } from "./hooks/useOrderManagement";
+import { useOrderDetail, useUpdateOrderStatus, useUpdateOrder } from "./hooks/useOrderManagement";
 import { toast } from "react-toastify";
 import { prefixAdmin } from "../../constants/routes";
 
@@ -27,6 +27,13 @@ const STATUS_OPTIONS: { [key: string]: { label: string; color: string; bg: strin
     completed: { label: "Hoàn thành", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
     cancelled: { label: "Đã hủy", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
     returned: { label: "Trả hàng", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
+    request_cancel: { label: "Yêu cầu hủy", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
+};
+
+const PAYMENT_STATUS_OPTIONS: { [key: string]: { label: string; color: string; bg: string } } = {
+    unpaid: { label: "Chưa thanh toán", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
+    paid: { label: "Đã thanh toán", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
+    refunded: { label: "Đã hoàn tiền", color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)" },
 };
 
 export const OrderDetailPage = () => {
@@ -35,6 +42,7 @@ export const OrderDetailPage = () => {
     const { data: orderRes, isLoading } = useOrderDetail(id || "");
     const order = orderRes?.data;
     const { mutate: updateStatus } = useUpdateOrderStatus();
+    const { mutate: updateOrder } = useUpdateOrder();
 
     if (isLoading) {
         return (
@@ -57,6 +65,17 @@ export const OrderDetailPage = () => {
     const handleStatusChange = (newStatus: string) => {
         updateStatus({ id: order._id, status: newStatus }, {
             onSuccess: () => toast.success("Cập nhật trạng thái thành công")
+        });
+    };
+
+    const handlePaymentStatusChange = (newStatus: string) => {
+        if (order.paymentStatus === "paid" && newStatus === "unpaid") {
+            toast.error("Không thể chuyển đơn đã thanh toán về chưa thanh toán!");
+            return;
+        }
+
+        updateOrder({ id: order._id, data: { paymentStatus: newStatus } }, {
+            onSuccess: () => toast.success("Cập nhật trạng thái thanh toán thành công")
         });
     };
 
@@ -459,6 +478,35 @@ export const OrderDetailPage = () => {
                         <Card sx={{ p: 3, borderRadius: 'var(--shape-borderRadius-lg)', boxShadow: 'var(--customShadows-card)' }}>
                             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
                                 <Typography sx={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--palette-text-primary)' }}>Thanh toán</Typography>
+                                <Select
+                                    size="small"
+                                    value={order.paymentStatus || 'unpaid'}
+                                    onChange={(e) => handlePaymentStatusChange(e.target.value)}
+                                    sx={{
+                                        minWidth: 140,
+                                        height: 32,
+                                        borderRadius: '8px',
+                                        '& .MuiSelect-select': {
+                                            fontSize: '0.75rem',
+                                            fontWeight: 700,
+                                            py: 0.5,
+                                            px: 1,
+                                            color: (PAYMENT_STATUS_OPTIONS[order.paymentStatus] || PAYMENT_STATUS_OPTIONS.unpaid).color,
+                                            bgcolor: (PAYMENT_STATUS_OPTIONS[order.paymentStatus] || PAYMENT_STATUS_OPTIONS.unpaid).bg,
+                                        }
+                                    }}
+                                >
+                                    {Object.entries(PAYMENT_STATUS_OPTIONS).map(([value, opt]) => (
+                                        <MenuItem
+                                            key={value}
+                                            value={value}
+                                            sx={{ fontSize: '0.875rem' }}
+                                            disabled={order.paymentStatus === 'paid' && value === 'unpaid'}
+                                        >
+                                            {opt.label}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
                             </Stack>
                             <Stack direction="row" alignItems="center" spacing={1} justifyContent="space-between">
                                 <Typography variant="body2" sx={{ color: 'var(--palette-text-disabled)' }}>Phương thức</Typography>
