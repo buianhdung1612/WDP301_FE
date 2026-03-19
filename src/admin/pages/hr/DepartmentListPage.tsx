@@ -17,6 +17,7 @@ import { dataGridCardStyles, dataGridContainerStyles, dataGridStyles, primaryBut
 import { HRToolbar } from './sections/HRToolbar';
 import { useDataGridLocale } from '../../hooks/useDataGridLocale';
 import { SortAscendingIcon, SortDescendingIcon, UnsortedIcon } from '../../assets/icons';
+import { confirmDelete } from "../../utils/swal";
 
 export const DepartmentListPage = () => {
     const [openDialog, setOpenDialog] = useState(false);
@@ -75,13 +76,13 @@ export const DepartmentListPage = () => {
     };
 
     const handleDelete = (id: string) => {
-        if (window.confirm('Bạn có chắc chắn muốn xóa phòng ban này?')) {
+        confirmDelete("Bạn có chắc chắn muốn xóa phòng ban này?", () => {
             deleteDept(id, {
                 onSuccess: () => {
                     toast.success('Xóa thành công');
                 }
             });
-        }
+        });
     };
 
     const columns = getDepartmentColumns(

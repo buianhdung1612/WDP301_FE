@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useDeleteBlog } from "../hooks/useBlog";
 import { Link } from "react-router-dom";
+import { confirmDelete } from "../../../utils/swal";
 
 interface BlogListProps {
     blogs: any[];
@@ -54,7 +55,7 @@ export const BlogList = ({ blogs = [], isLoading = false, page, onPageChange, pa
 
     const handleDelete = () => {
         if (selectedBlogId) {
-            if (window.confirm(t("admin.common.confirm_delete"))) {
+            confirmDelete(t("admin.common.confirm_delete"), () => {
                 deleteBlog(selectedBlogId, {
                     onSuccess: (res: any) => {
                         if (res.success) {
@@ -64,7 +65,7 @@ export const BlogList = ({ blogs = [], isLoading = false, page, onPageChange, pa
                         }
                     }
                 });
-            }
+            });
             handleCloseMenu();
         }
     };

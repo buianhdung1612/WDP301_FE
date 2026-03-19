@@ -93,6 +93,11 @@ export const useDeleteBlog = () => {
     });
 };
 
+// Dummy hooks cho BlogTagDialog chưa implement backend
+export const useBlogTags = () => ({ data: [], isLoading: false });
+export const useCreateBlogTag = () => ({ mutate: (_: any, __?: any) => { }, isPending: false });
+export const useDeleteBlogTag = () => ({ mutate: (_: any, __?: any) => { } });
+
 
 
 

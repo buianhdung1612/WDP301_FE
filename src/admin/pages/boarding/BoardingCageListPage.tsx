@@ -34,6 +34,7 @@ import { Title } from "../../components/ui/Title";
 import { prefixAdmin } from "../../constants/routes";
 import { Search } from "../../components/ui/Search";
 import { createBoardingCage, deleteBoardingCage, getBoardingCages, updateBoardingCage } from "../../api/boarding-cage.api";
+import { confirmDelete } from "../../utils/swal";
 
 const trangThaiChuongOptions = [
     { value: "available", label: "Sẵn sàng" },
@@ -543,7 +544,7 @@ export const BoardingCageListPage = () => {
                                                         <MenuItem
                                                             onClick={() => {
                                                                 handleCloseMenu(row._id);
-                                                                if (window.confirm("Bạn có chắc muốn xóa chuồng này?")) deleteMut.mutate(row._id);
+                                                                confirmDelete("Bạn có chắc muốn xóa chuồng này?", () => deleteMut.mutate(row._id));
                                                             }}
                                                             sx={{ color: "var(--palette-error-main)" }}
                                                         >

@@ -8,6 +8,7 @@ import { prefixAdmin } from "../../../constants/routes";
 import { toast } from "react-toastify";
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
+import { confirmDelete } from "../../../utils/swal";
 
 dayjs.locale('vi');
 interface RenderCreatedAtCellProps {
@@ -165,7 +166,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
     };
 
     const handleDelete = () => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa mã giảm giá này?")) {
+        confirmDelete("Bạn có chắc chắn muốn xóa mã giảm giá này?", () => {
             deleteCoupon(id, {
                 onSuccess: (res: any) => {
                     if (res.success) {
@@ -175,7 +176,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                     }
                 }
             });
-        }
+        });
     };
 
     return (
