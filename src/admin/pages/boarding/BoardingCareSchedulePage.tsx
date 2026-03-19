@@ -70,7 +70,7 @@ const DOG_FOOD_OPTIONS = [
     "Gà luộc + Cơm",
     "Thịt bò + Rau củ",
     "Bánh thưởng / Snack",
-    "Theo chủ cung cấp",
+    "Theo chế độ cung cấp",
 ];
 
 const CAT_FOOD_OPTIONS = [
@@ -79,14 +79,14 @@ const CAT_FOOD_OPTIONS = [
     "Hạt + Pate",
     "Súp thưởng (Churu)",
     "Cá luộc / Gà xé",
-    "Theo chủ cung cấp",
+    "Theo chế độ cung cấp",
 ];
 
 const GENERAL_FOOD_OPTIONS = [
     "Hạt khô",
     "Thức ăn ướt (Pate)",
     "Thức ăn tự nấu",
-    "Theo chủ cung cấp",
+    "Theo chế độ cung cấp",
 ];
 
 const getFoodOptions = (petType: string) => {
@@ -100,7 +100,7 @@ const calculateRecommendedPortion = (pets: any[], petType: "dog" | "cat" | "all"
     if (!targetPets.length) return "";
 
     const totalWeight = targetPets.reduce((sum, p) => sum + Number(p.weight || 0), 0);
-    const gramPerMeal = Math.round((totalWeight * 1000 * ratio) / 2); // Giả sử ăn 2 bữa chính
+    const gramPerMeal = Math.round((totalWeight * 1000 * ratio) / 2); // Gi? s? an 2 b?a ch�nh
 
     if (gramPerMeal <= 0) return "";
     return `${gramPerMeal}g`;
@@ -178,7 +178,9 @@ export const BoardingCareSchedulePage = () => {
     });
 
     const hotelStaffOptions = useMemo(() => {
-        const list = Array.isArray(hotelStaffRes?.data) ? hotelStaffRes.data : [];
+        if (!hotelStaffRes) return [];
+        const data = hotelStaffRes as any;
+        const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
         return list.map((staff: any) => ({
             value: staff._id,
             label: `${staff.fullName || "Nhân viên"}${staff.employeeCode ? ` - ${staff.employeeCode}` : ""}`,
@@ -255,7 +257,7 @@ export const BoardingCareSchedulePage = () => {
             : normalizeProofMedia(exerciseDraft[rowIndex]?.proofMedia).length;
 
         if (currentProofCount >= MAX_PROOF_MEDIA_PER_ROW) {
-            toast.error(`Mỗi dòng chỉ được tối đa ${MAX_PROOF_MEDIA_PER_ROW} minh chứng`);
+            toast.error(`Mỗi dòng chỉ được tải tối đa ${MAX_PROOF_MEDIA_PER_ROW} minh chứng`);
             return;
         }
 
@@ -321,7 +323,7 @@ export const BoardingCareSchedulePage = () => {
             const proofMedia = normalizeProofMedia(item.proofMedia);
             if (proofMedia.length > 0) continue;
             const title = getTitle(item);
-            toast.error(`${label} dòng ${index + 1}${title ? ` (${title})` : ""} phải có ảnh hoặc video minh chứng trước khi hoàn thành`);
+            toast.error(`${label} dng ${index + 1}${title ? ` (${title})` : ""} phải có ảnh hoặc video minh chứng trước khi hoàn thành`);
             return false;
         }
 
@@ -518,7 +520,7 @@ export const BoardingCareSchedulePage = () => {
             const targetItem = type === "feeding" ? feedingDraft[rowIndex] : exerciseDraft[rowIndex];
             const proofMedia = normalizeProofMedia(targetItem?.proofMedia);
             if (proofMedia.length === 0) {
-                toast.error("Phải tải ít nhất 1 ảnh hoặc video minh chứng trước khi chuyển sang Đã hoàn thành");
+                toast.error("Phải tải ít nhất 1 ảnh hoặc video minh chứng trước khi chuyển sang đã hoàn thành");
                 return;
             }
         }
@@ -574,7 +576,7 @@ export const BoardingCareSchedulePage = () => {
                         />
                     </Button>
                     <Typography sx={{ fontSize: "0.75rem", color: "var(--palette-text-secondary)" }}>
-                        Cần ít nhất 1 ảnh hoặc video để chuyển trạng thái sang "Đã hoàn thành". Tối đa {MAX_PROOF_MEDIA_PER_ROW} file, ảnh ≤ {MAX_IMAGE_PROOF_SIZE_MB}MB, video ≤ {MAX_VIDEO_PROOF_SIZE_MB}MB.
+                        Cần ít nhất 1 ảnh hoặc video để chuyển trạng thái sang "Đã hoàn thành". Tối đa {MAX_PROOF_MEDIA_PER_ROW} file, ảnh = {MAX_IMAGE_PROOF_SIZE_MB}MB, video = {MAX_VIDEO_PROOF_SIZE_MB}MB.
                     </Typography>
                 </Stack>
 
@@ -595,7 +597,7 @@ export const BoardingCareSchedulePage = () => {
                                 Xem gallery
                             </Button>
                             <Typography sx={{ fontSize: "0.75rem", color: "var(--palette-text-secondary)" }}>
-                                {proofMedia.length} file đã tải
+                                {proofMedia.length} file d� t?i
                             </Typography>
                         </Stack>
                         <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
@@ -763,7 +765,7 @@ export const BoardingCareSchedulePage = () => {
                             ) : filteredRows.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={4} align="center" sx={{ py: 10 }}>
-                                        <Typography sx={{ color: "var(--palette-text-secondary)" }}>Không có dữ liệu</Typography>
+                                        <Typography sx={{ color: "var(--palette-text-secondary)" }}>Kh�ng c� d? li?u</Typography>
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -789,17 +791,17 @@ export const BoardingCareSchedulePage = () => {
                                                         </Avatar>
                                                         <Stack spacing={0.25}>
                                                             <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
-                                                                {row.fullName || row.userId?.fullName || "Khách vãng lai"}
+                                                                {row.fullName || row.userId?.fullName || "Kh�ch v�ng lai"}
                                                             </Typography>
                                                             <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>
-                                                                {row.phone || row.userId?.phone || row.userId?.email || "Không có thông tin"}
+                                                                {row.phone || row.userId?.phone || row.userId?.email || "Kh�ng c� th�ng tin"}
                                                             </Typography>
                                                         </Stack>
                                                     </Stack>
                                                 </TableCell>
                                                 <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
                                                     <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.8125rem" }}>
-                                                        {canAssignHotelStaff ? `Ăn: ${summary.soLichAn} (gán NVKS: ${summary.soNhanVienLichAn}) | Vận động: ${summary.soVanDong} (gán NVKS: ${summary.soNhanVienVanDong})` : `Ăn: ${summary.soLichAn} | Vận động: ${summary.soVanDong}`}
+                                                        {canAssignHotelStaff ? `Ăn: ${summary.soLichAn} (gắn NVKS: ${summary.soNhanVienLichAn}) | Vận động: ${summary.soVanDong} (gắn NVKS: ${summary.soNhanVienVanDong})` : `Ăn: ${summary.soLichAn} | Vận động: ${summary.soVanDong}`}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
@@ -861,7 +863,7 @@ export const BoardingCareSchedulePage = () => {
                                                         {pet.name} ({pet.type === "dog" ? "Chó" : pet.type === "cat" ? "Mèo" : pet.type})
                                                     </Typography>
                                                     <Typography variant="caption" sx={{ color: "var(--palette-text-secondary)", display: "block" }}>
-                                                        {pet.breed} • {pet.weight}kg
+                                                        {pet.breed} - {pet.weight}kg
                                                     </Typography>
                                                 </Box>
                                             </Stack>
@@ -943,9 +945,9 @@ export const BoardingCareSchedulePage = () => {
 
                                 {(() => {
                                     const groups = [
-                                        { type: "dog" as const, label: "🐶 Chó", color: "#3b82f6" },
-                                        { type: "cat" as const, label: "🐱 Mèo", color: "#ec4899" },
-                                        { type: "all" as const, label: "🐾 Chung / Khác", color: "#64748b" },
+                                        { type: "dog" as const, label: "Chó", color: "#3b82f6" },
+                                        { type: "cat" as const, label: "Mèo", color: "#ec4899" },
+                                        { type: "all" as const, label: "Chung / Khác", color: "#64748b" },
                                     ];
 
                                     return groups.map((group) => {
@@ -978,7 +980,7 @@ export const BoardingCareSchedulePage = () => {
                                                         <Box key={`feeding-${idx}`}>
                                                             <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
                                                                 <TextField
-                                                                    label="Giờ"
+                                                                    label="Gi?"
                                                                     type="time"
                                                                     size="small"
                                                                     value={item.time || ""}
@@ -1042,7 +1044,7 @@ export const BoardingCareSchedulePage = () => {
                                                                         })}
                                                                         sx={{ minWidth: 180 }}
                                                                     >
-                                                                        <MenuItem value="">Chưa gán</MenuItem>
+                                                                        <MenuItem value="">Chưa gắn</MenuItem>
                                                                         {hotelStaffOptions.map((staff) => (
                                                                             <MenuItem key={staff.value} value={staff.value}>{staff.label}</MenuItem>
                                                                         ))}
@@ -1056,7 +1058,7 @@ export const BoardingCareSchedulePage = () => {
                                                                                 item.staffName ||
                                                                                 (getStaffId(item.staffId)
                                                                                     ? getStaffName(String(getStaffId(item.staffId) || ""), item.staffName)
-                                                                                    : "Chưa gán")
+                                                                                    : "Chưa gắn")
                                                                             )
                                                                         }
                                                                         InputProps={{ readOnly: true }}
@@ -1104,9 +1106,9 @@ export const BoardingCareSchedulePage = () => {
 
                                 {(() => {
                                     const groups = [
-                                        { type: "dog" as const, label: "🐶 Chó", color: "#3b82f6" },
-                                        { type: "cat" as const, label: "🐱 Mèo", color: "#ec4899" },
-                                        { type: "all" as const, label: "🐾 Chung / Khác", color: "#64748b" },
+                                        { type: "dog" as const, label: "Chó", color: "#3b82f6" },
+                                        { type: "cat" as const, label: "Mèo", color: "#ec4899" },
+                                        { type: "all" as const, label: "Chung / Khác", color: "#64748b" },
                                     ];
 
                                     return groups.map((group) => {
@@ -1130,7 +1132,7 @@ export const BoardingCareSchedulePage = () => {
                                                         onClick={() => setExerciseDraft((prev) => [...prev, taoDongVanDong(group.type)])}
                                                         sx={{ color: group.color }}
                                                     >
-                                                        Thêm dòng
+                                                        Thêm Dòng
                                                     </Button>
                                                 </Stack>
 
@@ -1139,7 +1141,7 @@ export const BoardingCareSchedulePage = () => {
                                                         <Box key={`exercise-${idx}`}>
                                                             <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
                                                                 <TextField
-                                                                    label="Giờ"
+                                                                    label="Gi?"
                                                                     type="time"
                                                                     size="small"
                                                                     value={item.time || ""}
@@ -1186,7 +1188,7 @@ export const BoardingCareSchedulePage = () => {
                                                                         })}
                                                                         sx={{ minWidth: 180 }}
                                                                     >
-                                                                        <MenuItem value="">Chưa gán</MenuItem>
+                                                                        <MenuItem value="">Chưa gắn</MenuItem>
                                                                         {hotelStaffOptions.map((staff) => (
                                                                             <MenuItem key={staff.value} value={staff.value}>{staff.label}</MenuItem>
                                                                         ))}
@@ -1200,7 +1202,7 @@ export const BoardingCareSchedulePage = () => {
                                                                                 item.staffName ||
                                                                                 (getStaffId(item.staffId)
                                                                                     ? getStaffName(String(getStaffId(item.staffId) || ""), item.staffName)
-                                                                                    : "Chưa gán")
+                                                                                    : "Chưa gắn")
                                                                             )
                                                                         }
                                                                         InputProps={{ readOnly: true }}
@@ -1277,13 +1279,13 @@ export const BoardingCareSchedulePage = () => {
             >
                 <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2 }}>
                     <Box>
-                        <Typography sx={{ fontWeight: 700 }}>{proofViewer.title || "Gallery minh chứng"}</Typography>
+                        <Typography sx={{ fontWeight: 700 }}>{proofViewer.title || "Gallery minh ch?ng"}</Typography>
                         <Typography sx={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.7)" }}>
                             {proofViewer.items.length > 0 ? `${proofViewer.index + 1}/${proofViewer.items.length}` : "0/0"}
                         </Typography>
                     </Box>
                     <Button onClick={() => setProofViewer((prev) => ({ ...prev, open: false }))} sx={{ color: "#fff" }}>
-                        Đóng
+                        ��ng
                     </Button>
                 </DialogTitle>
                 <DialogContent sx={{ pb: 3 }}>

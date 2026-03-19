@@ -53,9 +53,17 @@ export const CalendarPage = () => {
     const [events, setEvents] = useState<any[]>([]);
 
     // Fetch bookings and settings
-    const { data: bookings = [] } = useBookings({ noLimit: true });
+    const bookingsRes = useBookings({ noLimit: true });
     const { data: settingsData } = useSettingGeneral();
     const { mutate: createBooking } = useCreateBooking();
+
+    const bookings = React.useMemo(() => {
+        const data = (bookingsRes.data as any);
+        if (!data) return [];
+        return Array.isArray(data.recordList)
+            ? data.recordList
+            : (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
+    }, [bookingsRes.data]);
 
     // Convert bookings to calendar events
     useEffect(() => {

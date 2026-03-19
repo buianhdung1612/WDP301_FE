@@ -45,10 +45,11 @@ export const BulkDeleteDialog = ({
     const accounts = useMemo(() => {
         if (!accountsRes.data) return [];
         const data = accountsRes.data;
-        if (Array.isArray(data.recordList)) return data.recordList;
         if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
         if (Array.isArray(data.data)) return data.data;
-        return Array.isArray(data) ? data : [];
+        if (Array.isArray(data)) return data;
+        return [];
     }, [accountsRes.data]);
 
     const { control, handleSubmit, reset } = useForm({

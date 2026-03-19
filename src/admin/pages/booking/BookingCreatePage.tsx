@@ -8,7 +8,6 @@ import {
     TextField,
     Typography,
     Divider,
-    alpha,
     Avatar
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
@@ -43,9 +42,27 @@ export const BookingCreatePage = () => {
     const { user } = useAuthStore();
     const isStaff = user?.roles?.some((role: any) => role.isStaff);
 
-    const { data: services = [] } = useServices();
-    const { data: usersRes } = useUsers({ limit: 1000 });
-    const users = (usersRes as any)?.recordList || (Array.isArray(usersRes) ? usersRes : []);
+    const servicesRes = useServices();
+    const services = useMemo(() => {
+        if (!servicesRes.data) return [];
+        const data = servicesRes.data as any;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [servicesRes.data]);
+
+    const { data: usersResBody } = useUsers({ limit: 1000 });
+    const users = useMemo(() => {
+        if (!usersResBody) return [];
+        const data = usersResBody as any;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [usersResBody]);
     const { mutate: createBooking, isPending } = useCreateBooking();
     const { mutateAsync: suggestAssignment, isPending: isSuggesting } = useSuggestAssignment();
     const [quickCustomerDialogOpen, setQuickCustomerDialogOpen] = useState(false);

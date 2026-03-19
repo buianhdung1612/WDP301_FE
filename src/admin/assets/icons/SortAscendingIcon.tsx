@@ -1,6 +1,6 @@
 import { SvgIcon } from "@mui/material";
 
-export const SortAscendingIcon = (props: any) => (
+export const SortAscendingIcon = ({ sortingOrder, column, ...props }: any) => (
     <SvgIcon
         {...props}
         color="#1C252E"

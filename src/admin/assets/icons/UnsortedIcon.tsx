@@ -1,6 +1,6 @@
 import { SvgIcon } from "@mui/material";
 
-export const UnsortedIcon = (props: any) => (
+export const UnsortedIcon = ({ sortingOrder, column, ...props }: any) => (
     <SvgIcon
         {...props}
         viewBox="0 0 24 24"
