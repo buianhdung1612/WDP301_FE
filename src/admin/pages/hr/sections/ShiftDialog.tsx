@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -33,7 +33,16 @@ export const ShiftDialog = ({
     onSave,
     selectedItem,
 }: ShiftDialogProps) => {
-    const { data: departments = [] } = useDepartments();
+    const departmentsRes = useDepartments();
+    const departments = useMemo(() => {
+        if (!departmentsRes.data) return [];
+        const data = departmentsRes.data;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [departmentsRes.data]);
 
     const { control, handleSubmit, reset } = useForm({
         defaultValues: {

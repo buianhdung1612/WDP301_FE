@@ -1,4 +1,4 @@
-﻿import { ChangeEvent, MouseEvent, SyntheticEvent, useMemo, useState } from "react";
+import { ChangeEvent, MouseEvent, SyntheticEvent, useMemo, useState } from "react";
 import {
     Avatar,
     Box,
@@ -70,25 +70,25 @@ const kichThuocChuongOptions = [
         value: "S",
         label: "Size S (Nhỏ)",
         dimensions: "50 x 35 x 35 cm hoặc 60 x 42 x 50 cm",
-        weightRange: "Chó mèo dưới 8kg",
+        weightRange: "Chỉ dành cho thú cưng dưới 8kg",
     },
     {
         value: "M",
         label: "Size M (Trung)",
         dimensions: "63 x 43 x 53 cm hoặc 74 x 49 x 56 cm",
-        weightRange: "Chó mèo 8-15kg",
+        weightRange: "Chỉ dành cho thú cưng từ 8-15kg",
     },
     {
         value: "L",
         label: "Size L (Lớn)",
         dimensions: "83 x 63 x 63 cm hoặc 96 x 65 x 82 cm",
-        weightRange: "Chó mèo 15-20kg",
+        weightRange: "Chỉ dành cho thú cưng từ 15-20kg",
     },
     {
         value: "XL_XXL",
         label: "Size XL/XXL (Đại)",
         dimensions: "105 x 85 x 100 cm đến 170 x 125 x 130 cm",
-        weightRange: "Chó mèo trên 20kg",
+        weightRange: "Chỉ dành cho thú cưng trên 20kg",
     },
 ];
 
@@ -185,7 +185,7 @@ export const BoardingCageListPage = () => {
     const createMut = useMutation({
         mutationFn: createBoardingCage,
         onSuccess: () => {
-            toast.success("Tạo chuồng thành công");
+            toast.success("T?o chu?ng th�nh c�ng");
             queryClient.invalidateQueries({ queryKey: ["admin-boarding-cages"] });
             setOpen(false);
             setForm(initForm);
@@ -195,7 +195,7 @@ export const BoardingCageListPage = () => {
     const updateMut = useMutation({
         mutationFn: ({ id, payload }: { id: string; payload: any }) => updateBoardingCage(id, payload),
         onSuccess: () => {
-            toast.success("Cập nhật chuồng thành công");
+            toast.success("C?p nh?t chu?ng th�nh c�ng");
             queryClient.invalidateQueries({ queryKey: ["admin-boarding-cages"] });
             setOpen(false);
             setEditing(null);
@@ -206,7 +206,7 @@ export const BoardingCageListPage = () => {
     const deleteMut = useMutation({
         mutationFn: deleteBoardingCage,
         onSuccess: () => {
-            toast.success("Xóa chuồng thành công");
+            toast.success("X�a chu?ng th�nh c�ng");
             queryClient.invalidateQueries({ queryKey: ["admin-boarding-cages"] });
         },
     });
@@ -235,7 +235,7 @@ export const BoardingCageListPage = () => {
     };
 
     const handleSave = () => {
-        if (!form.cageCode) return toast.error("Vui lòng nhập mã chuồng");
+        if (!form.cageCode) return toast.error("Vui l�ng nh?p m� chu?ng");
         const payload = {
             ...form,
             size: normalizeCageSize(form.size),
@@ -403,7 +403,7 @@ export const BoardingCageListPage = () => {
                 </Tabs>
 
                 <Box sx={{ p: "20px", display: "flex", alignItems: "center", gap: 2, borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                    <Search placeholder="Tìm theo mã chuồng hoặc mô tả..." value={searchQuery} onChange={handleSearchChange} maxWidth="24rem" />
+                    <Search placeholder="Tìm theo mã chuồng hoặc mã t..." value={searchQuery} onChange={handleSearchChange} maxWidth="24rem" />
                 </Box>
 
                 <TableContainer sx={{ position: "relative", overflow: "unset" }}>
@@ -482,7 +482,7 @@ export const BoardingCageListPage = () => {
                                                 </TableCell>
                                                 <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
                                                     <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
-                                                        {Number(row.dailyPrice || 0).toLocaleString("vi-VN")}đ
+                                                        {Number(row.dailyPrice || 0).toLocaleString("vi-VN")}d
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
@@ -599,11 +599,11 @@ export const BoardingCageListPage = () => {
                                 Cân nặng phù hợp: {selectedSizeConfig.weightRange}
                             </Typography>
                             <Typography sx={{ fontSize: 12, color: "#9a3412", mt: 0.5 }}>
-                                Lưu ý: chiều dài chuồng nên lớn hơn chiều dài thân thú cưng 10-15cm để bé thoải mái.
+                                Lưu ý: chiều dài chuồng nên lớn hơn chiều dài thân thú cưng 10-15cm để thú thoải mái.
                             </Typography>
                         </Box>
                         <TextField type="number" label="Giá/ngày" value={form.dailyPrice} onChange={(e) => setForm({ ...form, dailyPrice: Number(e.target.value) || 0 })} />
-                        <TextField type="number" label="Tải trọng tối đa (kg)" value={form.maxWeightCapacity} onChange={(e) => setForm({ ...form, maxWeightCapacity: Number(e.target.value) || 0 })} />
+                        <TextField type="number" label="Tối đa (kg)" value={form.maxWeightCapacity} onChange={(e) => setForm({ ...form, maxWeightCapacity: Number(e.target.value) || 0 })} />
                         <TextField select label="Trạng thái" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
                             {trangThaiChuongOptions.map((item) => (
                                 <MenuItem key={item.value} value={item.value}>{item.label}</MenuItem>
@@ -616,8 +616,8 @@ export const BoardingCageListPage = () => {
                             rows={3}
                             value={form.galleryText}
                             onChange={(e) => setForm({ ...form, galleryText: e.target.value })}
-                            placeholder="Mỗi dòng 1 URL ảnh chuồng chó/mèo hoặc ngăn cách bằng dấu phẩy"
-                            helperText="Ảnh trong bộ này sẽ hiển thị ở trang chi tiết chuồng."
+                            placeholder="Mỗi dòng 1 URL ảnh chuồng cho mỗi hoặc ngăn cách bằng dấu phẩy"
+                            helperText="Ảnh trong bộ này sẽ hiện thị ở trang chi tiết chuồng."
                         />
                         <TextField label="Mô tả" multiline rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
                         <TextField

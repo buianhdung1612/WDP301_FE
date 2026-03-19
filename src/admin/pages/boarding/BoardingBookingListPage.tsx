@@ -1,4 +1,4 @@
-﻿
+
 import { ChangeEvent, Fragment, MouseEvent, SyntheticEvent, useMemo, useState } from "react";
 import {
     Avatar,
@@ -53,17 +53,17 @@ const TabBadge = styled("span")(() => ({
 const boardingStatusOptions = [
     { value: "pending", label: "Chờ xử lý" },
     { value: "held", label: "Đang giữ chỗ" },
-    { value: "confirmed", label: "Đã xác nhận" },
-    { value: "checked-in", label: "Đã nhận chuồng" },
-    { value: "checked-out", label: "Đã trả chuồng" },
-    { value: "cancelled", label: "Đã hủy" },
+    { value: "confirmed", label: "Xác nhận" },
+    { value: "checked-in", label: "Nhận chuồng" },
+    { value: "checked-out", label: "Trả chuồng" },
+    { value: "cancelled", label: "Hủy" },
 ];
 
 const paymentStatusOptions = [
     { value: "unpaid", label: "Chưa thanh toán" },
-    { value: "partial", label: "Đã cọc 20%" },
-    { value: "paid", label: "Đã thanh toán" },
-    { value: "refunded", label: "Đã hoàn tiền" },
+    { value: "partial", label: "Đặt cọc 20%" },
+    { value: "paid", label: "Thanh toán" },
+    { value: "refunded", label: "Hoàn tiền" },
 ];
 
 const formatCurrency = (value: number) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value || 0);
@@ -74,8 +74,8 @@ const getPetSlotItems = (row: any) => {
 
     return Array.from({ length: slotCount }).map((_, index) => ({
         key: String(pets[index]?._id || pets[index]?.id || `${row?._id || "booking"}-${index}`),
-        petName: String(pets[index]?.name || `Thú cưng ${index + 1}`),
-        cageLabel: [row?.cageId?.cageCode || "-", slotCount > 1 ? `Phòng ${index + 1}` : ""].filter(Boolean).join(" • "),
+        petName: String(pets[index]?.name || `Th� cung ${index + 1}`),
+        cageLabel: [row?.cageId?.cageCode || "-", slotCount > 1 ? `Ph�ng ${index + 1}` : ""].filter(Boolean).join(" � "),
     }));
 };
 
@@ -103,13 +103,21 @@ export const BoardingBookingListPage = () => {
         queryFn: () => getBoardingBookings(filters),
     });
 
-    const bookings = useMemo(() => (Array.isArray(res?.data?.recordList) ? res.data.recordList : []), [res]);
+    const bookings = useMemo(() => {
+        if (!res) return [];
+        const data = res as any;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [res]);
     const pagination = res?.data?.pagination || { totalRecords: 0 };
 
     const updateStatusMut = useMutation({
         mutationFn: ({ id, status }: { id: string; status: string }) => updateBoardingBookingStatus(id, status),
         onSuccess: () => {
-            toast.success("Đã cập nhật trạng thái lưu trú");
+            toast.success("Cập nhật trạng thái lưu trú thành công");
             queryClient.invalidateQueries({ queryKey: ["admin-boarding-bookings"] });
         },
         onError: (error: any) => {
@@ -120,7 +128,7 @@ export const BoardingBookingListPage = () => {
     const updatePaymentMut = useMutation({
         mutationFn: ({ id, status }: { id: string; status: string }) => updateBoardingPaymentStatus(id, status),
         onSuccess: () => {
-            toast.success("Đã cập nhật trạng thái thanh toán");
+            toast.success("Cập nhật trạng thái thanh toán thành công");
             queryClient.invalidateQueries({ queryKey: ["admin-boarding-bookings"] });
         },
         onError: (error: any) => {
@@ -196,11 +204,11 @@ export const BoardingBookingListPage = () => {
         <Box sx={{ maxWidth: "1200px", mx: "auto", p: "calc(3 * var(--spacing))" }}>
             <Box sx={{ mb: 5, display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
                 <Box>
-                    <Title title="Quản lý Đơn khách sạn" />
+                    <Title title="Quản lý đơn khách sạn" />
                     <Breadcrumb
                         items={[
                             { label: "Bảng điều khiển", to: `/${prefixAdmin}` },
-                            { label: "Quản lý Đơn khách sạn" },
+                            { label: "Quản lý đơn khách sạn" },
                         ]}
                     />
                 </Box>
@@ -520,7 +528,7 @@ export const BoardingBookingListPage = () => {
                                                                 }}
                                                             >
                                                                 <Icon icon="solar:calendar-mark-bold" width={18} style={{ marginRight: 8 }} />
-                                                                Lịch chăm sóc
+                                                                L?ch cham s�c
                                                             </MenuItem>
                                                         </Menu>
                                                     </TableCell>
@@ -579,10 +587,10 @@ export const BoardingBookingListPage = () => {
                                                                         </Box>
                                                                         <Box sx={{ textAlign: "right", minWidth: 132 }}>
                                                                             <Typography sx={{ fontWeight: 600, fontSize: "0.8125rem", color: "var(--palette-text-primary)" }}>
-                                                                                {formatCurrency(Number(row.pricePerDay || 0))}/đêm
+                                                                                {formatCurrency(Number(row.pricePerDay || 0))}/d�m
                                                                             </Typography>
                                                                             <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.25 }}>
-                                                                                {Number(row.numberOfDays || 0)} đêm
+                                                                                {Number(row.numberOfDays || 0)} d�m
                                                                             </Typography>
                                                                         </Box>
                                                                     </Stack>

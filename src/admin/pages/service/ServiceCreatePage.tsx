@@ -2,7 +2,7 @@ import { Box, Stack, TextField, ThemeProvider, useTheme, Button, MenuItem, FormC
 import { Breadcrumb } from "../../components/ui/Breadcrumb"
 import { Title } from "../../components/ui/Title"
 import { Tiptap } from "../../components/layouts/titap/Tiptap"
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useState, useMemo, type Dispatch, type SetStateAction } from "react";
 import { CollapsibleCard } from "../../components/ui/CollapsibleCard";
 import { useCreateService } from "./hooks/useService";
 import { useNestedServiceCategories } from "../service-category/hooks/useServiceCategory";
@@ -38,7 +38,16 @@ export const ServiceCreatePage = () => {
     const localTheme = getServiceTheme(outerTheme);
 
     const { data: categories = [] } = useNestedServiceCategories();
-    const { data: departments = [] } = useDepartments();
+    const departmentsRes = useDepartments();
+    const departments = useMemo(() => {
+        if (!departmentsRes.data) return [];
+        const data = departmentsRes.data;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [departmentsRes.data]);
     const { mutate: create, isPending } = useCreateService();
 
     const {

@@ -118,3 +118,11 @@ export const getBoardingBookingDetail = async (id: string) => {
         throw error;
     }
 };
+export const checkBoardingPaymentStatus = async (id: string) => {
+    try {
+        const response = await apiApp.get(`/api/v1/client/boarding/boarding-bookings/${id}/check-payment`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

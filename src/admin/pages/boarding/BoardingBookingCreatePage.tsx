@@ -78,12 +78,24 @@ export const BoardingBookingCreatePage = () => {
 
     const { data: usersRes } = useUsers({ limit: 1000 });
     const users = useMemo(() => {
-        return (usersRes as any)?.recordList || (Array.isArray(usersRes?.data) ? usersRes.data : (Array.isArray(usersRes) ? usersRes : []));
+        if (!usersRes) return [];
+        const res = usersRes as any;
+        if (Array.isArray(res.data?.recordList)) return res.data.recordList;
+        if (Array.isArray(res.recordList)) return res.recordList;
+        if (Array.isArray(res.data)) return res.data;
+        if (Array.isArray(res)) return res;
+        return [];
     }, [usersRes]);
 
     const { data: petsRes } = usePets({ userId: formData.userId, limit: 1000 });
     const pets = useMemo(() => {
-        return (petsRes as any)?.recordList || (Array.isArray(petsRes?.data) ? petsRes.data : (Array.isArray(petsRes) ? petsRes : []));
+        if (!petsRes) return [];
+        const res = petsRes as any;
+        if (Array.isArray(res.data?.recordList)) return res.data.recordList;
+        if (Array.isArray(res.recordList)) return res.recordList;
+        if (Array.isArray(res.data)) return res.data;
+        if (Array.isArray(res)) return res;
+        return [];
     }, [petsRes]);
 
     const { data: cageRes } = useQuery({
