@@ -102,6 +102,12 @@ export const Sidebar = () => {
               </Link>
             </li>
             <li>
+              <Link to="/dashboard/transactions" className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/transactions" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
+                <AlignJustify className="w-[20px] h-[20px]" />
+                Lịch sử giao dịch
+              </Link>
+            </li>
+            <li>
               <Link to="/dashboard/pet-cages" className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/pet-cages") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
                 <ShoppingBag className="w-[20px] h-[20px]" />
                 Chuồng thú cưng

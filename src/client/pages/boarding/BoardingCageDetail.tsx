@@ -1,9 +1,11 @@
 ﻿import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Bath, BedDouble, CalendarDays, Check, ChevronLeft, ChevronRight, ImageIcon, PawPrint, ShieldCheck, Sparkles, Star, Weight } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAuthStore } from "../../../stores/useAuthStore";
+import { getBoardingBookingList } from "../../api/dashboard.api";
 import { FooterSub } from "../../components/layouts/FooterSub";
 import { useAvailableCages, useBoardingCageDetail, useBoardingCageReviews, useCreateBoardingCageReview } from "../../hooks/useBoarding";
 import { useMyPets } from "../../hooks/usePet";
@@ -13,10 +15,10 @@ const SIZE_LABELS: Record<string, string> = {
   M: "M (8-15kg)",
   L: "L (15-20kg)",
   XL_XXL: "XL/XXL (trên 20kg)",
-  C: "S (dữ liệu cũ)",
-  B: "M (dữ liệu cũ)",
-  A: "L (dữ liệu cũ)",
-  XL: "XL/XXL (dữ liệu cũ)",
+  C: "S",
+  B: "M",
+  A: "L",
+  XL: "XL/XXL",
 };
 
 const STATUS_META: Record<string, { label: string; className: string }> = {
@@ -45,6 +47,34 @@ const HOTEL_RULES = [
   "Thú cưng cần có lịch tiêm phòng cơ bản và không có dấu hiệu bệnh truyền nhiễm.",
   "Nhân viên sẽ liên hệ nếu cần điều chỉnh khẩu phần hoặc lịch vận động theo tình trạng thực tế.",
 ];
+
+const normalizeId = (value: any) => String(value || "").trim();
+
+const isBookingActiveForPetConflict = (booking: any) => {
+  const status = String(booking?.boardingStatus || "").trim();
+  if (status === "confirmed" || status === "checked-in") return true;
+  if (status === "held") {
+    const holdExpiresAt = dayjs(booking?.holdExpiresAt);
+    return holdExpiresAt.isValid() && holdExpiresAt.isAfter(dayjs());
+  }
+  return false;
+};
+
+const isBookingOverlappingRange = (booking: any, checkInDate: string, checkOutDate: string) => {
+  const start = dayjs(checkInDate);
+  const end = dayjs(checkOutDate);
+  const bookingCheckIn = dayjs(booking?.checkInDate);
+  const bookingCheckOut = dayjs(booking?.checkOutDate);
+  if (!start.isValid() || !end.isValid() || !bookingCheckIn.isValid() || !bookingCheckOut.isValid()) return false;
+  return bookingCheckIn.isBefore(end) && bookingCheckOut.isAfter(start);
+};
+
+const formatBookingRange = (booking: any) => {
+  const start = dayjs(booking?.checkInDate);
+  const end = dayjs(booking?.checkOutDate);
+  if (!start.isValid() || !end.isValid()) return "trùng ngày đã chọn";
+  return `${start.format("DD/MM")} - ${end.format("DD/MM")}`;
+};
 
 const renderStars = (rating: number, sizeClass = "h-[14px] w-[14px]") =>
   Array.from({ length: 5 }).map((_, index) => (
@@ -82,6 +112,17 @@ export const BoardingCageDetailPage = () => {
   const { data: reviewData } = useBoardingCageReviews(id);
   const createReviewMutation = useCreateBoardingCageReview(id);
   const { data: myPets = [] } = useMyPets(!!user);
+  const { data: myBoardingBookings = [] } = useQuery({
+    queryKey: ["client-boarding-bookings"],
+    queryFn: async () => {
+      const response = await getBoardingBookingList();
+      if (Array.isArray(response)) return response;
+      if (Array.isArray((response as any)?.data)) return (response as any).data;
+      return [];
+    },
+    enabled: !!user,
+    staleTime: 60 * 1000,
+  });
 
   const [selectedImage, setSelectedImage] = useState("");
   const [checkInDate, setCheckInDate] = useState(dayjs().format("YYYY-MM-DD"));
@@ -167,6 +208,53 @@ export const BoardingCageDetailPage = () => {
     [reviewItems, totalReviews]
   );
 
+
+  const conflictingPetBookings = useMemo(() => {
+    const map = new Map<string, any>();
+    (Array.isArray(myBoardingBookings) ? myBoardingBookings : []).forEach((booking: any) => {
+      if (!isBookingActiveForPetConflict(booking)) return;
+      if (!isBookingOverlappingRange(booking, checkInDate, checkOutDate)) return;
+      const petIds = Array.isArray(booking?.petIds) ? booking.petIds : [];
+      petIds.forEach((petId: any) => {
+        const normalizedPetId = normalizeId(petId);
+        if (normalizedPetId && !map.has(normalizedPetId)) map.set(normalizedPetId, booking);
+      });
+    });
+    return map;
+  }, [myBoardingBookings, checkInDate, checkOutDate]);
+
+  const conflictingPets = useMemo(
+    () => (Array.isArray(myPets) ? myPets : []).filter((pet: any) => conflictingPetBookings.has(normalizeId(pet?._id))),
+    [myPets, conflictingPetBookings]
+  );
+
+  const bookedPetsByDate = useMemo(() => {
+    const petNameMap = new Map<string, string>((Array.isArray(myPets) ? myPets : []).map((pet: any) => [normalizeId(pet?._id), String(pet?.name || "Thú cưng")]));
+    const map = new Map<string, string[]>();
+
+    (Array.isArray(myBoardingBookings) ? myBoardingBookings : []).forEach((booking: any) => {
+      if (!isBookingActiveForPetConflict(booking)) return;
+      const bookingCheckIn = dayjs(booking?.checkInDate).startOf("day");
+      const bookingCheckOut = dayjs(booking?.checkOutDate).startOf("day");
+      if (!bookingCheckIn.isValid() || !bookingCheckOut.isValid() || !bookingCheckOut.isAfter(bookingCheckIn, "day")) return;
+
+      const petNames = (Array.isArray(booking?.petIds) ? booking.petIds : [])
+        .map((petId: any) => petNameMap.get(normalizeId(petId)))
+        .filter(Boolean) as string[];
+      if (petNames.length === 0) return;
+
+      let cursor = bookingCheckIn.clone();
+      while (cursor.isBefore(bookingCheckOut, "day")) {
+        const key = cursor.format("YYYY-MM-DD");
+        const merged = new Set([...(map.get(key) || []), ...petNames]);
+        map.set(key, Array.from(merged));
+        cursor = cursor.add(1, "day");
+      }
+    });
+
+    return map;
+  }, [myBoardingBookings, myPets]);
+
   const recommendedCages = useMemo(() => {
     const currentId = String((cage as any)?._id || "");
     return (Array.isArray(availableCages) ? availableCages : [])
@@ -187,6 +275,10 @@ export const BoardingCageDetailPage = () => {
       return next;
     });
   }, [myPets, quantity]);
+
+  useEffect(() => {
+    setSelectedPetIds((prev) => (Array.isArray(prev) ? prev : []).map((petId) => (petId && conflictingPetBookings.has(normalizeId(petId)) ? "" : petId)));
+  }, [conflictingPetBookings]);
 
   useEffect(() => {
     if (!dayjs(checkOutDate).isAfter(dayjs(checkInDate), "day")) {
@@ -243,7 +335,14 @@ export const BoardingCageDetailPage = () => {
     if (quantity > remainingRooms) return void toast.error(`Chỉ còn ${remainingRooms}/${totalRooms} phòng trong khoảng ngày đã chọn.`);
     const chosenPetIds = (selectedPetIds || []).map((petId) => String(petId || "").trim()).filter(Boolean);
     if (chosenPetIds.length !== quantity) return void toast.error(`Vui lòng chọn đủ ${quantity} thú cưng tương ứng ${quantity} phòng.`);
-    if (new Set(chosenPetIds).size !== chosenPetIds.length) return void toast.error("Mỗi phòng phải gắn một thú cưng khác nhau.");
+    if (new Set(chosenPetIds).size !== chosenPetIds.length) return void toast.error("Mỗi phòng phải gán một thú cưng khác nhau.");
+    const conflictedChosenPets = chosenPetIds
+      .map((petId) => (Array.isArray(myPets) ? myPets : []).find((pet: any) => normalizeId(pet?._id) === petId))
+      .filter((pet: any) => pet && conflictingPetBookings.has(normalizeId(pet?._id)));
+    if (conflictedChosenPets.length > 0) {
+      const names = conflictedChosenPets.map((pet: any) => pet.name).join(", ");
+      return void toast.error(`${names} đã có lịch khách sạn trùng ngày. Vui lòng chọn bé khác hoặc đổi ngày.`);
+    }
     if (!(cage as any)?._id) return void toast.error("Không tìm thấy thông tin chuồng.");
     if (totalDays <= 0) return void toast.error("Ngày trả phải sau ngày nhận.");
 
@@ -251,7 +350,7 @@ export const BoardingCageDetailPage = () => {
       state: {
         draft: {
           cageId: (cage as any)._id,
-          cageCode: (cage as any).cageCode || "Chuong",
+          cageCode: (cage as any).cageCode || "Chuồng",
           cageType: String((cage as any).type || "standard").toUpperCase(),
           cageSize: SIZE_LABELS[(cage as any).size] || (cage as any).size,
           dailyPrice: Number((cage as any).dailyPrice || 0),
@@ -310,10 +409,10 @@ export const BoardingCageDetailPage = () => {
         <div className="app-container py-[28px]">
           <div className="flex flex-wrap items-center gap-[8px] text-[13px] text-[#7d8794]">
             <Link to="/" className="hover:text-client-secondary transition-default">Trang chủ</Link>
-            <span>›</span>
+            <span className="text-[#a1a9b4] mx-1">/</span>
             <Link to="/hotels" className="hover:text-client-secondary transition-default">Danh sách phòng</Link>
-            <span>›</span>
-            <span className="font-[700] text-client-secondary">{(cage as any).cageCode || "Chuong"} - {String((cage as any).type || "standard").toUpperCase()}</span>
+            <span className="text-[#a1a9b4] mx-1">/</span>
+            <span className="font-[700] text-client-secondary">{(cage as any).cageCode || "Chuồng"} - {String((cage as any).type || "standard").toUpperCase()}</span>
           </div>
 
           <div className="mt-[18px] grid grid-cols-[minmax(0,1.3fr)_380px] gap-[24px] xl:grid-cols-1">
@@ -342,13 +441,13 @@ export const BoardingCageDetailPage = () => {
 
                 <div className="mt-[16px] flex items-end justify-between gap-[18px] md:flex-col md:items-start">
                   <div>
-                    <h1 className="text-[48px] leading-[1] font-secondary text-client-secondary md:text-[38px]">{(cage as any).cageCode || "Chuong"} - {String((cage as any).type || "standard").toUpperCase()}</h1>
+                    <h1 className="text-[48px] leading-[1] font-secondary text-client-secondary md:text-[38px]">{(cage as any).cageCode || "Chuồng"} - {String((cage as any).type || "standard").toUpperCase()}</h1>
                     <p className="mt-[8px] text-[15px] leading-[1.8] text-[#636f7c]">Không gian lưu trú được tối ưu cho thú cưng cần môi trường sạch, yên tĩnh và dễ thích nghi trong thời gian lưu trú.</p>
                   </div>
                   <div className="text-right md:text-left">
-                    <div className="text-[14px] text-[#7a8592]">Giá theo đêm</div>
+                    <div className="text-[14px] text-[#7a8592]">Giá theo ngày</div>
                     <div className="text-[52px] leading-[1] font-[900] tracking-[-0.04em] text-client-primary md:text-[42px]">{Number((cage as any).dailyPrice || 0).toLocaleString()}đ</div>
-                    <div className="mt-[4px] text-[14px] text-[#7a8592]">/ đêm</div>
+                    <div className="mt-[4px] text-[14px] text-[#7a8592]">/ ngày</div>
                   </div>
                 </div>
 
@@ -359,7 +458,7 @@ export const BoardingCageDetailPage = () => {
                     <p className="mt-[14px] text-[15px] leading-[1.95] text-[#53606e]">Chúng tôi cam kết vệ sinh phòng mỗi ngày bằng dung dịch thân thiện với thú cưng, đồng thời cập nhật tình trạng ăn uống, vận động và nghỉ ngơi theo lịch chăm sóc.</p>
                   </div>
                   <div>
-                    <h2 className="text-[28px] font-[800] text-client-secondary">Tiện nghi có sẵn</h2>
+                    <h2 className="text-[28px] font-[800] text-client-secondary">Tiện nghi cơ sở</h2>
                     <div className="mt-[14px] grid grid-cols-2 gap-[12px] md:grid-cols-1">
                       {amenities.map((item: string, idx: number) => (
                         <div key={`${item}-${idx}`} className="flex items-center gap-[10px] rounded-[18px] border border-[#f0e4dc] bg-[#fffaf7] px-[14px] py-[13px] text-[14px] font-[700] text-[#56616d]">
@@ -403,17 +502,38 @@ export const BoardingCageDetailPage = () => {
                       const isCheckOut = date.isSame(dayjs(checkOutDate), "day");
                       const isInSelectedRange = date.isAfter(dayjs(checkInDate), "day") && date.isBefore(dayjs(checkOutDate), "day");
                       const dayPrice = Number((cage as any).dailyPrice || 0) + (date.day() === 0 || date.day() === 6 ? WEEKEND_SURCHARGE : 0);
+                      const bookedPetNames = bookedPetsByDate.get(date.format("YYYY-MM-DD")) || [];
+                      const hasBookedPets = bookedPetNames.length > 0;
+                      const badgeText = bookedPetNames.length === 1 ? bookedPetNames[0] : `${bookedPetNames.length} bé đã có lịch`;
                       let cellBg = "bg-white";
                       if (isInSelectedRange) cellBg = "bg-[#ffeaf3]";
                       if (isToday) cellBg = "bg-[#fff5eb]";
                       if (isCheckIn || isCheckOut) cellBg = "bg-client-primary";
-                      return <button key={`${date.format("YYYY-MM-DD")}-${idx}`} type="button" disabled={isPast} onClick={() => handlePickCalendarDate(date)} className={`min-h-[92px] border-b border-r border-[#f3ece4] p-[10px] text-left transition-colors ${idx % 7 === 6 ? "border-r-0" : ""} ${cellBg} ${isPast ? "cursor-not-allowed opacity-45" : "hover:bg-[#fff0f6]"}`}><div className={`text-[15px] font-[800] ${isCheckIn || isCheckOut ? "text-white" : isCurrentMonth ? "text-[#495466]" : "text-[#c0c6cf]"}`}>{date.date()}</div><div className={`mt-[14px] text-[12px] ${isCheckIn || isCheckOut ? "text-white/90" : isCurrentMonth ? "text-[#6a7480]" : "text-[#d1d6dc]"}`}>{dayPrice.toLocaleString()}đ</div></button>;
+
+                      return (
+                        <button
+                          key={`${date.format("YYYY-MM-DD")}-${idx}`}
+                          type="button"
+                          disabled={isPast}
+                          title={hasBookedPets ? `Bé của bạn đã có booking ngày này: ${bookedPetNames.join(", ")}` : ""}
+                          onClick={() => handlePickCalendarDate(date)}
+                          className={`min-h-[104px] border-b border-r border-[#f3ece4] p-[10px] text-left transition-colors ${idx % 7 === 6 ? "border-r-0" : ""} ${cellBg} ${isPast ? "cursor-not-allowed opacity-45" : "hover:bg-[#fff0f6]"}`}
+                        >
+                          <div className={`text-[15px] font-[800] ${isCheckIn || isCheckOut ? "text-white" : isCurrentMonth ? "text-[#495466]" : "text-[#c0c6cf]"}`}>{date.date()}</div>
+                          <div className={`mt-[14px] text-[12px] ${isCheckIn || isCheckOut ? "text-white/90" : isCurrentMonth ? "text-[#6a7480]" : "text-[#d1d6dc]"}`}>{dayPrice.toLocaleString()}đ</div>
+                          {hasBookedPets ? (
+                            <div className={`mt-[8px] inline-flex max-w-full items-center rounded-full px-[8px] py-[3px] text-[10px] font-[800] ${isCheckIn || isCheckOut ? "bg-white/20 text-white" : "bg-[#eef2ff] text-[#4f46e5]"}`}>
+                              <span className="truncate">{badgeText}</span>
+                            </div>
+                          ) : null}
+                        </button>
+                      );
                     })}
                   </div>
                   <div className="inline-flex flex-wrap items-center gap-[14px] px-[16px] py-[12px] text-[12px] text-[#64707d]">
                     <span className="inline-flex items-center gap-[6px]"><span className="h-[14px] w-[14px] border border-[#e9d5c2] bg-[#fff5eb]" /> Hôm nay</span>
                     <span className="inline-flex items-center gap-[6px]"><span className="h-[14px] w-[14px] border border-[#e5e7eb] bg-white" /> Còn trống</span>
-                    <span className="inline-flex items-center gap-[6px]"><span className="h-[14px] w-[14px] border border-[#f3c8da] bg-[#ffeaf3]" /> Khoảng đã chọn</span>
+                    <span className="inline-flex items-center gap-[6px]"><span className="h-[14px] w-[14px] border border-[#f3c8da] bg-[#ffeaf3]" /> Khoảng trống</span>
                     <span className="inline-flex items-center gap-[6px]"><span className="h-[14px] w-[14px] border border-client-primary bg-client-primary" /> Nhận/Trả phòng</span>
                   </div>
                 </div>
@@ -579,12 +699,12 @@ export const BoardingCageDetailPage = () => {
                             </h3>
                             <div className="mt-[10px] flex items-center gap-[8px] text-[13px] text-[#7a8592]">
                               <span>{SIZE_LABELS[String(item?.size || "")] || String(item?.size || "Chưa cập nhật")}</span>
-                              <span>•</span>
+
                               <span>{Math.max(0, Number(item?.remainingRooms ?? ROOM_CAPACITY_DEFAULT))}/{Math.max(1, Number(item?.totalRooms || ROOM_CAPACITY_DEFAULT))} phòng</span>
                             </div>
                             <div className="mt-[12px] text-[28px] font-[900] tracking-[-0.03em] text-client-primary">
                               {Number(item?.dailyPrice || 0).toLocaleString()}đ
-                              <span className="ml-[4px] text-[14px] font-[600] text-[#7a8592]">/ đêm</span>
+                              <span className="ml-[4px] text-[14px] font-[600] text-[#7a8592]">/ ngày</span>
                             </div>
                             <Link
                               to={`/hotels/${item?._id}`}
@@ -618,15 +738,84 @@ export const BoardingCageDetailPage = () => {
                   </div>
                   <div>
                     <p className="mb-[6px] text-[11px] font-[800] uppercase tracking-[0.12em] text-[#a1a9b4]">Thông tin bé</p>
-                    <div className="space-y-[8px]">{myPets.length === 0 ? <div className="flex h-[48px] items-center rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] text-[#6b7280]">Chưa có thú cưng trong tài khoản</div> : Array.from({ length: quantity }).map((_, idx) => { const currentPetId = selectedPetIds[idx] || ""; const usedByOtherSlots = selectedPetIds.filter((_, selectedIdx) => selectedIdx !== idx).map((selectedId) => String(selectedId || "")).filter(Boolean); return <select key={`pet-slot-${idx}`} value={currentPetId} onChange={(e) => setPetAtIndex(idx, e.target.value)} className="h-[48px] w-full rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] font-[700] text-client-secondary outline-none focus:border-client-primary"><option value="">Chọn thú cưng cho phòng {idx + 1}</option>{myPets.map((pet: any) => { const petId = String(pet._id); return <option key={petId} value={petId} disabled={usedByOtherSlots.includes(petId)}>{pet.name} {pet.breed ? `(${pet.breed})` : ""}</option>; })}</select>; })}</div>
+                    <div className="space-y-[8px]">{myPets.length === 0 ? <div className="flex h-[48px] items-center rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] text-[#6b7280]">Chưa có thú cưng trong tài khoản</div> : Array.from({ length: quantity }).map((_, idx) => { const currentPetId = selectedPetIds[idx] || ""; const usedByOtherSlots = selectedPetIds.filter((_, selectedIdx) => selectedIdx !== idx).map((selectedId) => String(selectedId || "")).filter(Boolean); return <select key={`pet-slot-${idx}`} value={currentPetId} onChange={(e) => setPetAtIndex(idx, e.target.value)} className="h-[48px] w-full rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] font-[700] text-client-secondary outline-none focus:border-client-primary"><option value="">Chọn thú cưng cho phòng {idx + 1}</option>{myPets.map((pet: any) => { const petId = String(pet._id); return <option key={petId} value={petId} disabled={usedByOtherSlots.includes(petId) || conflictingPetBookings.has(petId)}>{pet.name} {pet.breed ? `(${pet.breed})` : ""}{conflictingPetBookings.has(petId) ? ` - Đã đặt ${formatBookingRange(conflictingPetBookings.get(petId))}` : ""}</option>; })}</select>; })}</div>{conflictingPets.length > 0 ? <div className="mt-[8px] rounded-[14px] border border-[#fde1cf] bg-[#fff7f2] px-[12px] py-[10px] text-[12px] leading-[1.7] text-[#9a5a28]"><span className="font-[800]">Các bé đã có lịch khách sạn trùng ngày:</span> {conflictingPets.map((pet: any) => `${pet.name}${pet.breed ? ` (${pet.breed})` : ""} - ${formatBookingRange(conflictingPetBookings.get(normalizeId(pet?._id)))}`).join("; ")}</div> : null}</div>
+                  <div className="rounded-[18px] border border-[#d6eee2] bg-[#edf8f1] px-[14px] py-[12px]">
+                    <p className="text-[11px] font-[800] uppercase tracking-[0.12em] text-[#4a7d62]">Thông tin người gửi</p>
+                    <div className="mt-[8px] space-y-[2px]">
+                      <p className="text-[14px] font-[800] text-client-secondary truncate" title={fullName}>{fullName || "Chưa cập nhật"}</p>
+                      <p className="text-[13px] text-[#51606d]">{phone || "Chưa cập nhật số điện thoại"}</p>
+                      {email ? <p className="text-[13px] text-[#51606d] break-all leading-relaxed">{email}</p> : null}
+                    </div>
                   </div>
-                  <div className="rounded-[18px] border border-[#d6eee2] bg-[#edf8f1] px-[14px] py-[12px]"><p className="text-[11px] font-[800] uppercase tracking-[0.12em] text-[#4a7d62]">Thông tin người gửi</p><div className="mt-[8px] space-y-[2px]"><p className="text-[14px] font-[800] text-client-secondary">{fullName || "Chưa cập nhật"}</p><p className="text-[13px] text-[#51606d]">{phone || "Chưa cập nhật số điện thoại"}</p>{email ? <p className="text-[13px] text-[#51606d]">{email}</p> : null}</div></div>
-                  <div className="space-y-[8px]"><input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Họ và tên" className="h-[46px] w-full rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] outline-none focus:border-client-primary" /><input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Số điện thoại" className="h-[46px] w-full rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] outline-none focus:border-client-primary" /><input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="h-[46px] w-full rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] outline-none focus:border-client-primary" /><textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} className="w-full resize-none rounded-[16px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] py-[10px] text-[13px] outline-none focus:border-client-primary" placeholder="Lưu ý khẩu phần, tính cách, thuốc hoặc các yêu cầu đặc biệt." /></div>
-                  <div className="rounded-[18px] border border-[#eee2d7] bg-[#fffaf7] px-[14px] py-[12px]"><div className="flex items-center justify-between text-[14px] text-[#596372]"><span>Phòng {(cage as any).cageCode} ({Math.max(totalDays, 1)} đêm)</span><span className="font-[800] text-client-secondary">{estimatedTotal.toLocaleString()}đ</span></div><div className="mt-[8px] flex items-center justify-between text-[14px] text-[#596372]"><span>Số lượng phòng</span><span className="font-[800] text-client-secondary">{quantity}</span></div><div className="mt-[8px] flex items-center justify-between border-t border-[#efe3d8] pt-[8px]"><span className="text-[16px] font-[800] text-client-secondary">Tổng cộng</span><span className="text-[30px] font-[900] tracking-[-0.03em] text-client-primary">{estimatedTotal.toLocaleString()}đ</span></div></div>
-                  <button type="button" onClick={handleBookNow} disabled={isSoldOut} className="h-[56px] w-full rounded-[18px] bg-client-primary text-[18px] font-[800] text-white shadow-[0_18px_34px_rgba(237,104,34,0.25)] transition-default hover:bg-client-secondary disabled:cursor-not-allowed disabled:bg-[#d1d5db] disabled:text-[#6b7280]">{isSoldOut ? "HẾT PHÒNG" : "ĐẶT PHÒNG NGAY"}</button>
+
+                  <div className="rounded-[22px] border border-[#efe2d8] bg-[#fffaf7] p-[16px] space-y-[12px]">
+                    <div className="flex items-center gap-[8px] border-b border-[#f1e6dc] pb-[8px]">
+                      <Sparkles className="h-[16px] w-[16px] text-client-primary" />
+                      <h4 className="text-[14px] font-[800] text-client-secondary uppercase tracking-wider">Chế độ chăm sóc dự kiến</h4>
+                    </div>
+
+                    <div className="space-y-[10px]">
+                      <div>
+                        <p className="text-[11px] font-[800] text-client-primary flex items-center gap-1 mb-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-client-primary"></span> LỊCH ĂN UỐNG
+                        </p>
+                        <ul className="text-[12px] text-[#596372] space-y-1 pl-2">
+                          <li>• <span className="font-bold">Sáng (07:30):</span> Bữa chính dinh dưỡng</li>
+                          <li>• <span className="font-bold">Trưa (12:00):</span> Snack & Bổ sung nước</li>
+                          <li>• <span className="font-bold">Tối (18:30):</span> Bữa nhẹ & Nghỉ ngơi</li>
+                        </ul>
+                      </div>
+
+                      <div>
+                        <p className="text-[11px] font-[800] text-[#4f46e5] flex items-center gap-1 mb-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#4f46e5]"></span> LỊCH VẬN ĐỘNG
+                        </p>
+                        <ul className="text-[12px] text-[#596372] space-y-1 pl-2">
+                          <li>• <span className="font-bold">9:00 - 10:30:</span> Vui chơi tại sân vườn</li>
+                          <li>• <span className="font-bold">16:00 - 17:00:</span> Tương tác nhân viên</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-[8px]">
+                    <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Họ và tên" className="h-[46px] w-full rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] outline-none focus:border-client-primary" />
+                    <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Số điện thoại" className="h-[46px] w-full rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] outline-none focus:border-client-primary" />
+                    <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="h-[46px] w-full rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] outline-none focus:border-client-primary" />
+                    <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} className="w-full resize-none rounded-[16px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] py-[10px] text-[13px] outline-none focus:border-client-primary" placeholder="Lưu ý khẩu phần, tính cách, thuốc hoặc các yêu cầu đặc biệt." />
+                  </div>
+                  <div className="rounded-[18px] border border-[#eee2d7] bg-[#fffaf7] px-[14px] py-[12px]">
+                    <div className="flex items-center justify-between text-[14px] text-[#596372]">
+                      <span>Phòng {(cage as any).cageCode} ({Math.max(totalDays, 1)} đêm)</span>
+                      <span className="font-[800] text-client-secondary">{estimatedTotal.toLocaleString()}đ</span>
+                    </div>
+                    <div className="mt-[8px] flex items-center justify-between text-[14px] text-[#596372]">
+                      <span>Số lượng phòng</span>
+                      <span className="font-[800] text-client-secondary">{quantity}</span>
+                    </div>
+                    <div className="mt-[8px] flex items-center justify-between border-t border-[#efe3d8] pt-[8px]">
+                      <span className="text-[16px] font-[800] text-client-secondary">Tổng cộng</span>
+                      <span className="text-[30px] font-[900] tracking-[-0.03em] text-client-primary">{estimatedTotal.toLocaleString()}đ</span>
+                    </div>
+                  </div>
+                  <button type="button" onClick={handleBookNow} disabled={isSoldOut} className="h-[56px] w-full rounded-[18px] bg-client-primary text-[18px] font-[800] text-white shadow-[0_18px_34px_rgba(237,104,34,0.25)] transition-default hover:bg-client-secondary disabled:cursor-not-allowed disabled:bg-[#d1d5db] disabled:text-[#6b7280]">
+                    {isSoldOut ? "HẾT PHÒNG" : "ĐẶT PHÒNG NGAY"}
+                  </button>
                 </div>
               </div>
-              <div className="rounded-[24px] border border-[#eadfd4] bg-white px-[18px] py-[16px] shadow-[0_20px_40px_rgba(36,24,14,0.05)]"><p className="text-[22px] font-[800] text-client-secondary">Thông tin giá</p><div className="mt-[12px] space-y-[10px] text-[14px] text-[#596372]"><div className="flex items-center justify-between"><span>Giá cơ bản / đêm</span><span className="font-[800] text-client-secondary">{Number((cage as any).dailyPrice || 0).toLocaleString()}đ</span></div><div className="flex items-center justify-between"><span>Phụ thu cuối tuần</span><span className="font-[800] text-client-secondary">+{WEEKEND_SURCHARGE.toLocaleString()}đ</span></div><div className="flex items-center justify-between"><span>Còn trống trong ngày</span><span className="font-[800] text-client-secondary">{remainingRooms}/{totalRooms}</span></div><div className="flex items-center justify-between"><span>Tải trọng tối đa</span><span className="font-[800] text-client-secondary">{(cage as any).maxWeightCapacity ? `${(cage as any).maxWeightCapacity}kg` : "Chưa cập nhật"}</span></div><div className="flex items-center justify-between"><span>Trạng thái</span><span className={`rounded-full border px-[10px] py-[4px] text-[12px] font-[800] ${status.className}`}>{status.label}</span></div></div></div>
+              <div className="rounded-[24px] border border-[#eadfd4] bg-white px-[18px] py-[16px] shadow-[0_20px_40px_rgba(36,24,14,0.05)]">
+                <p className="text-[22px] font-[800] text-client-secondary">Thông tin giá</p>
+                <div className="mt-[12px] space-y-[10px] text-[14px] text-[#596372]">
+                  <div className="flex items-center justify-between"><span>Giá cơ bản / đêm</span><span className="font-[800] text-client-secondary">{Number((cage as any).dailyPrice || 0).toLocaleString()}đ</span></div>
+                  <div className="flex items-center justify-between"><span>Phụ thu cuối tuần</span><span className="font-[800] text-client-secondary">+{WEEKEND_SURCHARGE.toLocaleString()}đ</span></div>
+                  <div className="flex items-center justify-between"><span>Còn trống trong ngày</span><span className="font-[800] text-client-secondary">{remainingRooms}/{totalRooms}</span></div>
+                  <div className="flex items-center justify-between"><span>Tải trọng tối đa</span><span className="font-[800] text-client-secondary">{(cage as any).maxWeightCapacity ? `${(cage as any).maxWeightCapacity}kg` : "Chưa cập nhật"}</span></div>
+                  <div className="flex items-center justify-between">
+                    <span>Trạng thái</span>
+                    <span className={`rounded-full border px-[10px] py-[4px] text-[12px] font-[800] ${status.className}`}>{status.label}</span>
+                  </div>
+                </div>
+              </div>
             </aside>
           </div>
         </div>

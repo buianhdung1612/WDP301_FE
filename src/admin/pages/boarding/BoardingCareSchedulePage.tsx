@@ -1,4 +1,4 @@
-﻿import { ChangeEvent, useMemo, useState } from "react";
+﻿import { ChangeEvent, Fragment, useMemo, useState } from "react";
 import {
     Avatar,
     Autocomplete,
@@ -27,6 +27,7 @@ import {
     TextField,
     Tooltip,
     Typography,
+    Collapse,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
@@ -41,6 +42,7 @@ import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
+import { Icon } from "@iconify/react";
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { Title } from "../../components/ui/Title";
 import { prefixAdmin } from "../../constants/routes";
@@ -163,6 +165,7 @@ export const BoardingCareSchedulePage = () => {
 
     const [careTab, setCareTab] = useState(0);
     const [speciesFilter, setSpeciesFilter] = useState("all");
+    const [openRows, setOpenRows] = useState<string[]>([]);
 
     const canAssignHotelStaff = useMemo(() => {
         const permissions = Array.isArray(user?.permissions) ? user.permissions : [];
@@ -750,7 +753,14 @@ export const BoardingCareSchedulePage = () => {
         setPage(0);
     };
 
+    const toggleRow = (id: string) => {
+        setOpenRows((prev) => (prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]));
+    };
+
+    const formatCurrency = (value: number) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value || 0);
+
     const currentProofMedia = proofViewer.items[proofViewer.index];
+
 
     return (
         <Box sx={{ maxWidth: "1200px", mx: "auto", p: "calc(3 * var(--spacing))" }}>
@@ -814,8 +824,10 @@ export const BoardingCareSchedulePage = () => {
                     <Table sx={{ minWidth: 860 }}>
                         <TableHead sx={{ bgcolor: "var(--palette-background-neutral)" }}>
                             <TableRow>
+                                <TableCell sx={{ borderBottom: "none", width: 48 }} />
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Mã đơn</TableCell>
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Khách hàng</TableCell>
+                                <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Thời gian lưu trú</TableCell>
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Tổng quan lịch</TableCell>
                                 <TableCell sx={{ borderBottom: "none", width: 160 }} align="right">Thao tác</TableCell>
                             </TableRow>
@@ -823,14 +835,14 @@ export const BoardingCareSchedulePage = () => {
                         <TableBody>
                             {isLoading ? (
                                 <TableRow>
-                                    <TableCell colSpan={4} align="center" sx={{ py: 10 }}>
+                                    <TableCell colSpan={6} align="center" sx={{ py: 10 }}>
                                         <CircularProgress size={32} />
                                     </TableCell>
                                 </TableRow>
                             ) : filteredRows.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={4} align="center" sx={{ py: 10 }}>
-                                        <Typography sx={{ color: "var(--palette-text-secondary)" }}>Kh?ng c? d? li?u</Typography>
+                                    <TableCell colSpan={6} align="center" sx={{ py: 10 }}>
+                                        <Typography sx={{ color: "var(--palette-text-secondary)" }}>Không có dữ liệu</Typography>
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -838,63 +850,166 @@ export const BoardingCareSchedulePage = () => {
                                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                     .map((row: any) => {
                                         const summary = getCareSummary(row);
+                                        const isOpen = openRows.includes(row._id);
                                         return (
-                                            <TableRow
-                                                key={row._id}
-                                                hover
-                                                sx={{ "&:hover": { bgcolor: "var(--palette-action-hover)" }, transition: "background-color 0.2s" }}
-                                            >
-                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)", textDecoration: "underline" }}>
-                                                        #{row.code?.slice(-6).toUpperCase() || "N/A"}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <Stack direction="row" spacing={2} alignItems="center">
-                                                        <Avatar src={row.userId?.avatar} sx={{ width: 40, height: 40, borderRadius: "var(--shape-borderRadius-sm)" }}>
-                                                            {String(row.fullName || row.userId?.fullName || "?").slice(0, 1)}
-                                                        </Avatar>
-                                                        <Stack spacing={0.25}>
-                                                            <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
-                                                                {row.fullName || row.userId?.fullName || "Khách vãng lai"}
-                                                            </Typography>
-                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>
-                                                                {row.phone || row.userId?.phone || row.userId?.email || "Không có thông tin"}
-                                                            </Typography>
+                                            <Fragment key={row._id}>
+                                                <TableRow
+                                                    hover
+                                                    sx={{ "&:hover": { bgcolor: "var(--palette-action-hover)" }, transition: "background-color 0.2s" }}
+                                                >
+                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", width: 48 }}>
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => toggleRow(row._id)}
+                                                            sx={{
+                                                                color: "var(--palette-text-primary)",
+                                                                bgcolor: isOpen ? "var(--palette-action-hover)" : "transparent",
+                                                            }}
+                                                        >
+                                                            <Icon icon={isOpen ? "eva:arrow-ios-upward-fill" : "eva:arrow-ios-downward-fill"} width={20} />
+                                                        </IconButton>
+                                                    </TableCell>
+                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                        <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)", textDecoration: "underline", mb: 0.5 }}>
+                                                            #{row.code?.slice(-6).toUpperCase() || "N/A"}
+                                                        </Typography>
+                                                        <Typography variant="caption" sx={{ color: "var(--palette-text-secondary)", display: "block", fontSize: "0.75rem" }}>
+                                                            Đặt lúc: {dayjs(row.createdAt).format("HH:mm DD/MM/YYYY")}
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                        <Stack direction="row" spacing={2} alignItems="center">
+                                                            <Avatar src={row.userId?.avatar} sx={{ width: 40, height: 40, borderRadius: "var(--shape-borderRadius-sm)" }}>
+                                                                {String(row.fullName || row.userId?.fullName || "?").slice(0, 1)}
+                                                            </Avatar>
+                                                            <Stack spacing={0.25}>
+                                                                <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
+                                                                    {row.fullName || row.userId?.fullName || "Khách vãng lai"}
+                                                                </Typography>
+                                                                <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", wordBreak: "break-all" }}>
+                                                                    {row.phone || row.userId?.phone || row.userId?.email || "Không có thông tin"}
+                                                                </Typography>
 
-                                                            <Box sx={{ mt: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
-                                                                {(Array.isArray(row.petIds) ? row.petIds : []).map((pet: any, pi: number) => (
-                                                                    <Box
-                                                                        key={pi}
+                                                                <Box sx={{ mt: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
+                                                                    {(Array.isArray(row.petIds) ? row.petIds : []).map((pet: any, pi: number) => (
+                                                                        <Box
+                                                                            key={pi}
+                                                                            sx={{
+                                                                                px: 1,
+                                                                                py: 0.25,
+                                                                                borderRadius: 0.5,
+                                                                                fontSize: "0.7rem",
+                                                                                fontWeight: 700,
+                                                                                bgcolor: (pet.type || pet.petType) === "dog" ? "rgba(59, 130, 246, 0.1)" : "rgba(236, 72, 153, 0.1)",
+                                                                                color: (pet.type || pet.petType) === "dog" ? "#3b82f6" : "#ec4899",
+                                                                                border: `1px solid ${(pet.type || pet.petType) === "dog" ? "rgba(59, 130, 246, 0.2)" : "rgba(236, 72, 153, 0.2)"}`
+                                                                            }}
+                                                                        >
+                                                                            {(pet.type || pet.petType) === "dog" ? "🐶" : "🐱"} {pet.name}
+                                                                        </Box>
+                                                                    ))}
+                                                                </Box>
+                                                            </Stack>
+                                                        </Stack>
+                                                    </TableCell>
+                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                        <Typography sx={{ fontWeight: 600, fontSize: "0.8125rem", color: "var(--palette-text-primary)" }}>
+                                                            {dayjs(row.checkInDate).format("DD/MM/YYYY")} - {dayjs(row.checkOutDate).format("DD/MM/YYYY")}
+                                                        </Typography>
+                                                        <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>
+                                                            ({dayjs(row.checkOutDate).diff(dayjs(row.checkInDate), 'day')} đêm)
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                        <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.8125rem" }}>
+                                                            {canAssignHotelStaff ? `Ăn: ${summary.soLichAn} (gắn NVKS: ${summary.soNhanVienLichAn}) | Vận động: ${summary.soVanDong} (gắn NVKS: ${summary.soNhanVienVanDong})` : `Ăn: ${summary.soLichAn} | Vận động: ${summary.soVanDong}`}
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                        <Button variant="outlined" size="small" onClick={() => moDialogChamSoc(row)} disabled={careLoading}>
+                                                            Quản lý lịch
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+
+                                                <TableRow>
+                                                    <TableCell
+                                                        colSpan={6}
+                                                        sx={{
+                                                            p: 2,
+                                                            py: isOpen ? 2 : 0,
+                                                            bgcolor: "var(--palette-background-neutral)",
+                                                            borderBottom: isOpen ? "1px dashed var(--palette-divider)" : "none",
+                                                            transition: "all 0.2s",
+                                                        }}
+                                                    >
+                                                        <Collapse in={isOpen} timeout="auto" unmountOnExit>
+                                                            <Box
+                                                                sx={{
+                                                                    bgcolor: "var(--palette-background-paper)",
+                                                                    borderRadius: "12px",
+                                                                    boxShadow: "var(--customShadows-z1)",
+                                                                    overflow: "hidden",
+                                                                    border: "1px solid var(--palette-divider)",
+                                                                }}
+                                                            >
+                                                                <Box sx={{ p: 2, borderBottom: "1px solid var(--palette-divider)", bgcolor: "rgba(145, 158, 171, 0.08)" }}>
+                                                                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Chi tiết đơn dịch vụ</Typography>
+                                                                </Box>
+                                                                {(Array.isArray(row.petIds) ? row.petIds : []).map((pet: any, index: number) => (
+                                                                    <Stack
+                                                                        key={`${row._id}-${pet._id || index}`}
+                                                                        direction="row"
+                                                                        alignItems="center"
+                                                                        spacing={2}
                                                                         sx={{
-                                                                            px: 1,
-                                                                            py: 0.25,
-                                                                            borderRadius: 0.5,
-                                                                            fontSize: "0.7rem",
-                                                                            fontWeight: 700,
-                                                                            bgcolor: (pet.type || pet.petType) === "dog" ? "rgba(59, 130, 246, 0.1)" : "rgba(236, 72, 153, 0.1)",
-                                                                            color: (pet.type || pet.petType) === "dog" ? "#3b82f6" : "#ec4899",
-                                                                            border: `1px solid ${(pet.type || pet.petType) === "dog" ? "rgba(59, 130, 246, 0.2)" : "rgba(236, 72, 153, 0.2)"}`
+                                                                            px: 2,
+                                                                            py: 1.5,
+                                                                            "&:not(:last-of-type)": {
+                                                                                borderBottom: "solid 1px var(--palette-background-neutral)",
+                                                                            },
                                                                         }}
                                                                     >
-                                                                        {(pet.type || pet.petType) === "dog" ? "🐶" : "🐱"} {pet.name}
-                                                                    </Box>
+                                                                        <Avatar
+                                                                            src={pet.avatar}
+                                                                            variant="rounded"
+                                                                            sx={{ width: 48, height: 48, borderRadius: 1 }}
+                                                                        >
+                                                                            <Icon icon="solar:dog-bold" width={22} />
+                                                                        </Avatar>
+                                                                        <Box sx={{ flexGrow: 1 }}>
+                                                                            <Typography sx={{ fontWeight: 700, fontSize: "0.875rem" }}>
+                                                                                {pet.name} ({pet.type === "dog" ? "Chó" : "Mèo"})
+                                                                            </Typography>
+                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>
+                                                                                Phòng: {row.cageId?.cageCode || "Chưa gắn phòng"} - {formatCurrency(Number(row.pricePerDay || 0))}/đêm
+                                                                            </Typography>
+                                                                        </Box>
+                                                                        <Box sx={{ textAlign: "right" }}>
+                                                                            <Typography sx={{ fontWeight: 700, fontSize: "0.8125rem" }}>
+                                                                                Tạm tính: {formatCurrency(Number(row.total || 0))}
+                                                                            </Typography>
+                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>
+                                                                                {row.boardingStatus === "pending" ? "Chờ nhận phòng" : "Đang lưu trú"}
+                                                                            </Typography>
+                                                                        </Box>
+                                                                    </Stack>
                                                                 ))}
+                                                                {(row.specialCare || row.notes) && (
+                                                                    <Box sx={{ p: 2, bgcolor: "rgba(255, 171, 0, 0.08)", borderTop: "1px solid var(--palette-divider)" }}>
+                                                                        <Typography variant="caption" sx={{ fontWeight: 700, color: "var(--palette-warning-dark)", display: "block", mb: 0.5 }}>
+                                                                            GHI CHÚ ĐẶC BIỆT:
+                                                                        </Typography>
+                                                                        <Typography variant="body2" sx={{ fontSize: "0.8125rem" }}>
+                                                                            {row.specialCare || row.notes}
+                                                                        </Typography>
+                                                                    </Box>
+                                                                )}
                                                             </Box>
-                                                        </Stack>
-                                                    </Stack>
-                                                </TableCell>
-                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.8125rem" }}>
-                                                        {canAssignHotelStaff ? `Ăn: ${summary.soLichAn} (gắn NVKS: ${summary.soNhanVienLichAn}) | Vận động: ${summary.soVanDong} (gắn NVKS: ${summary.soNhanVienVanDong})` : `Ăn: ${summary.soLichAn} | Vận động: ${summary.soVanDong}`}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <Button variant="outlined" size="small" onClick={() => moDialogChamSoc(row)} disabled={careLoading}>
-                                                        Quản lý lịch
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
+                                                        </Collapse>
+                                                    </TableCell>
+                                                </TableRow>
+                                            </Fragment>
                                         );
                                     })
                             )}
@@ -938,6 +1053,7 @@ export const BoardingCareSchedulePage = () => {
                                 value={careTab}
                                 onChange={(_e, val) => setCareTab(val)}
                                 sx={{
+                                    mb: 3,
                                     borderBottom: 1,
                                     borderColor: "divider",
                                     "& .MuiTab-root": { fontWeight: 700 }
@@ -946,6 +1062,7 @@ export const BoardingCareSchedulePage = () => {
                                 <Tab label="Lịch ăn" />
                                 <Tab label="Lịch vận động" />
                                 <Tab label="Thông tin thú cưng" />
+                                <Tab label="Lịch sử giao dịch" />
                             </Tabs>
 
                             {careTab === 2 && editingBooking?.petIds?.length > 0 && (
@@ -1420,6 +1537,58 @@ export const BoardingCareSchedulePage = () => {
                                     })()}
                                 </Box>
                             )}
+
+                            {careTab === 3 && (
+                                <Box>
+                                    <Typography variant="h6" sx={{ mb: 2 }}>Lịch sử giao dịch dịch vụ khách sạn</Typography>
+                                    <TableContainer sx={{ maxHeight: 400, border: "1px solid var(--palette-divider)", borderRadius: 1 }}>
+                                        <Table size="small" stickyHeader>
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell sx={{ fontWeight: 700, bgcolor: "var(--palette-background-neutral)" }}>Mã đơn</TableCell>
+                                                    <TableCell sx={{ fontWeight: 700, bgcolor: "var(--palette-background-neutral)" }}>Ngày đặt</TableCell>
+                                                    <TableCell sx={{ fontWeight: 700, bgcolor: "var(--palette-background-neutral)" }}>Trạng thái</TableCell>
+                                                    <TableCell sx={{ fontWeight: 700, bgcolor: "var(--palette-background-neutral)" }} align="right">Tổng cộng</TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {(() => {
+                                                    const history = (Array.isArray(data?.data) ? data.data : [])
+                                                        .filter((b: any) => (b.userId?._id || b.userId) === (editingBooking?.userId?._id || editingBooking?.userId));
+
+                                                    if (history.length === 0) {
+                                                        return (
+                                                            <TableRow>
+                                                                <TableCell colSpan={4} align="center" sx={{ py: 3 }}>Không có dữ liệu khác</TableCell>
+                                                            </TableRow>
+                                                        );
+                                                    }
+
+                                                    return history.map((b: any) => (
+                                                        <TableRow key={b._id} hover>
+                                                            <TableCell sx={{ color: "var(--palette-primary-main)", fontWeight: 700 }}>#{b.code?.slice(-6).toUpperCase()}</TableCell>
+                                                            <TableCell>{dayjs(b.createdAt).format("DD/MM/YYYY")}</TableCell>
+                                                            <TableCell>
+                                                                <Box sx={{
+                                                                    px: 1, py: 0.5, borderRadius: 1, fontSize: "0.75rem", fontWeight: 700,
+                                                                    display: "inline-block",
+                                                                    bgcolor: b.boardingStatus === "checked-out" ? "var(--palette-success-lighter)" :
+                                                                        b.boardingStatus === "cancelled" ? "var(--palette-error-lighter)" : "var(--palette-warning-lighter)",
+                                                                    color: b.boardingStatus === "checked-out" ? "var(--palette-success-dark)" :
+                                                                        b.boardingStatus === "cancelled" ? "var(--palette-error-dark)" : "var(--palette-warning-dark)"
+                                                                }}>
+                                                                    {b.boardingStatus}
+                                                                </Box>
+                                                            </TableCell>
+                                                            <TableCell align="right">{new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(b.total || 0)}</TableCell>
+                                                        </TableRow>
+                                                    ));
+                                                })()}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                </Box>
+                            )}
                         </Stack>
                     )}
                 </DialogContent>
@@ -1566,8 +1735,6 @@ export const BoardingCareSchedulePage = () => {
                     ) : null}
                 </DialogContent>
             </Dialog>
-        </Box >
+        </Box>
     );
-
 };
-

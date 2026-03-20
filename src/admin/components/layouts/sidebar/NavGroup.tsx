@@ -15,7 +15,7 @@ export const NavGroup = memo(({ title, data }: Props) => {
     const { isOpen } = useSidebar();
     const { user } = useAuthStore();
     const permissions = user?.permissions || [];
-    const isStaff = user?.roles?.some((role: any) => role.isStaff);
+    const isStaff = user?.roles?.some((role: any) => role.isStaff || role.name?.toLowerCase().includes("nhân viên") || role.name?.toLowerCase().includes("staff"));
 
     const [openGroup, setOpenGroup] = useState(true);
 

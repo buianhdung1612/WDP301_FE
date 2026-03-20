@@ -11,7 +11,7 @@ export const SideBar = () => {
     const { isOpen, toggleSidebar } = useSidebar();
     const { user } = useAuthStore();
 
-    const isStaff = user?.roles?.some((role: any) => role.isStaff);
+    const isStaff = user?.roles?.some((role: any) => role.isStaff || role.name?.toLowerCase().includes("nhân viên") || role.name?.toLowerCase().includes("staff"));
 
     return (
         <div className={`flex fixed top-0 left-0 flex-col z-[1200] h-full bg-white border-r border-[#919eab1f] transition-[width] duration-[120ms] ease-linear ${isOpen ? 'w-[300px]' : 'w-[88px]'}`}>
