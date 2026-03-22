@@ -13,6 +13,7 @@ import { useShifts, useCreateShift, useUpdateShift, useDeleteShift } from './hoo
 import { getShiftColumns } from './configs/shift.config';
 import { ShiftDialog } from './sections/ShiftDialog';
 import { toast } from 'react-toastify';
+import { confirmDelete } from '../../utils/swal';
 import { dataGridCardStyles, dataGridContainerStyles, dataGridStyles, primaryButtonStyles } from './configs/styles.config';
 import { HRToolbar } from './sections/HRToolbar';
 import { useDataGridLocale } from '../../hooks/useDataGridLocale';
@@ -75,13 +76,16 @@ export const ShiftListPage = () => {
     };
 
     const handleDelete = (id: string) => {
-        if (window.confirm('Bạn có chắc chắn muốn xóa ca làm việc này?')) {
+        confirmDelete('Bạn có chắc chắn muốn xóa ca làm việc này?', () => {
             deleteShift(id, {
-                onSuccess: (res: any) => {
-                    toast.success(res.message || 'Xóa thành công');
+                onSuccess: () => {
+                    toast.success('Xóa ca làm việc thành công');
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || 'Lỗi khi xóa ca làm việc');
                 }
             });
-        }
+        });
     };
 
     const columns = getShiftColumns(

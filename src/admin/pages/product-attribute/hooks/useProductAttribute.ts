@@ -4,7 +4,9 @@ import {
     getProductAttributeDetail,
     deleteProductAttribute,
     updateProductAttribute,
-    createProductAttribute
+    createProductAttribute,
+    restoreProductAttribute,
+    forceDeleteProductAttribute
 } from '../../../api/product-attribute.api';
 
 
@@ -56,6 +58,32 @@ export const useDeleteProductAttribute = () => {
 
     return useMutation({
         mutationFn: deleteProductAttribute,
+        onSuccess: (response: any) => {
+            if (response.success) {
+                queryClient.invalidateQueries({ queryKey: ['product-attributes'] });
+            }
+        },
+    });
+};
+
+export const useRestoreProductAttribute = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: restoreProductAttribute,
+        onSuccess: (response: any) => {
+            if (response.success) {
+                queryClient.invalidateQueries({ queryKey: ['product-attributes'] });
+            }
+        },
+    });
+};
+
+export const useForceDeleteProductAttribute = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: forceDeleteProductAttribute,
         onSuccess: (response: any) => {
             if (response.success) {
                 queryClient.invalidateQueries({ queryKey: ['product-attributes'] });

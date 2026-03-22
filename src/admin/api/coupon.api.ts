@@ -73,8 +73,19 @@ export const updateCoupon = async (id: string | number, data: any): Promise<any>
     return response.data;
 };
 
-/** Xóa mã giảm giá */
 export const deleteCoupon = async (id: string | number): Promise<any> => {
     const response = await apiApp.patch(`${BASE_URL}/delete/${id}`, {}, withAuth());
+    return response.data;
+};
+
+/** Khôi phục mã giảm giá */
+export const restoreCoupon = async (id: string | number): Promise<any> => {
+    const response = await apiApp.patch(`${BASE_URL}/restore/${id}`, {}, withAuth());
+    return response.data;
+};
+
+/** Xóa vĩnh viễn mã giảm giá */
+export const forceDeleteCoupon = async (id: string | number): Promise<any> => {
+    const response = await apiApp.delete(`${BASE_URL}/force-delete/${id}`, withAuth());
     return response.data;
 };

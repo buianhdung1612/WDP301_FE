@@ -1,13 +1,13 @@
 import { GridColDef } from "@mui/x-data-grid";
 import {
-    RenderActionsCell,
+    getRenderActionsCell,
     RenderTitleCell,
     RenderStatusCell,
     RenderCreatedAtCell
 } from '../utils/render-cells';
 import { IBlogCategory } from "./types";
 
-export const columnsConfig: GridColDef<IBlogCategory>[] = [
+export const getColumnsConfig = (isTrash: boolean): GridColDef<IBlogCategory>[] => [
     {
         field: "name",
         headerName: "Tên danh mục",
@@ -48,7 +48,7 @@ export const columnsConfig: GridColDef<IBlogCategory>[] = [
         sortable: false,
         filterable: false,
         align: 'right',
-        renderCell: RenderActionsCell,
+        renderCell: getRenderActionsCell(isTrash),
     },
 ];
 

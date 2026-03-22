@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getCategories, createCategory, getNestedCategories, getCategoryById, deleteCategory, updateCategory } from '../../../api/blog-category.api';
+import { getCategories, createCategory, getNestedCategories, getCategoryById, deleteCategory, updateCategory, restoreCategory, forceDeleteCategory } from '../../../api/blog-category.api';
 
 
 export const useBlogCategories = (params?: any) => {
@@ -56,6 +56,28 @@ export const useDeleteBlogCategory = () => {
 
     return useMutation({
         mutationFn: deleteCategory,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['blog-categories'] });
+        },
+    });
+};
+
+export const useRestoreBlogCategory = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: restoreCategory,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['blog-categories'] });
+        },
+    });
+};
+
+export const useForceDeleteBlogCategory = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: forceDeleteCategory,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['blog-categories'] });
         },

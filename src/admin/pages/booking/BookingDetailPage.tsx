@@ -19,6 +19,7 @@ import dayjs from "dayjs";
 import { useBookingDetail, useUpdateBookingStatus, useUpdateBooking } from "./hooks/useBookingManagement";
 import { toast } from "react-toastify";
 import { prefixAdmin } from "../../constants/routes";
+import { confirmAction } from "../../utils/swal";
 
 const STATUS_OPTIONS: { [key: string]: { label: string; color: string; bg: string } } = {
     pending: { label: "Chờ xác nhận", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)" },
@@ -65,9 +66,29 @@ export const BookingDetailPage = () => {
     const currentStatus = STATUS_OPTIONS[booking.bookingStatus] || STATUS_OPTIONS.pending;
 
     const handleStatusChange = (newStatus: string) => {
-        updateStatus({ id: booking._id, status: newStatus }, {
-            onSuccess: () => toast.success("Cập nhật trạng thái thành công")
-        });
+        const update = () => {
+            updateStatus({ id: booking._id, status: newStatus }, {
+                onSuccess: () => toast.success("Cập nhật trạng thái thành công")
+            });
+        };
+
+        if (newStatus === 'in-progress') {
+            confirmAction(
+                "Bắt đầu thực hiện?",
+                "Xác nhận đơn dịch vụ này bắt đầu được thực hiện ngay bây giờ.",
+                update,
+                'info'
+            );
+        } else if (newStatus === 'completed') {
+            confirmAction(
+                "Hoàn thành dịch vụ?",
+                "Bạn có chắc chắn muốn xác nhận hoàn thành đơn dịch vụ này?",
+                update,
+                'success'
+            );
+        } else {
+            update();
+        }
     };
 
     const handlePaymentStatusChange = (newStatus: string) => {

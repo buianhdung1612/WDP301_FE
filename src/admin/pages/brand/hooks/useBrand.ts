@@ -1,12 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getBrands, createBrand, getBrandById, updateBrand, deleteBrand } from '../../../api/brand.api';
+import { getBrands, createBrand, getBrandById, updateBrand, deleteBrand, restoreBrand, forceDeleteBrand } from '../../../api/brand.api';
 
 
 export const useBrands = (params?: any) => {
     return useQuery({
         queryKey: ['brands', params],
         queryFn: () => getBrands(params),
-        select: (res: any) => res.data?.recordList || [],
     });
 };
 
@@ -58,6 +57,28 @@ export const useDeleteBrand = () => {
 
     return useMutation({
         mutationFn: deleteBrand,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['brands'] });
+        },
+    });
+};
+
+export const useRestoreBrand = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: restoreBrand,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['brands'] });
+        },
+    });
+};
+
+export const useDeletePermanentBrand = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: forceDeleteBrand,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['brands'] });
         },

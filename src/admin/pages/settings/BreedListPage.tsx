@@ -6,6 +6,7 @@ import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { useState } from "react";
 import { useBreeds, useCreateBreed, useUpdateBreed, useDeleteBreed } from "../account-user/hooks/useBreed";
 import { toast } from "react-toastify";
+import { confirmDelete } from "../../utils/swal";
 import { prefixAdmin } from "../../constants/routes";
 import { Search } from "../../components/ui/Search";
 import { SortAscendingIcon, SortDescendingIcon, UnsortedIcon } from "../../assets/icons";
@@ -108,13 +109,16 @@ export const BreedListPage = () => {
     };
 
     const handleDelete = (id: string) => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa vĩnh viễn giống này?")) {
+        confirmDelete("Bạn có chắc chắn muốn xóa vĩnh viễn giống này?", () => {
             deleteBreed(id, {
                 onSuccess: () => {
-                    toast.success("Xóa thành công");
+                    toast.success("Xóa giống thành công");
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || "Lỗi khi xóa giống");
                 }
             });
-        }
+        });
     };
 
     const columns: GridColDef[] = [

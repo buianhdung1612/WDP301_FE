@@ -31,3 +31,13 @@ export const deleteBoardingCage = async (id: string) => {
     const response = await apiApp.delete(`${BASE_URL}/${id}`, withAuth());
     return response.data;
 };
+
+export const restoreBoardingCage = async (id: string) => {
+    const response = await apiApp.patch(`${BASE_URL}/restore/${id}`, {}, withAuth());
+    return response.data;
+};
+
+export const forceDeleteBoardingCage = async (id: string) => {
+    const response = await apiApp.delete(`${BASE_URL}/force-delete/${id}`, withAuth());
+    return response.data;
+};

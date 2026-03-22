@@ -38,6 +38,16 @@ export const deleteService = async (id: string | number): Promise<any> => {
     return response.data;
 };
 
+export const restoreService = async (id: string | number): Promise<any> => {
+    const response = await apiApp.patch(`${BASE_URL}/restore/${id}`, {}, withAuth());
+    return response.data;
+};
+
+export const forceDeleteService = async (id: string | number): Promise<any> => {
+    const response = await apiApp.delete(`${BASE_URL}/force-delete/${id}`, withAuth());
+    return response.data;
+};
+
 // Deprecated object export for backward compatibility if needed, 
 // but we'll move towards direct function imports.
 export const serviceApi = {

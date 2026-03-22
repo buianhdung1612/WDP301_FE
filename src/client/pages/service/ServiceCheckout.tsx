@@ -454,7 +454,7 @@ export const ServiceCheckoutPage = () => {
                                 )}
 
                                 <div className="pt-[20px] border-t border-[#eee]">
-                                    {depositPercentage > 0 && (
+                                    {depositPercentage > 0 && paymentMethod === 'money' && (
                                         <div className="flex justify-between items-center mb-[15px] p-[15px] bg-orange-50 rounded-[15px] border border-orange-100">
                                             <div className="text-[14px]">
                                                 <div className="font-bold text-orange-800">Cần thanh toán cọc ({depositPercentage}%)</div>

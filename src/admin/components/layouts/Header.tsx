@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { logout as logoutApi } from "../../api/auth.api";
 import Cookies from "js-cookie";
 import { prefixAdmin } from "../../constants/routes";
+import { NotificationPopover } from "./NotificationPopover";
 
 interface Props {
     window?: () => Window;
@@ -232,6 +233,7 @@ export const Header = () => {
                                 Tiếng Việt
                             </MenuItem>
                         </Popover>
+                        <NotificationPopover />
                         <Button
                             className="hover:scale-[1.04] hover:bg-admin-hoverIcon transition-all duration-150 ease-in-out"
                             sx={{

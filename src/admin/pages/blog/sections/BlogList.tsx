@@ -2,16 +2,17 @@ import { useState } from "react";
 import { Box, ButtonBase, Card, Pagination, Stack, CircularProgress, Popover, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { DeleteIcon, EditIcon, EyeIcon, ThreeDotsIcon } from "../../../assets/icons";
+import RestoreIcon from '@mui/icons-material/Restore';
 import { prefixAdmin } from "../../../constants/routes";
 
 import dayjs from "dayjs";
 import 'dayjs/locale/vi';
 
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import { useDeleteBlog } from "../hooks/useBlog";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import { confirmDelete } from "../../../utils/swal";
+import { useDeleteBlog, useRestoreBlog, useForceDeleteBlog } from "../hooks/useBlog";
 
 interface BlogListProps {
     blogs: any[];
@@ -19,9 +20,10 @@ interface BlogListProps {
     page: number;
     onPageChange: (page: number) => void;
     pagination: any;
+    isTrash?: boolean;
 }
 
-export const BlogList = ({ blogs = [], isLoading = false, page, onPageChange, pagination }: BlogListProps) => {
+export const BlogList = ({ blogs = [], isLoading = false, page, onPageChange, pagination, isTrash }: BlogListProps) => {
     const { t } = useTranslation();
 
     const handleChangePage = (_event: React.ChangeEvent<unknown>, value: number) => {
@@ -33,6 +35,8 @@ export const BlogList = ({ blogs = [], isLoading = false, page, onPageChange, pa
 
     const navigate = useNavigate();
     const { mutate: deleteBlog } = useDeleteBlog();
+    const { mutate: restoreBlog } = useRestoreBlog();
+    const { mutate: forceDeleteBlog } = useForceDeleteBlog();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null);
 
@@ -55,8 +59,11 @@ export const BlogList = ({ blogs = [], isLoading = false, page, onPageChange, pa
 
     const handleDelete = () => {
         if (selectedBlogId) {
-            confirmDelete(t("admin.common.confirm_delete"), () => {
-                deleteBlog(selectedBlogId, {
+            const message = isTrash ? "Bạn có chắc chắn muốn xóa vĩnh viễn bài này?" : t("admin.common.confirm_delete");
+            const action = isTrash ? forceDeleteBlog : deleteBlog;
+
+            confirmDelete(message, () => {
+                action(selectedBlogId, {
                     onSuccess: (res: any) => {
                         if (res.success) {
                             toast.success(t("admin.common.success"));
@@ -65,6 +72,21 @@ export const BlogList = ({ blogs = [], isLoading = false, page, onPageChange, pa
                         }
                     }
                 });
+            });
+            handleCloseMenu();
+        }
+    };
+
+    const handleRestore = () => {
+        if (selectedBlogId) {
+            restoreBlog(selectedBlogId, {
+                onSuccess: (res: any) => {
+                    if (res.success) {
+                        toast.success("Khôi phục thành công");
+                    } else {
+                        toast.error(res.message);
+                    }
+                }
             });
             handleCloseMenu();
         }
@@ -252,27 +274,46 @@ export const BlogList = ({ blogs = [], isLoading = false, page, onPageChange, pa
                     },
                 }}
             >
-                <MenuItem onClick={() => {
-                    navigate(`/${prefixAdmin}/blog/detail/${selectedBlogId}`);
-                    handleCloseMenu();
-                }} sx={{ borderRadius: "var(--shape-borderRadius-sm)", py: 1 }}>
-                    <ListItemIcon sx={{ minWidth: '24px !important', mr: 1 }}>
-                        <EyeIcon sx={{ width: 20, height: 20 }} />
-                    </ListItemIcon>
-                    <ListItemText primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}>{t("admin.common.details")}</ListItemText>
-                </MenuItem>
-                <MenuItem onClick={handleEdit} sx={{ borderRadius: "var(--shape-borderRadius-sm)", py: 1 }}>
-                    <ListItemIcon sx={{ minWidth: '24px !important', mr: 1 }}>
-                        <EditIcon sx={{ width: 20, height: 20 }} />
-                    </ListItemIcon>
-                    <ListItemText primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}>{t("admin.common.edit")}</ListItemText>
-                </MenuItem>
-                <MenuItem onClick={handleDelete} sx={{ borderRadius: "var(--shape-borderRadius-sm)", py: 1, color: 'error.main' }}>
-                    <ListItemIcon sx={{ minWidth: '24px !important', mr: 1, color: 'error.main' }}>
-                        <DeleteIcon sx={{ width: 20, height: 20 }} />
-                    </ListItemIcon>
-                    <ListItemText primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}>{t("admin.common.delete")}</ListItemText>
-                </MenuItem>
+                {!isTrash ? (
+                    <>
+                        <MenuItem onClick={() => {
+                            navigate(`/${prefixAdmin}/blog/detail/${selectedBlogId}`);
+                            handleCloseMenu();
+                        }} sx={{ borderRadius: "var(--shape-borderRadius-sm)", py: 1 }}>
+                            <ListItemIcon sx={{ minWidth: '24px !important', mr: 1 }}>
+                                <EyeIcon sx={{ width: 20, height: 20 }} />
+                            </ListItemIcon>
+                            <ListItemText primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}>{t("admin.common.details")}</ListItemText>
+                        </MenuItem>
+                        <MenuItem onClick={handleEdit} sx={{ borderRadius: "var(--shape-borderRadius-sm)", py: 1 }}>
+                            <ListItemIcon sx={{ minWidth: '24px !important', mr: 1 }}>
+                                <EditIcon sx={{ width: 20, height: 20 }} />
+                            </ListItemIcon>
+                            <ListItemText primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}>{t("admin.common.edit")}</ListItemText>
+                        </MenuItem>
+                        <MenuItem onClick={handleDelete} sx={{ borderRadius: "var(--shape-borderRadius-sm)", py: 1, color: 'error.main' }}>
+                            <ListItemIcon sx={{ minWidth: '24px !important', mr: 1, color: 'error.main' }}>
+                                <DeleteIcon sx={{ width: 20, height: 20 }} />
+                            </ListItemIcon>
+                            <ListItemText primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}>{t("admin.common.delete")}</ListItemText>
+                        </MenuItem>
+                    </>
+                ) : (
+                    <>
+                        <MenuItem onClick={handleRestore} sx={{ borderRadius: "var(--shape-borderRadius-sm)", py: 1, color: 'info.main' }}>
+                            <ListItemIcon sx={{ minWidth: '24px !important', mr: 1, color: 'info.main' }}>
+                                <RestoreIcon sx={{ width: 20, height: 20 }} />
+                            </ListItemIcon>
+                            <ListItemText primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}>Khôi phục</ListItemText>
+                        </MenuItem>
+                        <MenuItem onClick={handleDelete} sx={{ borderRadius: "var(--shape-borderRadius-sm)", py: 1, color: 'error.main' }}>
+                            <ListItemIcon sx={{ minWidth: '24px !important', mr: 1, color: 'error.main' }}>
+                                <DeleteIcon sx={{ width: 20, height: 20 }} />
+                            </ListItemIcon>
+                            <ListItemText primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}>Xóa vĩnh viễn</ListItemText>
+                        </MenuItem>
+                    </>
+                )}
             </Popover>
 
             <Pagination

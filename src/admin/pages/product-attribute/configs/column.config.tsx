@@ -1,13 +1,14 @@
 
 import { Box, Link } from "@mui/material";
 import { GridActionsCell, GridActionsCellItem, GridRenderCellParams, GridColDef } from "@mui/x-data-grid";
-import { DeleteIcon, EditIcon } from "../../../assets/icons/index";
+import { DeleteIcon, EditIcon, ReloadIcon, EyeIcon } from "../../../assets/icons/index";
 import { COLORS, ATTRIBUTE_TYPES } from "./constants";
-import { useDeleteProductAttribute } from "../hooks/useProductAttribute";
+import { useDeleteProductAttribute, useRestoreProductAttribute, useForceDeleteProductAttribute } from "../hooks/useProductAttribute";
 import { useNavigate } from "react-router-dom";
 import { prefixAdmin } from "../../../constants/routes";
 import { toast } from "react-toastify";
 import Chip from '@mui/material/Chip';
+import { useMemo } from "react";
 
 
 // Render Tên thuộc tính
@@ -63,7 +64,6 @@ export const RenderTypeCell = (params: GridRenderCellParams) => {
 };
 
 // Render Giá trị (options) - Unified blue color
-// Options is [{label, value}]
 export const RenderOptionsCell = (params: GridRenderCellParams) => {
     const options = params.value || [];
 
@@ -104,13 +104,21 @@ export const RenderOptionsCell = (params: GridRenderCellParams) => {
 };
 
 // Actions
-export const RenderActionsCell = (params: GridRenderCellParams) => {
+export const RenderActionsCell = (params: GridRenderCellParams & { isTrash?: boolean }) => {
     const navigate = useNavigate();
     const { mutate: deleteAttribute } = useDeleteProductAttribute();
+    const { mutate: restoreAttribute } = useRestoreProductAttribute();
+    const { mutate: forceDeleteAttribute } = useForceDeleteProductAttribute();
+
     const id = params.row._id;
+    const isTrash = params.isTrash;
 
     const handleEdit = () => {
         navigate(`/${prefixAdmin}/product/attribute/edit/${id}`);
+    };
+
+    const handleDetail = () => {
+        navigate(`/${prefixAdmin}/product/attribute/detail/${id}`);
     };
 
     const handleDelete = () => {
@@ -127,20 +135,70 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
         }
     };
 
+    const handleRestore = () => {
+        restoreAttribute(id, {
+            onSuccess: (res: any) => {
+                if (res.success) {
+                    toast.success("Khôi phục thuộc tính thành công");
+                } else {
+                    toast.error(res.message);
+                }
+            }
+        });
+    };
+
+    const handleForceDelete = () => {
+        if (window.confirm("Xóa vĩnh viễn? Hành động này không thể hoàn tác!")) {
+            forceDeleteAttribute(id, {
+                onSuccess: (res: any) => {
+                    if (res.success) {
+                        toast.success("Đã xóa vĩnh viễn thuộc tính");
+                    } else {
+                        toast.error(res.message);
+                    }
+                }
+            });
+        }
+    };
+
+    if (isTrash) {
+        return (
+            <GridActionsCell {...params}>
+                <GridActionsCellItem
+                    icon={<ReloadIcon />}
+                    label="Khôi phục"
+                    showInMenu
+                    onClick={handleRestore}
+                />
+                <GridActionsCellItem
+                    icon={<DeleteIcon />}
+                    label="Xóa vĩnh viễn"
+                    showInMenu
+                    {...({
+                        sx: {
+                            '& .MuiTypography-root': {
+                                color: "var(--palette-error-main)"
+                            },
+                        },
+                    } as any)}
+                    onClick={handleForceDelete}
+                />
+            </GridActionsCell>
+        );
+    }
+
     return (
         <GridActionsCell {...params}>
+            <GridActionsCellItem
+                icon={<EyeIcon />}
+                label="Xem chi tiết"
+                showInMenu
+                onClick={handleDetail}
+            />
             <GridActionsCellItem
                 icon={<EditIcon />}
                 label="Chỉnh sửa"
                 showInMenu
-                {...({
-                    sx: {
-                        '& .MuiTypography-root': {
-                            fontSize: '0.8125rem',
-                            fontWeight: "600"
-                        },
-                    },
-                } as any)}
                 onClick={handleEdit}
             />
             <GridActionsCellItem
@@ -150,8 +208,6 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                 {...({
                     sx: {
                         '& .MuiTypography-root': {
-                            fontSize: '0.8125rem',
-                            fontWeight: "600",
                             color: "var(--palette-error-main)"
                         },
                     },
@@ -162,47 +218,48 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
     );
 };
 
-// Column configs
-export const columnsConfig: GridColDef<any>[] = [
-    {
-        field: "name",
-        headerName: "Tên thuộc tính",
-        flex: 1,
-        minWidth: 180,
-        hideable: false,
-        renderCell: RenderNameCell,
-    },
-    {
-        field: "type",
-        headerName: "Kiểu hiển thị",
-        width: 150,
-        renderCell: RenderTypeCell,
-    },
-    {
-        field: "options",
-        headerName: "Danh sách lựa chọn",
-        flex: 2,
-        minWidth: 350,
-        renderCell: RenderOptionsCell,
-    },
-    {
-        field: 'actions',
-        headerName: 'Hành động',
-        width: 100,
-        sortable: false,
-        filterable: false,
-        align: 'center',
-        headerAlign: 'center',
-        renderCell: RenderActionsCell,
-    },
-];
+// Hook for columns
+export const useAttributeColumns = (isTrash: boolean) => {
+    return useMemo(() => {
+        const columns: GridColDef<any>[] = [
+            {
+                field: "name",
+                headerName: "Tên thuộc tính",
+                flex: 1,
+                minWidth: 180,
+                hideable: false,
+                renderCell: RenderNameCell,
+            },
+            {
+                field: "type",
+                headerName: "Kiểu hiển thị",
+                width: 150,
+                renderCell: RenderTypeCell,
+            },
+            {
+                field: "options",
+                headerName: "Danh sách lựa chọn",
+                flex: 2,
+                minWidth: 350,
+                renderCell: RenderOptionsCell,
+            },
+            {
+                field: 'actions',
+                headerName: 'Hành động',
+                width: 100,
+                sortable: false,
+                filterable: false,
+                align: 'center',
+                headerAlign: 'center',
+                renderCell: (params) => <RenderActionsCell {...params} isTrash={isTrash} />,
+            },
+        ];
+        return columns;
+    }, [isTrash]);
+};
 
 export const columnsInitialState = {
     pagination: {
         paginationModel: { page: 0, pageSize: 10 },
     },
 };
-
-
-
-

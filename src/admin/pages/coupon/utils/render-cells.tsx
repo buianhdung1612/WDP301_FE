@@ -16,7 +16,8 @@ interface RenderCreatedAtCellProps {
 }
 
 export const RenderTitleCell = (params: GridRenderCellParams) => {
-    const { name, id } = params.row;
+    const { name } = params.row;
+    const id = params.row._id || params.row.id;
     const navigate = useNavigate();
 
     return (
@@ -159,7 +160,7 @@ export const RenderStatusCell = (params: GridRenderCellParams) => {
 export const RenderActionsCell = (params: GridRenderCellParams) => {
     const navigate = useNavigate();
     const { mutate: deleteCoupon } = useDeleteCoupon();
-    const id = params.row.id;
+    const id = params.row._id || params.row.id;
 
     const handleEdit = () => {
         navigate(`/${prefixAdmin}/coupon/edit/${id}`);

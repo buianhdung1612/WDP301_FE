@@ -23,10 +23,11 @@ interface TabListProps {
         published: number;
         draft: number;
         archived: number;
+        deleted?: number;
     }
 }
 
-export const TabList = ({ value, onChange, counts = { all: 0, published: 0, draft: 0, archived: 0 } }: TabListProps) => {
+export const TabList = ({ value, onChange, counts = { all: 0, published: 0, draft: 0, archived: 0, deleted: 0 } }: TabListProps) => {
 
 
     return (

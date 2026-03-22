@@ -24,9 +24,10 @@ import { prefixAdmin } from "../../constants/routes";
 import { COLORS } from "../role/configs/constants";
 import { toast } from "react-toastify";
 import { useEffect, useCallback } from "react";
+import { confirmAction } from "../../utils/swal";
 
 // Timer component for tracking service progress
-const ServiceTimer = ({ startedAt, duration, maxDuration, minDuration, surchargeType, surchargeValue }: { startedAt: string, duration: number, maxDuration: number, minDuration: number, surchargeType?: string, surchargeValue?: number }) => {
+const ServiceTimer = ({ startedAt, duration, maxDuration, minDuration }: { startedAt: string, duration: number, maxDuration: number, minDuration: number }) => {
     const [elapsed, setElapsed] = useState(0);
 
     const calculate = useCallback(() => {
@@ -58,15 +59,6 @@ const ServiceTimer = ({ startedAt, duration, maxDuration, minDuration, surcharge
 
     const minRemaining = getRemainingForMin();
 
-    const calculateEstimatedSurcharge = () => {
-        if (!isOverMax || surchargeType === 'none' || !surchargeValue) return 0;
-        if (surchargeType === 'fixed') return surchargeValue;
-        if (surchargeType === 'per-minute') return (elapsed - maxDuration) * surchargeValue;
-        return 0;
-    };
-
-    const estSurcharge = calculateEstimatedSurcharge();
-
     return (
         <Stack spacing={0.5} alignItems="flex-end">
             <Stack direction="row" spacing={1} alignItems="center">
@@ -84,12 +76,13 @@ const ServiceTimer = ({ startedAt, duration, maxDuration, minDuration, surcharge
                     />
                 )}
             </Stack>
-            {isOverMax && surchargeType !== 'none' && (
+            {/* Estimated surcharge hidden based on user request */}
+            {/* {isOverMax && surchargeType !== 'none' && (
                 <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 800, fontSize: '10px', display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Icon icon="solar:bill-list-bold-duotone" width={12} />
                     Dự kiến phụ thu: {estSurcharge.toLocaleString()}đ
                 </Typography>
-            )}
+            )} */}
         </Stack>
     );
 };
@@ -109,32 +102,53 @@ export const StaffTaskListPage = () => {
     const { mutate: startService, isPending: isStarting } = useStartBooking();
     const { mutate: updateStatus, isPending: isUpdating } = useUpdateBookingStatus();
 
+    const [processingItem, setProcessingItem] = useState<{ id: string; petId?: string } | null>(null);
+
     const tasks = bookingsRes?.data || [];
 
+
     const handleStart = (id: string, petId?: string) => {
-        startService({ id, petId }, {
-            onSuccess: () => {
-                toast.success("Đã bắt đầu thực hiện dịch vụ cho thú cưng");
-                refetch();
+        confirmAction(
+            "Bắt đầu dịch vụ?",
+            "Xác nhận bạn muốn bắt đầu thực hiện dịch vụ ngay bây giờ.",
+            () => {
+                setProcessingItem({ id, petId });
+                startService({ id, petId }, {
+                    onSuccess: () => {
+                        toast.success("Đã bắt đầu thực hiện dịch vụ cho thú cưng");
+                        refetch();
+                    },
+                    onError: (error: any) => {
+                        const message = error.response?.data?.message || "Lỗi khi bắt đầu dịch vụ";
+                        toast.error(message);
+                    },
+                    onSettled: () => setProcessingItem(null)
+                });
             },
-            onError: (error: any) => {
-                const message = error.response?.data?.message || "Lỗi khi bắt đầu dịch vụ";
-                toast.error(message);
-            }
-        });
+            'info'
+        );
     };
 
     const handleComplete = (id: string, petId?: string) => {
-        updateStatus({ id, status: "completed", petId }, {
-            onSuccess: () => {
-                toast.success("Đã hoàn thành dịch vụ cho thú cưng");
-                refetch();
+        confirmAction(
+            "Hoàn thành dịch vụ?",
+            "Bạn có chắc chắn muốn xác nhận hoàn thành dịch vụ này?",
+            () => {
+                setProcessingItem({ id, petId });
+                updateStatus({ id, status: "completed", petId }, {
+                    onSuccess: () => {
+                        toast.success("Đã hoàn thành dịch vụ cho thú cưng");
+                        refetch();
+                    },
+                    onError: (error: any) => {
+                        const message = error.response?.data?.message || "Lỗi khi cập nhật trạng thái";
+                        toast.error(message);
+                    },
+                    onSettled: () => setProcessingItem(null)
+                });
             },
-            onError: (error: any) => {
-                const message = error.response?.data?.message || "Lỗi khi cập nhật trạng thái";
-                toast.error(message);
-            }
-        });
+            'success'
+        );
     };
 
     const getStatusChip = (status: string) => {
@@ -331,9 +345,13 @@ export const StaffTaskListPage = () => {
                                                                         <Button
                                                                             variant="contained"
                                                                             size="small"
-                                                                            startIcon={<Icon icon={task.bookingStatus === 'pending' ? "eva:clock-outline" : "eva:play-circle-fill"} />}
+                                                                            startIcon={
+                                                                                (isStarting && processingItem?.id === task._id && processingItem?.petId === m.petId?._id) ?
+                                                                                    <CircularProgress size={16} color="inherit" /> :
+                                                                                    <Icon icon={task.bookingStatus === 'pending' ? "eva:clock-outline" : "eva:play-circle-fill"} />
+                                                                            }
                                                                             onClick={() => handleStart(task._id, m.petId?._id)}
-                                                                            disabled={isStarting || task.bookingStatus === 'pending'}
+                                                                            disabled={(isStarting && processingItem?.id === task._id && processingItem?.petId === m.petId?._id) || task.bookingStatus === 'pending'}
                                                                             sx={{
                                                                                 borderRadius: "var(--shape-borderRadius)",
                                                                                 textTransform: 'none',
@@ -354,23 +372,29 @@ export const StaffTaskListPage = () => {
                                                                                 duration={task.serviceId?.duration || 0}
                                                                                 minDuration={task.serviceId?.minDuration || 0}
                                                                                 maxDuration={task.serviceId?.maxDuration || 0}
-                                                                                surchargeType={task.serviceId?.surchargeType}
-                                                                                surchargeValue={task.serviceId?.surchargeValue}
                                                                             />
                                                                             <Button
                                                                                 variant="contained"
                                                                                 size="small"
                                                                                 color="success"
-                                                                                startIcon={<Icon icon="eva:checkmark-circle-2-fill" />}
+                                                                                startIcon={
+                                                                                    (isUpdating && processingItem?.id === task._id && processingItem?.petId === m.petId?._id) ?
+                                                                                        <CircularProgress size={16} color="inherit" /> :
+                                                                                        <Icon icon="eva:checkmark-circle-2-fill" />
+                                                                                }
                                                                                 onClick={() => handleComplete(task._id, m.petId?._id)}
                                                                                 disabled={
-                                                                                    isUpdating ||
+                                                                                    (isUpdating && processingItem?.id === task._id && processingItem?.petId === m.petId?._id) ||
                                                                                     (task.serviceId?.minDuration > 0 &&
                                                                                         dayjs().diff(dayjs(m.startedAt), 'minute') < task.serviceId.minDuration)
                                                                                 }
-                                                                                sx={{ borderRadius: "var(--shape-borderRadius)", textTransform: 'none', color: "var(--palette-common-white)" }}
+                                                                                sx={{
+                                                                                    borderRadius: "var(--shape-borderRadius)",
+                                                                                    textTransform: 'none',
+                                                                                    color: "var(--palette-common-white)"
+                                                                                }}
                                                                             >
-                                                                                Xong
+                                                                                Hoàn thành
                                                                             </Button>
                                                                         </Stack>
                                                                     )}
@@ -380,11 +404,12 @@ export const StaffTaskListPage = () => {
                                                             {m.status === 'completed' && task.bookingStatus !== 'cancelled' && (
                                                                 <Stack alignItems="flex-end">
                                                                     <Icon icon="eva:checkmark-circle-2-fill" width={24} style={{ color: 'var(--palette-success-main)' }} />
-                                                                    {m.surchargeAmount > 0 && (
+                                                                    {/* Final surcharge hidden based on user request */}
+                                                                    {/* {m.surchargeAmount > 0 && (
                                                                         <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 700, mt: 0.5 }}>
                                                                             +{m.surchargeAmount.toLocaleString()}đ phụ thu
                                                                         </Typography>
-                                                                    )}
+                                                                    )} */}
                                                                 </Stack>
                                                             )}
 

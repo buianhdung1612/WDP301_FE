@@ -4,10 +4,12 @@ import { DeleteIcon, EditIcon, EyeIcon } from "../../../assets/icons/index";
 import { COLORS } from "../configs/constants";
 import { useNavigate } from "react-router-dom";
 import { prefixAdmin } from "../../../constants/routes";
-import { useDeleteProduct } from "../hooks/useProduct";
+import { useProducts } from "../hooks/useProducts";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
+import { confirmDelete } from "../../../utils/swal";
+import { ReloadIcon } from "../../../assets/icons/index";
 
 // Sản phẩm
 export const RenderProductCell = (params: GridRenderCellParams) => {
@@ -201,64 +203,110 @@ export const RenderStatusCell = (params: GridRenderCellParams) => {
     );
 }
 
+interface RenderActionsCellProps extends GridRenderCellParams {
+    isTrash: boolean;
+}
+
 // Actions
-export const RenderActionsCell = (params: GridRenderCellParams) => {
+export const RenderActionsCell = (params: RenderActionsCellProps) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { mutate: deleteProduct } = useDeleteProduct();
+    const { deleteProduct, restoreProduct, forceDeleteProduct } = useProducts();
+    const { isTrash, ...paramsRest } = params;
 
     const handleEdit = () => {
         navigate(`/${prefixAdmin}/product/edit/${params.row.id}`);
     };
 
     const handleDelete = () => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-            deleteProduct(params.row.id, {
+        const message = isTrash ? "Bạn có chắc chắn muốn xóa vĩnh viễn sản phẩm này?" : "Bạn có chắc chắn muốn xóa sản phẩm này?";
+        const action = isTrash ? forceDeleteProduct : deleteProduct;
+
+        confirmDelete(message, () => {
+            action(params.row.id, {
                 onSuccess: (res: any) => {
                     if (res.success) {
-                        toast.success(res.message || "Xóa sản phẩm thành công");
+                        toast.success(res.message || "Thao tác thành công");
                     } else {
-                        toast.error(res.message || "Xóa sản phẩm thất bại");
+                        toast.error(res.message || "Thao tác thất bại");
                     }
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || err.message || "Thao tác không thành công");
                 }
             });
-        }
+        });
+    };
+
+    const handleRestore = () => {
+        restoreProduct(params.row.id, {
+            onSuccess: (res: any) => {
+                if (res.success) {
+                    toast.success("Khôi phục sản phẩm thành công");
+                } else {
+                    toast.error(res.message || "Khôi phục sản phẩm thất bại");
+                }
+            },
+            onError: (err: any) => {
+                toast.error(err.response?.data?.message || err.message || "Khôi phục sản phẩm không thành công");
+            }
+        });
     };
 
     return (
-        <GridActionsCell {...params}>
-            <GridActionsCellItem
-                icon={<EyeIcon />}
-                label={t("admin.common.details")}
-                onClick={handleEdit}
-                showInMenu
-                {...({
-                    sx: {
-                        '& .MuiTypography-root': {
-                            fontSize: '0.8125rem',
-                            fontWeight: "600"
+        <GridActionsCell {...paramsRest}>
+            {!isTrash ? (
+                <>
+                    <GridActionsCellItem
+                        icon={<EyeIcon />}
+                        label={t("admin.common.details")}
+                        onClick={handleEdit}
+                        showInMenu
+                        {...({
+                            sx: {
+                                '& .MuiTypography-root': {
+                                    fontSize: '0.8125rem',
+                                    fontWeight: "600"
+                                },
+                            },
+                        } as any)}
+                    />
+                    <GridActionsCellItem
+                        icon={<EditIcon />}
+                        label={t("admin.common.edit")}
+                        onClick={handleEdit}
+                        showInMenu
+                        {...({
+                            sx: {
+                                '& .MuiTypography-root': {
+                                    fontSize: '0.8125rem',
+                                    fontWeight: "600"
+                                },
+                            },
+                        } as any)}
+                    />
+                </>
+            ) : (
+                <GridActionsCellItem
+                    icon={<ReloadIcon />}
+                    label="Khôi phục"
+                    onClick={handleRestore}
+                    showInMenu
+                    {...({
+                        sx: {
+                            '& .MuiTypography-root': {
+                                fontSize: '0.8125rem',
+                                fontWeight: "600",
+                                color: "var(--palette-info-main)"
+                            },
                         },
-                    },
-                } as any)}
-            />
-            <GridActionsCellItem
-                icon={<EditIcon />}
-                label={t("admin.common.edit")}
-                onClick={handleEdit}
-                showInMenu
-                {...({
-                    sx: {
-                        '& .MuiTypography-root': {
-                            fontSize: '0.8125rem',
-                            fontWeight: "600"
-                        },
-                    },
-                } as any)}
-            />
+                    } as any)}
+                />
+            )}
 
             <GridActionsCellItem
                 icon={<DeleteIcon />}
-                label={t("admin.common.delete")}
+                label={isTrash ? "Xóa vĩnh viễn" : t("admin.common.delete")}
                 onClick={handleDelete}
                 showInMenu
                 {...({

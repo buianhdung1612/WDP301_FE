@@ -113,6 +113,9 @@ export const BookingEditPage = () => {
     const isReadOnly = useMemo(() =>
         ["completed", "cancelled"].includes(booking?.bookingStatus), [booking]);
 
+    const isInProgress = useMemo(() =>
+        booking?.bookingStatus === 'in-progress', [booking]);
+
     const { data: staffList = [] } = useStaffByService(formData.serviceId);
 
     const { data: schedulesRes } = useSchedules({
@@ -122,8 +125,25 @@ export const BookingEditPage = () => {
         date: formData.date.format('YYYY-MM-DD')
     });
 
-    const schedules = schedulesRes?.data || [];
-    const bookings = bookingsRes?.data || [];
+    const schedules = useMemo(() => {
+        if (!schedulesRes) return [];
+        const data = schedulesRes as any;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [schedulesRes]);
+
+    const bookings = useMemo(() => {
+        if (!bookingsRes) return [];
+        const data = bookingsRes as any;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [bookingsRes]);
 
     const staffAvailability = useMemo(() => {
         if (!formData.serviceId) return {};
@@ -172,7 +192,7 @@ export const BookingEditPage = () => {
 
 
 
-    const { data: userPets = [] } = usePets({ userId: formData.userId });
+    const { data: userPetsResBody } = usePets({ userId: formData.userId });
 
     // Cập nhật duration dựa trên số lượng thú cưng cho mỗi nhân viên
     useEffect(() => {
@@ -231,6 +251,16 @@ export const BookingEditPage = () => {
             value: u._id,
             label: `${u.fullName} - ${u.phone}`,
         })), [users]);
+
+    const userPets = useMemo(() => {
+        if (!userPetsResBody) return [];
+        const data = userPetsResBody as any;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [userPetsResBody]);
 
     const petOptions = useMemo(() =>
         userPets.map((pet: any) => ({
@@ -452,7 +482,7 @@ export const BookingEditPage = () => {
                                     options={serviceOptions}
                                     value={formData.serviceId}
                                     onChange={(val) => setFormData({ ...formData, serviceId: val })}
-                                    disabled={isReadOnly}
+                                    disabled={isReadOnly || isInProgress}
                                     sx={{ width: '100%' }}
                                 />
 
@@ -462,7 +492,7 @@ export const BookingEditPage = () => {
                                             label="Ngày thực hiện"
                                             value={formData.date}
                                             onChange={(val) => setFormData({ ...formData, date: val || dayjs() })}
-                                            disabled={isReadOnly}
+                                            disabled={isReadOnly || isInProgress}
                                             format="DD/MM/YYYY"
                                             minDate={dayjs()}
                                             slotProps={{ textField: { fullWidth: true } }}
@@ -473,7 +503,7 @@ export const BookingEditPage = () => {
                                             label="Bắt đầu"
                                             value={formData.startTime}
                                             onChange={(val) => setFormData({ ...formData, startTime: val || dayjs() })}
-                                            disabled={isReadOnly}
+                                            disabled={isReadOnly || isInProgress}
                                             ampm={false} format="HH:mm"
                                             minutesStep={1}
                                             shouldDisableTime={(timeValue) => isTimeDisabled(timeValue, 'start')}
@@ -691,14 +721,14 @@ export const BookingEditPage = () => {
                                         options={userOptions}
                                         value={formData.userId}
                                         onChange={(val) => setFormData({ ...formData, userId: val, petIds: [] })}
-                                        disabled={isReadOnly}
+                                        disabled={true} // Always locked in Edit
                                     />
                                     <SelectMulti
                                         label="Thú cưng"
                                         options={petOptions}
                                         value={formData.petIds}
                                         onChange={(val) => {
-                                            if (isReadOnly) return;
+                                            if (isReadOnly || isInProgress) return;
                                             setFormData(prev => {
                                                 let newStaffIds = prev.staffIds;
                                                 if (val.length > 0 && prev.staffIds.length > val.length) {
@@ -708,7 +738,7 @@ export const BookingEditPage = () => {
                                                 return { ...prev, petIds: val, staffIds: newStaffIds };
                                             });
                                         }}
-                                        disabled={isReadOnly || !formData.userId}
+                                        disabled={isReadOnly || isInProgress || !formData.userId}
                                     />
                                     <Divider sx={{ borderStyle: 'dashed' }} />
                                     <SelectSingle
@@ -736,7 +766,7 @@ export const BookingEditPage = () => {
                                         ]}
                                         value={formData.paymentMethod}
                                         onChange={(val) => setFormData({ ...formData, paymentMethod: val })}
-                                        disabled={isReadOnly}
+                                        disabled={isReadOnly || isInProgress || formData.paymentStatus === 'paid'}
                                     />
                                     <SelectSingle
                                         label="Trạng thái thanh toán"
@@ -747,7 +777,7 @@ export const BookingEditPage = () => {
                                         ]}
                                         value={formData.paymentStatus}
                                         onChange={(val) => setFormData({ ...formData, paymentStatus: val })}
-                                        disabled={isReadOnly}
+                                        disabled={isReadOnly || (formData.paymentStatus === 'paid' && !isStaff)} // Only non-staff (admins) can potentially revert payment if really needed, or just lock it for everyone
                                     />
 
                                     <Divider sx={{ borderStyle: 'dashed' }} />

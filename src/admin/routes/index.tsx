@@ -74,9 +74,11 @@ import { BoardingBookingListPage } from "../pages/boarding/BoardingBookingListPa
 import { BoardingBookingCreatePage } from "../pages/boarding/BoardingBookingCreatePage";
 import { BoardingCageListPage } from "../pages/boarding/BoardingCageListPage";
 import { BoardingCareSchedulePage } from "../pages/boarding/BoardingCareSchedulePage";
+import { NotificationListPage } from "../pages/notification/NotificationListPage";
 
 export const AdminRoutes = [
     { path: "dashboard", element: <PermissionGuard permission="dashboard_view"><DashboardPage /></PermissionGuard> },
+    { path: "notifications", element: <NotificationListPage /> },
     { path: "dashboard/system", element: <PermissionGuard permission="dashboard_view"><SystemPage /></PermissionGuard> },
     { path: "dashboard/ecommerce", element: <PermissionGuard permission="dashboard_view"><EcommercePage /></PermissionGuard> },
     { path: "dashboard/analytics", element: <PermissionGuard permission="dashboard_view"><AnalyticsPage /></PermissionGuard> },

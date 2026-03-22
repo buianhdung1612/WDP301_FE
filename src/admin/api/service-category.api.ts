@@ -47,3 +47,13 @@ export const deleteCategory = async (id: string | number): Promise<any> => {
     const response = await apiApp.delete(`${BASE_URL}/delete/${id}`, withAuth());
     return response.data;
 };
+
+export const restoreCategory = async (id: string | number): Promise<any> => {
+    const response = await apiApp.patch(`${BASE_URL}/restore/${id}`, {}, withAuth());
+    return response.data;
+};
+
+export const forceDeleteCategory = async (id: string | number): Promise<any> => {
+    const response = await apiApp.delete(`${BASE_URL}/force-delete/${id}`, withAuth());
+    return response.data;
+};

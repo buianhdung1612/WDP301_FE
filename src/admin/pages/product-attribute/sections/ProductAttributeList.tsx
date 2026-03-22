@@ -7,7 +7,7 @@ import { ProductAttributeToolbar } from './ProductAttributeToolbar';
 import { useDataGridLocale } from '../../../hooks/useDataGridLocale';
 import { useTranslation } from 'react-i18next';
 import { useProductAttributes } from '../hooks/useProductAttribute';
-import { columnsConfig, columnsInitialState } from '../configs/column.config';
+import { useAttributeColumns, columnsInitialState } from '../configs/column.config';
 import {
     dataGridCardStyles,
     dataGridContainerStyles,
@@ -16,7 +16,7 @@ import {
 
 import { useState } from 'react';
 
-export const ProductAttributeList = () => {
+export const ProductAttributeList = ({ isTrash = false }: { isTrash?: boolean }) => {
     const { t } = useTranslation();
     const [page, setPage] = useState(0);
     const [pageSize, setPageSize] = useState(10);
@@ -26,12 +26,14 @@ export const ProductAttributeList = () => {
         page: page + 1,
         limit: pageSize,
         keyword: search,
+        is_trash: isTrash
     };
 
     const { data: res, isLoading } = useProductAttributes(params);
     const attributes = res?.data?.recordList || [];
     const pagination = res?.data?.pagination || { totalRecords: 0 };
     const localeText = useDataGridLocale();
+    const columns = useAttributeColumns(isTrash);
 
     return (
         <Card elevation={0} sx={dataGridCardStyles}>
@@ -41,7 +43,7 @@ export const ProductAttributeList = () => {
                     getRowId={(row) => row._id}
                     showToolbar
                     loading={isLoading}
-                    columns={columnsConfig}
+                    columns={columns}
                     density="comfortable"
                     slots={{
                         toolbar: ProductAttributeToolbar as any,
