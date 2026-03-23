@@ -21,7 +21,7 @@ export const StaffCustomerListPage = () => {
                     />
                 </div>
             </div>
-            <AccountUserList createdBy={user?.id} />
+            <AccountUserList />
         </>
     );
 };
