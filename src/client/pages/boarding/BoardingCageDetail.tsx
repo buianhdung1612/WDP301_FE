@@ -2,12 +2,12 @@
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Bath, BedDouble, CalendarDays, Check, ChevronLeft, ChevronRight, ImageIcon, PawPrint, ShieldCheck, Sparkles, Star, Weight } from "lucide-react";
+import { Bath, BedDouble, CalendarDays, Check, ChevronLeft, ChevronRight, Dumbbell, ImageIcon, Mail, PawPrint, Phone, Search, ShieldCheck, Sparkles, Star, UserRound, Utensils, Weight, X } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { getBoardingBookingList } from "../../api/dashboard.api";
 import { FooterSub } from "../../components/layouts/FooterSub";
-import { useAvailableCages, useBoardingCageDetail, useBoardingCageReviews, useCreateBoardingCageReview } from "../../hooks/useBoarding";
+import { useAvailableCages, useBoardingCageDetail, useBoardingCageReviews, useCreateBoardingCageReview, useExerciseTemplates, useFoodTemplates } from "../../hooks/useBoarding";
 import { useMyPets } from "../../hooks/usePet";
 
 const SIZE_LABELS: Record<string, string> = {
@@ -139,6 +139,12 @@ export const BoardingCageDetailPage = () => {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
+  const [feedingOption, setFeedingOption] = useState<"standard" | "custom">("standard");
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [customFeeding, setCustomFeeding] = useState<Record<string, string>>({});
+  const [customExercise, setCustomExercise] = useState<Record<string, string>>({});
+  const [scheduleTab, setScheduleTab] = useState<"food" | "exercise">("food");
+  const [scheduleSearch, setScheduleSearch] = useState("");
 
   const { data: availableCages = [] } = useAvailableCages(checkInDate, checkOutDate);
 
@@ -365,6 +371,8 @@ export const BoardingCageDetailPage = () => {
           notes: note,
           paymentGateway: "zalopay" as const,
           paymentMode: "full" as const,
+          customFeeding,
+          customExercise,
         },
       },
     });
@@ -736,52 +744,330 @@ export const BoardingCageDetailPage = () => {
                     <div className="inline-flex h-[48px] w-full items-center overflow-hidden rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8]"><button type="button" onClick={() => setQuantityWithinRange(quantity - 1)} disabled={isSoldOut || quantity <= 1} className="h-full w-[46px] border-r border-[#e7ddd3] text-[18px] font-[800] text-[#596273] transition-default hover:bg-white disabled:cursor-not-allowed disabled:opacity-40">-</button><input type="number" min={1} max={Math.max(1, maxSelectableRooms || ROOM_CAPACITY_DEFAULT)} value={quantity} onChange={(e) => setQuantityWithinRange(Number(e.target.value || 1))} disabled={isSoldOut} className="h-full w-full bg-transparent px-[10px] text-center text-[14px] font-[700] text-client-secondary outline-none" /><button type="button" onClick={() => setQuantityWithinRange(quantity + 1)} disabled={isSoldOut || quantity >= Math.max(1, maxSelectableRooms)} className="h-full w-[46px] border-l border-[#e7ddd3] text-[18px] font-[800] text-[#596273] transition-default hover:bg-white disabled:cursor-not-allowed disabled:opacity-40">+</button></div>
                     <p className="mt-[6px] text-[11px] text-[#7b8591]">Hiện còn {remainingRooms}/{totalRooms} phòng có thể đặt trong khoảng ngày đã chọn.</p>
                   </div>
+                  <div className="space-y-[8px]">
+                    <p className="text-[11px] font-[800] uppercase tracking-[0.12em] text-[#a1a9b4]">Lựa chọn thực đơn</p>
+                    <div className="grid grid-cols-2 gap-[8px]">
+                      <button
+                        type="button"
+                        onClick={() => setFeedingOption("standard")}
+                        className={`flex flex-col items-center gap-[6px] rounded-[18px] border py-[12px] px-[8px] transition-all ${feedingOption === "standard"
+                          ? "border-client-primary bg-[#fffbf9] shadow-[0_8px_20px_rgba(237,104,34,0.08)]"
+                          : "border-[#e7ddd3] bg-[#fbfaf8] hover:border-client-primary/40"
+                          }`}
+                      >
+                        <Sparkles className={`h-[20px] w-[20px] ${feedingOption === "standard" ? "text-client-primary" : "text-[#9aa3b2]"}`} />
+                        <div className="text-center">
+                          <p className={`text-[12px] font-[800] ${feedingOption === "standard" ? "text-client-secondary" : "text-[#51606d]"}`}>Gói dinh dưỡng</p>
+                          <p className="text-[10px] text-[#8a94a1]">TeddyPet lo liệu</p>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFeedingOption("custom")}
+                        className={`flex flex-col items-center gap-[6px] rounded-[18px] border py-[12px] px-[8px] transition-all ${feedingOption === "custom"
+                          ? "border-client-primary bg-[#fffbf9] shadow-[0_8px_20px_rgba(237,104,34,0.08)]"
+                          : "border-[#e7ddd3] bg-[#fbfaf8] hover:border-client-primary/40"
+                          }`}
+                      >
+                        <UserRound className={`h-[20px] w-[20px] ${feedingOption === "custom" ? "text-client-primary" : "text-[#9aa3b2]"}`} />
+                        <div className="text-center">
+                          <p className={`text-[12px] font-[800] ${feedingOption === "custom" ? "text-client-secondary" : "text-[#51606d]"}`}>Thực đơn riêng</p>
+                          <p className="text-[10px] text-[#8a94a1]">Chủ nuôi chuẩn bị</p>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+
                   <div>
                     <p className="mb-[6px] text-[11px] font-[800] uppercase tracking-[0.12em] text-[#a1a9b4]">Thông tin bé</p>
                     <div className="space-y-[8px]">{myPets.length === 0 ? <div className="flex h-[48px] items-center rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] text-[#6b7280]">Chưa có thú cưng trong tài khoản</div> : Array.from({ length: quantity }).map((_, idx) => { const currentPetId = selectedPetIds[idx] || ""; const usedByOtherSlots = selectedPetIds.filter((_, selectedIdx) => selectedIdx !== idx).map((selectedId) => String(selectedId || "")).filter(Boolean); return <select key={`pet-slot-${idx}`} value={currentPetId} onChange={(e) => setPetAtIndex(idx, e.target.value)} className="h-[48px] w-full rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] font-[700] text-client-secondary outline-none focus:border-client-primary"><option value="">Chọn thú cưng cho phòng {idx + 1}</option>{myPets.map((pet: any) => { const petId = String(pet._id); return <option key={petId} value={petId} disabled={usedByOtherSlots.includes(petId) || conflictingPetBookings.has(petId)}>{pet.name} {pet.breed ? `(${pet.breed})` : ""}{conflictingPetBookings.has(petId) ? ` - Đã đặt ${formatBookingRange(conflictingPetBookings.get(petId))}` : ""}</option>; })}</select>; })}</div>{conflictingPets.length > 0 ? <div className="mt-[8px] rounded-[14px] border border-[#fde1cf] bg-[#fff7f2] px-[12px] py-[10px] text-[12px] leading-[1.7] text-[#9a5a28]"><span className="font-[800]">Các bé đã có lịch khách sạn trùng ngày:</span> {conflictingPets.map((pet: any) => `${pet.name}${pet.breed ? ` (${pet.breed})` : ""} - ${formatBookingRange(conflictingPetBookings.get(normalizeId(pet?._id)))}`).join("; ")}</div> : null}</div>
-                  <div className="rounded-[18px] border border-[#d6eee2] bg-[#edf8f1] px-[14px] py-[12px]">
-                    <p className="text-[11px] font-[800] uppercase tracking-[0.12em] text-[#4a7d62]">Thông tin người gửi</p>
-                    <div className="mt-[8px] space-y-[2px]">
-                      <p className="text-[14px] font-[800] text-client-secondary truncate" title={fullName}>{fullName || "Chưa cập nhật"}</p>
-                      <p className="text-[13px] text-[#51606d]">{phone || "Chưa cập nhật số điện thoại"}</p>
-                      {email ? <p className="text-[13px] text-[#51606d] break-all leading-relaxed">{email}</p> : null}
+                  <div className="rounded-[22px] border border-[#d6eee2] bg-[#edf8f1] p-[18px] space-y-[12px]">
+                    <div className="flex items-center gap-[10px] border-b border-[#c9e4d6] pb-[10px]">
+                      <UserRound className="h-[18px] w-[18px] text-[#4a7d62]" />
+                      <p className="text-[14px] font-[800] uppercase tracking-[0.12em] text-[#4a7d62]">Thông tin người đặt</p>
+                    </div>
+
+                    <div className="space-y-[10px]">
+                      {[
+                        { icon: <UserRound className="h-[18px] w-[18px]" />, label: "Họ và tên", value: fullName, setter: setFullName, placeholder: "Nhập họ tên...", type: "text" },
+                        { icon: <Phone className="h-[18px] w-[18px]" />, label: "Số điện thoại", value: phone, setter: setPhone, placeholder: "Số điện thoại...", type: "tel" },
+                        { icon: <Mail className="h-[18px] w-[18px]" />, label: "Email", value: email, setter: setEmail, placeholder: "Email (không bắt buộc)...", type: "email" },
+                      ].map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-[12px] rounded-[18px] border border-[#d6eee2] bg-white p-[11px] shadow-sm transition-all focus-within:border-client-primary/50 focus-within:shadow-md">
+                          <div className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[12px] bg-[#edf8f1] text-[#4a7d62]">
+                            {item.icon}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[10px] font-[800] uppercase tracking-[0.16em] text-[#9aa3b2]/80 mb-0.5">{item.label}</p>
+                            <input
+                              type={item.type}
+                              value={item.value}
+                              onChange={(e) => item.setter(e.target.value)}
+                              placeholder={item.placeholder}
+                              className="w-full bg-transparent text-[14px] font-[700] text-client-secondary outline-none break-all placeholder:font-[400] placeholder:text-[#cbd5e1]"
+                            />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
                   <div className="rounded-[22px] border border-[#efe2d8] bg-[#fffaf7] p-[16px] space-y-[12px]">
-                    <div className="flex items-center gap-[8px] border-b border-[#f1e6dc] pb-[8px]">
-                      <Sparkles className="h-[16px] w-[16px] text-client-primary" />
-                      <h4 className="text-[14px] font-[800] text-client-secondary uppercase tracking-wider">Chế độ chăm sóc dự kiến</h4>
+                    <div className="flex items-center justify-between border-b border-[#f1e6dc] pb-[8px]">
+                      <div className="flex items-center gap-[8px]">
+                        <Sparkles className="h-[16px] w-[16px] text-client-primary" />
+                        <h4 className="text-[14px] font-[800] text-client-secondary uppercase tracking-wider">Chế độ chăm sóc dự kiến</h4>
+                      </div>
+                      {feedingOption === "standard" && (
+                        <button
+                          type="button"
+                          onClick={() => setShowScheduleModal(true)}
+                          className="text-[11px] font-[800] text-client-primary hover:underline hover:underline-offset-4"
+                        >
+                          Tùy chỉnh
+                        </button>
+                      )}
                     </div>
 
-                    <div className="space-y-[10px]">
-                      <div>
-                        <p className="text-[11px] font-[800] text-client-primary flex items-center gap-1 mb-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-client-primary"></span> LỊCH ĂN UỐNG
-                        </p>
-                        <ul className="text-[12px] text-[#596372] space-y-1 pl-2">
-                          <li>• <span className="font-bold">Sáng (07:30):</span> Bữa chính dinh dưỡng</li>
-                          <li>• <span className="font-bold">Trưa (12:00):</span> Snack & Bổ sung nước</li>
-                          <li>• <span className="font-bold">Tối (18:30):</span> Bữa nhẹ & Nghỉ ngơi</li>
-                        </ul>
-                      </div>
+                    <div className="animate-in fade-in duration-500">
+                      {feedingOption === "custom" ? (
+                        <div className="space-y-[12px]">
+                          <div className="rounded-[16px] border border-dashed border-client-primary/40 bg-white p-[14px] text-center">
+                            <div className="flex justify-center mb-2">
+                              <div className="h-[42px] w-[42px] rounded-full bg-[#fff4ee] text-client-primary flex items-center justify-center shadow-sm">
+                                <UserRound className="h-[20px] w-[20px]" />
+                              </div>
+                            </div>
+                            <p className="text-[13px] font-[800] text-client-secondary uppercase tracking-tight">Thực đơn & Lịch riêng</p>
+                            <p className="mt-[4px] text-[12px] leading-[1.6] text-[#697384]">
+                              Vui lòng chuẩn bị sẵn thức ăn và để lại hướng dẫn chi tiết trong phần <span className="text-client-primary font-[800]">Ghi chú</span> phía dưới.
+                            </p>
+                          </div>
 
-                      <div>
-                        <p className="text-[11px] font-[800] text-[#4f46e5] flex items-center gap-1 mb-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#4f46e5]"></span> LỊCH VẬN ĐỘNG
-                        </p>
-                        <ul className="text-[12px] text-[#596372] space-y-1 pl-2">
-                          <li>• <span className="font-bold">9:00 - 10:30:</span> Vui chơi tại sân vườn</li>
-                          <li>• <span className="font-bold">16:00 - 17:00:</span> Tương tác nhân viên</li>
-                        </ul>
-                      </div>
+                          <div className="h-px bg-[#f1e6dc] mx-2" />
+
+                          <div>
+                            <p className="text-[11px] font-[800] text-[#4f46e5] flex items-center gap-1 mb-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#4f46e5]"></span> LỊCH VẬN ĐỘNG (HỖ TRỢ)
+                            </p>
+                            <ul className="text-[12px] text-[#596372] space-y-2 pl-2">
+                              {(() => {
+                                const selectedPets = (selectedPetIds || [])
+                                  .map(id => (myPets || []).find((p: any) => normalizeId(p._id) === id))
+                                  .filter(Boolean);
+                                const primaryPet = selectedPets[0];
+                                let exercise = [
+                                  { time: "09:00 - 10:30", content: "Vui chơi tại sân vườn" },
+                                  { time: "16:30 - 17:30", content: "Tương tác nhân viên & Snack" }
+                                ];
+                                if (primaryPet?.type === "cat") {
+                                  exercise = [
+                                    { time: "10:00 - 11:30", content: "Leo trèo Cat-tree" },
+                                    { time: "15:30 - 16:30", content: "Tương tác (Laser/Cần câu)" }
+                                  ];
+                                }
+                                return exercise.map((item, i) => (
+                                  <li key={i} className="flex items-start gap-2 bg-white/50 p-2 rounded-lg border border-[#f1e6dc]/40">
+                                    <span className="font-[800] text-[#4f46e5] whitespace-nowrap">{item.time}:</span>
+                                    <span>{item.content}</span>
+                                  </li>
+                                ));
+                              })()}
+                            </ul>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-[12px]">
+                          {(() => {
+                            const selectedPets = (selectedPetIds || [])
+                              .map(id => (myPets || []).find((p: any) => normalizeId(p._id) === id))
+                              .filter(Boolean);
+                            const primaryPet = selectedPets[0];
+                            const isYoung = primaryPet?.age && primaryPet.age < 1;
+                            const isSenior = primaryPet?.age && primaryPet.age > 7;
+
+                            let feeding = [
+                              { time: "07:30", label: "Sáng", content: customFeeding["Sáng"] || (isYoung ? "Hạt ngâm mềm & Canxi" : "Bữa chính dinh dưỡng") },
+                              { time: "12:00", label: "Trưa", content: customFeeding["Trưa"] || "Snack & Bổ sung nước" },
+                              { time: "18:00", label: "Tối", content: customFeeding["Tối"] || (isSenior ? "Cơm trộn nhẹ bụng" : "Hạt trộn thịt/Pate") }
+                            ];
+                            let exercise = [
+                              { time: "09:00 - 10:30", content: customExercise["slot1"] || "Vận động & Vui chơi ngoài trời" },
+                              { time: "16:30 - 17:30", content: customExercise["slot2"] || "Tương tác & Huấn luyện cơ bản" }
+                            ];
+
+                            if (primaryPet?.type === "cat") {
+                              feeding = [
+                                { time: "08:00", label: "Sáng", content: customFeeding["Sáng"] || (isYoung ? "Pate con & Sữa" : "Hạt cao cấp & Pate") },
+                                { time: "13:00", label: "Trưa", content: customFeeding["Trưa"] || "Súp thưởng bổ sung nước" },
+                                { time: "19:00", label: "Tối", content: customFeeding["Tối"] || (isSenior ? "Bữa nhẹ dễ tiêu" : "Hạt & Gà xé") }
+                              ];
+                              exercise = [
+                                { time: "10:00 - 11:30", content: customExercise["slot1"] || "Leo trèo khu vực Cat-tree" },
+                                { time: "15:30 - 16:30", content: customExercise["slot2"] || "Tương tác (Laser/Cần câu)" }
+                              ];
+                            }
+
+                            return (
+                              <>
+                                <div>
+                                  <p className="text-[11px] font-[800] text-client-primary flex items-center gap-1 mb-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-client-primary"></span> LỊCH ĂN UỐNG {primaryPet ? `(${primaryPet.name})` : ""}
+                                  </p>
+                                  <ul className="text-[12px] text-[#596372] space-y-2 pl-2">
+                                    {feeding.map((item, i) => (
+                                      <li key={i} className="flex items-start gap-2 bg-white/50 p-2 rounded-lg border border-[#f1e6dc]/40">
+                                        <span className="font-[800] text-client-primary whitespace-nowrap">{item.label} ({item.time}):</span>
+                                        <span>{item.content}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                                <div>
+                                  <p className="text-[11px] font-[800] text-[#4f46e5] flex items-center gap-1 mb-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#4f46e5]"></span> LỊCH VẬN ĐỘNG
+                                  </p>
+                                  <ul className="text-[12px] text-[#596372] space-y-2 pl-2">
+                                    {exercise.map((item, i) => (
+                                      <li key={i} className="flex items-start gap-2 bg-white/50 p-2 rounded-lg border border-[#f1e6dc]/40">
+                                        <span className="font-[800] text-[#4f46e5] whitespace-nowrap">{item.time}:</span>
+                                        <span>{item.content}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                  {primaryPet && (
+                                    <p className="mt-[12px] text-[10px] italic text-[#9aa3b2] text-center border-t border-[#efe3d8] pt-2">
+                                      * {Object.keys(customFeeding).length > 0 || Object.keys(customExercise).length > 0 ? "Lịch trình đã được tùy chỉnh." : `Lịch trình tự động cho ${primaryPet?.type === "cat" ? "mèo" : "chó"} ${isYoung ? "nhỏ" : isSenior ? "lớn tuổi" : "trưởng thành"}.`}
+                                    </p>
+                                  )}
+                                </div>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      )}
                     </div>
                   </div>
 
+                  {/* Schedule Customization Modal */}
+                  {showScheduleModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm animate-in fade-in duration-300">
+                      <div className="w-full max-w-[550px] overflow-hidden rounded-[32px] border border-[#eadfd4] bg-white shadow-2xl animate-in zoom-in-95 duration-300">
+                        <div className="relative border-b border-[#f1e6dc] bg-[#fffaf7] px-[24px] py-[20px]">
+                          <div className="flex items-center gap-[12px]">
+                            <div className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-client-primary/10 text-client-primary">
+                              <Sparkles className="h-[20px] w-[20px]" />
+                            </div>
+                            <div>
+                              <h3 className="text-[20px] font-[800] text-client-secondary">Tùy chỉnh lịch trình</h3>
+                              <p className="text-[12px] text-[#6b7582]">Cá nhân hóa bữa ăn và vận động cho bé</p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setShowScheduleModal(false)}
+                            className="absolute right-[20px] top-[24px] rounded-full p-2 text-[#a1a9b4] hover:bg-black/5 hover:text-client-secondary transition-default"
+                          >
+                            <X className="h-[20px] w-[20px]" />
+                          </button>
+                        </div>
+
+                        <div className="flex border-b border-[#f1e6dc]">
+                          <button
+                            type="button"
+                            onClick={() => setScheduleTab("food")}
+                            className={`flex flex-1 items-center justify-center gap-2 py-[14px] text-[13px] font-[800] transition-all ${scheduleTab === "food" ? "border-b-2 border-client-primary bg-white text-client-primary" : "text-[#7b8591] hover:bg-[#fffcfb]"}`}
+                          >
+                            <Utensils className="h-[16px] w-[16px]" />
+                            DINH DƯỠNG
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setScheduleTab("exercise")}
+                            className={`flex flex-1 items-center justify-center gap-2 py-[14px] text-[13px] font-[800] transition-all ${scheduleTab === "exercise" ? "border-b-2 border-client-primary bg-white text-client-primary" : "text-[#7b8591] hover:bg-[#fffcfb]"}`}
+                          >
+                            <Dumbbell className="h-[16px] w-[16px]" />
+                            VẬN ĐỘNG
+                          </button>
+                        </div>
+
+                        {/* Search Bar */}
+                        <div className="border-b border-[#f1e6dc] bg-white px-[24px] py-[14px]">
+                          <div className="relative">
+                            <Search className="absolute left-[12px] top-1/2 h-[16px] w-[16px] -translate-y-1/2 text-[#a1a9b4]" />
+                            <input
+                              type="text"
+                              value={scheduleSearch}
+                              onChange={(e) => setScheduleSearch(e.target.value)}
+                              placeholder={`Tìm kiếm ${scheduleTab === "food" ? "món ăn" : "hoạt động"}...`}
+                              className="h-[42px] w-full rounded-[14px] border border-[#efe2d8] bg-[#fbfaf8] pl-[38px] pr-[12px] text-[13px] font-[700] text-client-secondary outline-none transition-all focus:border-client-primary focus:bg-white"
+                            />
+                            {scheduleSearch && (
+                              <button
+                                type="button"
+                                onClick={() => setScheduleSearch("")}
+                                className="absolute right-[12px] top-1/2 -translate-y-1/2 rounded-full p-1 text-[#a1a9b4] hover:bg-black/5 hover:text-rose-500"
+                              >
+                                <X className="h-[14px] w-[14px]" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="max-h-[60vh] overflow-y-auto p-[24px]">
+                          {(() => {
+                            const selectedPets = (selectedPetIds || [])
+                              .map(id => (myPets || []).find((p: any) => normalizeId(p._id) === id))
+                              .filter(Boolean);
+                            const primaryPet = selectedPets[0];
+                            const petType = primaryPet?.type || "dog";
+
+                            if (scheduleTab === "food") {
+                              return (
+                                <ScheduleFoodCustomizer
+                                  petType={petType}
+                                  choices={customFeeding}
+                                  onChange={setCustomFeeding}
+                                  searchQuery={scheduleSearch}
+                                />
+                              );
+                            } else {
+                              return (
+                                <ScheduleExerciseCustomizer
+                                  petType={petType}
+                                  choices={customExercise}
+                                  onChange={setCustomExercise}
+                                  searchQuery={scheduleSearch}
+                                />
+                              );
+                            }
+                          })()}
+                        </div>
+
+                        <div className="flex items-center justify-between gap-[12px] border-t border-[#f1e6dc] bg-[#fffaf7] px-[24px] py-[18px]">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCustomFeeding({});
+                              setCustomExercise({});
+                            }}
+                            className="text-[13px] font-[700] text-[#6b7582] hover:text-rose-500 transition-default"
+                          >
+                            Đặt lại mặc định
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowScheduleModal(false)}
+                            className="rounded-[16px] bg-client-primary px-[28px] py-[12px] text-[14px] font-[800] text-white shadow-lg shadow-client-primary/20 transition-all hover:bg-client-secondary active:scale-95"
+                          >
+                            Lưu cấu hình
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-[8px]">
-                    <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Họ và tên" className="h-[46px] w-full rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] outline-none focus:border-client-primary" />
-                    <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Số điện thoại" className="h-[46px] w-full rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] outline-none focus:border-client-primary" />
-                    <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="h-[46px] w-full rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] outline-none focus:border-client-primary" />
                     <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} className="w-full resize-none rounded-[16px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] py-[10px] text-[13px] outline-none focus:border-client-primary" placeholder="Lưu ý khẩu phần, tính cách, thuốc hoặc các yêu cầu đặc biệt." />
                   </div>
                   <div className="rounded-[18px] border border-[#eee2d7] bg-[#fffaf7] px-[14px] py-[12px]">
@@ -825,3 +1111,122 @@ export const BoardingCageDetailPage = () => {
   );
 };
 
+// ══════════════════════════════════════════════════
+// HELPER COMPONENTS
+// ══════════════════════════════════════════════════
+
+const ScheduleFoodCustomizer = ({ petType, choices, onChange, searchQuery }: { petType: string, choices: Record<string, string>, onChange: any, searchQuery: string }) => {
+  const { data: foodTemplates = [], isLoading } = useFoodTemplates(petType);
+
+  const meals = [
+    { id: "Sáng", label: "Bữa Sáng", icon: <Utensils className="h-4 w-4" />, time: "07:30 - 08:30" },
+    { id: "Trưa", label: "Bữa Trưa", icon: <Utensils className="h-4 w-4 text-amber-500" />, time: "12:00 - 13:00" },
+    { id: "Tối", label: "Bữa Tối", icon: <Utensils className="h-4 w-4 text-indigo-500" />, time: "18:00 - 19:30" },
+  ];
+
+  const filteredTemplates = foodTemplates.filter((f: any) =>
+    f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (f.description && f.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  if (isLoading) return <div className="flex py-10 justify-center items-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-client-primary"></div></div>;
+
+  return (
+    <div className="space-y-6">
+      {meals.map((meal) => (
+        <div key={meal.id} className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="bg-white p-1.5 rounded-lg border border-[#f1e6dc] shadow-sm">{meal.icon}</div>
+              <span className="text-[14px] font-[800] text-client-secondary uppercase tracking-tight">{meal.label}</span>
+            </div>
+            <span className="text-[11px] font-[700] text-[#9aa3b2] bg-black/5 px-2 py-0.5 rounded-full">{meal.time}</span>
+          </div>
+          <div className="grid grid-cols-1 gap-2">
+            {filteredTemplates.length > 0 ? (
+              filteredTemplates.map((food: any) => (
+                <button
+                  key={food._id}
+                  type="button"
+                  onClick={() => onChange({ ...choices, [meal.id]: food.name })}
+                  className={`flex items-start gap-3 p-3 text-left rounded-[16px] border transition-all ${choices[meal.id] === food.name ? "border-client-primary bg-[#fffbf9] shadow-sm" : "border-[#efe2d8] bg-white hover:border-client-primary/50"}`}
+                >
+                  <div className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${choices[meal.id] === food.name ? "border-client-primary bg-client-primary text-white" : "border-[#cbd5e1]"}`}>
+                    {choices[meal.id] === food.name && <Check className="h-2.5 w-2.5" />}
+                  </div>
+                  <div>
+                    <p className={`text-[13px] font-[700] ${choices[meal.id] === food.name ? "text-client-secondary" : "text-[#51606d]"}`}>{food.name}</p>
+                    {food.description && <p className="text-[11px] text-[#8a94a1] leading-relaxed mt-0.5">{food.description}</p>}
+                  </div>
+                </button>
+              ))
+            ) : (
+              <p className="text-center py-4 text-[13px] text-[#9aa3b2]">Không tìm thấy món ăn nào phù hợp.</p>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const ScheduleExerciseCustomizer = ({ petType, choices, onChange, searchQuery }: { petType: string, choices: Record<string, string>, onChange: any, searchQuery: string }) => {
+  const { data: exerciseTemplates = [], isLoading } = useExerciseTemplates(petType);
+
+  const slots = [
+    { id: "slot1", label: "Ca Sáng", icon: <Dumbbell className="h-4 w-4" />, time: "09:00 - 10:30" },
+    { id: "slot2", label: "Ca Chiều", icon: <Dumbbell className="h-4 w-4 text-indigo-500" />, time: "16:30 - 17:30" },
+  ];
+
+  const filteredTemplates = exerciseTemplates.filter((ex: any) =>
+    ex.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (ex.description && ex.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  if (isLoading) return <div className="flex py-10 justify-center items-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-client-primary"></div></div>;
+
+  return (
+    <div className="space-y-6">
+      {slots.map((slot) => (
+        <div key={slot.id} className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="bg-white p-1.5 rounded-lg border border-[#f1e6dc] shadow-sm">{slot.icon}</div>
+              <span className="text-[14px] font-[800] text-client-secondary uppercase tracking-tight">{slot.label}</span>
+            </div>
+            <span className="text-[11px] font-[700] text-[#9aa3b2] bg-black/5 px-2 py-0.5 rounded-full">{slot.time}</span>
+          </div>
+          <div className="grid grid-cols-1 gap-2">
+            {filteredTemplates.length > 0 ? (
+              filteredTemplates.map((ex: any) => (
+                <button
+                  key={ex._id}
+                  type="button"
+                  onClick={() => onChange({ ...choices, [slot.id]: ex.name })}
+                  className={`flex items-start gap-3 p-3 text-left rounded-[16px] border transition-all ${choices[slot.id] === ex.name ? "border-client-primary bg-[#fffbf9] shadow-sm" : "border-[#efe2d8] bg-white hover:border-client-primary/50"}`}
+                >
+                  <div className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${choices[slot.id] === ex.name ? "border-client-primary bg-client-primary text-white" : "border-[#cbd5e1]"}`}>
+                    {choices[slot.id] === ex.name && <Check className="h-2.5 w-2.5" />}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className={`text-[13px] font-[700] ${choices[slot.id] === ex.name ? "text-client-secondary" : "text-[#51606d]"}`}>{ex.name}</p>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${ex.intensity === 'high' ? 'bg-rose-100 text-rose-600' : ex.intensity === 'medium' ? 'bg-amber-100 text-amber-600' : 'bg-green-100 text-green-600'}`}>
+                        {ex.intensity === 'high' ? 'Mạnh' : ex.intensity === 'medium' ? 'Vừa' : 'Nhẹ'}
+                      </span>
+                    </div>
+                    {ex.description && <p className="text-[11px] text-[#8a94a1] leading-relaxed mt-0.5">{ex.description}</p>}
+                  </div>
+                </button>
+              ))
+            ) : (
+              <p className="text-center py-4 text-[13px] text-[#9aa3b2]">Không tìm thấy hoạt động nào phù hợp.</p>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default BoardingCageDetailPage;
