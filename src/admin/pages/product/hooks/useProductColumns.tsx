@@ -4,7 +4,7 @@ import { RenderActionsCell, RenderCreatedAtCell, RenderProductCell, RenderStatus
 import { IProduct } from '../configs/types';
 import { useMemo } from 'react';
 
-export const useProductColumns = () => {
+export const useProductColumns = (isTrash: boolean = false) => {
     const { t } = useTranslation();
 
     const columns: GridColDef<IProduct>[] = useMemo(() => [
@@ -59,9 +59,9 @@ export const useProductColumns = () => {
             disableColumnMenu: true,
             width: 64,
             align: 'right',
-            renderCell: (params) => <RenderActionsCell {...params} />,
+            renderCell: (params) => <RenderActionsCell {...params} isTrash={isTrash} />,
         },
-    ], [t]);
+    ], [t, isTrash]);
 
     return columns;
 };

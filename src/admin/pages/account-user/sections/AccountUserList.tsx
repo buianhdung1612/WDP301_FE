@@ -27,6 +27,7 @@ import { toast } from 'react-toastify';
 import { STATUS_OPTIONS } from '../configs/constants';
 import { Search } from '../../../components/ui/Search';
 import { ExportImport } from '../../../components/ui/ExportImport';
+import { confirmDelete } from "../../../utils/swal";
 
 const TabBadge = styled('span')(() => ({
     height: "24px",
@@ -64,13 +65,13 @@ export const AccountUserList = ({ createdBy }: { createdBy?: string }) => {
     const pagination = res?.data?.pagination || { totalRecords: 0 };
 
     const handleDelete = (id: string) => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa tài khoản khách hàng này?")) {
+        confirmDelete("Bạn có chắc chắn muốn xóa tài khoản khách hàng này?", () => {
             deleteUser(id, {
                 onSuccess: () => {
                     toast.success("Xóa tài khoản thành công!");
                 }
             });
-        }
+        });
     };
 
     const handleEdit = (id: string) => {

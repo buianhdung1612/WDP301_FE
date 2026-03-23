@@ -9,6 +9,9 @@ import { useSidebar } from "../context/sidebar/useSidebar";
 import { SidebarProvider } from "../context/sidebar/SidebarProvider";
 import { useGetMe } from "../pages/authen/hooks/use-get-me";
 
+import { SocketProvider } from "../context/SocketContext";
+import { OverrunAlerter } from "../components/OverrunAlerter";
+
 const LayoutAdminContent = () => {
     useGetMe();
     const location = useLocation();
@@ -18,10 +21,9 @@ const LayoutAdminContent = () => {
     const fullWidthRoutes = ["/admin/dashboard", "/admin/dashboard/system", "/admin/dashboard/analytics", "/admin/dashboard/ecommerce"];
     const isFullWidthPage = fullWidthRoutes.includes(location.pathname) || isBlogDetail;
 
-
-
     return (
         <div className="flex">
+            <OverrunAlerter />
             <ToastContainer />
             <SideBar />
 
@@ -47,8 +49,10 @@ const LayoutAdminContent = () => {
 
 export const LayoutAdmin = () => {
     return (
-        <SidebarProvider>
-            <LayoutAdminContent />
-        </SidebarProvider>
+        <SocketProvider>
+            <SidebarProvider>
+                <LayoutAdminContent />
+            </SidebarProvider>
+        </SocketProvider>
     );
 };

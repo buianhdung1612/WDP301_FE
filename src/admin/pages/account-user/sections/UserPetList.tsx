@@ -29,6 +29,7 @@ import { CircularProgress } from "@mui/material";
 import { uploadImagesToCloudinary } from "../../../api/uploadCloudinary.api";
 import { toast } from "react-toastify";
 import { useRef } from "react";
+import { confirmDelete } from "../../../utils/swal";
 
 const filter = createFilterOptions<any>();
 
@@ -149,13 +150,13 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
     };
 
     const handleDelete = (id: string) => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa thú cưng này?")) {
+        confirmDelete("Bạn có chắc chắn muốn xóa thú cưng này?", () => {
             deletePet(id, {
                 onSuccess: () => {
                     toast.success("Xóa thú cưng thành công");
                 }
             });
-        }
+        });
     };
 
     return (

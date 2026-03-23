@@ -179,9 +179,9 @@ export const ServiceCreatePage = () => {
                                             <TextField
                                                 {...field}
                                                 type="number"
-                                                label="Thời lượng dự kiến (phút)"
+                                                label="Tổng thời gian (xong hết cả dọn dẹp)"
                                                 error={!!fieldState.error}
-                                                helperText={fieldState.error?.message}
+                                                helperText={fieldState.error?.message || "Bao gồm thời gian làm và chuẩn bị/dọn dẹp (phút)"}
                                                 onChange={(e) => field.onChange(Number(e.target.value))}
                                             />
                                         )}

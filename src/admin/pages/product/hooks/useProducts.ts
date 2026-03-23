@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-import { getProducts, deleteProduct } from '../../../api/product.api';
+import { getProducts, deleteProduct, restoreProduct, forceDeleteProduct } from '../../../api/product.api';
 
 interface IProductFilters {
     status?: string[];
@@ -8,6 +8,7 @@ interface IProductFilters {
     search?: string;
     page: number;
     limit: number;
+    isTrash?: boolean;
 }
 
 export const useProducts = () => {
@@ -27,6 +28,7 @@ export const useProducts = () => {
             status: filters.status && filters.status.length > 0 ? filters.status.join(',') : undefined,
             page: filters.page,
             limit: filters.limit,
+            is_trash: filters.isTrash || undefined,
         }),
         placeholderData: keepPreviousData,
     });
@@ -51,10 +53,25 @@ export const useProducts = () => {
         totalPages: 0,
         currentPage: 1,
         limit: 10,
+        deletedCount: 0,
     };
 
     const deleteMutation = useMutation({
         mutationFn: deleteProduct,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+        }
+    });
+
+    const restoreMutation = useMutation({
+        mutationFn: restoreProduct,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+        }
+    });
+
+    const forceDeleteMutation = useMutation({
+        mutationFn: forceDeleteProduct,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['products'] });
         }
@@ -66,6 +83,10 @@ export const useProducts = () => {
 
     const setStockFilter = (stock: string[]) => {
         setFilters((prev) => ({ ...prev, stock, page: 1 }));
+    };
+
+    const setIsTrashFilter = (isTrash: boolean) => {
+        setFilters((prev) => ({ ...prev, isTrash, page: 1 }));
     };
 
     const setSearchFilter = (search: string) => {
@@ -87,6 +108,7 @@ export const useProducts = () => {
             search: '',
             page: 1,
             limit: 10,
+            isTrash: false,
         });
     };
 
@@ -99,10 +121,13 @@ export const useProducts = () => {
         setStatusFilter,
         setStockFilter,
         setSearchFilter,
+        setIsTrashFilter,
         setPage,
         setLimit,
         clearFilters,
-        deleteProduct: deleteMutation.mutate
+        deleteProduct: deleteMutation.mutate,
+        restoreProduct: restoreMutation.mutate,
+        forceDeleteProduct: forceDeleteMutation.mutate,
     };
 };
 

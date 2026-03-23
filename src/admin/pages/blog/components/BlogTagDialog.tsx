@@ -18,6 +18,7 @@ import { useState } from "react";
 import { Delete as DeleteIcon, Close as CloseIcon } from "@mui/icons-material";
 import { useBlogTags, useCreateBlogTag, useDeleteBlogTag } from "../hooks/useBlog";
 import { toast } from "react-toastify";
+import { confirmDelete } from "../../../utils/swal";
 
 interface BlogTagDialogProps {
     open: boolean;
@@ -52,7 +53,7 @@ export const BlogTagDialog = ({ open, onClose }: BlogTagDialogProps) => {
     };
 
     const handleDelete = (id: number | string) => {
-        if (confirm(t("admin.product.tags.delete_confirm"))) {
+        confirmDelete(t("admin.product.tags.delete_confirm"), () => {
             deleteTag(id, {
                 onSuccess: (res) => {
                     if (res.success) {
@@ -62,7 +63,7 @@ export const BlogTagDialog = ({ open, onClose }: BlogTagDialogProps) => {
                     }
                 }
             });
-        }
+        });
     };
 
     return (

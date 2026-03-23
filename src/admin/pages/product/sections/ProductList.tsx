@@ -26,7 +26,13 @@ declare module '@mui/x-data-grid' {
     }
 }
 
-export const ProductList = () => {
+export const ProductList = ({
+    productHook,
+    isTrash = false
+}: {
+    productHook: any;
+    isTrash?: boolean;
+}) => {
     const { settings, setSettings } = useSettings();
     const {
         products,
@@ -39,8 +45,9 @@ export const ProductList = () => {
         setSearchFilter,
         setPage,
         setLimit,
-    } = useProducts();
-    const columns = useProductColumns();
+    } = productHook;
+
+    const columns = useProductColumns(isTrash);
     const localeText = useDataGridLocale();
 
     if (isLoading) {

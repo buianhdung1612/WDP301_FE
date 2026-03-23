@@ -14,7 +14,15 @@ export const useStaffByService = (serviceId?: string) => {
         queryKey: ["staff-by-service", serviceId],
         queryFn: () => getStaffByService(serviceId!),
         enabled: !!serviceId,
-        select: (res: any) => res.data || [],
+        select: (res: any) => {
+            if (!res) return [];
+            const data = res as any;
+            if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+            if (Array.isArray(data.recordList)) return data.recordList;
+            if (Array.isArray(data.data)) return data.data;
+            if (Array.isArray(data)) return data;
+            return [];
+        },
     });
 };
 

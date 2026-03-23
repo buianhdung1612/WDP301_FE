@@ -14,7 +14,7 @@ import {
 } from '../configs/styles.config';
 import { useBrands } from '../hooks/useBrand';
 
-export const BrandList = () => {
+export const BrandList = ({ isTrash = false }: { isTrash?: boolean }) => {
     const [page, setPage] = useState(0);
     const [pageSize, setPageSize] = useState(10);
     const [search, setSearch] = useState('');
@@ -24,7 +24,8 @@ export const BrandList = () => {
         page: page + 1,
         limit: pageSize,
         keyword: search,
-        status: status[0],
+        status: status.length > 0 ? status.join(',') : undefined,
+        is_trash: isTrash
     };
 
     const { data: res, isLoading } = useBrands(params);

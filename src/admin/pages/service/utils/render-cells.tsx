@@ -6,6 +6,7 @@ import { useDeleteService } from "../hooks/useService";
 import { useNavigate } from "react-router-dom";
 import { prefixAdmin } from "../../../constants/routes";
 import { toast } from "react-toastify";
+import { confirmDelete } from "../../../utils/swal";
 
 export const RenderTitleCell = (params: GridRenderCellParams) => {
     const { name, _id, images } = params.row;
@@ -123,7 +124,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
     const _id = params.row._id;
 
     const handleDelete = () => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa dịch vụ này?")) {
+        confirmDelete("Bạn có chắc chắn muốn xóa dịch vụ này?", () => {
             deleteService(_id, {
                 onSuccess: (res: any) => {
                     if (res.code === 200 || res.success) {
@@ -133,7 +134,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                     }
                 }
             });
-        }
+        });
     };
 
     return (

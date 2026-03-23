@@ -41,20 +41,45 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
     }, [isToday]);
 
     // Fetch all schedules for this date
-    const { data: schedulesRes, isLoading: isLoadingSchedules } = useSchedules({
+    const { data: schedulesResBody, isLoading: isLoadingSchedules } = useSchedules({
         date: date.format('YYYY-MM-DD')
     });
-    const schedules = schedulesRes?.data || [];
+    const schedules = React.useMemo(() => {
+        if (!schedulesResBody) return [];
+        const data = schedulesResBody;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [schedulesResBody]);
 
     // Fetch all bookings for this date
-    const { data: bookingsRes, isLoading: isLoadingBookings } = useBookings({
+    const { data: bookingsResBody, isLoading: isLoadingBookings } = useBookings({
         date: date.format('YYYY-MM-DD')
     });
-    const bookings = bookingsRes?.data || [];
+    const bookings = React.useMemo(() => {
+        if (!bookingsResBody) return [];
+        const data = bookingsResBody;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [bookingsResBody]);
 
     // Fetch staff for this service (only used if propStaffList is not provided)
-    const { data: fetchedStaff = [], isLoading: isLoadingStaff } = useStaffByService(propStaffList ? undefined : serviceId);
-    const capableStaff = propStaffList || fetchedStaff;
+    const { data: fetchedStaffBody, isLoading: isLoadingStaff } = useStaffByService(propStaffList ? undefined : serviceId);
+    const capableStaff = React.useMemo(() => {
+        if (propStaffList) return propStaffList;
+        if (!fetchedStaffBody) return [];
+        const data = fetchedStaffBody;
+        if (Array.isArray(data)) return data;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        return [];
+    }, [propStaffList, fetchedStaffBody]);
 
     const staffData = useMemo(() => {
         const map = new Map();
@@ -155,7 +180,7 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
             }}>
                 <Icon icon="solar:calendar-slash-bold-duotone" width={48} color={'rgba(145, 158, 171, 0.50)'} />
                 <Typography variant="body2" sx={{ color: 'var(--palette-text-secondary)', fontWeight: 500 }}>
-                    KhÙng cÛ nh‚n viÍn th?c hi?n nhi?m v? trong ng‡y n‡y
+                    KhÔøΩng cÔøΩ nhÔøΩn viÔøΩn th?c hi?n nhi?m v? trong ngÔøΩy nÔøΩy
                 </Typography>
             </Box>
         );
@@ -183,7 +208,7 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                         mb: 2
                     }}>
                         <Box sx={{ width: 180, flexShrink: 0 }}>
-                            <Typography variant="overline" sx={{ color: 'var(--palette-text-disabled)', fontWeight: 700 }}>Nh‚n viÍn</Typography>
+                            <Typography variant="overline" sx={{ color: 'var(--palette-text-disabled)', fontWeight: 700 }}>NhÔøΩn viÔøΩn</Typography>
                         </Box>
                         {HOURS.map(hour => (
                             <Box key={hour} sx={{ flex: 1, textAlign: 'center' }}>
@@ -267,7 +292,7 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                                         if (width <= 0) return null;
 
                                         return (
-                                            <Tooltip key={s._id} title={`Ca l‡m vi?c: ${s.shiftId.name} (${s.shiftId.startTime} - ${s.shiftId.endTime})`}>
+                                            <Tooltip key={s._id} title={`Ca lÔøΩm vi?c: ${s.shiftId.name} (${s.shiftId.startTime} - ${s.shiftId.endTime})`}>
                                                 <Box
                                                     sx={{
                                                         position: 'absolute',
@@ -356,7 +381,7 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                                                             '100%': { boxShadow: '0 0 0 0 rgba(255, 171, 0, 0)' },
                                                         },
                                                         '&::after': isSelectedStaff ? {
-                                                            content: '"–ang ch?n"',
+                                                            content: '"ƒêang ch·ªçn"',
                                                             position: 'absolute',
                                                             top: -20, left: '50%', transform: 'translateX(-50%)',
                                                             fontSize: '0.625rem', fontWeight: 800, color: '#FFAB00',
@@ -391,7 +416,7 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                     borderRadius: "var(--shape-borderRadius)", border: '1px solid', borderColor: 'rgba(0, 167, 111, 0.10)'
                 }}>
                     <Box sx={{ width: 10, height: 10, bgcolor: 'rgba(0, 167, 111, 0.20)', border: '1px solid', borderColor: 'var(--palette-primary-main)', borderRadius: '3px' }} />
-                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--palette-primary-main)' }}>Ca tr?c d? ki?n</Typography>
+                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--palette-primary-main)' }}>Ca tr·ª±c d·ª± ki·∫øn</Typography>
                 </Box>
 
                 <Box sx={{
@@ -401,7 +426,7 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                     background: 'linear-gradient(135deg, rgba(0, 167, 111, 0.1) 0%, rgba(0, 133, 89, 0.1) 100%)'
                 }}>
                     <Box sx={{ width: 10, height: 10, background: 'linear-gradient(135deg, var(--palette-primary-main) 0%, #008559 100%)', borderRadius: '3px' }} />
-                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#008559' }}>L?ch d„ chi?m ch?</Typography>
+                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#008559' }}>L·ªãch ƒë√£ chi·∫øm ch·ªó</Typography>
                 </Box>
 
                 <Box sx={{
@@ -410,7 +435,7 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                     borderRadius: "var(--shape-borderRadius)", border: '1px dashed', borderColor: 'rgba(145, 158, 171, 0.30)'
                 }}>
                     <Box sx={{ width: 10, height: 10, border: '2px dashed var(--palette-text-disabled)', borderRadius: '3px' }} />
-                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--palette-text-secondary)' }}>Gi? b?n dang ch?n</Typography>
+                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--palette-text-secondary)' }}>Gi·ªù b·∫°n ƒëang ch·ªçn</Typography>
                 </Box>
 
                 {isToday && (
@@ -420,7 +445,7 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                         borderRadius: "var(--shape-borderRadius)", border: '1px solid', borderColor: 'rgba(255, 86, 48, 0.10)'
                     }}>
                         <Box sx={{ width: 10, height: 2, bgcolor: 'var(--palette-error-main)', borderRadius: '1px' }} />
-                        <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--palette-error-main)' }}>Hi?n t?i</Typography>
+                        <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--palette-error-main)' }}>Hi·ªán t·∫°i</Typography>
                     </Box>
                 )}
             </Box>

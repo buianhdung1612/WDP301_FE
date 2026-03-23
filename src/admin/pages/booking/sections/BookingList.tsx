@@ -33,6 +33,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { prefixAdmin } from "../../../constants/routes";
 import { useAuthStore } from "../../../../stores/useAuthStore";
+import { confirmAction } from "../../../utils/swal";
 
 const TabBadge = styled('span')(() => ({
     height: "24px",
@@ -84,9 +85,29 @@ export const BookingList = () => {
     const { mutate: updateStatus } = useUpdateBookingStatus();
 
     const handleStatusUpdate = (id: string, status: string) => {
-        updateStatus({ id, status }, {
-            onSuccess: () => toast.success(t("admin.validation.update_success"))
-        });
+        const update = () => {
+            updateStatus({ id, status }, {
+                onSuccess: () => toast.success(t("admin.validation.update_success"))
+            });
+        };
+
+        if (status === 'in-progress') {
+            confirmAction(
+                "Bắt đầu thực hiện?",
+                "Xác nhận đơn dịch vụ này bắt đầu được thực hiện ngay bây giờ.",
+                update,
+                'info'
+            );
+        } else if (status === 'completed') {
+            confirmAction(
+                "Hoàn thành dịch vụ?",
+                "Bạn có chắc chắn muốn xác nhận hoàn thành đơn dịch vụ này?",
+                update,
+                'success'
+            );
+        } else {
+            update();
+        }
     };
 
     const handleViewDetail = (id: string) => {

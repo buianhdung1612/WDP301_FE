@@ -44,8 +44,20 @@ export const updateProductAttribute = async (id: string | number, data: any): Pr
     return response.data;
 };
 
-/** Xóa thuộc tính */
+/** Xóa thuộc tính (mềm) */
 export const deleteProductAttribute = async (id: string | number): Promise<ApiResponse<any>> => {
-    const response = await apiApp.delete(`${BASE_URL}/delete/${id}`, withAuth());
+    const response = await apiApp.patch(`${BASE_URL}/delete/${id}`, {}, withAuth());
+    return response.data;
+};
+
+/** Khôi phục thuộc tính */
+export const restoreProductAttribute = async (id: string | number): Promise<ApiResponse<any>> => {
+    const response = await apiApp.patch(`${BASE_URL}/restore/${id}`, {}, withAuth());
+    return response.data;
+};
+
+/** Xóa vĩnh viễn thuộc tính */
+export const forceDeleteProductAttribute = async (id: string | number): Promise<ApiResponse<any>> => {
+    const response = await apiApp.delete(`${BASE_URL}/force-delete/${id}`, withAuth());
     return response.data;
 };

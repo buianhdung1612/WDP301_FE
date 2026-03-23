@@ -96,3 +96,8 @@ input:-webkit-autofill:active {
     -webkit-text-fill-color: #1C252E !important;
     transition: background-color 5000s ease-in-out 0s;
 }
+
+/* Fix SweetAlert2 Backdrop (Override MUI Sidebar z-index 1200) */
+.swal2-container {
+    z-index: 9999 !important;
+}

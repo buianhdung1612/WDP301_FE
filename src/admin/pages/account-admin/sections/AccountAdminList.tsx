@@ -30,6 +30,7 @@ import { STATUS_OPTIONS } from '../configs/constants';
 import { SelectMulti } from '../../../components/ui/SelectMulti';
 import { Search } from '../../../components/ui/Search';
 import { ExportImport } from '../../../components/ui/ExportImport';
+import { confirmDelete } from "../../../utils/swal";
 
 // Styled component cho con số (Badge nhãn) - Tham khảo từ blog
 const TabBadge = styled('span')(() => ({
@@ -75,13 +76,13 @@ export const AccountAdminList = () => {
     }));
 
     const handleDelete = (id: string) => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa tài khoản này?")) {
+        confirmDelete("Bạn có chắc chắn muốn xóa tài khoản này?", () => {
             deleteAccount(id, {
                 onSuccess: () => {
                     toast.success("Xóa tài khoản thành công!");
                 }
             });
-        }
+        });
     };
 
     const handleEdit = (id: string) => {

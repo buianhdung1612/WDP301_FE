@@ -24,6 +24,7 @@ import { toast } from 'react-toastify';
 import { Title } from "../../components/ui/Title";
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { prefixAdmin } from "../../constants/routes";
+import { confirmDelete } from "../../utils/swal";
 import { useCalendarData, useCreateSchedule, useUpdateSchedule, useBulkCreateSchedules, useDeleteSchedule, useBulkDeleteSchedules } from './hooks/useSchedules';
 import { ScheduleEventDialog } from './sections/ScheduleEventDialog';
 import { BulkScheduleDialog } from './sections/BulkScheduleDialog';
@@ -129,7 +130,7 @@ export const ScheduleCalendarPage = () => {
     };
 
     const handleDeleteEvent = (id: string) => {
-        if (window.confirm('Bạn có chắc chắn muốn xóa ca làm việc này?')) {
+        confirmDelete('Bạn có chắc chắn muốn xóa ca làm việc này?', () => {
             deleteSchedule(id, {
                 onSuccess: () => {
                     toast.success('Xóa lịch thành công');
@@ -139,7 +140,7 @@ export const ScheduleCalendarPage = () => {
                     toast.error(err.response?.data?.message || 'Lỗi xóa lịch');
                 }
             });
-        }
+        });
     };
 
     const handleSaveBulk = (data: any) => {

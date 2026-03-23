@@ -4,7 +4,7 @@ import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import { SortAscendingIcon, SortDescendingIcon, UnsortedIcon } from '../../../assets/icons';
-import { columnsConfig, columnsInitialState } from '../configs/column.config';
+import { getColumnsConfig, columnsInitialState } from '../configs/column.config';
 import { BlogCategoryToolbar } from './BlogCategoryToolbar';
 import { DATA_GRID_LOCALE_VN } from '../configs/localeText.config';
 import {
@@ -14,7 +14,7 @@ import {
 } from '../configs/styles.config';
 import { useBlogCategories } from '../hooks/useBlogCategory';
 
-export const BlogCategoryList = () => {
+export const BlogCategoryList = ({ isTrash = false }: { isTrash?: boolean }) => {
     const [page, setPage] = useState(0);
     const [pageSize, setPageSize] = useState(10);
     const [search, setSearch] = useState('');
@@ -24,7 +24,8 @@ export const BlogCategoryList = () => {
         page: page + 1,
         limit: pageSize,
         keyword: search,
-        status: status[0],
+        status: status.length > 0 ? status.join(',') : undefined,
+        is_trash: isTrash || undefined,
     };
 
     const { data: res, isLoading } = useBlogCategories(params);
@@ -38,7 +39,7 @@ export const BlogCategoryList = () => {
                     rows={categories}
                     getRowId={(row) => row._id}
                     loading={isLoading}
-                    columns={columnsConfig}
+                    columns={getColumnsConfig(isTrash)}
                     density="comfortable"
                     slots={{
                         toolbar: BlogCategoryToolbar as any,

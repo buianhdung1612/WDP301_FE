@@ -8,6 +8,7 @@ import { prefixAdmin } from "../../../constants/routes";
 import { toast } from "react-toastify";
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
+import { confirmDelete } from "../../../utils/swal";
 
 dayjs.locale('vi');
 interface RenderCreatedAtCellProps {
@@ -15,7 +16,8 @@ interface RenderCreatedAtCellProps {
 }
 
 export const RenderTitleCell = (params: GridRenderCellParams) => {
-    const { name, id } = params.row;
+    const { name } = params.row;
+    const id = params.row._id || params.row.id;
     const navigate = useNavigate();
 
     return (
@@ -158,14 +160,14 @@ export const RenderStatusCell = (params: GridRenderCellParams) => {
 export const RenderActionsCell = (params: GridRenderCellParams) => {
     const navigate = useNavigate();
     const { mutate: deleteCoupon } = useDeleteCoupon();
-    const id = params.row.id;
+    const id = params.row._id || params.row.id;
 
     const handleEdit = () => {
         navigate(`/${prefixAdmin}/coupon/edit/${id}`);
     };
 
     const handleDelete = () => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa mã giảm giá này?")) {
+        confirmDelete("Bạn có chắc chắn muốn xóa mã giảm giá này?", () => {
             deleteCoupon(id, {
                 onSuccess: (res: any) => {
                     if (res.success) {
@@ -175,7 +177,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                     }
                 }
             });
-        }
+        });
     };
 
     return (

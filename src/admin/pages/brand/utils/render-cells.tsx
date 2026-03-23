@@ -2,12 +2,14 @@ import { Avatar, Box, Link, ListItemText } from "@mui/material";
 import { GridActionsCell, GridActionsCellItem, GridRenderCellParams } from "@mui/x-data-grid";
 import { DeleteIcon, EditIcon, EyeIcon } from "../../../assets/icons/index";
 import { COLORS } from "../configs/constants";
-import { useDeleteBrand } from "../hooks/useBrand";
+import { useDeleteBrand, useRestoreBrand, useDeletePermanentBrand } from "../hooks/useBrand";
+import { ReloadIcon } from "../../../assets/icons/index";
 import { useNavigate } from "react-router-dom";
 import { prefixAdmin } from "../../../constants/routes";
 import { toast } from "react-toastify";
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
+import { confirmDelete } from "../../../utils/swal";
 
 dayjs.locale('vi');
 interface RenderCreatedAtCellProps {
@@ -147,25 +149,100 @@ export const RenderStatusCell = (params: GridRenderCellParams) => {
 export const RenderActionsCell = (params: GridRenderCellParams) => {
     const navigate = useNavigate();
     const { mutate: deleteBrand } = useDeleteBrand();
+    const { mutate: restoreBrand } = useRestoreBrand();
+    const { mutate: forceDeleteBrand } = useDeletePermanentBrand();
     const id = params.row.id;
+    const isTrash = params.row.deleted;
 
     const handleEdit = () => {
         navigate(`/${prefixAdmin}/brand/edit/${id}`);
     };
 
     const handleDelete = () => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa thương hiệu này?")) {
+        confirmDelete("Bạn có chắc chắn muốn xóa thương hiệu này?", () => {
             deleteBrand(id, {
                 onSuccess: (res: any) => {
                     if (res.success) {
                         toast.success("Xóa thương hiệu thành công");
                     } else {
-                        toast.error(res.message);
+                        toast.error(res.message || "Có lỗi xảy ra");
                     }
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || err.message || "Không thể xóa thương hiệu");
                 }
             });
-        }
+        });
     };
+
+    const handleRestore = () => {
+        restoreBrand(id, {
+            onSuccess: (res: any) => {
+                if (res.success) {
+                    toast.success("Khôi phục thương hiệu thành công");
+                } else {
+                    toast.error(res.message || "Có lỗi xảy ra");
+                }
+            },
+            onError: (err: any) => {
+                toast.error(err.response?.data?.message || err.message || "Không thể khôi phục thương hiệu");
+            }
+        });
+    };
+
+    const handleForceDelete = () => {
+        confirmDelete("Bạn có chắc chắn muốn xóa vĩnh viễn thương hiệu này?", () => {
+            forceDeleteBrand(id, {
+                onSuccess: (res: any) => {
+                    if (res.success) {
+                        toast.success("Xóa vĩnh viễn thương hiệu thành công");
+                    } else {
+                        toast.error(res.message || "Có lỗi xảy ra");
+                    }
+                },
+                onError: (err: any) => {
+                    toast.error(err.response?.data?.message || err.message || "Không thể xóa vĩnh viễn thương hiệu");
+                }
+            });
+        });
+    };
+
+    if (isTrash) {
+        return (
+            <GridActionsCell {...params}>
+                <GridActionsCellItem
+                    icon={<ReloadIcon />}
+                    label="Khôi phục"
+                    showInMenu
+                    {...({
+                        sx: {
+                            '& .MuiTypography-root': {
+                                fontSize: '0.8125rem',
+                                fontWeight: "600",
+                                color: "var(--palette-success-main)"
+                            },
+                        },
+                    } as any)}
+                    onClick={handleRestore}
+                />
+                <GridActionsCellItem
+                    icon={<DeleteIcon />}
+                    label="Xóa vĩnh viễn"
+                    showInMenu
+                    {...({
+                        sx: {
+                            '& .MuiTypography-root': {
+                                fontSize: '0.8125rem',
+                                fontWeight: "600",
+                                color: "var(--palette-error-main)"
+                            },
+                        },
+                    } as any)}
+                    onClick={handleForceDelete}
+                />
+            </GridActionsCell>
+        );
+    }
 
     return (
         <GridActionsCell {...params}>

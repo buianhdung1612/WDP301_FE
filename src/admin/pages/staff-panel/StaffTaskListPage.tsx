@@ -19,10 +19,76 @@ import {
 import { Icon } from "@iconify/react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+<<<<<<< HEAD
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { useStartBooking, useUpdateBookingStatus } from "../booking/hooks/useBookingManagement";
 import { getBoardingBookings } from "../../api/boarding-booking.api";
 import { prefixAdmin } from "../../constants/routes";
+=======
+import { useEffect, useCallback } from "react";
+import { confirmAction } from "../../utils/swal";
+
+// Timer component for tracking service progress
+const ServiceTimer = ({ startedAt, duration, maxDuration, minDuration }: { startedAt: string, duration: number, maxDuration: number, minDuration: number }) => {
+    const [elapsed, setElapsed] = useState(0);
+
+    const calculate = useCallback(() => {
+        const start = dayjs(startedAt);
+        const now = dayjs();
+        setElapsed(now.diff(start, 'minute'));
+    }, [startedAt]);
+
+    useEffect(() => {
+        calculate();
+        const interval = setInterval(calculate, 30000); // Update every 30s
+        return () => clearInterval(interval);
+    }, [calculate]);
+
+    const isOverMax = maxDuration > 0 && elapsed > maxDuration;
+
+    const getColor = () => {
+        if (isOverMax) return 'var(--palette-error-main)'; // Red - Surcharge
+        if (duration > 0 && elapsed >= duration) return 'var(--palette-warning-main)'; // Orange - Over expected
+        return 'var(--palette-info-main)'; // Blue - Normal
+    };
+
+    const getRemainingForMin = () => {
+        if (minDuration > 0 && elapsed < minDuration) {
+            return minDuration - elapsed;
+        }
+        return 0;
+    };
+
+    const minRemaining = getRemainingForMin();
+
+    return (
+        <Stack spacing={0.5} alignItems="flex-end">
+            <Stack direction="row" spacing={1} alignItems="center">
+                <Icon icon="eva:clock-outline" width={16} style={{ color: getColor() }} />
+                <Typography variant="caption" sx={{ fontWeight: 700, color: getColor() }}>
+                    {elapsed} phút {isOverMax && "(ĐÃ QUÁ GIỜ)"}
+                </Typography>
+                {minRemaining > 0 && (
+                    <Chip
+                        label={`Chờ thêm ${minRemaining}p`}
+                        size="small"
+                        variant="outlined"
+                        color="error"
+                        sx={{ height: 20, fontSize: '10px' }}
+                    />
+                )}
+            </Stack>
+            {/* Estimated surcharge hidden based on user request */}
+            {/* {isOverMax && surchargeType !== 'none' && (
+                <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 800, fontSize: '10px', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Icon icon="solar:bill-list-bold-duotone" width={12} />
+                    Dự kiến phụ thu: {estSurcharge.toLocaleString()}đ
+                </Typography>
+            )} */}
+        </Stack>
+    );
+};
+>>>>>>> ad6bda80ce57fbedebd9e1b8b5ce8d2f3a5274cc
 
 export const StaffTaskListPage = () => {
     const navigate = useNavigate();
@@ -41,6 +107,7 @@ export const StaffTaskListPage = () => {
         enabled: !!user
     });
 
+<<<<<<< HEAD
     const boardingBookings = useMemo(() => {
         return (boardingRes as any)?.data?.recordList || (Array.isArray(boardingRes?.data) ? boardingRes.data : []);
     }, [boardingRes]);
@@ -70,6 +137,58 @@ export const StaffTaskListPage = () => {
                 toast.error(message);
             }
         });
+=======
+    const { mutate: startService, isPending: isStarting } = useStartBooking();
+    const { mutate: updateStatus, isPending: isUpdating } = useUpdateBookingStatus();
+
+    const [processingItem, setProcessingItem] = useState<{ id: string; petId?: string } | null>(null);
+
+    const tasks = bookingsRes?.data || [];
+
+
+    const handleStart = (id: string, petId?: string) => {
+        confirmAction(
+            "Bắt đầu dịch vụ?",
+            "Xác nhận bạn muốn bắt đầu thực hiện dịch vụ ngay bây giờ.",
+            () => {
+                setProcessingItem({ id, petId });
+                startService({ id, petId }, {
+                    onSuccess: () => {
+                        toast.success("Đã bắt đầu thực hiện dịch vụ cho thú cưng");
+                        refetch();
+                    },
+                    onError: (error: any) => {
+                        const message = error.response?.data?.message || "Lỗi khi bắt đầu dịch vụ";
+                        toast.error(message);
+                    },
+                    onSettled: () => setProcessingItem(null)
+                });
+            },
+            'info'
+        );
+    };
+
+    const handleComplete = (id: string, petId?: string) => {
+        confirmAction(
+            "Hoàn thành dịch vụ?",
+            "Bạn có chắc chắn muốn xác nhận hoàn thành dịch vụ này?",
+            () => {
+                setProcessingItem({ id, petId });
+                updateStatus({ id, status: "completed", petId }, {
+                    onSuccess: () => {
+                        toast.success("Đã hoàn thành dịch vụ cho thú cưng");
+                        refetch();
+                    },
+                    onError: (error: any) => {
+                        const message = error.response?.data?.message || "Lỗi khi cập nhật trạng thái";
+                        toast.error(message);
+                    },
+                    onSettled: () => setProcessingItem(null)
+                });
+            },
+            'success'
+        );
+>>>>>>> ad6bda80ce57fbedebd9e1b8b5ce8d2f3a5274cc
     };
 
     const filteredBoarding = useMemo(() => {
@@ -321,6 +440,7 @@ export const StaffTaskListPage = () => {
                     const fItemsPerDay = Math.ceil((b.feedingSchedule?.length || 0) / totalDays);
                     const feedingToday = (b.feedingSchedule || []).slice(dayIndex * fItemsPerDay, (dayIndex + 1) * fItemsPerDay);
 
+<<<<<<< HEAD
                     const eItemsPerDay = Math.ceil((b.exerciseSchedule?.length || 0) / totalDays);
                     const exerciseToday = (b.exerciseSchedule || []).slice(dayIndex * eItemsPerDay, (dayIndex + 1) * eItemsPerDay);
 
@@ -334,6 +454,96 @@ export const StaffTaskListPage = () => {
                                         <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
                                             <Chip label={b.cageId?.cageCode} size="small" sx={{ fontWeight: 800 }} />
                                             <Chip label="ĐANG Ở" size="small" sx={{ bgcolor: '#E7F5EF', color: '#007B55', fontWeight: 800 }} />
+=======
+                                                        <Stack direction="row" spacing={1}>
+                                                            {task.bookingStatus !== 'cancelled' && (
+                                                                <>
+                                                                    {(m.status === 'pending' || !m.status) && (
+                                                                        <Button
+                                                                            variant="contained"
+                                                                            size="small"
+                                                                            startIcon={
+                                                                                (isStarting && processingItem?.id === task._id && processingItem?.petId === m.petId?._id) ?
+                                                                                    <CircularProgress size={16} color="inherit" /> :
+                                                                                    <Icon icon={task.bookingStatus === 'pending' ? "eva:clock-outline" : "eva:play-circle-fill"} />
+                                                                            }
+                                                                            onClick={() => handleStart(task._id, m.petId?._id)}
+                                                                            disabled={(isStarting && processingItem?.id === task._id && processingItem?.petId === m.petId?._id) || task.bookingStatus === 'pending'}
+                                                                            sx={{
+                                                                                borderRadius: "var(--shape-borderRadius)",
+                                                                                textTransform: 'none',
+                                                                                ...(task.bookingStatus === 'pending' && {
+                                                                                    bgcolor: 'rgba(145, 158, 171, 0.24)',
+                                                                                    color: 'rgba(145, 158, 171, 0.8)'
+                                                                                })
+                                                                            }}
+                                                                        >
+                                                                            {task.bookingStatus === 'pending' ? 'Chờ xác nhận' : 'Bắt đầu'}
+                                                                        </Button>
+                                                                    )}
+
+                                                                    {m.status === 'in-progress' && (
+                                                                        <Stack spacing={1} alignItems="flex-end" sx={{ mr: 2 }}>
+                                                                            <ServiceTimer
+                                                                                startedAt={m.startedAt}
+                                                                                duration={task.serviceId?.duration || 0}
+                                                                                minDuration={task.serviceId?.minDuration || 0}
+                                                                                maxDuration={task.serviceId?.maxDuration || 0}
+                                                                            />
+                                                                            <Button
+                                                                                variant="contained"
+                                                                                size="small"
+                                                                                color="success"
+                                                                                startIcon={
+                                                                                    (isUpdating && processingItem?.id === task._id && processingItem?.petId === m.petId?._id) ?
+                                                                                        <CircularProgress size={16} color="inherit" /> :
+                                                                                        <Icon icon="eva:checkmark-circle-2-fill" />
+                                                                                }
+                                                                                onClick={() => handleComplete(task._id, m.petId?._id)}
+                                                                                disabled={
+                                                                                    (isUpdating && processingItem?.id === task._id && processingItem?.petId === m.petId?._id) ||
+                                                                                    (task.serviceId?.minDuration > 0 &&
+                                                                                        dayjs().diff(dayjs(m.startedAt), 'minute') < task.serviceId.minDuration)
+                                                                                }
+                                                                                sx={{
+                                                                                    borderRadius: "var(--shape-borderRadius)",
+                                                                                    textTransform: 'none',
+                                                                                    color: "var(--palette-common-white)"
+                                                                                }}
+                                                                            >
+                                                                                Hoàn thành
+                                                                            </Button>
+                                                                        </Stack>
+                                                                    )}
+                                                                </>
+                                                            )}
+
+                                                            {m.status === 'completed' && task.bookingStatus !== 'cancelled' && (
+                                                                <Stack alignItems="flex-end">
+                                                                    <Icon icon="eva:checkmark-circle-2-fill" width={24} style={{ color: 'var(--palette-success-main)' }} />
+                                                                    {/* Final surcharge hidden based on user request */}
+                                                                    {/* {m.surchargeAmount > 0 && (
+                                                                        <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 700, mt: 0.5 }}>
+                                                                            +{m.surchargeAmount.toLocaleString()}đ phụ thu
+                                                                        </Typography>
+                                                                    )} */}
+                                                                </Stack>
+                                                            )}
+
+                                                            {task.bookingStatus === 'cancelled' && (
+                                                                <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 700 }}>
+                                                                    Lịch đã hủy
+                                                                </Typography>
+                                                            )}
+                                                        </Stack>
+                                                    </Stack>
+                                                </Card>
+                                            )) : (
+                                                <Typography variant="caption" sx={{ fontStyle: 'italic' }}>
+                                                    (Đơn hàng này không chỉ định cụ thể thú cưng cho bạn)
+                                                </Typography>
+                                            )}
+>>>>>>> ad6bda80ce57fbedebd9e1b8b5ce8d2f3a5274cc
                                         </Stack>
                                     </Box>
                                     <IconButton onClick={() => setSelectedDetailBooking(null)} sx={{ alignSelf: 'flex-start', bgcolor: '#F9FAFB' }}>

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getBlogs, createBlog, getBlogById, updateBlog, deleteBlog } from '../../../api/blog.api';
+import { getBlogs, createBlog, getBlogById, updateBlog, deleteBlog, restoreBlog, forceDeleteBlog } from '../../../api/blog.api';
 import { ApiResponse } from '../../../config/type';
 
 export const useBlogs = (params?: any) => {
@@ -13,7 +13,11 @@ export const useBlogs = (params?: any) => {
 
             if (data && typeof data === 'object' && 'recordList' in data) {
                 records = data.recordList || [];
-                pagination = data.pagination || { totalRecords: 0 };
+                pagination = {
+                    totalRecords: data.pagination?.totalRecords || 0,
+                    deletedCount: data.pagination?.deletedCount || 0,
+                    ...data.pagination
+                };
             } else if (Array.isArray(data)) {
                 records = data;
             }
@@ -92,6 +96,33 @@ export const useDeleteBlog = () => {
         },
     });
 };
+
+export const useRestoreBlog = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: restoreBlog,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['blogs'] });
+        },
+    });
+};
+
+export const useForceDeleteBlog = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: forceDeleteBlog,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['blogs'] });
+        },
+    });
+};
+
+// Dummy hooks cho BlogTagDialog chưa implement backend
+export const useBlogTags = () => ({ data: [], isLoading: false });
+export const useCreateBlogTag = () => ({ mutate: (_: any, __?: any) => { }, isPending: false });
+export const useDeleteBlogTag = () => ({ mutate: (_: any, __?: any) => { } });
 
 
 

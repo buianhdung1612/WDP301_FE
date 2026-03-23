@@ -164,8 +164,22 @@ export const BookingHistoryPage = () => {
                                                         {getStatusText(booking.bookingStatus)}
                                                     </span>
                                                 </td>
-                                                <td className="p-[20px] text-[15px] text-client-primary font-[600]">
-                                                    {formatCurrency(booking.total || 0)}
+                                                <td className="p-[20px] text-[15px]">
+                                                    <div className="text-client-primary font-[700]">
+                                                        {formatCurrency(booking.total || 0)}
+                                                    </div>
+                                                    {booking.depositAmount > 0 && (
+                                                        <div className="mt-1 text-[11px] leading-tight space-y-0.5">
+                                                            <div className="text-emerald-600 font-[600]">
+                                                                Đã cọc: {formatCurrency(booking.depositAmount)}
+                                                            </div>
+                                                            {booking.paymentStatus === 'partially_paid' && (
+                                                                <div className="text-[#FF5630] font-[600]">
+                                                                    Còn lại: {formatCurrency((booking.total || 0) - (booking.depositAmount || 0))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </td>
                                                 <td className="p-[20px]">
                                                     <div className="flex flex-col gap-2">

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { ProductBanner } from "../product/sections/ProductBanner";
 import { Sidebar } from "./sections/Sidebar";
 import { useParams, Link, useNavigate } from "react-router-dom";
@@ -10,31 +10,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@iconify/react";
 import { CancelModal } from "../../components/ui/CancelModal";
 
-// Timer component to check overtime locally every few seconds
-const OvertimeTimer = ({ startedAt, maxDuration }: { startedAt: string, maxDuration: number }) => {
-    const [isOver, setIsOver] = useState(false);
-
-    const check = useCallback(() => {
-        if (!startedAt || maxDuration <= 0) return;
-        const diff = dayjs().diff(dayjs(startedAt), 'minute');
-        setIsOver(diff > maxDuration);
-    }, [startedAt, maxDuration]);
-
-    useEffect(() => {
-        check();
-        const interval = setInterval(check, 30000); // Check every 30s
-        return () => clearInterval(interval);
-    }, [check]);
-
-    if (!isOver) return null;
-
-    return (
-        <div className="mt-2 text-[11px] text-[#FF5630] font-bold bg-[#FF5630]/5 p-2 rounded-lg border border-[#FF5630]/20 flex items-center gap-2">
-            <span className="flex h-2 w-2 rounded-full bg-[#FF5630] animate-pulse"></span>
-            Dịch vụ đang quá giờ tối đa - có thể phát sinh phụ thu
-        </div>
-    );
-};
 
 export const BookingDetailPage = () => {
     const { id } = useParams();
@@ -128,19 +103,6 @@ export const BookingDetailPage = () => {
             "request_cancel": "Chờ duyệt hủy/hoàn tiền"
         };
         return map[status] || status;
-    };
-
-    const getPetStatusChip = (status: string, bookingStatus: string) => {
-        if (bookingStatus === 'cancelled') return <span className="bg-red-50 text-red-500 px-2 py-0.5 rounded text-[11px] font-bold border border-red-100 uppercase">Đã hủy</span>;
-
-        switch (status) {
-            case "completed":
-                return <span className="bg-green-50 text-green-600 px-2 py-0.5 rounded text-[11px] font-bold border border-green-100 uppercase">Hoàn thành</span>;
-            case "in-progress":
-                return <span className="bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded text-[11px] font-bold border border-yellow-100 uppercase">Đang làm</span>;
-            default:
-                return <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-[11px] font-bold border border-blue-100 uppercase">Chờ thực hiện</span>;
-        }
     };
 
     if (loading) return <div className="p-10 text-center text-[16px]">Đang tải...</div>;
@@ -270,7 +232,6 @@ export const BookingDetailPage = () => {
                                                         (m.petId?._id || m.petId) === pet._id
                                                     );
                                                     const petStatus = mapping?.status || 'pending';
-                                                    const surcharge = mapping?.surchargeAmount || 0;
 
                                                     return (
                                                         <div key={pet._id} className="bg-gray-50 p-2.5 rounded-xl border border-gray-100">
@@ -283,28 +244,21 @@ export const BookingDetailPage = () => {
                                                                             <span className="text-client-primary font-bold text-[12px]">{pet.name?.charAt(0)}</span>
                                                                         )}
                                                                     </div>
-                                                                    <div>
-                                                                        <p className="text-[13px] font-bold text-client-secondary">{pet.name}</p>
-                                                                        <p className="text-[10px] text-[#7d7b7b]">{pet.breed || "Giống loài"}</p>
+                                                                    <div className="flex flex-col">
+                                                                        <p className="text-[13px] font-bold text-client-secondary leading-tight">{pet.name}</p>
+                                                                        <p className="text-[10px] text-[#7d7b7b]">{pet.breed || (pet.type === 'dog' ? 'Chó' : 'Mèo')}</p>
                                                                     </div>
                                                                 </div>
                                                                 <div className="text-right">
-                                                                    {getPetStatusChip(petStatus, booking.bookingStatus)}
+                                                                    <span className={`px-2.5 py-1 rounded-full text-[12px] font-bold ${booking.bookingStatus === 'cancelled' ? 'bg-red-50 text-red-500 border border-red-100' :
+                                                                        petStatus === 'completed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                                                                            petStatus === 'in-progress' ? 'bg-amber-50 text-amber-600 border border-amber-100' :
+                                                                                'bg-gray-100 text-gray-500'
+                                                                        }`}>
+                                                                        {booking.bookingStatus === 'cancelled' ? 'Đã hủy' : petStatus === 'completed' ? 'Đã xong' : petStatus === 'in-progress' ? 'Đang làm' : 'Chờ làm'}
+                                                                    </span>
                                                                 </div>
                                                             </div>
-
-                                                            {petStatus === 'in-progress' && mapping?.startedAt && (
-                                                                <OvertimeTimer
-                                                                    startedAt={mapping.startedAt}
-                                                                    maxDuration={booking.serviceId?.maxDuration || 0}
-                                                                />
-                                                            )}
-
-                                                            {surcharge > 0 && (
-                                                                <div className="mt-2 text-[11px] text-[#FF5630] font-bold bg-[#FF5630]/5 p-2 rounded-lg border border-[#FF5630]/20">
-                                                                    Phụ thu: {formatCurrency(surcharge)} ({mapping?.surchargeNotes || "Quá giờ"})
-                                                                </div>
-                                                            )}
                                                         </div>
                                                     );
                                                 })}
@@ -318,14 +272,15 @@ export const BookingDetailPage = () => {
                                     </tr>
                                 </tbody>
                                 <tfoot>
-                                    {booking.petStaffMap?.some((m: any) => m.surchargeAmount > 0) && (
+                                    {/* Surcharge summary hidden based on user request */}
+                                    {/* {booking.petStaffMap?.some((m: any) => m.surchargeAmount > 0) && (
                                         <tr>
                                             <td colSpan={3} className="p-[20px] pb-0 text-right font-[600] text-[#7d7b7b]">Phụ phí quá giờ:</td>
                                             <td className="p-[20px] pb-0 text-right font-[700] text-[16px] text-[#FF5630]">
                                                 +{formatCurrency(booking.petStaffMap.reduce((sum: number, m: any) => sum + (m.surchargeAmount || 0), 0))}
                                             </td>
                                         </tr>
-                                    )}
+                                    )} */}
                                     <tr>
                                         <td colSpan={3} className="p-[20px] text-right font-[600] text-[#7d7b7b]">Thành tiền:</td>
                                         <td className="p-[20px] text-right font-[800] text-[22px] text-client-primary">{formatCurrency(booking.total || 0)}</td>
@@ -350,7 +305,7 @@ export const BookingDetailPage = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div >
 
             <CancelModal
                 isOpen={isCancelModalOpen}

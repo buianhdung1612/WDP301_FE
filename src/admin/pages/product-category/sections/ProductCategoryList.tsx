@@ -13,25 +13,30 @@ import {
     dataGridContainerStyles,
     dataGridStyles
 } from '../configs/styles.config';
-import { useProductCategories } from '../hooks/useProductCategory';
+import { useProductCategoryData } from '../hooks/useProductCategory';
+import { useEffect } from 'react';
 
-import { useState } from 'react';
-
-export const ProductCategoryList = () => {
+export const ProductCategoryList = ({ isTrash = false }: { isTrash?: boolean }) => {
     const { t } = useTranslation();
-    const [page, setPage] = useState(0);
-    const [pageSize, setPageSize] = useState(10);
-    const [search, setSearch] = useState('');
+    const {
+        categories,
+        pagination,
+        isLoading,
+        page,
+        setPage,
+        pageSize,
+        setPageSize,
+        search,
+        setSearch,
+        status,
+        setStatus,
+        setIsTrash
+    } = useProductCategoryData();
 
-    const params = {
-        page: page + 1,
-        limit: pageSize,
-        keyword: search,
-    };
-
-    const { data: res, isLoading } = useProductCategories(params);
-    const categories = res?.data?.recordList || [];
-    const pagination = res?.data?.pagination || { totalRecords: 0 };
+    // Đồng bộ prop isTrash vào hook khi thay đổi
+    useEffect(() => {
+        setIsTrash(isTrash);
+    }, [isTrash, setIsTrash]);
 
     const columns = useProductCategoryColumns();
     const localeText = useDataGridLocale();
@@ -60,7 +65,9 @@ export const ProductCategoryList = () => {
                     slotProps={{
                         toolbar: {
                             search,
-                            onSearchChange: (val: string) => { setSearch(val); setPage(0); }
+                            onSearchChange: (val: string) => { setSearch(val); setPage(0); },
+                            status,
+                            onStatusChange: (val: string[]) => { setStatus(val); setPage(0); }
                         } as any
                     }}
                     localeText={localeText}

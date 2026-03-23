@@ -15,6 +15,7 @@ import { useRoles, useDeleteRole } from '../hooks/useRole';
 import { useNavigate } from 'react-router-dom';
 import { prefixAdmin } from '../../../constants/routes';
 import { toast } from 'react-toastify';
+import { confirmDelete } from "../../../utils/swal";
 
 export const RoleList = () => {
     const navigate = useNavigate();
@@ -22,13 +23,13 @@ export const RoleList = () => {
     const { mutate: deleteRole } = useDeleteRole();
 
     const handleDelete = (id: string) => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa nhóm quyền này?")) {
+        confirmDelete("Bạn có chắc chắn muốn xóa nhóm quyền này?", () => {
             deleteRole(id, {
                 onSuccess: () => {
                     toast.success("Xóa nhóm quyền thành công!");
                 }
             });
-        }
+        });
     };
 
     const handleEdit = (id: string) => {
