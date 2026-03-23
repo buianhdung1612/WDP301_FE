@@ -5,6 +5,8 @@ import {
   createBoardingCageReview,
   getBoardingCageDetail,
   getBoardingCageReviews,
+  getFoodTemplates,
+  getExerciseTemplates,
 } from "../api/boarding-cage-detail.api";
 
 export const useCreateBoardingBooking = () => {
@@ -79,6 +81,26 @@ export const useCreateBoardingCageReview = (id?: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["boarding-cage-reviews", id] });
+    },
+  });
+};
+
+export const useFoodTemplates = (petType: string = "all") => {
+  return useQuery({
+    queryKey: ["food-templates", petType],
+    queryFn: async () => {
+      const res = await getFoodTemplates(petType);
+      return res.data?.data || [];
+    },
+  });
+};
+
+export const useExerciseTemplates = (petType: string = "all") => {
+  return useQuery({
+    queryKey: ["exercise-templates", petType],
+    queryFn: async () => {
+      const res = await getExerciseTemplates(petType);
+      return res.data?.data || [];
     },
   });
 };

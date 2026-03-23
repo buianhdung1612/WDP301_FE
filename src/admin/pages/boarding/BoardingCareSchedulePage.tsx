@@ -58,6 +58,8 @@ import {
     updateBoardingCareSchedule,
 } from "../../api/boarding-booking.api";
 import { uploadMediaToCloudinary } from "../../api/uploadCloudinary.api";
+import { getFoodTemplates, getExerciseTemplates } from "../../api/pet-care-template.api";
+import type { FoodTemplate, ExerciseTemplate } from "../../api/pet-care-template.api";
 
 const trangThaiChamSocOptions: Array<{ value: "pending" | "done" | "skipped"; label: string }> = [
     { value: "pending", label: "Chưa thực hiện" },
@@ -69,43 +71,18 @@ const MAX_PROOF_MEDIA_PER_ROW = 5;
 const MAX_IMAGE_PROOF_SIZE_MB = 5;
 const MAX_VIDEO_PROOF_SIZE_MB = 20;
 
-const DOG_FOOD_OPTIONS = [
-    "Hạt (Royal Canin)",
-    "Hạt + Pate",
-    "Gà luộc + Cơm",
-    "Thịt bò + Rau củ",
-    "Bánh thưởng / Snack",
-    "Theo chế độ cung cấp",
-];
-
-const CAT_FOOD_OPTIONS = [
-    "Hạt (Royal Canin)",
-    "Pate (Gói/Lon)",
-    "Hạt + Pate",
-    "Súp thưởng (Churu)",
-    "Cá luộc / Gà xé",
-    "Theo chế độ cung cấp",
-];
-
-const GENERAL_FOOD_OPTIONS = [
-    "Hạt khô",
-    "Thức ăn ướt (Pate)",
-    "Thức ăn tự nấu",
-    "Theo chế độ cung cấp",
-];
-
-const getFoodOptions = (petType: string) => {
-    if (petType === "dog") return DOG_FOOD_OPTIONS;
-    if (petType === "cat") return CAT_FOOD_OPTIONS;
-    return GENERAL_FOOD_OPTIONS;
-};
-
-const calculateRecommendedPortion = (pets: any[], petType: "dog" | "cat" | "all", ratio: number = 0.02) => {
+const calculateRecommendedPortion = (pets: any[], petType: "dog" | "cat" | "all") => {
     const targetPets = pets.filter(p => petType === "all" || p.type === petType);
     if (!targetPets.length) return "";
 
     const totalWeight = targetPets.reduce((sum, p) => sum + Number(p.weight || 0), 0);
-    const gramPerMeal = Math.round((totalWeight * 1000 * ratio) / 2);
+    const isYoung = targetPets.some(p => p.age && Number(p.age) < 1);
+
+    // Tỉ lệ khuyến nghị: 2.5% cho trưởng thành, 5% cho chó mèo con
+    const ratio = isYoung ? 0.05 : 0.025;
+    const mealsPerDay = isYoung ? 3 : 2;
+
+    const gramPerMeal = Math.round((totalWeight * 1000 * ratio) / mealsPerDay);
 
     if (gramPerMeal <= 0) return "";
     return `${gramPerMeal}g`;
@@ -196,6 +173,42 @@ export const BoardingCareSchedulePage = () => {
             label: `${staff.fullName || "Nhân viên"}${staff.employeeCode ? ` - ${staff.employeeCode}` : ""}`,
         }));
     }, [hotelStaffRes]);
+
+    // ─── Food & Exercise templates from DB ───────────────────────────
+    const { data: foodTemplatesRes } = useQuery({
+        queryKey: ["food-templates"],
+        queryFn: () => getFoodTemplates(),
+        staleTime: 5 * 60 * 1000,
+    });
+    const { data: exerciseTemplatesRes } = useQuery({
+        queryKey: ["exercise-templates"],
+        queryFn: () => getExerciseTemplates(),
+        staleTime: 5 * 60 * 1000,
+    });
+
+    const allFoodTemplates: FoodTemplate[] = useMemo(() => {
+        const res = foodTemplatesRes as any;
+        return Array.isArray(res?.data) ? res.data : [];
+    }, [foodTemplatesRes]);
+
+    const allExerciseTemplates: ExerciseTemplate[] = useMemo(() => {
+        const res = exerciseTemplatesRes as any;
+        return Array.isArray(res?.data) ? res.data : [];
+    }, [exerciseTemplatesRes]);
+
+    const getFoodOptionsByPetType = (petType: string): FoodTemplate[] => {
+        if (!allFoodTemplates.length) return [];
+        return allFoodTemplates.filter(
+            (t) => t.isActive && (t.petType === petType || t.petType === "all")
+        );
+    };
+
+    const getExerciseOptionsByPetType = (petType: string): ExerciseTemplate[] => {
+        if (!allExerciseTemplates.length) return [];
+        return allExerciseTemplates.filter(
+            (t) => t.isActive && (t.petType === petType || t.petType === "all")
+        );
+    };
 
     const getStaffId = (value: any) => {
         if (!value) return "";
@@ -1062,7 +1075,6 @@ export const BoardingCareSchedulePage = () => {
                                 <Tab label="Lịch ăn" />
                                 <Tab label="Lịch vận động" />
                                 <Tab label="Thông tin thú cưng" />
-                                <Tab label="Lịch sử giao dịch" />
                             </Tabs>
 
                             {careTab === 2 && editingBooking?.petIds?.length > 0 && (
@@ -1106,12 +1118,13 @@ export const BoardingCareSchedulePage = () => {
                                                 size="small"
                                                 color="primary"
                                                 onClick={() => {
-                                                    const defaultStaff = hotelStaffOptions.length > 0 ? hotelStaffOptions[0] : null;
+                                                    const currentUserInHotel = hotelStaffOptions.find(opt => opt.value === user?.id);
+                                                    const defaultStaff = currentUserInHotel || (hotelStaffOptions.length > 0 ? hotelStaffOptions[0] : null);
                                                     const template = [
                                                         {
                                                             time: "06:30",
                                                             food: "Hạt (Royal Canin)",
-                                                            amount: calculateRecommendedPortion(editingBooking?.petIds || [], "dog", 0.012),
+                                                            amount: calculateRecommendedPortion(editingBooking?.petIds || [], "dog"),
                                                             note: "Ăn sáng. Sau ăn nghỉ 30p.",
                                                             petType: "dog",
                                                             status: "pending",
@@ -1131,7 +1144,7 @@ export const BoardingCareSchedulePage = () => {
                                                         {
                                                             time: "18:00",
                                                             food: "Hạt + Pate",
-                                                            amount: calculateRecommendedPortion(editingBooking?.petIds || [], "dog", 0.015),
+                                                            amount: calculateRecommendedPortion(editingBooking?.petIds || [], "dog"),
                                                             note: "Ăn tối.",
                                                             petType: "dog",
                                                             status: "pending",
@@ -1149,12 +1162,13 @@ export const BoardingCareSchedulePage = () => {
                                                 size="small"
                                                 color="primary"
                                                 onClick={() => {
-                                                    const defaultStaff = hotelStaffOptions.length > 0 ? hotelStaffOptions[0] : null;
+                                                    const currentUserInHotel = hotelStaffOptions.find(opt => opt.value === user?.id);
+                                                    const defaultStaff = currentUserInHotel || (hotelStaffOptions.length > 0 ? hotelStaffOptions[0] : null);
                                                     const template = [
                                                         {
                                                             time: "07:00",
                                                             food: "Hạt (Royal Canin)",
-                                                            amount: calculateRecommendedPortion(editingBooking?.petIds || [], "dog", 0.015),
+                                                            amount: calculateRecommendedPortion(editingBooking?.petIds || [], "dog"),
                                                             note: "Ăn sáng.",
                                                             petType: "dog",
                                                             status: "pending",
@@ -1164,7 +1178,7 @@ export const BoardingCareSchedulePage = () => {
                                                         {
                                                             time: "17:00",
                                                             food: "Hạt + Thịt luộc",
-                                                            amount: calculateRecommendedPortion(editingBooking?.petIds || [], "dog", 0.02),
+                                                            amount: calculateRecommendedPortion(editingBooking?.petIds || [], "dog"),
                                                             note: "Ăn tối.",
                                                             petType: "dog",
                                                             status: "pending",
@@ -1182,7 +1196,8 @@ export const BoardingCareSchedulePage = () => {
                                                 size="small"
                                                 color="secondary"
                                                 onClick={() => {
-                                                    const defaultStaff = hotelStaffOptions.length > 0 ? hotelStaffOptions[0] : null;
+                                                    const currentUserInHotel = hotelStaffOptions.find(opt => opt.value === user?.id);
+                                                    const defaultStaff = currentUserInHotel || (hotelStaffOptions.length > 0 ? hotelStaffOptions[0] : null);
                                                     const template = [
                                                         {
                                                             time: "07:00",
@@ -1290,10 +1305,16 @@ export const BoardingCareSchedulePage = () => {
                                                                     <Autocomplete
                                                                         freeSolo
                                                                         size="small"
-                                                                        options={getFoodOptions(item.petType || "all")}
+                                                                        options={getFoodOptionsByPetType(item.petType || "all")}
+                                                                        groupBy={(opt) => typeof opt === "string" ? "" : opt.group}
+                                                                        getOptionLabel={(opt) => typeof opt === "string" ? opt : opt.name}
                                                                         value={item.food || ""}
+                                                                        onChange={(_e, val) => {
+                                                                            const v = typeof val === "string" ? val : val?.name || "";
+                                                                            capNhatDongLichAn(idx, { food: v });
+                                                                        }}
                                                                         onInputChange={(_e, val) => capNhatDongLichAn(idx, { food: val })}
-                                                                        sx={{ minWidth: 200 }}
+                                                                        sx={{ minWidth: 220 }}
                                                                         renderInput={(params) => (
                                                                             <TextField {...params} label="Thức ăn" />
                                                                         )}
@@ -1455,12 +1476,26 @@ export const BoardingCareSchedulePage = () => {
                                                                         <MenuItem value="cat">Mèo</MenuItem>
                                                                         <MenuItem value="all">Tất cả</MenuItem>
                                                                     </TextField>
-                                                                    <TextField
-                                                                        label="Hoạt động"
+                                                                    <Autocomplete
+                                                                        freeSolo
                                                                         size="small"
+                                                                        options={getExerciseOptionsByPetType(item.petType || "all")}
+                                                                        groupBy={(opt) => typeof opt === "string" ? "" : (opt.intensity === "high" ? "🔥 Cường độ cao" : opt.intensity === "medium" ? "⚡ Vừa phải" : "🌿 Nhẹ nhàng")}
+                                                                        getOptionLabel={(opt) => typeof opt === "string" ? opt : `${opt.name}${opt.durationMinutes ? ` (${opt.durationMinutes} phút)` : ""}`}
                                                                         value={item.activity || ""}
-                                                                        onChange={(e) => capNhatDongVanDong(idx, { activity: e.target.value })}
-                                                                        sx={{ minWidth: 160 }}
+                                                                        onChange={(_e, val) => {
+                                                                            if (val && typeof val !== "string") {
+                                                                                capNhatDongVanDong(idx, {
+                                                                                    activity: val.name,
+                                                                                    durationMinutes: val.durationMinutes || item.durationMinutes,
+                                                                                });
+                                                                            }
+                                                                        }}
+                                                                        onInputChange={(_e, val) => capNhatDongVanDong(idx, { activity: val })}
+                                                                        sx={{ minWidth: 220 }}
+                                                                        renderInput={(params) => (
+                                                                            <TextField {...params} label="Hoạt động vận động" />
+                                                                        )}
                                                                     />
                                                                     <TextField
                                                                         label="Số phút"

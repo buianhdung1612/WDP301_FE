@@ -74,6 +74,7 @@ import { BoardingBookingListPage } from "../pages/boarding/BoardingBookingListPa
 import { BoardingBookingCreatePage } from "../pages/boarding/BoardingBookingCreatePage";
 import { BoardingCageListPage } from "../pages/boarding/BoardingCageListPage";
 import { BoardingCareSchedulePage } from "../pages/boarding/BoardingCareSchedulePage";
+import { PetCareTemplatePage } from "../pages/boarding/PetCareTemplatePage";
 import { NotificationListPage } from "../pages/notification/NotificationListPage";
 
 export const AdminRoutes = [
@@ -149,6 +150,7 @@ export const AdminRoutes = [
     { path: "boarding/create", element: <PermissionGuard permission="boarding_booking_create"><BoardingBookingCreatePage /></PermissionGuard> },
     { path: "boarding/care-schedule", element: <PermissionGuard permission="boarding_booking_edit"><BoardingCareSchedulePage /></PermissionGuard> },
     { path: "boarding/cages", element: <PermissionGuard permission="boarding_cage_view"><BoardingCageListPage /></PermissionGuard> },
+    { path: "boarding/care-templates", element: <PermissionGuard permission="boarding_cage_edit"><PetCareTemplatePage /></PermissionGuard> },
     { path: "staff/tasks", element: <StaffTaskListPage /> },
     { path: "staff/schedule", element: <StaffWorkSchedulePage /> },
     { path: "staff/customers", element: <StaffCustomerListPage /> },

@@ -428,6 +428,11 @@ export const BoardingBookingListPage = () => {
                                                         <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
                                                             {formatCurrency(Number(row.total || 0))}
                                                         </Typography>
+                                                        {row.surcharge > 0 && (
+                                                            <Typography sx={{ color: "var(--palette-warning-main)", fontSize: "10px", fontWeight: 800, textTransform: "uppercase" }}>
+                                                                + Phụ thu trễ
+                                                            </Typography>
+                                                        )}
                                                     </TableCell>
 
                                                     <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
@@ -585,6 +590,30 @@ export const BoardingBookingListPage = () => {
                                                                                     {row.specialCare || row.notes}
                                                                                 </Typography>
                                                                             ) : null}
+                                                                            {(row.actualCheckInDate || row.actualCheckOutDate) && (
+                                                                                <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                                                                                    {row.actualCheckInDate && (
+                                                                                        <Box>
+                                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase" }}>
+                                                                                                Nhận thực tế
+                                                                                            </Typography>
+                                                                                            <Typography sx={{ color: "var(--palette-text-primary)", fontSize: "0.75rem" }}>
+                                                                                                {dayjs(row.actualCheckInDate).format("DD/MM/YYYY HH:mm")}
+                                                                                            </Typography>
+                                                                                        </Box>
+                                                                                    )}
+                                                                                    {row.actualCheckOutDate && (
+                                                                                        <Box>
+                                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase" }}>
+                                                                                                Trả thực tế
+                                                                                            </Typography>
+                                                                                            <Typography sx={{ color: "var(--palette-text-primary)", fontSize: "0.75rem" }}>
+                                                                                                {dayjs(row.actualCheckOutDate).format("DD/MM/YYYY HH:mm")}
+                                                                                            </Typography>
+                                                                                        </Box>
+                                                                                    )}
+                                                                                </Stack>
+                                                                            )}
                                                                         </Box>
                                                                         <Box sx={{ textAlign: "right", minWidth: 120 }}>
                                                                             <Typography sx={{ fontWeight: 700, fontSize: "0.8125rem", color: "var(--palette-text-primary)" }}>
@@ -596,6 +625,27 @@ export const BoardingBookingListPage = () => {
                                                                         </Box>
                                                                     </Stack>
                                                                 ))}
+
+                                                                {row.surcharge > 0 && (
+                                                                    <Box
+                                                                        sx={{
+                                                                            p: 2,
+                                                                            borderTop: "dashed 1px var(--palette-divider)",
+                                                                            bgcolor: "rgba(255, 171, 0, 0.08)",
+                                                                            borderRadius: "0 0 12px 12px",
+                                                                        }}
+                                                                    >
+                                                                        <Stack direction="row" alignItems="center" spacing={1}>
+                                                                            <Icon icon="eva:info-fill" color="var(--palette-warning-main)" width={20} />
+                                                                            <Typography sx={{ color: "var(--palette-warning-dark)", fontWeight: 700, fontSize: "0.8125rem" }}>
+                                                                                Phụ phí phát sinh: {formatCurrency(row.surcharge)}
+                                                                            </Typography>
+                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.8125rem", ml: 1 }}>
+                                                                                Lý do: {row.surchargeReason}
+                                                                            </Typography>
+                                                                        </Stack>
+                                                                    </Box>
+                                                                )}
                                                             </Box>
                                                         </Collapse>
                                                     </TableCell>
