@@ -62,7 +62,12 @@ export const BookingPage = () => {
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<any>(null);
 
     // UI Local state for tab switching
-    const [activeTimeSession, setActiveTimeSession] = useState("Sáng"); // Sáng, Chiều, Tối
+    const [activeTimeSession, setActiveTimeSession] = useState(() => {
+        const hour = dayjs().hour();
+        if (hour < 13) return "Sáng";
+        if (hour < 18) return "Chiều";
+        return "Tối";
+    });
 
     const [note, setNote] = useState("");
 
@@ -117,6 +122,18 @@ export const BookingPage = () => {
             }
         }
     }, [sessionAvailability, availableSlots, activeTimeSession]);
+
+    // Smart default session when date changes
+    useEffect(() => {
+        if (selectedDate === dayjs().format("YYYY-MM-DD")) {
+            const hour = dayjs().hour();
+            if (hour < 13) setActiveTimeSession("Sáng");
+            else if (hour < 18) setActiveTimeSession("Chiều");
+            else setActiveTimeSession("Tối");
+        } else {
+            setActiveTimeSession("Sáng"); // Mặc định sáng cho các ngày tương lai
+        }
+    }, [selectedDate]);
 
     // Services Filter
     const filteredServices = useMemo(() => {
