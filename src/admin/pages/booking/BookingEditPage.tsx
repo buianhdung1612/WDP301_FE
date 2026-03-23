@@ -10,7 +10,11 @@ import {
     Divider,
     CircularProgress,
     Chip,
-    Avatar
+    Avatar,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { Title } from "../../components/ui/Title";
@@ -20,7 +24,7 @@ import { useServices } from "../service/hooks/useService";
 import { useUsers } from "../account-user/hooks/useAccountUser";
 import { usePets } from "../account-user/hooks/usePet";
 import { useStaffByService } from "../account-admin/hooks/useAccountAdmin";
-import { useBookingDetail, useUpdateBooking, useBookings, useSuggestAssignment } from "./hooks/useBookingManagement";
+import { useBookingDetail, useUpdateBooking, useBookings, useSuggestAssignment, useUpdateBookingStatus } from "./hooks/useBookingManagement";
 import { useSchedules } from "../hr/hooks/useSchedules";
 import { Icon } from "@iconify/react";
 import { toast } from "react-toastify";
@@ -38,6 +42,76 @@ import { QuickCustomerDialog } from "./sections/QuickCustomerDialog";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { useTranslation } from "react-i18next";
 import { LoadingButton } from "../../components/ui/LoadingButton";
+
+const BulkRescheduleDialog = ({ open, onClose, affectedBookings, onConfirm }: any) => {
+    const [minutes, setMinutes] = useState(15);
+
+    return (
+        <Dialog open={open} onClose={onClose} PaperProps={{ sx: { borderRadius: '16px', p: 1, width: '500px', maxWidth: '100%' } }}>
+            <DialogTitle sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Icon icon="solar:history-bold" color="var(--palette-error-main)" />
+                Dời lịch hàng loạt
+            </DialogTitle>
+            <DialogContent>
+                <Typography variant="body2" sx={{ mb: 2, color: 'var(--palette-text-secondary)' }}>
+                    Nhập số phút muốn dời cho <b>{affectedBookings.length}</b> ca làm tiếp theo của nhân viên để tránh trùng lặp.
+                </Typography>
+                <TextField
+                    fullWidth
+                    size="small"
+                    label="Số phút dời thêm"
+                    type="number"
+                    value={minutes}
+                    onChange={(e) => setMinutes(Number(e.target.value))}
+                    slotProps={{ input: { sx: { fontWeight: 700 } } }}
+                    helperText="Tất cả giờ của các ca dưới đây sẽ được cộng thêm."
+                    sx={{ mb: 3 }}
+                />
+                {affectedBookings.length > 0 && (
+                    <Box sx={{ maxHeight: 200, overflowY: 'auto', p: 1, bgcolor: 'var(--palette-background-neutral)', borderRadius: '8px' }}>
+                        {affectedBookings.map((b: any, idx: number) => (
+                            <Stack key={b._id} direction="row" alignItems="center" justifyContent="space-between" sx={{
+                                py: 1, px: 2,
+                                bgcolor: 'var(--palette-background-paper)',
+                                borderRadius: '6px',
+                                mb: idx < affectedBookings.length - 1 ? 1 : 0,
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                            }}>
+                                <Box>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>#{b.code?.slice(-6).toUpperCase()}</Typography>
+                                    <Typography variant="caption" sx={{ color: 'var(--palette-text-secondary)' }}>
+                                        {dayjs(b.start).format("HH:mm")} - {dayjs(b.end).format("HH:mm")}
+                                    </Typography>
+                                </Box>
+                                <Icon icon="solar:arrow-right-linear" width={16} style={{ margin: '0 8px', color: 'var(--palette-text-disabled)' }} />
+                                <Box sx={{ textAlign: 'right' }}>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'var(--palette-warning-main)' }}>
+                                        Dự kiến mới
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ fontWeight: 600, color: 'var(--palette-warning-dark)' }}>
+                                        {dayjs(b.start).add(minutes || 0, 'minute').format("HH:mm")} - {dayjs(b.end).add(minutes || 0, 'minute').format("HH:mm")}
+                                    </Typography>
+                                </Box>
+                            </Stack>
+                        ))}
+                    </Box>
+                )}
+            </DialogContent>
+            <DialogActions sx={{ p: 2, pt: 0, mt: 2 }}>
+                <Button onClick={onClose} sx={{ color: 'var(--palette-text-secondary)', fontWeight: 700 }}>Hủy</Button>
+                <Button
+                    variant="contained"
+                    color="error"
+                    onClick={() => onConfirm(minutes)}
+                    sx={{ fontWeight: 800, borderRadius: '8px' }}
+                    disabled={affectedBookings.length === 0}
+                >
+                    Xác nhận dời {minutes}p
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
+};
 
 export const BookingEditPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -70,9 +144,11 @@ export const BookingEditPage = () => {
         if (Array.isArray(data)) return data;
         return [];
     }, [usersResBody]);
-    const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking();
+    const { mutateAsync: updateBookingAsync, isPending: isUpdating } = useUpdateBooking();
+    const { mutate: updateStatus, isPending: isUpdatingStatus } = useUpdateBookingStatus();
     const { mutateAsync: suggestAssignment, isPending: isSuggesting } = useSuggestAssignment();
     const [quickCustomerDialogOpen, setQuickCustomerDialogOpen] = useState(false);
+    const [rescheduleOpen, setRescheduleOpen] = useState(false);
 
     const [formData, setFormData] = useState({
         userId: "",
@@ -144,6 +220,52 @@ export const BookingEditPage = () => {
         if (Array.isArray(data)) return data;
         return [];
     }, [bookingsRes]);
+
+    const sid = formData.staffIds[0];
+    const affectedList = useMemo(() => {
+        if (!sid) return [];
+        return bookings.filter((b: any) =>
+            b._id !== id &&
+            b.staffIds?.some((s: any) => s._id === sid || s === sid) &&
+            ['pending', 'confirmed', 'in-progress'].includes(b.bookingStatus) &&
+            dayjs(b.start).isAfter(formData.startTime)
+        ).sort((a: any, b: any) => dayjs(a.start).diff(dayjs(b.start)));
+    }, [bookings, sid, id, formData.startTime]);
+
+    const handleBulkReschedule = async (offset: number) => {
+        if (affectedList.length === 0) return;
+        const loadToast = toast.loading("Đang xử lý dời lịch...");
+        try {
+            for (const b of affectedList) {
+                const newStart = dayjs(b.start).add(offset, 'minute').toISOString();
+                const newEnd = dayjs(b.end).add(offset, 'minute').toISOString();
+                await updateBookingAsync({ id: b._id, data: { start: newStart, end: newEnd } });
+            }
+            toast.update(loadToast, { render: `Đã dời thành công ${affectedList.length} lịch đặt thêm ${offset} phút!`, type: "success", isLoading: false, autoClose: 3000 });
+            setRescheduleOpen(false);
+        } catch (e) {
+            toast.update(loadToast, { render: "Lỗi khi dời lịch!", type: "error", isLoading: false, autoClose: 3000 });
+        }
+    };
+
+    const handleQuickCheckIn = () => {
+        updateStatus({ id: id!, status: 'returned' }, {
+            onSuccess: () => toast.success("Đã xác nhận khách đến (Check-in)!")
+        });
+    };
+
+    const handleQuickCheckout = () => {
+        if (booking?.paymentStatus !== 'paid') {
+            toast.error("Vui lòng thanh toán đủ trước khi Checkout (Hoàn tất đơn)");
+            return;
+        }
+        updateStatus({ id: id!, status: 'completed' }, {
+            onSuccess: () => {
+                toast.success("Checkout thành công! Đơn hàng đã hoàn tất.");
+                navigate(`/${prefixAdmin}/booking/detail/${id}`);
+            }
+        });
+    };
 
     const staffAvailability = useMemo(() => {
         if (!formData.serviceId) return {};
@@ -407,14 +529,11 @@ export const BookingEditPage = () => {
             data.petStaffMap = [{ petId: formData.petIds[0], staffId: formData.staffIds[0] }];
         }
 
-        updateBooking({ id: id!, data }, {
-            onSuccess: () => {
-                toast.success("Cập nhật đơn hàng thành công!");
-                navigate(`/${prefixAdmin}/booking/detail/${id}`);
-            },
-            onError: (error: any) => {
-                toast.error(error.response?.data?.message || "Lỗi khi cập nhật");
-            }
+        updateBookingAsync({ id: id!, data }).then(() => {
+            toast.success("Cập nhật đơn hàng thành công!");
+            navigate(`/${prefixAdmin}/booking/detail/${id}`);
+        }).catch((error: any) => {
+            toast.error(error.response?.data?.message || "Lỗi khi cập nhật");
         });
     };
 
@@ -423,6 +542,12 @@ export const BookingEditPage = () => {
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
             <Box sx={{ maxWidth: '1200px', mx: 'auto', p: "calc(3 * var(--spacing))" }}>
+                <BulkRescheduleDialog
+                    open={rescheduleOpen}
+                    onClose={() => setRescheduleOpen(false)}
+                    affectedBookings={affectedList}
+                    onConfirm={handleBulkReschedule}
+                />
                 <Box sx={{ mb: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Stack direction="row" spacing={2} alignItems="center">
                         <Box>
@@ -847,14 +972,54 @@ export const BookingEditPage = () => {
                             </Card>
 
                             {!isReadOnly && (
-                                <LoadingButton
-                                    fullWidth
-                                    loading={isUpdating}
-                                    label="Lưu thay đổi"
-                                    loadingLabel="Đang lưu..."
-                                    onClick={handleSubmit}
-                                    sx={{ py: 1.5, borderRadius: "var(--shape-borderRadius-md)" }}
-                                />
+                                <Stack spacing={2}>
+                                    <LoadingButton
+                                        fullWidth
+                                        loading={isUpdating}
+                                        label="Lưu thay đổi"
+                                        loadingLabel="Đang lưu..."
+                                        onClick={handleSubmit}
+                                        sx={{ py: 1.5, borderRadius: "var(--shape-borderRadius-md)", fontWeight: 800 }}
+                                    />
+                                    {affectedList.length > 0 && (
+                                        <Button
+                                            fullWidth
+                                            variant="outlined"
+                                            color="warning"
+                                            onClick={() => setRescheduleOpen(true)}
+                                            startIcon={<Icon icon="solar:calendar-bold-duotone" />}
+                                            sx={{ py: 1.5, borderRadius: "var(--shape-borderRadius-md)", fontWeight: 700 }}
+                                        >
+                                            Dời lịch các ca tiếp theo ({affectedList.length})
+                                        </Button>
+                                    )}
+
+                                    {['confirmed', 'delayed'].includes(booking?.bookingStatus) && (
+                                        <Button
+                                            fullWidth
+                                            variant="contained"
+                                            color="info"
+                                            onClick={handleQuickCheckIn}
+                                            startIcon={<Icon icon="solar:user-check-bold" />}
+                                            sx={{ py: 1.5, borderRadius: "var(--shape-borderRadius-md)", fontWeight: 800 }}
+                                        >
+                                            Khách đã tới (Check-in)
+                                        </Button>
+                                    )}
+
+                                    {['returned', 'in-progress'].includes(booking?.bookingStatus) && (
+                                        <Button
+                                            fullWidth
+                                            variant="contained"
+                                            color="warning"
+                                            onClick={handleQuickCheckout}
+                                            startIcon={<Icon icon="solar:card-send-bold" />}
+                                            sx={{ py: 1.5, borderRadius: "var(--shape-borderRadius-md)", fontWeight: 800 }}
+                                        >
+                                            Thanh toán & Hoàn tất (Checkout)
+                                        </Button>
+                                    )}
+                                </Stack>
                             )}
                         </Stack>
                     </Grid>

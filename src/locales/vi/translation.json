@@ -323,10 +323,11 @@
             "status": {
                 "pending": "Chờ xác nhận",
                 "confirmed": "Đã xác nhận",
+                "delayed": "Bị trễ",
                 "in_progress": "Đang làm",
-                "completed": "Hoàn thành",
+                "completed": "Hoàn tất / Xong",
                 "cancelled": "Đã hủy",
-                "returned": "Trả đơn (Hoàn)",
+                "returned": "Khách đã đến",
                 "request_cancel": "Yêu cầu hủy"
             }
         },

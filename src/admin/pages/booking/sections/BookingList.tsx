@@ -98,12 +98,19 @@ export const BookingList = () => {
                 update,
                 'info'
             );
-        } else if (status === 'completed') {
+        } else if (status === 'returned') {
             confirmAction(
-                "Hoàn thành dịch vụ?",
-                "Bạn có chắc chắn muốn xác nhận hoàn thành đơn dịch vụ này?",
+                "Xác nhận khách đã đến?",
+                "Hệ thống sẽ ghi nhận khách đã có mặt và đơn này sẽ không bị tự động hủy.",
                 update,
                 'success'
+            );
+        } else if (status === 'completed') {
+            confirmAction(
+                "Xác nhận Checkout & Hoàn tất?",
+                "Đảm bảo khách đã thanh toán đủ trước khi thực hiện Checkout.",
+                update,
+                'warning'
             );
         } else {
             update();
@@ -388,10 +395,11 @@ export const BookingList = () => {
                                                     const statusMap: any = {
                                                         pending: { label: t("admin.booking.status.pending"), color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)" },
                                                         confirmed: { label: t("admin.booking.status.confirmed"), color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)" },
+                                                        delayed: { label: t("admin.booking.status.delayed"), color: "var(--palette-error-dark)", bg: "rgba(255, 86, 48, 0.16)" },
                                                         "in-progress": { label: t("admin.booking.status.in_progress"), color: "var(--palette-primary-dark)", bg: "var(--palette-primary-lighter)" },
                                                         completed: { label: t("admin.booking.status.completed"), color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
                                                         cancelled: { label: t("admin.booking.status.cancelled"), color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
-                                                        returned: { label: "Trả đơn (Hoàn)", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
+                                                        returned: { label: t("admin.booking.status.returned"), color: "var(--palette-info-dark)", bg: "rgba(0, 184, 217, 0.16)" },
                                                         request_cancel: { label: t("admin.booking.status.request_cancel"), color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" }
                                                     };
                                                     const status = statusMap[row.bookingStatus] || { label: row.bookingStatus, color: 'var(--palette-text-disabled)', bg: "var(--palette-background-neutral)" };
@@ -494,6 +502,26 @@ export const BookingList = () => {
                                                         >
                                                             <Icon icon="eva:checkmark-circle-2-fill" width={18} style={{ marginRight: 8 }} />
                                                             Xác nhận
+                                                        </MenuItem>
+                                                    )}
+
+                                                    {['confirmed', 'delayed'].includes(row.bookingStatus) && (
+                                                        <MenuItem
+                                                            onClick={() => { handleCloseMenu(row._id); handleStatusUpdate(row._id, 'returned'); }}
+                                                            sx={{ color: 'var(--palette-info-main)' }}
+                                                        >
+                                                            <Icon icon="solar:user-check-bold" width={18} style={{ marginRight: 8 }} />
+                                                            Khách đã tới
+                                                        </MenuItem>
+                                                    )}
+
+                                                    {['returned', 'in-progress'].includes(row.bookingStatus) && (
+                                                        <MenuItem
+                                                            onClick={() => { handleCloseMenu(row._id); handleStatusUpdate(row._id, 'completed'); }}
+                                                            sx={{ color: 'var(--palette-warning-main)' }}
+                                                        >
+                                                            <Icon icon="solar:card-send-bold" width={18} style={{ marginRight: 8 }} />
+                                                            Checkout / Xong
                                                         </MenuItem>
                                                     )}
 

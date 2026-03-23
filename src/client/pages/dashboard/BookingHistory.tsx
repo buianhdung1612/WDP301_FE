@@ -168,7 +168,7 @@ export const BookingHistoryPage = () => {
                                                     <div className="text-client-primary font-[700]">
                                                         {formatCurrency(booking.total || 0)}
                                                     </div>
-                                                    {booking.depositAmount > 0 && (
+                                                    {booking.paymentStatus !== 'paid' && booking.depositAmount > 0 && (
                                                         <div className="mt-1 text-[11px] leading-tight space-y-0.5">
                                                             <div className="text-emerald-600 font-[600]">
                                                                 Đã cọc: {formatCurrency(booking.depositAmount)}
