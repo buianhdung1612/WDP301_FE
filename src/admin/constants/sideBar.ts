@@ -174,6 +174,7 @@ export const menuManagementData = [
             { id: "booking-create", label: "Tạo đơn khách sạn", path: `/${prefixAdmin}/boarding/create`, permission: "boarding_booking_create" },
             { id: "care-schedule", label: "Lịch chăm sóc", path: `/${prefixAdmin}/boarding/care-schedule`, permission: "boarding_booking_edit" },
             { id: "cages", label: "Quản lý chuồng", path: `/${prefixAdmin}/boarding/cages`, permission: "boarding_cage_view" },
+            { id: "care-templates", label: " Danh mục Thức ăn & Vận động", path: `/${prefixAdmin}/boarding/care-templates`, permission: "boarding_cage_edit" },
         ]
     },
     {

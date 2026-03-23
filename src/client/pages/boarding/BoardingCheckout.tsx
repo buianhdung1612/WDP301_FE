@@ -41,12 +41,15 @@ type BoardingCheckoutDraft = {
   notes?: string;
   paymentGateway: "zalopay" | "vnpay";
   paymentMode: "full" | "deposit";
+  customFeeding?: Record<string, string>;
+  customExercise?: Record<string, string>;
 };
 
 type DetailInfoItemProps = {
   icon: ReactNode;
   label: string;
   value: ReactNode;
+  className?: string;
 };
 
 type PaymentOptionCardProps = {
@@ -70,15 +73,15 @@ const breadcrumbs = [
 
 const formatVnd = (value: number) => `${new Intl.NumberFormat("vi-VN").format(Number(value || 0))}đ`;
 
-const DetailInfoItem = ({ icon, label, value }: DetailInfoItemProps) => (
-  <div className="rounded-[18px] border border-[#f2e6de] bg-white px-[16px] py-[14px] shadow-[0_10px_24px_rgba(42,27,17,0.04)]">
-    <div className="flex items-start gap-[12px]">
+const DetailInfoItem = ({ icon, label, value, className }: DetailInfoItemProps) => (
+  <div className={`rounded-[18px] border border-[#f2e6de] bg-white px-[16px] py-[14px] shadow-[0_10px_24px_rgba(42,27,17,0.04)] ${className || ""}`}>
+    <div className="flex items-center gap-[14px]">
       <div className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[14px] bg-[#fff2eb] text-client-primary">
         {icon}
       </div>
-      <div className="min-w-0">
-        <p className="text-[11px] font-[700] uppercase tracking-[0.22em] text-[#9aa3b2]">{label}</p>
-        <div className="mt-[6px] text-[16px] font-[700] leading-[1.45] text-client-secondary">{value}</div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-[800] uppercase tracking-[0.2em] text-[#9aa3b2] mb-0.5">{label}</p>
+        <div className="text-[15px] font-[700] leading-tight text-client-secondary">{value}</div>
       </div>
     </div>
   </div>
@@ -88,17 +91,15 @@ const PaymentOptionCard = ({ active, icon, title, description, onClick }: Paymen
   <button
     type="button"
     onClick={onClick}
-    className={`flex w-full items-center justify-between gap-[18px] rounded-[24px] border px-[20px] py-[22px] text-left transition-all duration-300 ${
-      active
-        ? "border-client-primary bg-[#fff7f2] shadow-[0_16px_34px_rgba(237,104,34,0.12)]"
-        : "border-[#ebe7e3] bg-white hover:border-[#f1c9b5] hover:shadow-[0_14px_30px_rgba(42,27,17,0.06)]"
-    }`}
+    className={`flex w-full items-center justify-between gap-[18px] rounded-[24px] border px-[20px] py-[22px] text-left transition-all duration-300 ${active
+      ? "border-client-primary bg-[#fff7f2] shadow-[0_16px_34px_rgba(237,104,34,0.12)]"
+      : "border-[#ebe7e3] bg-white hover:border-[#f1c9b5] hover:shadow-[0_14px_30px_rgba(42,27,17,0.06)]"
+      }`}
   >
     <div className="flex items-center gap-[16px]">
       <div
-        className={`flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-[18px] ${
-          active ? "bg-[#fff0e6] text-client-primary" : "bg-[#f7f8fb] text-[#92a0b2]"
-        }`}
+        className={`flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-[18px] ${active ? "bg-[#fff0e6] text-client-primary" : "bg-[#f7f8fb] text-[#92a0b2]"
+          }`}
       >
         {icon}
       </div>
@@ -108,9 +109,8 @@ const PaymentOptionCard = ({ active, icon, title, description, onClick }: Paymen
       </div>
     </div>
     <span
-      className={`flex h-[24px] w-[24px] items-center justify-center rounded-full border transition-all ${
-        active ? "border-client-primary bg-client-primary text-white" : "border-[#d7dde7] bg-white text-transparent"
-      }`}
+      className={`flex h-[24px] w-[24px] items-center justify-center rounded-full border transition-all ${active ? "border-client-primary bg-client-primary text-white" : "border-[#d7dde7] bg-white text-transparent"
+        }`}
     >
       <CheckCircle2 className="h-[14px] w-[14px]" />
     </span>
@@ -216,6 +216,8 @@ export const BoardingCheckoutPage = () => {
         specialCare: "",
         paymentMethod,
         paymentGateway,
+        customFeeding: draft.customFeeding,
+        customExercise: draft.customExercise,
       });
 
       const bookingId = created?.data?.data?._id;
@@ -360,9 +362,12 @@ export const BoardingCheckoutPage = () => {
                               </>
                             }
                           />
-                          {draft.email ? (
-                            <DetailInfoItem icon={<Mail className="h-[20px] w-[20px]" />} label="Email" value={<span>{draft.email}</span>} />
-                          ) : null}
+                          <DetailInfoItem
+                            icon={<Mail className="h-[20px] w-[20px]" />}
+                            label="Email"
+                            value={<span className="break-all">{draft.email}</span>}
+                            className="col-span-2"
+                          />
                           {draft.notes ? (
                             <DetailInfoItem
                               icon={<AlertCircle className="h-[20px] w-[20px]" />}
@@ -436,11 +441,10 @@ export const BoardingCheckoutPage = () => {
                               key={gateway.value}
                               type="button"
                               onClick={() => setPaymentGateway(gateway.value)}
-                              className={`inline-flex items-center gap-[8px] rounded-full border px-[16px] py-[10px] text-[14px] font-[700] transition-all ${
-                                active
-                                  ? "border-client-primary bg-client-primary text-white shadow-[0_12px_24px_rgba(237,104,34,0.18)]"
-                                  : "border-[#dddfe4] bg-white text-client-secondary hover:border-client-primary/50"
-                              }`}
+                              className={`inline-flex items-center gap-[8px] rounded-full border px-[16px] py-[10px] text-[14px] font-[700] transition-all ${active
+                                ? "border-client-primary bg-client-primary text-white shadow-[0_12px_24px_rgba(237,104,34,0.18)]"
+                                : "border-[#dddfe4] bg-white text-client-secondary hover:border-client-primary/50"
+                                }`}
                             >
                               <span className={`h-[8px] w-[8px] rounded-full ${active ? "bg-white" : "bg-client-primary"}`} />
                               {gateway.label}
@@ -562,7 +566,7 @@ export const BoardingCheckoutPage = () => {
                             {draft.phone}
                           </span>
                           {draft.email ? (
-                            <span className="inline-flex items-center gap-[6px] rounded-full bg-[#f7f8fb] px-[10px] py-[6px]">
+                            <span className="inline-flex items-center gap-[6px] rounded-full bg-[#f7f8fb] px-[10px] py-[8px]">
                               <Mail className="h-[14px] w-[14px] text-client-primary" />
                               {draft.email}
                             </span>
