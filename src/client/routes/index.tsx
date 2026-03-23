@@ -38,6 +38,8 @@ import { BoardingPaymentSuccessPage } from "../pages/boarding/BoardingPaymentSuc
 import { BookingSuccessPage } from "../pages/booking/BookingSuccess";
 import { BookingHistoryPage } from "../pages/dashboard/BookingHistory";
 import { BookingDetailPage } from "../pages/dashboard/BookingDetail";
+import { TransactionHistoryPage } from "../pages/dashboard/TransactionHistory";
+import { BoardingBookingDetailPage } from "../pages/dashboard/BoardingBookingDetail";
 import { AuthGuard } from "../components/guards/AuthGuard";
 
 export const ClientRoutes: RouteObject[] = [
@@ -83,7 +85,9 @@ export const ClientRoutes: RouteObject[] = [
             { path: "order/detail/:id", element: <OrderDetailPage /> },
             { path: "orders", element: <OrderHistoryPage /> },
             { path: "bookings", element: <BookingHistoryPage /> },
+            { path: "transactions", element: <TransactionHistoryPage /> },
             { path: "booking/detail/:id", element: <BookingDetailPage /> },
+            { path: "boarding/detail/:id", element: <BoardingBookingDetailPage /> },
             { path: "pet", element: <PetListPage /> },
             { path: "pet/create", element: <PetCreatePage /> },
             { path: "pet/edit/:id", element: <PetEditPage /> },

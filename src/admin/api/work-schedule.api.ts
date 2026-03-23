@@ -1,5 +1,5 @@
+import { apiApp } from "../../api";
 import Cookies from "js-cookie";
-import { apiApp } from "../../api/index";
 
 const BASE_URL = "/api/v1/admin/schedules";
 
@@ -9,48 +9,15 @@ const withAuth = () => {
         headers: {
             Authorization: `Bearer ${token}`,
         },
-        withCredentials: true,
     };
 };
 
+export const getMySchedules = async (params?: { startDate?: string; endDate?: string }) => {
+    const response = await apiApp.get(`${BASE_URL}/my-schedule`, { ...withAuth(), params });
+    return response.data;
+};
+
 export const getSchedules = async (params?: any) => {
-    const response = await apiApp.get(`${BASE_URL}`, { params, ...withAuth() });
-    return response.data;
-};
-export const getMySchedules = async (params?: any) => {
-    const response = await apiApp.get(`${BASE_URL}/my-schedule`, { params, ...withAuth() });
-    return response.data;
-};
-
-export const getCalendarData = async (month: number, year: number, departmentId?: string) => {
-    const response = await apiApp.get(`${BASE_URL}/calendar`, {
-        params: { month, year, departmentId },
-        ...withAuth()
-    });
-    return response.data;
-};
-
-export const createSchedule = async (data: any) => {
-    const response = await apiApp.post(`${BASE_URL}`, data, withAuth());
-    return response.data;
-};
-
-export const bulkCreateSchedules = async (data: any) => {
-    const response = await apiApp.post(`${BASE_URL}/bulk`, data, withAuth());
-    return response.data;
-};
-
-export const bulkDeleteSchedules = async (data: any) => {
-    const response = await apiApp.post(`${BASE_URL}/bulk-delete`, data, withAuth());
-    return response.data;
-};
-
-export const updateSchedule = async (id: string, data: any) => {
-    const response = await apiApp.patch(`${BASE_URL}/${id}`, data, withAuth());
-    return response.data;
-};
-
-export const deleteSchedule = async (id: string) => {
-    const response = await apiApp.delete(`${BASE_URL}/${id}`, withAuth());
+    const response = await apiApp.get(BASE_URL, { ...withAuth(), params });
     return response.data;
 };

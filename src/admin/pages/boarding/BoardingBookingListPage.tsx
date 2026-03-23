@@ -74,8 +74,8 @@ const getPetSlotItems = (row: any) => {
 
     return Array.from({ length: slotCount }).map((_, index) => ({
         key: String(pets[index]?._id || pets[index]?.id || `${row?._id || "booking"}-${index}`),
-        petName: String(pets[index]?.name || `Th� cung ${index + 1}`),
-        cageLabel: [row?.cageId?.cageCode || "-", slotCount > 1 ? `Ph�ng ${index + 1}` : ""].filter(Boolean).join(" � "),
+        petName: String(pets[index]?.name || `Thú cưng ${index + 1}`),
+        cageLabel: [row?.cageId?.cageCode || "-", slotCount > 1 ? `Phòng ${index + 1}` : ""].filter(Boolean).join(" - "),
     }));
 };
 
@@ -244,6 +244,7 @@ export const BoardingBookingListPage = () => {
                     overflow: "hidden",
                     display: "flex",
                     flexDirection: "column",
+                    position: "relative",
                 }}
             >
                 <Tabs
@@ -316,8 +317,8 @@ export const BoardingBookingListPage = () => {
                     />
                 </Box>
 
-                <TableContainer sx={{ position: "relative", overflow: "unset" }}>
-                    <Table sx={{ minWidth: 1120 }}>
+                <TableContainer sx={{ position: "relative", overflow: "auto", maxHeight: "75vh" }}>
+                    <Table sx={{ minWidth: 1120 }} stickyHeader>
                         <TableHead sx={{ bgcolor: "var(--palette-background-neutral)" }}>
                             <TableRow>
                                 <TableCell padding="checkbox" sx={{ borderBottom: "none", textAlign: "center" }}>
@@ -528,7 +529,7 @@ export const BoardingBookingListPage = () => {
                                                                 }}
                                                             >
                                                                 <Icon icon="solar:calendar-mark-bold" width={18} style={{ marginRight: 8 }} />
-                                                                L?ch cham s�c
+                                                                Lịch chăm sóc
                                                             </MenuItem>
                                                         </Menu>
                                                     </TableCell>
@@ -537,7 +538,7 @@ export const BoardingBookingListPage = () => {
                                                     <TableCell
                                                         colSpan={9}
                                                         sx={{
-                                                            p: 0,
+                                                            p: 2,
                                                             bgcolor: "var(--palette-background-neutral)",
                                                             borderBottom: isOpen ? "1px dashed var(--palette-divider)" : "none",
                                                         }}
@@ -546,8 +547,8 @@ export const BoardingBookingListPage = () => {
                                                             <Box
                                                                 sx={{
                                                                     bgcolor: "var(--palette-background-paper)",
-                                                                    borderRadius: "8px",
-                                                                    m: "calc(1.5 * var(--spacing))",
+                                                                    borderRadius: "12px",
+                                                                    boxShadow: "var(--customShadows-z1)",
                                                                     overflow: "hidden",
                                                                 }}
                                                             >
@@ -573,10 +574,10 @@ export const BoardingBookingListPage = () => {
                                                                             <Icon icon="solar:dog-bold" width={22} />
                                                                         </Avatar>
                                                                         <Box sx={{ flexGrow: 1 }}>
-                                                                            <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
+                                                                            <Typography sx={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
                                                                                 {item.petName}
                                                                             </Typography>
-                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.25 }}>
+                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.25, fontWeight: 500 }}>
                                                                                 {item.cageLabel}
                                                                             </Typography>
                                                                             {row.specialCare || row.notes ? (
@@ -585,12 +586,12 @@ export const BoardingBookingListPage = () => {
                                                                                 </Typography>
                                                                             ) : null}
                                                                         </Box>
-                                                                        <Box sx={{ textAlign: "right", minWidth: 132 }}>
-                                                                            <Typography sx={{ fontWeight: 600, fontSize: "0.8125rem", color: "var(--palette-text-primary)" }}>
-                                                                                {formatCurrency(Number(row.pricePerDay || 0))}/d�m
+                                                                        <Box sx={{ textAlign: "right", minWidth: 120 }}>
+                                                                            <Typography sx={{ fontWeight: 700, fontSize: "0.8125rem", color: "var(--palette-text-primary)" }}>
+                                                                                {formatCurrency(Number(row.pricePerDay || 0))}/đêm
                                                                             </Typography>
-                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.25 }}>
-                                                                                {Number(row.numberOfDays || 0)} d�m
+                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.25, fontWeight: 500 }}>
+                                                                                {Number(row.numberOfDays || 0)} đêm
                                                                             </Typography>
                                                                         </Box>
                                                                     </Stack>

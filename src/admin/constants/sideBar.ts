@@ -15,6 +15,7 @@ import HomeWorkIcon from "@mui/icons-material/HomeWork";
 
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import RateReviewIcon from "@mui/icons-material/RateReview";
+import AssignmentIcon from "@mui/icons-material/Assignment";
 
 export const menuOverviewData = [
     {
@@ -45,7 +46,7 @@ export const menuStaffData = [
     {
         id: "staff-tasks",
         label: "Công việc của tôi",
-        Icon: ScheduleSendIcon,
+        Icon: AssignmentIcon,
         path: `/${prefixAdmin}/staff/tasks`,
     },
     {
