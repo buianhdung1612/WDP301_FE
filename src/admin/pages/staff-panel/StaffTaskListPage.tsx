@@ -23,10 +23,40 @@ import { useAuthStore } from "../../../stores/useAuthStore";
 import { useStartBooking, useUpdateBookingStatus } from "../booking/hooks/useBookingManagement";
 import { getBoardingBookings } from "../../api/boarding-booking.api";
 import { prefixAdmin } from "../../constants/routes";
+import { StaffServiceTaskPage } from "./StaffServiceTaskPage";
+
+/** Kiểm tra xem nhân viên có thuộc bộ phận Khách sạn/Boarding không */
+const isBoardingDepartment = (roles: any[]): boolean => {
+    if (!roles || roles.length === 0) return false;
+    const keywords = ["boarding", "khách sạn", "hotel", "lưu trú"];
+    return roles.some((role: any) => {
+        const depName = (role.departmentId?.name || role.departmentId?.code || "").toLowerCase();
+        return keywords.some(kw => depName.includes(kw));
+    });
+};
+
+/** Kiểm tra xem nhân viên có thuộc bộ phận Dịch vụ không */
+const isServiceDepartment = (roles: any[]): boolean => {
+    if (!roles || roles.length === 0) return false;
+    const keywords = ["dịch vụ", "service", "grooming", "spa", "thú y", "vet"];
+    return roles.some((role: any) => {
+        const depName = (role.departmentId?.name || role.departmentId?.code || "").toLowerCase();
+        return keywords.some(kw => depName.includes(kw));
+    });
+};
 
 export const StaffTaskListPage = () => {
     const navigate = useNavigate();
     const { user } = useAuthStore();
+    const roles = user?.roles || [];
+
+    // --- Định tuyến UI theo bộ phận ---
+    if (isServiceDepartment(roles)) {
+        return <StaffServiceTaskPage />;
+    }
+    // Bộ phận Khách sạn hoặc chưa xác định → hiển thị UI Boarding bên dưới
+    // ----------------------------------------
+
     const [filterDate, setFilterDate] = useState(dayjs());
 
     const [selectedDetailBooking, setSelectedDetailBooking] = useState<any>(null);
