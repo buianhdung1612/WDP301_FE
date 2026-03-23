@@ -396,18 +396,37 @@ export const BookingList = () => {
                                                     };
                                                     const status = statusMap[row.bookingStatus] || { label: row.bookingStatus, color: 'var(--palette-text-disabled)', bg: "var(--palette-background-neutral)" };
                                                     return (
-                                                        <Chip
-                                                            label={status.label}
-                                                            size="small"
-                                                            sx={{
-                                                                borderRadius: "var(--shape-borderRadius-sm)",
-                                                                fontWeight: 700,
-                                                                fontSize: '0.6875rem',
-                                                                color: status.color,
-                                                                bgcolor: status.bg,
-                                                                height: '24px'
-                                                            }}
-                                                        />
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                            <Chip
+                                                                label={status.label}
+                                                                size="small"
+                                                                sx={{
+                                                                    borderRadius: "var(--shape-borderRadius-sm)",
+                                                                    fontWeight: 700,
+                                                                    fontSize: '0.6875rem',
+                                                                    color: status.color,
+                                                                    bgcolor: status.bg,
+                                                                    height: '24px'
+                                                                }}
+                                                            />
+                                                            {row.isOverrun && (
+                                                                <Chip
+                                                                    icon={<Icon icon="eva:alert-triangle-fill" />}
+                                                                    label="Quá giờ"
+                                                                    size="small"
+                                                                    sx={{
+                                                                        ml: 1,
+                                                                        borderRadius: "var(--shape-borderRadius-sm)",
+                                                                        fontWeight: 700,
+                                                                        fontSize: '0.6875rem',
+                                                                        color: "var(--palette-error-main)",
+                                                                        bgcolor: "rgba(255, 86, 48, 0.16)",
+                                                                        height: '24px',
+                                                                        '& .MuiChip-icon': { color: 'inherit' }
+                                                                    }}
+                                                                />
+                                                            )}
+                                                        </Box>
                                                     );
                                                 })()}
                                             </TableCell>

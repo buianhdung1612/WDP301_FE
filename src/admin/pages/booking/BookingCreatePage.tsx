@@ -76,17 +76,40 @@ export const BookingCreatePage = () => {
         return label;
     };
 
+    const { defaultStartTime, defaultDate } = useMemo(() => {
+        const now = dayjs();
+        let d = now;
+        let s = now.add(15, 'minute');
+
+        // Round up to nearest 5 minutes
+        const roundedMin = Math.ceil(s.minute() / 5) * 5;
+        s = s.minute(roundedMin).second(0).millisecond(0);
+
+        // Shop open hours 8:00 - 22:00
+        if (now.hour() < 8) {
+            s = now.set('hour', 8).set('minute', 0).second(0);
+        } else if (now.hour() >= 22) {
+            d = now.add(1, 'day');
+            s = d.set('hour', 8).set('minute', 0).second(0);
+        }
+
+        return {
+            defaultStartTime: s,
+            defaultDate: d.startOf('day')
+        };
+    }, []);
+
     const [formData, setFormData] = useState({
         userId: "",
         petIds: [] as string[],
         serviceId: "",
         staffIds: (user?.roles?.some((role: any) => role.isStaff)) ? [user?.id || ""] : [] as string[],
         petStaffMap: [] as { petId: string, staffId: string }[],
-        date: dayjs(),
-        startTime: dayjs().set('hour', 9).set('minute', 0),
-        endTime: dayjs().set('hour', 10).set('minute', 0),
+        date: defaultDate,
+        startTime: defaultStartTime,
+        endTime: null as dayjs.Dayjs | null,
         notes: "",
-        bookingStatus: "pending",
+        bookingStatus: "confirmed",
         paymentMethod: "money",
         paymentStatus: "unpaid",
         discount: 0
@@ -101,13 +124,32 @@ export const BookingCreatePage = () => {
         date: formData.date.format('YYYY-MM-DD')
     });
 
-    const schedules = schedulesRes?.data || [];
-    const bookings = bookingsRes?.data || [];
+    const schedules = useMemo(() => {
+        if (!schedulesRes) return [];
+        const data = schedulesRes as any;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [schedulesRes]);
+
+    const bookings = useMemo(() => {
+        if (!bookingsRes) return [];
+        const data = bookingsRes as any;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [bookingsRes]);
 
     const staffAvailability = useMemo(() => {
         if (!formData.serviceId) return {};
         const startH = formData.startTime.hour() + formData.startTime.minute() / 60;
-        const endH = formData.endTime.hour() + formData.endTime.minute() / 60;
+        const endH = formData.endTime
+            ? formData.endTime.hour() + formData.endTime.minute() / 60
+            : startH + 1; // Mặc định giả định 1 tiếng nếu chưa chọn xong
 
         return staffList.reduce((acc: any, staff: any) => {
             const staffSchedules = schedules.filter((s: any) => s.staffId?._id === staff._id);
@@ -139,7 +181,7 @@ export const BookingCreatePage = () => {
             };
             return acc;
         }, {});
-    }, [staffList, schedules, bookings, formData.startTime, formData.endTime, formData.serviceId]);
+    }, [staffList, schedules, bookings, formData.startTime, formData.endTime?.format(), formData.serviceId]);
 
     const eligibleStaffList = useMemo(() => {
         if (!formData.serviceId) return [];
@@ -152,7 +194,16 @@ export const BookingCreatePage = () => {
 
 
 
-    const { data: userPets = [] } = usePets({ userId: formData.userId });
+    const userPetsRes = usePets({ userId: formData.userId });
+    const userPets = useMemo(() => {
+        if (!userPetsRes.data) return [];
+        const data = userPetsRes.data as any;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [userPetsRes.data]);
 
     // Auto-update end time based on sequential duration for pets assigned to same staff
     useEffect(() => {
@@ -171,9 +222,17 @@ export const BookingCreatePage = () => {
             const maxPetsPerStaff = Math.max(0, ...Object.values(staffPetCounts), 1);
             const totalDuration = baseDuration * maxPetsPerStaff;
 
-            const newEndTime = formData.startTime.add(totalDuration, 'minute');
-            if (!newEndTime.isSame(formData.endTime)) {
-                setFormData(prev => ({ ...prev, endTime: newEndTime }));
+            const allAssigned = formData.petIds.length > 0 &&
+                formData.petStaffMap.length === formData.petIds.length &&
+                formData.petStaffMap.every(m => m.staffId);
+
+            if (allAssigned) {
+                const newEndTime = formData.startTime.add(totalDuration, 'minute');
+                if (!newEndTime.isSame(formData.endTime)) {
+                    setFormData(prev => ({ ...prev, endTime: newEndTime }));
+                }
+            } else if (formData.endTime !== null) {
+                setFormData(prev => ({ ...prev, endTime: null }));
             }
         }
     }, [formData.serviceId, formData.startTime, formData.petStaffMap, selectedService, formData.endTime]);
@@ -253,8 +312,20 @@ export const BookingCreatePage = () => {
 
 
 
-    const isTimeDisabled = (_time: dayjs.Dayjs, _type: 'start' | 'end', _view?: string) => {
-        return false; // Temporarily disabled for testing
+    const isTimeDisabled = (timeValue: dayjs.Dayjs, type: 'start' | 'end', view?: string) => {
+        const isToday = formData.date.isSame(dayjs(), 'day');
+        if (isToday) {
+            const now = dayjs();
+            if (view === 'hours') {
+                return timeValue.hour() < now.hour();
+            }
+            if (type === 'start') {
+                return timeValue.isBefore(now, 'minute');
+            } else {
+                return timeValue.isBefore(formData.startTime, 'minute');
+            }
+        }
+        return false;
     };
 
     const pricing = useMemo(() => {
@@ -354,10 +425,17 @@ export const BookingCreatePage = () => {
             return;
         }
 
-        const endDateTime = formData.date
-            .set('hour', formData.endTime.get('hour'))
-            .set('minute', formData.endTime.get('minute'))
-            .set('second', 0);
+        const endDateTime = formData.endTime
+            ? formData.date
+                .set('hour', formData.endTime.get('hour'))
+                .set('minute', formData.endTime.get('minute'))
+                .set('second', 0)
+            : startDateTime.add(1, 'hour');
+
+        if (!formData.endTime) {
+            toast.error("Vui lòng phân công nhân viên để tính thời gian kết thúc");
+            return;
+        }
 
         // Validate working blocks (Temporarily disabled for testing)
         /*
@@ -389,9 +467,15 @@ export const BookingCreatePage = () => {
             toast.error(`Thời gian đặt lịch phải nằm trong các ca (${shiftInfo})`);
             return;
         }
-
+        */
         // Kiểm tra tính khả dụng của tất cả nhân viên đã phân công
         const assignedStaffIds = Array.from(new Set(formData.petStaffMap.map(m => m.staffId).filter(id => id)));
+
+        if (assignedStaffIds.length === 0) {
+            toast.error("Vui lòng phân công nhân viên thực hiện");
+            return;
+        }
+
         for (const staffId of assignedStaffIds) {
             const availability = staffAvailability[staffId];
             if (availability && !availability.available) {
@@ -400,7 +484,6 @@ export const BookingCreatePage = () => {
                 return;
             }
         }
-        */
 
         const data = {
             userId: formData.userId,
@@ -514,19 +597,35 @@ export const BookingCreatePage = () => {
                                         />
                                     </Grid>
                                     <Grid size={{ xs: 6, sm: 3.75 }}>
-                                        <TimePicker
-                                            label="Kết thúc"
-                                            value={formData.endTime}
-                                            onChange={(val) => setFormData({ ...formData, endTime: val || dayjs() })}
-                                            ampm={false}
-                                            format="HH:mm"
-                                            minutesStep={1}
-                                            shouldDisableTime={(timeValue, view) => isTimeDisabled(timeValue, 'end', view)}
-                                            slotProps={{
-                                                textField: { fullWidth: true },
-                                                popper: popperStyle
-                                            }}
-                                        />
+                                        {formData.endTime ? (
+                                            <TimePicker
+                                                label="Kết thúc"
+                                                value={formData.endTime}
+                                                onChange={(val) => setFormData({ ...formData, endTime: val })}
+                                                ampm={false}
+                                                format="HH:mm"
+                                                minutesStep={1}
+                                                shouldDisableTime={(timeValue, view) => isTimeDisabled(timeValue, 'end', view)}
+                                                slotProps={{
+                                                    textField: { fullWidth: true },
+                                                    popper: popperStyle
+                                                }}
+                                            />
+                                        ) : (
+                                            <Box sx={{
+                                                height: '56px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                bgcolor: 'rgba(145, 158, 171, 0.08)',
+                                                borderRadius: "var(--shape-borderRadius)",
+                                                border: '1px dashed rgba(145, 158, 171, 0.20)'
+                                            }}>
+                                                <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', textAlign: 'center' }}>
+                                                    Chọn thú cưng <br />& NV để tính giờ
+                                                </Typography>
+                                            </Box>
+                                        )}
                                     </Grid>
                                 </Grid>
 
@@ -638,14 +737,22 @@ export const BookingCreatePage = () => {
                                                     toast.error("Vui lòng chọn khách hàng và thú cưng trước khi phân bổ!");
                                                     return;
                                                 }
+                                                // Check if all pets have an assigned staff
+                                                const allPetsAssigned = formData.petIds.every(petId =>
+                                                    formData.petStaffMap.some(m => m.petId === petId && m.staffId)
+                                                );
+                                                if (!allPetsAssigned) {
+                                                    toast.error("Vui lòng phân công nhân viên cho tất cả thú cưng trước khi tự động phân bổ!");
+                                                    return;
+                                                }
 
                                                 const isOnlyMeAsAdmin = formData.staffIds.length === 1 && formData.staffIds[0] === user?.id && !isStaff;
                                                 const hasManualSelection = formData.staffIds.length > 0 && !isOnlyMeAsAdmin;
 
                                                 // Smart distribution (API call)
                                                 try {
-                                                    const merge = (d: dayjs.Dayjs, t: dayjs.Dayjs) =>
-                                                        d.hour(t.hour()).minute(t.minute()).second(0).format('YYYY-MM-DDTHH:mm:ss');
+                                                    const merge = (d: dayjs.Dayjs, t: dayjs.Dayjs | null) =>
+                                                        t ? d.hour(t.hour()).minute(t.minute()).second(0).format('YYYY-MM-DDTHH:mm:ss') : "";
 
                                                     const res = await suggestAssignment({
                                                         date: formData.date.format('YYYY-MM-DD'),
@@ -660,7 +767,8 @@ export const BookingCreatePage = () => {
                                                         setFormData(prev => ({
                                                             ...prev,
                                                             petStaffMap: res.data.petStaffMap,
-                                                            staffIds: res.data.staffIds
+                                                            staffIds: res.data.staffIds,
+                                                            endTime: dayjs(res.data.endTime) // Update endTime from API response
                                                         }));
                                                         toast.success(hasManualSelection
                                                             ? "Đã phân bổ xoay vòng trong danh sách nhân viên bạn chọn!"
@@ -711,7 +819,7 @@ export const BookingCreatePage = () => {
                                         serviceId={formData.serviceId}
                                         staffList={eligibleStaffList}
                                         selectionStart={formData.startTime}
-                                        selectionEnd={formData.endTime}
+                                        selectionEnd={formData.endTime || (undefined as any)}
                                         selectedStaffIds={Array.from(new Set(formData.petStaffMap.map(m => m.staffId).filter(id => id)))}
                                         onlyShowSelected={isStaff}
                                     />
@@ -773,22 +881,10 @@ export const BookingCreatePage = () => {
                                             });
                                         }}
                                         sx={{ width: '100%' }}
+                                        disabled={!formData.userId}
                                     />
 
                                     <Divider sx={{ borderStyle: 'dashed' }} />
-
-                                    <SelectSingle
-                                        label="Trạng thái đơn"
-                                        options={[
-                                            { value: "pending", label: "Chờ xác nhận" },
-                                            { value: "confirmed", label: "Đã xác nhận" },
-                                            { value: "completed", label: "Hoàn thành" },
-                                            { value: "cancelled", label: "Hủy đơn" }
-                                        ]}
-                                        value={formData.bookingStatus}
-                                        onChange={(val) => setFormData({ ...formData, bookingStatus: val })}
-                                        sx={{ width: '100%' }}
-                                    />
 
                                     <Divider sx={{ borderStyle: 'dashed' }} />
 
@@ -803,18 +899,6 @@ export const BookingCreatePage = () => {
                                         ]}
                                         value={formData.paymentMethod}
                                         onChange={(val) => setFormData({ ...formData, paymentMethod: val })}
-                                        sx={{ width: '100%' }}
-                                    />
-
-                                    <SelectSingle
-                                        label="Trạng thái thanh toán"
-                                        options={[
-                                            { value: "unpaid", label: "Chưa thanh toán" },
-                                            { value: "paid", label: "Đã thanh toán" },
-                                            { value: "refunded", label: "Hoàn tiền" }
-                                        ]}
-                                        value={formData.paymentStatus}
-                                        onChange={(val) => setFormData({ ...formData, paymentStatus: val })}
                                         sx={{ width: '100%' }}
                                     />
 

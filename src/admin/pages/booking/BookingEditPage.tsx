@@ -79,7 +79,7 @@ export const BookingEditPage = () => {
         petIds: [] as string[],
         serviceId: "",
         staffIds: [] as string[],
-        petStaffMap: [] as { petId: string, staffId: string }[],
+        petStaffMap: [] as { petId: string, staffId: string, status?: string, completedAt?: Date }[],
         date: dayjs(),
         startTime: dayjs().set('hour', 9).set('minute', 0),
         endTime: dayjs().set('hour', 10).set('minute', 0),
@@ -469,6 +469,24 @@ export const BookingEditPage = () => {
                     </Box>
                 )}
 
+                {booking?.isOverrun && (
+                    <Box sx={{
+                        mb: 3, p: 2, borderRadius: "var(--shape-borderRadius-md)",
+                        bgcolor: 'var(--palette-error-lighter)', border: '1px solid var(--palette-error-light)',
+                        display: 'flex', alignItems: 'center', gap: 2
+                    }}>
+                        <Icon icon="solar:danger-bold-duotone" width={24} color="var(--palette-error-main)" />
+                        <Box>
+                            <Typography variant="subtitle2" sx={{ color: 'var(--palette-error-dark)', fontWeight: 800 }}>
+                                CẢNH BÁO: DỊCH VỤ ĐANG QUÁ GIỜ!
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 700 }}>
+                                Thời gian kết thúc dự kiến thực tế: {dayjs(booking.expectedFinish).format("HH:mm")}
+                            </Typography>
+                        </Box>
+                    </Box>
+                )}
+
                 <Grid container spacing={3}>
                     <Grid size={{ xs: 12, md: 8 }}>
                         <Card sx={{ p: 3, borderRadius: '20px', boxShadow: COLORS.shadow }}>
@@ -588,11 +606,31 @@ export const BookingEditPage = () => {
                                                         }}
                                                     >
                                                         <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flex: 1 }}>
-                                                            <Avatar sx={{ width: 32, height: 32, bgcolor: 'rgba(33, 43, 54, 0.10)', color: COLORS.primary, fontSize: '0.875rem' }}>
-                                                                {pet?.name?.charAt(0)}
-                                                            </Avatar>
+                                                            <Box sx={{ position: 'relative' }}>
+                                                                <Avatar sx={{
+                                                                    width: 32, height: 32,
+                                                                    bgcolor: 'rgba(33, 43, 54, 0.10)',
+                                                                    color: COLORS.primary,
+                                                                    fontSize: '0.875rem',
+                                                                    border: currentMapping?.status === 'in-progress' ? `2px solid ${COLORS.primary}` : 'none'
+                                                                }}>
+                                                                    {pet?.name?.charAt(0)}
+                                                                </Avatar>
+                                                                {currentMapping?.status === 'in-progress' && (
+                                                                    <Box sx={{
+                                                                        position: 'absolute', bottom: -2, right: -2,
+                                                                        width: 10, height: 10, bgcolor: COLORS.primary,
+                                                                        borderRadius: '50%', border: '1.5px solid white'
+                                                                    }} />
+                                                                )}
+                                                            </Box>
                                                             <Box>
-                                                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{pet?.name || "Thú cưng"}</Typography>
+                                                                <Stack direction="row" spacing={1} alignItems="center">
+                                                                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{pet?.name || "Thú cưng"}</Typography>
+                                                                    {currentMapping?.status === 'in-progress' && (
+                                                                        <Chip label="Đang làm" size="small" sx={{ height: 16, fontSize: '0.6rem', fontWeight: 900, bgcolor: COLORS.primary, color: 'white' }} />
+                                                                    )}
+                                                                </Stack>
                                                                 <Typography variant="caption" sx={{ color: 'var(--palette-text-secondary)' }}>{pet?.breed || (pet?.type === 'dog' ? 'Chó' : 'Mèo')}</Typography>
                                                             </Box>
                                                         </Stack>

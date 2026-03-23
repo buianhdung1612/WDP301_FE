@@ -12,7 +12,8 @@ import {
     Avatar,
     Divider,
     IconButton,
-    Tooltip
+    Tooltip,
+    alpha
 } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
@@ -240,14 +241,62 @@ export const StaffTaskListPage = () => {
                                 p: 3,
                                 borderRadius: 'var(--shape-borderRadius-lg)',
                                 boxShadow: 'var(--customShadows-card)',
-                                borderLeft: `6px solid ${task.bookingStatus === 'in-progress' ? 'var(--palette-warning-main)' :
-                                    task.bookingStatus === 'completed' ? 'var(--palette-success-main)' :
-                                        task.bookingStatus === 'cancelled' ? 'var(--palette-error-main)' :
-                                            'var(--palette-info-main)'
+                                borderLeft: `6px solid ${task.isOverrun ? 'var(--palette-error-main)' :
+                                    task.bookingStatus === 'in-progress' ? 'var(--palette-warning-main)' :
+                                        task.bookingStatus === 'completed' ? 'var(--palette-success-main)' :
+                                            task.bookingStatus === 'cancelled' ? 'var(--palette-error-main)' :
+                                                'var(--palette-info-main)'
                                     }`,
-                                bgcolor: task.bookingStatus === 'cancelled' ? 'var(--palette-error-lighter)' : 'var(--palette-background-paper)'
+                                position: 'relative',
+                                bgcolor: task.bookingStatus === 'cancelled' ? 'var(--palette-error-lighter)' : 'var(--palette-background-paper)',
                             }}>
+                                {task.isOverrun && (
+                                    <Box sx={{
+                                        position: 'absolute',
+                                        top: 12,
+                                        right: 12,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1,
+                                        bgcolor: 'rgba(255, 72, 66, 0.1)',
+                                        color: 'var(--palette-error-main)',
+                                        px: 1.5,
+                                        py: 0.5,
+                                        borderRadius: '20px',
+                                        border: '1px solid var(--palette-error-main)'
+                                    }}>
+                                        <Icon icon="solar:danger-bold-duotone" width={18} />
+                                        <Typography sx={{ fontWeight: 800, fontSize: '0.75rem' }}>ĐANG QUÁ GIỜ</Typography>
+                                    </Box>
+                                )}
                                 <Stack spacing={3}>
+                                    {task.isOverrun && (
+                                        <Box sx={{
+                                            mb: -1,
+                                            p: 1.5,
+                                            borderRadius: '8px',
+                                            bgcolor: (theme) => alpha(theme.palette.error.main, 0.08),
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between'
+                                        }}>
+                                            <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 700 }}>
+                                                ⚠️ Việc quá giờ này có thể gây trễ các lịch đặt sau. {user?.roles?.some((r: any) => r.isAdmin) ? "Vui lòng kiểm tra và dời lịch nếu cần." : "Vui lòng báo cho quản lý để xử lý."}
+                                            </Typography>
+                                            {user?.roles?.some((r: any) => r.isAdmin) && (
+                                                <Button
+                                                    size="small"
+                                                    color="error"
+                                                    variant="contained"
+                                                    startIcon={<Icon icon="solar:calendar-minimalistic-bold" />}
+                                                    onClick={() => navigate(`/${prefixAdmin}/booking/detail/${task._id}`)}
+                                                    sx={{ fontSize: '10px', fontWeight: 800, height: 24 }}
+                                                >
+                                                    Dời lịch sau
+                                                </Button>
+                                            )}
+                                        </Box>
+                                    )}
                                     <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ md: 'center' }}>
                                         {/* Time & Code */}
                                         <Box sx={{ minWidth: '150px' }}>

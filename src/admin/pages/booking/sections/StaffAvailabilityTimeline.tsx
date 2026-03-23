@@ -325,7 +325,9 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                                         return (
                                             <Tooltip key={b._id} arrow title={
                                                 <Box sx={{ p: 0.5 }}>
-                                                    <Typography variant="caption" sx={{ display: 'block', fontWeight: 700 }}>{b.serviceId?.name || 'D?ch v?'}</Typography>
+                                                    <Typography variant="caption" sx={{ display: 'block', fontWeight: 700 }}>
+                                                        {b.serviceId?.name || 'Dịch vụ'} {b.isOverrun && "(QUÁ GIỜ)"}
+                                                    </Typography>
                                                     <Typography variant="caption" sx={{ display: 'block', opacity: 0.8 }}>{start.format('HH:mm')} - {end.format('HH:mm')}</Typography>
                                                 </Box>
                                             }>
@@ -334,13 +336,23 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                                                         position: 'absolute',
                                                         top: 6, bottom: 6,
                                                         left: `${left}%`, width: `${width}%`,
-                                                        background: 'linear-gradient(135deg, var(--palette-primary-main) 0%, #008559 100%)',
+                                                        background: b.isOverrun
+                                                            ? 'linear-gradient(135deg, var(--palette-error-main) 0%, #B71D18 100%)'
+                                                            : 'linear-gradient(135deg, var(--palette-primary-main) 0%, #008559 100%)',
                                                         borderRadius: "var(--shape-borderRadius-sm)",
-                                                        boxShadow: '0 4px 8px rgba(0, 167, 111, 0.24)',
-                                                        zIndex: 5,
+                                                        boxShadow: b.isOverrun
+                                                            ? '0 4px 8px rgba(255, 86, 48, 0.24)'
+                                                            : '0 4px 8px rgba(0, 167, 111, 0.24)',
+                                                        zIndex: b.isOverrun ? 10 : 5,
                                                         cursor: 'pointer',
                                                         transition: 'transform 0.1s',
-                                                        '&:hover': { transform: 'scaleY(1.1)', zIndex: 12 }
+                                                        '&:hover': { transform: 'scaleY(1.1)', zIndex: 12 },
+                                                        animation: b.isOverrun ? 'pulse-red 2s infinite' : 'none',
+                                                        '@keyframes pulse-red': {
+                                                            '0%': { opacity: 0.9 },
+                                                            '50%': { opacity: 1 },
+                                                            '100%': { opacity: 0.9 }
+                                                        }
                                                     }}
                                                 />
                                             </Tooltip>
@@ -427,6 +439,15 @@ export const StaffAvailabilityTimeline: React.FC<StaffAvailabilityTimelineProps>
                 }}>
                     <Box sx={{ width: 10, height: 10, background: 'linear-gradient(135deg, var(--palette-primary-main) 0%, #008559 100%)', borderRadius: '3px' }} />
                     <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#008559' }}>Lịch đã chiếm chỗ</Typography>
+                </Box>
+
+                <Box sx={{
+                    display: 'flex', alignItems: 'center', gap: 1,
+                    px: 1.5, py: 0.75, bgcolor: 'rgba(255, 86, 48, 0.08)',
+                    borderRadius: "var(--shape-borderRadius)", border: '1px solid', borderColor: 'rgba(255, 86, 48, 0.10)'
+                }}>
+                    <Box sx={{ width: 10, height: 10, background: 'linear-gradient(135deg, var(--palette-error-main) 0%, #B71D18 100%)', borderRadius: '3px' }} />
+                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--palette-error-main)' }}>Dịch vụ đang quá giờ</Typography>
                 </Box>
 
                 <Box sx={{
