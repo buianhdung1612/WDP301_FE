@@ -72,7 +72,6 @@ import { ReviewListPage } from "../pages/review/ReviewListPage";
 import { PermissionGuard } from "../components/auth/PermissionGuard";
 import { BoardingBookingListPage } from "../pages/boarding/BoardingBookingListPage";
 import { BoardingBookingCreatePage } from "../pages/boarding/BoardingBookingCreatePage";
-import { BoardingBookingDetailPage } from "../pages/boarding/BoardingBookingDetailPage";
 import { BoardingCageListPage } from "../pages/boarding/BoardingCageListPage";
 import { BoardingCareSchedulePage } from "../pages/boarding/BoardingCareSchedulePage";
 import { PetCareTemplatePage } from "../pages/boarding/PetCareTemplatePage";
