@@ -185,7 +185,10 @@ export const BookingCreatePage = () => {
 
     const eligibleStaffList = useMemo(() => {
         if (!formData.serviceId) return [];
-        return staffList.filter((s: any) => staffAvailability[s._id]?.hasShift);
+        return staffList.filter((s: any) => {
+            const availability = staffAvailability[s._id];
+            return availability?.hasShift && !availability?.hasOverlap;
+        });
     }, [staffList, staffAvailability, formData.serviceId]);
 
     const selectedService = useMemo(() =>
@@ -707,10 +710,15 @@ export const BookingCreatePage = () => {
 
                                                         <SelectSingle
                                                             label="Chọn người làm"
-                                                            options={formData.staffIds.length > 0 ? formData.staffIds.map(sid => ({
-                                                                value: sid,
-                                                                label: staffList.find(s => s._id === sid)?.fullName || "Nhân viên"
-                                                            })) : staffOptions}
+                                                            options={formData.staffIds.length > 0 ? formData.staffIds.map(sid => {
+                                                                const staff = staffList.find(s => s._id === sid);
+                                                                const availability = staffAvailability[sid];
+                                                                return {
+                                                                    value: sid,
+                                                                    label: (staff?.fullName || "Nhân viên") + (availability?.available ? "" : ` (${availability?.reason || "Bận"})`),
+                                                                    disabled: !availability?.available
+                                                                };
+                                                            }) : staffOptions}
                                                             value={currentMapping?.staffId || ""}
                                                             onChange={(val) => {
                                                                 const newMap = [...formData.petStaffMap];
@@ -731,18 +739,10 @@ export const BookingCreatePage = () => {
                                             variant="contained"
                                             color="primary"
                                             loading={isSuggesting}
-                                            label="Tự động phân bổ lại"
+                                            label="Tự động phân bổ nhân viên"
                                             onClick={async () => {
                                                 if (formData.petIds.length === 0) {
                                                     toast.error("Vui lòng chọn khách hàng và thú cưng trước khi phân bổ!");
-                                                    return;
-                                                }
-                                                // Check if all pets have an assigned staff
-                                                const allPetsAssigned = formData.petIds.every(petId =>
-                                                    formData.petStaffMap.some(m => m.petId === petId && m.staffId)
-                                                );
-                                                if (!allPetsAssigned) {
-                                                    toast.error("Vui lòng phân công nhân viên cho tất cả thú cưng trước khi tự động phân bổ!");
                                                     return;
                                                 }
 

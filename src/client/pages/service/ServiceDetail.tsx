@@ -93,10 +93,18 @@ export const ServiceDetailPage = () => {
         setBookingPreview(null);
     };
 
+    const filteredShifts = useMemo(() => {
+        if (selectedDate !== dayjs().format("YYYY-MM-DD")) return availableShifts;
+        return availableShifts.filter(shift => {
+            const shiftEnd = dayjs(`${selectedDate} ${shift.endTime}`, "YYYY-MM-DD HH:mm");
+            return shiftEnd.isAfter(dayjs());
+        });
+    }, [availableShifts, selectedDate]);
+
     const activeShift = useMemo(() => {
         if (activeShiftId) return availableShifts.find(s => s._id === activeShiftId);
-        return availableShifts[0];
-    }, [availableShifts, activeShiftId]);
+        return filteredShifts[0] || null;
+    }, [availableShifts, activeShiftId, filteredShifts]);
 
     const groupedSlots = useMemo(() => {
         const groups: Record<string, any[]> = {};
@@ -112,19 +120,39 @@ export const ServiceDetailPage = () => {
 
     // Tự động chọn ca và giờ rảnh đầu tiên
     useEffect(() => {
-        if (availableShifts.length > 0) {
-            if (!activeShiftId || !availableShifts.find(s => s._id === activeShiftId)) {
-                setActiveShiftId(availableShifts[0]._id);
+        if (filteredShifts.length > 0) {
+            if (!activeShiftId || !filteredShifts.find(s => s._id === activeShiftId)) {
+                setActiveShiftId(filteredShifts[0]._id);
             }
+        } else {
+            setActiveShiftId(null);
         }
-    }, [availableShifts]);
+    }, [filteredShifts]);
+
+    const filteredHours = useMemo(() => {
+        const hours = Object.keys(groupedSlots).sort((a, b) => parseInt(a) - parseInt(b));
+        if (selectedDate !== dayjs().format("YYYY-MM-DD")) return hours;
+
+        return hours.filter(hour => {
+            const hInt = parseInt(hour);
+            const currentHour = dayjs().hour();
+            if (hInt > currentHour) return true;
+            if (hInt < currentHour) return false;
+            // Nếu cùng giờ, kiểm tra xem còn phút nào trong tương lai không
+            return groupedSlots[hour].some(slot => {
+                const m = slot.time.split(":")[1];
+                return dayjs(`${selectedDate} ${hour}:${m}`, "YYYY-MM-DD H:mm").isAfter(dayjs());
+            });
+        });
+    }, [groupedSlots, selectedDate]);
 
     useEffect(() => {
-        const hours = Object.keys(groupedSlots).sort((a, b) => parseInt(a) - parseInt(b));
-        if (hours.length > 0 && (!activeHour || !groupedSlots[activeHour])) {
-            setActiveHour(hours[0]);
+        if (filteredHours.length > 0 && (!activeHour || !filteredHours.includes(activeHour))) {
+            setActiveHour(filteredHours[0]);
+        } else if (filteredHours.length === 0) {
+            setActiveHour(null);
         }
-    }, [groupedSlots]);
+    }, [filteredHours]);
 
     const pricing = useMemo(() => {
         if (!service) return { total: 0, breakdown: [] };
@@ -657,7 +685,7 @@ export const ServiceDetailPage = () => {
                             <div className="flex-1 overflow-y-auto p-6 pt-4 custom-scrollbar">
 
                                 <div className="flex bg-gray-50 p-1 rounded-[15px] mb-4 overflow-x-auto no-scrollbar gap-1">
-                                    {availableShifts.map((shift) => (
+                                    {filteredShifts.map((shift) => (
                                         <button
                                             key={shift._id}
                                             onClick={() => setActiveShiftId(shift._id)}
@@ -670,7 +698,7 @@ export const ServiceDetailPage = () => {
                                             </div>
                                         </button>
                                     ))}
-                                    {availableShifts.length === 0 && !isLoadingSlots && (
+                                    {filteredShifts.length === 0 && !isLoadingSlots && (
                                         <div className="py-2 px-4 text-gray-400 text-[13px] text-center w-full">
                                             Không có ca trực nào trong ngày này
                                         </div>
@@ -682,27 +710,25 @@ export const ServiceDetailPage = () => {
                                         <Icon icon="line-md:loading-loop" width={30} className="text-client-primary mb-2" />
                                         <p className="text-gray-400 text-[12px]">Đang tải...</p>
                                     </div>
-                                ) : Object.keys(groupedSlots).length > 0 ? (
+                                ) : filteredHours.length > 0 ? (
                                     <div className="flex flex-col gap-6">
                                         <div className="flex gap-5 items-start">
                                             {/* Hours Selection */}
                                             <div className="w-[85px] flex flex-col gap-2">
                                                 <span className="text-[10px] font-bold text-gray-300 px-1 uppercase tracking-widest">Giờ</span>
                                                 <div className="flex flex-col max-h-[220px] overflow-y-auto pr-1 custom-scrollbar gap-1.5">
-                                                    {Object.keys(groupedSlots)
-                                                        .sort((a, b) => parseInt(a) - parseInt(b))
-                                                        .map((hour) => (
-                                                            <button
-                                                                key={hour}
-                                                                onClick={() => setActiveHour(hour)}
-                                                                className={`py-1.5 rounded-[10px] text-[14px] text-center transition-all border-2
+                                                    {filteredHours.map((hour) => (
+                                                        <button
+                                                            key={hour}
+                                                            onClick={() => setActiveHour(hour)}
+                                                            className={`py-1.5 rounded-[10px] text-[14px] text-center transition-all border-2
                                                                 ${activeHour === hour
-                                                                        ? "bg-client-secondary text-white border-client-secondary font-bold"
-                                                                        : "bg-white text-gray-400 border-gray-50 hover:border-gray-200"}`}
-                                                            >
-                                                                {hour}h
-                                                            </button>
-                                                        ))}
+                                                                    ? "bg-client-secondary text-white border-client-secondary font-bold"
+                                                                    : "bg-white text-gray-400 border-gray-50 hover:border-gray-200"}`}
+                                                        >
+                                                            {hour}h
+                                                        </button>
+                                                    ))}
                                                 </div>
                                             </div>
 

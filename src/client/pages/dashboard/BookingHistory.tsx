@@ -119,11 +119,9 @@ export const BookingHistoryPage = () => {
                             <h3 className="text-[24px] font-black text-[#181818]">
                                 Lịch sử đặt lịch
                             </h3>
-                            <Link
-                                to="/services"
-                                className="bg-client-primary text-white px-6 py-2.5 rounded-full font-bold text-[14px] hover:scale-105 transition-all shadow-lg shadow-orange-100"
-                            >
-                                + Đặt lịch mới
+                            <Link className="relative overflow-hidden group bg-client-primary rounded-[8px] px-[25px] py-[12px] font-[500] text-[14px] text-white flex items-center gap-[8px]" to="/services">
+                                <span className="relative z-10">Đặt lịch mới</span>
+                                <div className="absolute top-0 left-0 w-full h-full bg-client-secondary transition-transform duration-500 ease-in-out transform scale-x-0 origin-left group-hover:scale-x-100"></div>
                             </Link>
                         </div>
 
@@ -168,7 +166,7 @@ export const BookingHistoryPage = () => {
                                                     <div className="text-client-primary font-[700]">
                                                         {formatCurrency(booking.total || 0)}
                                                     </div>
-                                                    {booking.depositAmount > 0 && (
+                                                    {booking.paymentStatus !== 'paid' && booking.depositAmount > 0 && (
                                                         <div className="mt-1 text-[11px] leading-tight space-y-0.5">
                                                             <div className="text-emerald-600 font-[600]">
                                                                 Đã cọc: {formatCurrency(booking.depositAmount)}

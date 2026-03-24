@@ -20,7 +20,7 @@ export const Section6 = () => {
                             hoverBackground="group-hover:bg-client-secondary"
                             svgColor="text-client-primary"
                             hoverSvgColor="group-hover:text-client-secondary"
-                            url="cua-hang"
+                            url="/shop"
                         />
                     </div>
                 </div>

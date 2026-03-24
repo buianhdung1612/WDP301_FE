@@ -55,3 +55,11 @@ export const resetPassword = async (data: any) => {
         throw error;
     }
 };
+export const getMe = async () => {
+    try {
+        const response = await apiApp.get(`${API_AUTH}/me`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

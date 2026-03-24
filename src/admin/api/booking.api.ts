@@ -36,9 +36,25 @@ export const createBooking = async (data: any) => {
 };
 
 export const updateBookingStatus = async (id: string, status: string, petId?: string) => {
-    const endpoint = status === 'confirmed' ? 'confirm' : status === 'cancelled' ? 'cancel' : status === 'completed' ? 'complete' : '';
+    const endpointMapping: Record<string, string> = {
+        'confirmed': 'confirm',
+        'cancelled': 'cancel',
+        'completed': 'complete',
+        'returned': 'check-in',
+    };
+    const endpoint = endpointMapping[status];
     if (!endpoint) throw new Error("Invalid status update");
     const response = await apiApp.patch(`${BASE_URL}/${id}/${endpoint}`, { petId }, withAuth());
+    return response.data;
+};
+
+export const checkInBooking = async (id: string) => {
+    const response = await apiApp.patch(`${BASE_URL}/${id}/check-in`, {}, withAuth());
+    return response.data;
+};
+
+export const checkoutBooking = async (id: string) => {
+    const response = await apiApp.patch(`${BASE_URL}/${id}/check-out`, {}, withAuth());
     return response.data;
 };
 

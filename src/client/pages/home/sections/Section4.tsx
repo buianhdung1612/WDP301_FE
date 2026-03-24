@@ -20,7 +20,7 @@ export const Section4 = () => {
                             svgColor="text-white"
                             textColor="text-client-secondary"
                             iconColor="before:bg-client-secondary after:bg-client-secondary"
-                            url="cua-hang"
+                            url="/shop"
                         />
                     </div>
                     <SaleOff content="20% OFF" backgroundColor="bg-[#C32643]" textColor="text-white" position="absolute bottom-[10px] right-[15px]" />
@@ -40,7 +40,7 @@ export const Section4 = () => {
                             svgColor="text-white"
                             textColor="text-client-secondary"
                             iconColor="before:bg-client-secondary after:bg-client-secondary"
-                            url="cua-hang"
+                            url="/shop"
                         />
                     </div>
                     <SaleOff content="40% OFF" backgroundColor="bg-white" textColor="text-client-secondary" position="absolute top-[10px] right-[15px]" />

@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 interface Option {
     value: string;
     label: string;
+    disabled?: boolean;
 }
 
 interface SelectMultiProps {
@@ -129,9 +130,14 @@ export const SelectMulti = memo(({ label, options, sx, value, onChange, disabled
                 MenuProps={MENU_PROPS}
             >
                 {options.map((option) => (
-                    <MenuItem key={option.value} value={option.value} sx={{
-                        fontWeight: selectedValues.includes(option.value) ? 550 : 400,
-                    }}>
+                    <MenuItem
+                        key={option.value}
+                        value={option.value}
+                        disabled={option.disabled}
+                        sx={{
+                            fontWeight: selectedValues.includes(option.value) ? 550 : 400,
+                        }}
+                    >
                         <Checkbox
                             size="small"
                             checked={selectedValues.includes(option.value)}

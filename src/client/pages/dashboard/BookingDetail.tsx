@@ -188,7 +188,7 @@ export const BookingDetailPage = () => {
                                                 {booking.paymentMethod === 'money' ? 'Tiền mặt tại quầy' : booking.paymentMethod === 'vnpay' ? 'Ví VNPAY' : booking.paymentMethod === 'zalopay' ? 'Ví ZaloPay' : booking.paymentMethod}
                                             </span>
                                         </p>
-                                        {booking.depositAmount > 0 && (
+                                        {booking.paymentStatus !== 'paid' && booking.depositAmount > 0 && (
                                             <>
                                                 <p className="text-[15px]">
                                                     <span className="text-[#7d7b7b] w-[140px] inline-block font-[500]">Tiền đã cọc:</span>

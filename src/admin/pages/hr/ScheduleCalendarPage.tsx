@@ -324,7 +324,7 @@ export const ScheduleCalendarPage = () => {
             >
                 <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
                     <Tabs
-                        value={currentTab}
+                        value={currentTab || false}
                         onChange={handleTabChange}
                         sx={{
                             '& .MuiTab-root': {
