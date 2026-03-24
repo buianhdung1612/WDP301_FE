@@ -96,7 +96,7 @@ export const ProductCard = ({ product, rawData }: { product: Product, rawData?: 
                     {/* Title */}
                     <Link
                         to={product.url}
-                        className="block text-client-secondary text-[24px] 2xl:text-[23px] line-clamp-1 font-secondary leading-[1.8] transition-all duration-[350ms] ease-in-out my-[10px] group-hover:text-white hover:opacity-70"
+                        className="block text-client-secondary text-[22px] 2xl:text-[20px] truncate !whitespace-nowrap font-secondary leading-[1.3] transition-all duration-[350ms] ease-in-out my-[10px] group-hover:text-white hover:opacity-70"
                     >
                         {product.title}
                     </Link>
