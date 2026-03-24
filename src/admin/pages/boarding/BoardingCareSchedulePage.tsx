@@ -44,6 +44,7 @@ import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import { Icon } from "@iconify/react";
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
+import { BoardingPetDiaryManager } from "./BoardingPetDiaryManager";
 import { Title } from "../../components/ui/Title";
 import { prefixAdmin } from "../../constants/routes";
 import { Search } from "../../components/ui/Search";
@@ -1075,6 +1076,7 @@ export const BoardingCareSchedulePage = () => {
                                 <Tab label="Lịch ăn" />
                                 <Tab label="Lịch vận động" />
                                 <Tab label="Thông tin thú cưng" />
+                                <Tab label="Nhật ký lưu trú" />
                             </Tabs>
 
                             {careTab === 2 && editingBooking?.petIds?.length > 0 && (
@@ -1103,6 +1105,14 @@ export const BoardingCareSchedulePage = () => {
                                         ))}
                                     </Stack>
                                 </Box>
+                            )}
+
+                            {careTab === 3 && editingBooking?.petIds?.length > 0 && (
+                                <BoardingPetDiaryManager
+                                    bookingId={editingBooking._id}
+                                    pets={editingBooking.petIds}
+                                    date={careDate}
+                                />
                             )}
 
                             {careTab === 0 && (

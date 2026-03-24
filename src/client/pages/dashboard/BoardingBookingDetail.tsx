@@ -3,6 +3,7 @@ import { Sidebar } from "./sections/Sidebar";
 import { useParams, Link } from "react-router-dom";
 import { getBoardingBookingDetail } from "../../api/dashboard.api";
 import { formatCurrency } from "../../helpers";
+import { ClientBoardingPetDiary } from "./ClientBoardingPetDiary";
 import dayjs from "dayjs";
 import { useQuery } from "@tanstack/react-query";
 
@@ -192,6 +193,10 @@ export const BoardingBookingDetailPage = () => {
                                     <li>Cập nhật hình ảnh/video hàng ngày qua tin nhắn.</li>
                                 </ul>
                             </div>
+
+                            {/* Nhật ký thú cưng */}
+                            <ClientBoardingPetDiary bookingId={booking._id} pets={pets} />
+
                         </div>
                     </div>
                 </div>
