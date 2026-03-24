@@ -1,5 +1,5 @@
-import { SectionHeader } from "../../../components/ui/SectionHeader"
-import { ServiceCard } from "../../../components/ui/ServiceCard";
+import { SectionHeader } from "../../../components/ui/SectionHeader";
+import { ServiceCard } from "../../../components/ui/ServiceCard.tsx";
 
 const services = [
     {
