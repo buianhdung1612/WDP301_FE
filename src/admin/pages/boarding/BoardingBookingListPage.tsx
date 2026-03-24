@@ -1,13 +1,14 @@
-
-import { ChangeEvent, Fragment, MouseEvent, SyntheticEvent, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Icon } from "@iconify/react";
 import {
     Avatar,
     Box,
     Button,
     Card,
     Checkbox,
-    Collapse,
+    Chip,
     CircularProgress,
+    Collapse,
     IconButton,
     Menu,
     MenuItem,
@@ -21,20 +22,19 @@ import {
     TableHead,
     TablePagination,
     TableRow,
-    TextField,
     Tabs,
     Typography,
 } from "@mui/material";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { toast } from "react-toastify";
+import { ChangeEvent, Fragment, MouseEvent, SyntheticEvent, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Icon } from "@iconify/react";
+import { toast } from "react-toastify";
+import { getBoardingBookings, updateBoardingBookingStatus } from "../../api/boarding-booking.api";
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
+import { Search } from "../../components/ui/Search";
 import { Title } from "../../components/ui/Title";
 import { prefixAdmin } from "../../constants/routes";
-import { Search } from "../../components/ui/Search";
-import { getBoardingBookings, updateBoardingBookingStatus, updateBoardingPaymentStatus } from "../../api/boarding-booking.api";
+import { confirmAction } from "../../utils/swal";
 
 const TabBadge = styled("span")(() => ({
     height: "24px",
@@ -50,23 +50,8 @@ const TabBadge = styled("span")(() => ({
     transition: "all 0.2s",
 }));
 
-const boardingStatusOptions = [
-    { value: "pending", label: "Chờ xử lý" },
-    { value: "held", label: "Đang giữ chỗ" },
-    { value: "confirmed", label: "Xác nhận" },
-    { value: "checked-in", label: "Nhận chuồng" },
-    { value: "checked-out", label: "Trả chuồng" },
-    { value: "cancelled", label: "Hủy" },
-];
-
-const paymentStatusOptions = [
-    { value: "unpaid", label: "Chưa thanh toán" },
-    { value: "partial", label: "Đặt cọc 20%" },
-    { value: "paid", label: "Thanh toán" },
-    { value: "refunded", label: "Hoàn tiền" },
-];
-
 const formatCurrency = (value: number) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value || 0);
+
 const getPetSlotItems = (row: any) => {
     const pets = Array.isArray(row?.petIds) ? row.petIds.filter(Boolean) : [];
     const quantity = Math.max(1, Number(row?.quantity || 0) || pets.length || 1);
@@ -112,38 +97,27 @@ export const BoardingBookingListPage = () => {
         if (Array.isArray(data)) return data;
         return [];
     }, [res]);
+
     const pagination = res?.data?.pagination || { totalRecords: 0 };
 
     const updateStatusMut = useMutation({
         mutationFn: ({ id, status }: { id: string; status: string }) => updateBoardingBookingStatus(id, status),
         onSuccess: () => {
-            toast.success("Cập nhật trạng thái lưu trú thành công");
+            toast.success("Cập nhật trạng thái thành công");
             queryClient.invalidateQueries({ queryKey: ["admin-boarding-bookings"] });
         },
         onError: (error: any) => {
-            toast.error(error?.response?.data?.message || "Không thể cập nhật trạng thái lưu trú");
+            toast.error(error?.response?.data?.message || "Không thể cập nhật trạng thái");
         },
     });
 
-    const updatePaymentMut = useMutation({
-        mutationFn: ({ id, status }: { id: string; status: string }) => updateBoardingPaymentStatus(id, status),
-        onSuccess: () => {
-            toast.success("Cập nhật trạng thái thanh toán thành công");
-            queryClient.invalidateQueries({ queryKey: ["admin-boarding-bookings"] });
-        },
-        onError: (error: any) => {
-            toast.error(error?.response?.data?.message || "Không thể cập nhật trạng thái thanh toán");
-        },
-    });
-
-    const statusCounts = res?.data?.statusCounts || {
-        all: 0,
-        pending: 0,
-        held: 0,
-        confirmed: 0,
-        "checked-in": 0,
-        "checked-out": 0,
-        cancelled: 0,
+    const handleStatusUpdate = (id: string, status: string, label: string) => {
+        confirmAction(
+            `Xác nhận ${label}?`,
+            `Bạn có chắc chắn muốn chuyển đơn sang trạng thái "${label}" không?`,
+            () => updateStatusMut.mutate({ id, status }),
+            "info"
+        );
     };
 
     const handleOpenMenu = (event: MouseEvent<HTMLElement>, id: string) => {
@@ -200,15 +174,17 @@ export const BoardingBookingListPage = () => {
         setOpenRows((prev) => (prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]));
     };
 
+    const statusCounts = res?.data?.statusCounts || { all: 0 };
+
     return (
         <Box sx={{ maxWidth: "1200px", mx: "auto", p: "calc(3 * var(--spacing))" }}>
             <Box sx={{ mb: 5, display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
                 <Box>
-                    <Title title="Quản lý đơn khách sạn" />
+                    <Title title="Quản lý khách sạn (Boarding)" />
                     <Breadcrumb
                         items={[
                             { label: "Bảng điều khiển", to: `/${prefixAdmin}` },
-                            { label: "Quản lý đơn khách sạn" },
+                            { label: "Quản lý khách sạn" },
                         ]}
                     />
                 </Box>
@@ -261,13 +237,13 @@ export const BoardingBookingListPage = () => {
                     }}
                 >
                     {[
-                        { value: "all", label: "Tất cả", color: "var(--palette-common-white)", bg: "var(--palette-grey-800)", activeColor: "var(--palette-common-white)", activeBg: "var(--palette-grey-800)" },
-                        { value: "pending", label: "Chờ xử lý", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)", activeColor: "var(--palette-warning-contrastText)", activeBg: "var(--palette-warning-main)" },
-                        { value: "held", label: "Giữ chỗ", color: "var(--palette-primary-dark)", bg: "var(--palette-primary-lighter)", activeColor: "var(--palette-primary-contrastText)", activeBg: "var(--palette-primary-main)" },
-                        { value: "confirmed", label: "Đã xác nhận", color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)", activeColor: "var(--palette-info-contrastText)", activeBg: "var(--palette-info-main)" },
-                        { value: "checked-in", label: "Đã nhận chuồng", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)", activeColor: "var(--palette-success-contrastText)", activeBg: "var(--palette-success-main)" },
-                        { value: "checked-out", label: "Đã trả chuồng", color: "var(--palette-secondary-dark)", bg: "var(--palette-secondary-lighter)", activeColor: "var(--palette-secondary-contrastText)", activeBg: "var(--palette-secondary-main)" },
-                        { value: "cancelled", label: "Đã hủy", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)", activeColor: "var(--palette-error-contrastText)", activeBg: "var(--palette-error-main)" },
+                        { value: "all", label: "Tất cả", bg: "var(--palette-grey-800)", color: "var(--palette-common-white)" },
+                        { value: "pending", label: "Chờ xử lý", bg: "var(--palette-warning-lighter)", color: "var(--palette-warning-dark)" },
+                        { value: "held", label: "Giữ chỗ", bg: "var(--palette-info-lighter)", color: "var(--palette-info-dark)" },
+                        { value: "confirmed", label: "Xác nhận", bg: "var(--palette-info-lighter)", color: "var(--palette-info-dark)" },
+                        { value: "checked-in", label: "Đã nhận", bg: "var(--palette-success-lighter)", color: "var(--palette-success-dark)" },
+                        { value: "checked-out", label: "Đã trả", bg: "var(--palette-secondary-lighter)", color: "var(--palette-secondary-dark)" },
+                        { value: "cancelled", label: "Đã hủy", bg: "var(--palette-error-lighter)", color: "var(--palette-error-dark)" },
                     ].map((tab) => (
                         <Tab
                             key={tab.value}
@@ -286,11 +262,11 @@ export const BoardingBookingListPage = () => {
                                     </Typography>
                                     <TabBadge
                                         sx={{
-                                            bgcolor: tabStatus === tab.value ? tab.activeBg : tab.bg,
-                                            color: tabStatus === tab.value ? tab.activeColor : tab.color,
+                                            bgcolor: tabStatus === tab.value ? "var(--palette-text-primary)" : tab.bg,
+                                            color: tabStatus === tab.value ? "var(--palette-common-white)" : tab.color,
                                         }}
                                     >
-                                        {statusCounts[tab.value as keyof typeof statusCounts]}
+                                        {statusCounts[tab.value as keyof typeof statusCounts] || 0}
                                     </TabBadge>
                                 </Box>
                             )}
@@ -300,9 +276,7 @@ export const BoardingBookingListPage = () => {
                                 minHeight: "48px",
                                 textTransform: "none",
                                 color: "var(--palette-text-secondary)",
-                                "&.Mui-selected": {
-                                    color: "var(--palette-text-primary)",
-                                },
+                                "&.Mui-selected": { color: "var(--palette-text-primary)" },
                             }}
                         />
                     ))}
@@ -310,15 +284,15 @@ export const BoardingBookingListPage = () => {
 
                 <Box sx={{ p: "20px", display: "flex", alignItems: "center", gap: 2, borderBottom: "1px dashed var(--palette-background-neutral)" }}>
                     <Search
-                        placeholder="Tìm theo mã đơn, khách hàng, số điện thoại, mã chuồng..."
+                        placeholder="Tìm theo mã đơn, khách hàng, số điện thoại..."
                         value={searchQuery}
                         onChange={handleSearchChange}
                         maxWidth="26rem"
                     />
                 </Box>
 
-                <TableContainer sx={{ position: "relative", overflow: "auto", maxHeight: "75vh" }}>
-                    <Table sx={{ minWidth: 1120 }} stickyHeader>
+                <TableContainer sx={{ position: "relative", overflow: "unset" }}>
+                    <Table sx={{ minWidth: 1000 }}>
                         <TableHead sx={{ bgcolor: "var(--palette-background-neutral)" }}>
                             <TableRow>
                                 <TableCell padding="checkbox" sx={{ borderBottom: "none", textAlign: "center" }}>
@@ -334,7 +308,6 @@ export const BoardingBookingListPage = () => {
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Thời gian</TableCell>
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Tổng tiền</TableCell>
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }} align="right">Trạng thái</TableCell>
-                                <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }} align="right">Thanh toán</TableCell>
                                 <TableCell sx={{ borderBottom: "none", width: 80 }} align="right" />
                             </TableRow>
                         </TableHead>
@@ -342,317 +315,226 @@ export const BoardingBookingListPage = () => {
                         <TableBody>
                             {isLoading ? (
                                 <TableRow>
-                                    <TableCell colSpan={9} align="center" sx={{ py: 10 }}>
+                                    <TableCell colSpan={7} align="center" sx={{ py: 10 }}>
                                         <CircularProgress size={32} />
                                     </TableCell>
                                 </TableRow>
                             ) : bookings.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={9} align="center" sx={{ py: 10 }}>
-                                        <Typography sx={{ color: "var(--palette-text-secondary)" }}>
-                                            Không có dữ liệu
-                                        </Typography>
+                                    <TableCell colSpan={7} align="center" sx={{ py: 10 }}>
+                                        <Typography sx={{ color: "var(--palette-text-secondary)" }}>Không có dữ liệu</Typography>
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                bookings
-                                    .map((row: any) => {
-                                        const isItemSelected = selected.indexOf(row._id) !== -1;
-                                        const isOpen = openRows.includes(row._id);
-                                        const petSlotItems = getPetSlotItems(row);
+                                bookings.map((row: any) => {
+                                    const isItemSelected = selected.indexOf(row._id) !== -1;
+                                    const isOpen = openRows.includes(row._id);
+                                    const petSlotItems = getPetSlotItems(row);
 
-                                        return (
-                                            <Fragment key={row._id}>
-                                                <TableRow
-                                                    hover
-                                                    selected={isItemSelected}
-                                                    sx={{
-                                                        "&:hover": { bgcolor: "var(--palette-action-hover)" },
-                                                        ...(isOpen && { bgcolor: "transparent" }),
-                                                        transition: "background-color 0.2s",
-                                                    }}
-                                                >
-                                                    <TableCell padding="checkbox" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", textAlign: "center" }}>
-                                                        <Checkbox
-                                                            checked={isItemSelected}
-                                                            onClick={() => handleSelectRow(row._id)}
-                                                            sx={{ color: "var(--palette-text-disabled)", p: 0 }}
-                                                        />
-                                                    </TableCell>
+                                    return (
+                                        <Fragment key={row._id}>
+                                            <TableRow
+                                                hover
+                                                selected={isItemSelected}
+                                                sx={{
+                                                    "&:hover": { bgcolor: "var(--palette-action-hover)" },
+                                                    ...(isOpen && { bgcolor: "transparent" }),
+                                                    transition: "background-color 0.2s",
+                                                }}
+                                            >
+                                                <TableCell padding="checkbox" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", textAlign: "center" }}>
+                                                    <Checkbox
+                                                        checked={isItemSelected}
+                                                        onClick={() => handleSelectRow(row._id)}
+                                                        sx={{ color: "var(--palette-text-disabled)", p: 0 }}
+                                                    />
+                                                </TableCell>
 
-                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                        <Typography
-                                                            sx={{
-                                                                fontWeight: 600,
-                                                                fontSize: "0.875rem",
-                                                                color: "var(--palette-text-primary)",
-                                                                textDecoration: "underline",
-                                                            }}
-                                                        >
-                                                            #{row.code?.slice(-6).toUpperCase() || "N/A"}
-                                                        </Typography>
-                                                    </TableCell>
-
-                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                        <Stack direction="row" spacing={2} alignItems="center">
-                                                            <Avatar
-                                                                src={row.userId?.avatar}
-                                                                sx={{ width: 40, height: 40, borderRadius: "var(--shape-borderRadius-sm)" }}
-                                                            >
-                                                                <Icon icon="eva:person-fill" width={22} />
-                                                            </Avatar>
-                                                            <Stack spacing={0.25}>
-                                                                <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
-                                                                    {row.fullName || row.userId?.fullName || "Khách vãng lai"}
-                                                                </Typography>
-                                                                <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>
-                                                                    {row.phone || row.userId?.phone || row.userId?.email || "Không có thông tin"}
-                                                                </Typography>
-                                                            </Stack>
-                                                        </Stack>
-                                                    </TableCell>
-
-
-                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                        <Stack spacing={0.25}>
-                                                            <Typography sx={{ fontWeight: 500, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
-                                                                {dayjs(row.checkInDate).format("DD/MM/YYYY")} - {dayjs(row.checkOutDate).format("DD/MM/YYYY")}
-                                                            </Typography>
-                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>
-                                                                {Number(row.numberOfDays || 0)} đêm
-                                                            </Typography>
-                                                        </Stack>
-                                                    </TableCell>
-
-                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                        <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
-                                                            {formatCurrency(Number(row.total || 0))}
-                                                        </Typography>
-                                                        {row.surcharge > 0 && (
-                                                            <Typography sx={{ color: "var(--palette-warning-main)", fontSize: "10px", fontWeight: 800, textTransform: "uppercase" }}>
-                                                                + Phụ thu trễ
-                                                            </Typography>
-                                                        )}
-                                                    </TableCell>
-
-                                                    <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                        <TextField
-                                                            select
-                                                            size="small"
-                                                            value={String(row.boardingStatus || "")}
-                                                            onChange={(event) => {
-                                                                const nextStatus = String(event.target.value || "");
-                                                                if (!nextStatus || nextStatus === String(row.boardingStatus || "")) return;
-                                                                updateStatusMut.mutate({ id: row._id, status: nextStatus });
-                                                            }}
-                                                            disabled={updateStatusMut.isPending}
-                                                            sx={{
-                                                                minWidth: 170,
-                                                                "& .MuiInputBase-input": { py: "6px", fontSize: "0.8125rem", fontWeight: 600 },
-                                                            }}
-                                                        >
-                                                            {boardingStatusOptions.map((option) => (
-                                                                <MenuItem key={option.value} value={option.value}>
-                                                                    {option.label}
-                                                                </MenuItem>
-                                                            ))}
-                                                        </TextField>
-                                                    </TableCell>
-
-                                                    <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                        <TextField
-                                                            select
-                                                            size="small"
-                                                            value={String(row.paymentStatus || "")}
-                                                            onChange={(event) => {
-                                                                const nextStatus = String(event.target.value || "");
-                                                                if (!nextStatus || nextStatus === String(row.paymentStatus || "")) return;
-                                                                updatePaymentMut.mutate({ id: row._id, status: nextStatus });
-                                                            }}
-                                                            disabled={updatePaymentMut.isPending}
-                                                            sx={{
-                                                                minWidth: 160,
-                                                                "& .MuiInputBase-input": { py: "6px", fontSize: "0.8125rem", fontWeight: 600 },
-                                                            }}
-                                                        >
-                                                            {paymentStatusOptions.map((option) => (
-                                                                <MenuItem key={option.value} value={option.value}>
-                                                                    {option.label}
-                                                                </MenuItem>
-                                                            ))}
-                                                        </TextField>
-                                                    </TableCell>
-
-                                                    <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", width: 96 }}>
-                                                        <Stack direction="row" spacing={0} justifyContent="flex-end">
-                                                            <IconButton
-                                                                onClick={() => toggleRow(row._id)}
-                                                                sx={{
-                                                                    color: "var(--palette-text-primary)",
-                                                                    bgcolor: isOpen ? "var(--palette-action-hover)" : "transparent",
-                                                                    "&:hover": {
-                                                                        bgcolor: "rgba(var(--palette-action-activeChannel) / var(--palette-action-hoverOpacity))",
-                                                                    },
-                                                                }}
-                                                            >
-                                                                <Icon icon={isOpen ? "eva:arrow-ios-upward-fill" : "eva:arrow-ios-downward-fill"} width={20} />
-                                                            </IconButton>
-                                                            <IconButton
-                                                                onClick={(event) => handleOpenMenu(event, row._id)}
-                                                                sx={{
-                                                                    color: "var(--palette-text-primary)",
-                                                                    bgcolor: Boolean(anchorEl[row._id]) ? "var(--palette-action-hover)" : "transparent",
-                                                                    "&:hover": {
-                                                                        bgcolor: "rgba(var(--palette-action-activeChannel) / var(--palette-action-hoverOpacity))",
-                                                                    },
-                                                                }}
-                                                            >
-                                                                <Icon icon="eva:more-vertical-fill" width={20} />
-                                                            </IconButton>
-                                                        </Stack>
-                                                        <Menu
-                                                            anchorEl={anchorEl[row._id]}
-                                                            open={Boolean(anchorEl[row._id])}
-                                                            onClose={() => handleCloseMenu(row._id)}
-                                                            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                                                            transformOrigin={{ vertical: "top", horizontal: "right" }}
-                                                            slotProps={{
-                                                                paper: {
-                                                                    sx: {
-                                                                        width: 240,
-                                                                        boxShadow: "var(--customShadows-z20)",
-                                                                        borderRadius: "var(--shape-borderRadius-md)",
-                                                                        p: 0.5,
-                                                                    },
-                                                                },
-                                                            }}
-                                                        >
-                                                            <MenuItem
-                                                                onClick={() => {
-                                                                    handleCloseMenu(row._id);
-                                                                    navigate(`/${prefixAdmin}/boarding/care-schedule`);
-                                                                }}
-                                                            >
-                                                                <Icon icon="solar:calendar-mark-bold" width={18} style={{ marginRight: 8 }} />
-                                                                Lịch chăm sóc
-                                                            </MenuItem>
-                                                        </Menu>
-                                                    </TableCell>
-                                                </TableRow>
-                                                <TableRow>
-                                                    <TableCell
-                                                        colSpan={9}
+                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                    <Typography
+                                                        onClick={() => navigate(`/${prefixAdmin}/boarding/detail/${row._id}`)}
                                                         sx={{
-                                                            p: 2,
-                                                            bgcolor: "var(--palette-background-neutral)",
-                                                            borderBottom: isOpen ? "1px dashed var(--palette-divider)" : "none",
+                                                            fontWeight: 600,
+                                                            fontSize: "0.875rem",
+                                                            color: "var(--palette-text-primary)",
+                                                            textDecoration: "underline",
+                                                            cursor: "pointer",
+                                                            "&:hover": { color: "var(--palette-primary-main)" }
                                                         }}
                                                     >
-                                                        <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                                                            <Box
-                                                                sx={{
-                                                                    bgcolor: "var(--palette-background-paper)",
-                                                                    borderRadius: "12px",
-                                                                    boxShadow: "var(--customShadows-z1)",
-                                                                    overflow: "hidden",
-                                                                }}
-                                                            >
-                                                                {petSlotItems.map((item) => (
-                                                                    <Stack
-                                                                        key={`${row._id}-${item.key}`}
-                                                                        direction="row"
-                                                                        alignItems="center"
-                                                                        spacing={2}
-                                                                        sx={{
-                                                                            px: "calc(2 * var(--spacing))",
-                                                                            py: "calc(1.5 * var(--spacing))",
-                                                                            "&:not(:last-of-type)": {
-                                                                                borderBottom: "solid 2px var(--palette-background-neutral)",
-                                                                            },
-                                                                        }}
-                                                                    >
-                                                                        <Avatar
-                                                                            src={(row.petIds || []).find((pet: any) => String(pet?._id || pet?.id) === item.key)?.avatar}
-                                                                            variant="rounded"
-                                                                            sx={{ width: 48, height: 48, borderRadius: "var(--shape-borderRadius-sm)" }}
-                                                                        >
-                                                                            <Icon icon="solar:dog-bold" width={22} />
-                                                                        </Avatar>
-                                                                        <Box sx={{ flexGrow: 1 }}>
-                                                                            <Typography sx={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
-                                                                                {item.petName}
-                                                                            </Typography>
-                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.25, fontWeight: 500 }}>
-                                                                                {item.cageLabel}
-                                                                            </Typography>
-                                                                            {row.specialCare || row.notes ? (
-                                                                                <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.5 }}>
-                                                                                    {row.specialCare || row.notes}
-                                                                                </Typography>
-                                                                            ) : null}
-                                                                            {(row.actualCheckInDate || row.actualCheckOutDate) && (
-                                                                                <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-                                                                                    {row.actualCheckInDate && (
-                                                                                        <Box>
-                                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase" }}>
-                                                                                                Nhận thực tế
-                                                                                            </Typography>
-                                                                                            <Typography sx={{ color: "var(--palette-text-primary)", fontSize: "0.75rem" }}>
-                                                                                                {dayjs(row.actualCheckInDate).format("DD/MM/YYYY HH:mm")}
-                                                                                            </Typography>
-                                                                                        </Box>
-                                                                                    )}
-                                                                                    {row.actualCheckOutDate && (
-                                                                                        <Box>
-                                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.65rem", fontWeight: 700, textTransform: "uppercase" }}>
-                                                                                                Trả thực tế
-                                                                                            </Typography>
-                                                                                            <Typography sx={{ color: "var(--palette-text-primary)", fontSize: "0.75rem" }}>
-                                                                                                {dayjs(row.actualCheckOutDate).format("DD/MM/YYYY HH:mm")}
-                                                                                            </Typography>
-                                                                                        </Box>
-                                                                                    )}
-                                                                                </Stack>
-                                                                            )}
-                                                                        </Box>
-                                                                        <Box sx={{ textAlign: "right", minWidth: 120 }}>
-                                                                            <Typography sx={{ fontWeight: 700, fontSize: "0.8125rem", color: "var(--palette-text-primary)" }}>
-                                                                                {formatCurrency(Number(row.pricePerDay || 0))}/đêm
-                                                                            </Typography>
-                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.25, fontWeight: 500 }}>
-                                                                                {Number(row.numberOfDays || 0)} đêm
-                                                                            </Typography>
-                                                                        </Box>
-                                                                    </Stack>
-                                                                ))}
+                                                        #{row.code?.slice(-6).toUpperCase() || "N/A"}
+                                                    </Typography>
+                                                </TableCell>
 
-                                                                {row.surcharge > 0 && (
-                                                                    <Box
-                                                                        sx={{
-                                                                            p: 2,
-                                                                            borderTop: "dashed 1px var(--palette-divider)",
-                                                                            bgcolor: "rgba(255, 171, 0, 0.08)",
-                                                                            borderRadius: "0 0 12px 12px",
-                                                                        }}
+                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                    <Stack direction="row" spacing={2} alignItems="center">
+                                                        <Avatar src={row.userId?.avatar} sx={{ width: 40, height: 40, borderRadius: "var(--shape-borderRadius-sm)" }}>
+                                                            <Icon icon="eva:person-fill" width={22} />
+                                                        </Avatar>
+                                                        <Stack spacing={0.25}>
+                                                            <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
+                                                                {row.fullName || row.userId?.fullName || "Khách vãng lai"}
+                                                            </Typography>
+                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>
+                                                                {row.phone || row.userId?.phone || "N/A"}
+                                                            </Typography>
+                                                        </Stack>
+                                                    </Stack>
+                                                </TableCell>
+
+                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                    <Stack spacing={0.25}>
+                                                        <Typography sx={{ fontWeight: 500, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
+                                                            {dayjs(row.checkInDate).format("DD/MM/YYYY")} - {dayjs(row.checkOutDate).format("DD/MM/YYYY")}
+                                                        </Typography>
+                                                        <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>
+                                                            {Number(row.numberOfDays || 0)} ngày lưu trú
+                                                        </Typography>
+                                                    </Stack>
+                                                </TableCell>
+
+                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                    <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
+                                                        {formatCurrency(Number(row.total || 0))}
+                                                    </Typography>
+                                                </TableCell>
+
+                                                <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                    {(() => {
+                                                        const statusMap: any = {
+                                                            pending: { label: "Chờ xử lý", color: "var(--palette-warning-main)", bg: "var(--palette-warning-lighter)" },
+                                                            confirmed: { label: "Xác nhận", color: "var(--palette-info-main)", bg: "var(--palette-info-lighter)" },
+                                                            "checked-in": { label: "Đã nhận", color: "var(--palette-success-main)", bg: "var(--palette-success-lighter)" },
+                                                            "checked-out": { label: "Đã trả", color: "var(--palette-secondary-main)", bg: "var(--palette-secondary-lighter)" },
+                                                            cancelled: { label: "Đã hủy", color: "var(--palette-error-main)", bg: "var(--palette-error-lighter)" },
+                                                        };
+                                                        const status = statusMap[row.boardingStatus] || { label: row.boardingStatus, color: "var(--palette-text-disabled)", bg: "var(--palette-background-neutral)" };
+                                                        return (
+                                                            <Chip
+                                                                label={status.label}
+                                                                size="small"
+                                                                sx={{
+                                                                    borderRadius: "var(--shape-borderRadius-sm)",
+                                                                    fontWeight: 700,
+                                                                    fontSize: "0.6875rem",
+                                                                    color: status.color,
+                                                                    bgcolor: status.bg,
+                                                                    height: "24px",
+                                                                }}
+                                                            />
+                                                        );
+                                                    })()}
+                                                </TableCell>
+
+                                                <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", width: 80 }}>
+                                                    <Stack direction="row" spacing={0} justifyContent="flex-end">
+                                                        <IconButton onClick={() => toggleRow(row._id)}>
+                                                            <Icon icon={isOpen ? "eva:arrow-ios-upward-fill" : "eva:arrow-ios-downward-fill"} width={20} />
+                                                        </IconButton>
+                                                        <IconButton onClick={(event) => handleOpenMenu(event, row._id)}>
+                                                            <Icon icon="eva:more-vertical-fill" width={20} />
+                                                        </IconButton>
+                                                    </Stack>
+                                                    <Menu
+                                                        anchorEl={anchorEl[row._id]}
+                                                        open={Boolean(anchorEl[row._id])}
+                                                        onClose={() => handleCloseMenu(row._id)}
+                                                        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                                                        transformOrigin={{ vertical: "top", horizontal: "right" }}
+                                                        slotProps={{
+                                                            paper: {
+                                                                sx: {
+                                                                    width: 180,
+                                                                    boxShadow: "var(--customShadows-z20)",
+                                                                    borderRadius: "var(--shape-borderRadius-md)",
+                                                                    p: 0.5,
+                                                                },
+                                                            },
+                                                        }}
+                                                    >
+                                                        <MenuItem onClick={() => { handleCloseMenu(row._id); navigate(`/${prefixAdmin}/boarding/detail/${row._id}`); }}>
+                                                            <Icon icon="eva:eye-fill" width={18} style={{ marginRight: 8 }} />
+                                                            Chi tiết
+                                                        </MenuItem>
+                                                        <MenuItem onClick={() => { handleCloseMenu(row._id); navigate(`/${prefixAdmin}/boarding/edit/${row._id}`); }}>
+                                                            <Icon icon="solar:pen-bold" width={18} style={{ marginRight: 8 }} />
+                                                            Sửa
+                                                        </MenuItem>
+                                                        <MenuItem onClick={() => { handleCloseMenu(row._id); navigate(`/${prefixAdmin}/boarding/care-schedule`); }}>
+                                                            <Icon icon="solar:calendar-mark-bold" width={18} style={{ marginRight: 8 }} />
+                                                            Lịch chăm sóc
+                                                        </MenuItem>
+
+                                                        {["pending", "held"].includes(row.boardingStatus) && (
+                                                            <MenuItem
+                                                                onClick={() => { handleCloseMenu(row._id); handleStatusUpdate(row._id, "confirmed", "Xác nhận"); }}
+                                                                sx={{ color: "var(--palette-success-main)" }}
+                                                            >
+                                                                <Icon icon="eva:checkmark-circle-2-fill" width={18} style={{ marginRight: 8 }} />
+                                                                Xác nhận khách
+                                                            </MenuItem>
+                                                        )}
+
+                                                        {row.boardingStatus === "confirmed" && (
+                                                            <MenuItem
+                                                                onClick={() => { handleCloseMenu(row._id); handleStatusUpdate(row._id, "checked-in", "Nhận chuồng"); }}
+                                                                sx={{ color: "var(--palette-info-main)" }}
+                                                            >
+                                                                <Icon icon="solar:user-check-bold" width={18} style={{ marginRight: 8 }} />
+                                                                Nhận chuồng
+                                                            </MenuItem>
+                                                        )}
+
+                                                        {row.boardingStatus === "checked-in" && (
+                                                            <MenuItem
+                                                                onClick={() => { handleCloseMenu(row._id); handleStatusUpdate(row._id, "checked-out", "Trả chuồng"); }}
+                                                                sx={{ color: "var(--palette-warning-main)" }}
+                                                            >
+                                                                <Icon icon="solar:card-send-bold" width={18} style={{ marginRight: 8 }} />
+                                                                Trả chuồng (Hết)
+                                                            </MenuItem>
+                                                        )}
+                                                    </Menu>
+                                                </TableCell>
+                                            </TableRow>
+
+                                            <TableRow>
+                                                <TableCell colSpan={7} sx={{ p: 0, bgcolor: "var(--palette-background-neutral)", borderBottom: isOpen ? "1px dashed var(--palette-divider)" : "none" }}>
+                                                    <Collapse in={isOpen} timeout="auto" unmountOnExit>
+                                                        <Box sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "8px", m: "calc(1.5 * var(--spacing))", overflow: "hidden" }}>
+                                                            {petSlotItems.map((item) => (
+                                                                <Stack
+                                                                    key={`${row._id}-${item.key}`}
+                                                                    direction="row"
+                                                                    alignItems="center"
+                                                                    spacing={2}
+                                                                    sx={{ px: 2, py: 1.5, "&:not(:last-of-type)": { borderBottom: "solid 2px var(--palette-background-neutral)" } }}
+                                                                >
+                                                                    <Avatar
+                                                                        src={(row.petIds || []).find((pet: any) => String(pet?._id || pet?.id) === item.key)?.avatar}
+                                                                        variant="rounded"
+                                                                        sx={{ width: 48, height: 48, borderRadius: "var(--shape-borderRadius-sm)" }}
                                                                     >
-                                                                        <Stack direction="row" alignItems="center" spacing={1}>
-                                                                            <Icon icon="eva:info-fill" color="var(--palette-warning-main)" width={20} />
-                                                                            <Typography sx={{ color: "var(--palette-warning-dark)", fontWeight: 700, fontSize: "0.8125rem" }}>
-                                                                                Phụ phí phát sinh: {formatCurrency(row.surcharge)}
-                                                                            </Typography>
-                                                                            <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.8125rem", ml: 1 }}>
-                                                                                Lý do: {row.surchargeReason}
-                                                                            </Typography>
-                                                                        </Stack>
+                                                                        <Icon icon="solar:dog-bold" width={22} />
+                                                                    </Avatar>
+                                                                    <Box sx={{ flexGrow: 1 }}>
+                                                                        <Typography sx={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>{item.petName}</Typography>
+                                                                        <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem", mt: 0.25 }}>{item.cageLabel}</Typography>
                                                                     </Box>
-                                                                )}
-                                                            </Box>
-                                                        </Collapse>
-                                                    </TableCell>
-                                                </TableRow>
-                                            </Fragment>
-                                        );
-                                    })
+                                                                    <Box sx={{ textAlign: "right", minWidth: 120 }}>
+                                                                        <Typography sx={{ fontWeight: 700, fontSize: "0.8125rem", color: "var(--palette-text-primary)" }}>
+                                                                            {formatCurrency(Number(row.pricePerDay || row.total / (row.numberOfDays || 1)))}/ngày
+                                                                        </Typography>
+                                                                    </Box>
+                                                                </Stack>
+                                                            ))}
+                                                        </Box>
+                                                    </Collapse>
+                                                </TableCell>
+                                            </TableRow>
+                                        </Fragment>
+                                    );
+                                })
                             )}
                         </TableBody>
                     </Table>

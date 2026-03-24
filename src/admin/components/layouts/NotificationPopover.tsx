@@ -217,7 +217,7 @@ export const NotificationPopover = () => {
                         disableRipple
                         label={
                             <Stack direction="row" alignItems="center" spacing={1}>
-                                <Typography variant="subtitle2" sx={{ fontSize: '0.875rem', fontWeight: 600 }}>Chưa đọc</Typography>
+                                <Typography variant="subtitle2" sx={{ fontSize: '0.875rem', fontWeight: 600, whiteSpace: 'nowrap' }}>Chưa đọc</Typography>
                                 <Box sx={{
                                     bgcolor: tab === 'unread' ? '#00B8D9' : 'rgba(0, 184, 217, 0.16)',
                                     color: tab === 'unread' ? 'white' : '#006C9C',

@@ -75,6 +75,8 @@ import { BoardingBookingCreatePage } from "../pages/boarding/BoardingBookingCrea
 import { BoardingCageListPage } from "../pages/boarding/BoardingCageListPage";
 import { BoardingCareSchedulePage } from "../pages/boarding/BoardingCareSchedulePage";
 import { PetCareTemplatePage } from "../pages/boarding/PetCareTemplatePage";
+import { BoardingBookingDetailPage } from "../pages/boarding/BoardingBookingDetailPage";
+import { BoardingBookingEditPage } from "../pages/boarding/BoardingBookingEditPage";
 import { NotificationListPage } from "../pages/notification/NotificationListPage";
 
 export const AdminRoutes = [
@@ -148,6 +150,8 @@ export const AdminRoutes = [
     { path: "departments", element: <PermissionGuard permission="department_view"><DepartmentListPage /></PermissionGuard> },
     { path: "boarding/booking-list", element: <PermissionGuard permission="boarding_booking_view"><BoardingBookingListPage /></PermissionGuard> },
     { path: "boarding/create", element: <PermissionGuard permission="boarding_booking_create"><BoardingBookingCreatePage /></PermissionGuard> },
+    { path: "boarding/detail/:id", element: <PermissionGuard permission="boarding_booking_view"><BoardingBookingDetailPage /></PermissionGuard> },
+    { path: "boarding/edit/:id", element: <PermissionGuard permission="boarding_booking_edit"><BoardingBookingEditPage /></PermissionGuard> },
     { path: "boarding/care-schedule", element: <PermissionGuard permission="boarding_booking_edit"><BoardingCareSchedulePage /></PermissionGuard> },
     { path: "boarding/cages", element: <PermissionGuard permission="boarding_cage_view"><BoardingCageListPage /></PermissionGuard> },
     { path: "boarding/care-templates", element: <PermissionGuard permission="boarding_cage_edit"><PetCareTemplatePage /></PermissionGuard> },

@@ -50,6 +50,11 @@ export const updateBoardingPaymentStatus = async (id: string, paymentStatus: str
     return response.data;
 };
 
+export const updateBoardingBookingDetail = async (id: string, data: any) => {
+    const response = await apiApp.put(`${BASE_URL}/${id}`, data, withAuth());
+    return response.data;
+};
+
 export interface BoardingProofMediaItem {
     url: string;
     kind?: "image" | "video";

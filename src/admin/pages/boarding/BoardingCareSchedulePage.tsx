@@ -799,7 +799,7 @@ export const BoardingCareSchedulePage = () => {
                     flexDirection: "column",
                 }}
             >
-                <Box sx={{ p: "20px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 3, borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                <Box sx={{ p: "24px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 3 }}>
                     <Search
                         placeholder="Tìm theo mã đơn, khách hàng, số điện thoại..."
                         value={searchQuery}
@@ -810,12 +810,23 @@ export const BoardingCareSchedulePage = () => {
                         value={speciesFilter}
                         onChange={(_e, val) => setSpeciesFilter(val)}
                         sx={{
-                            "& .MuiTab-root": { minHeight: 40, py: 0.5, px: 2, fontWeight: 700 }
+                            "& .MuiTab-root": {
+                                minHeight: 48,
+                                textTransform: "none",
+                                fontWeight: 700,
+                                fontSize: "0.875rem",
+                                color: "var(--palette-text-secondary)",
+                                "&.Mui-selected": { color: "var(--palette-text-primary)" }
+                            },
+                            "& .MuiTabs-indicator": {
+                                bgcolor: "var(--palette-text-primary)",
+                                height: 3
+                            }
                         }}
                     >
                         <Tab value="all" label="Tất cả" />
-                        <Tab value="dog" label="Chó 🐕" />
-                        <Tab value="cat" label="Mèo 🐈" />
+                        <Tab value="dog" label="Chó 🐶" />
+                        <Tab value="cat" label="Mèo 🐱" />
                     </Tabs>
 
                     <Box sx={{ flexGrow: 1 }} />
@@ -825,9 +836,21 @@ export const BoardingCareSchedulePage = () => {
                             size="small"
                             checked={onlyMyAssign}
                             onChange={(e) => setOnlyMyAssign(e.target.checked)}
-                            sx={{ p: 0 }}
+                            sx={{
+                                color: "var(--palette-text-disabled)",
+                                "&.Mui-checked": { color: "var(--palette-primary-main)" }
+                            }}
                         />
-                        <Typography variant="body2" sx={{ fontWeight: 600, cursor: "pointer" }} onClick={() => setOnlyMyAssign(!onlyMyAssign)}>
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                fontWeight: 600,
+                                color: "var(--palette-text-primary)",
+                                cursor: "pointer",
+                                "&:hover": { opacity: 0.8 }
+                            }}
+                            onClick={() => setOnlyMyAssign(!onlyMyAssign)}
+                        >
                             Chỉ hiện lịch của tôi
                         </Typography>
                     </Stack>
@@ -910,12 +933,12 @@ export const BoardingCareSchedulePage = () => {
                                                                             sx={{
                                                                                 px: 1,
                                                                                 py: 0.25,
-                                                                                borderRadius: 0.5,
+                                                                                borderRadius: "var(--shape-borderRadius-sm)",
                                                                                 fontSize: "0.7rem",
                                                                                 fontWeight: 700,
-                                                                                bgcolor: (pet.type || pet.petType) === "dog" ? "rgba(59, 130, 246, 0.1)" : "rgba(236, 72, 153, 0.1)",
-                                                                                color: (pet.type || pet.petType) === "dog" ? "#3b82f6" : "#ec4899",
-                                                                                border: `1px solid ${(pet.type || pet.petType) === "dog" ? "rgba(59, 130, 246, 0.2)" : "rgba(236, 72, 153, 0.2)"}`
+                                                                                bgcolor: (pet.type || pet.petType) === "dog" ? "var(--palette-primary-lighter)" : "var(--palette-secondary-lighter)",
+                                                                                color: (pet.type || pet.petType) === "dog" ? "var(--palette-primary-dark)" : "var(--palette-secondary-dark)",
+                                                                                border: `1px solid ${(pet.type || pet.petType) === "dog" ? "var(--palette-primary-light)" : "var(--palette-secondary-light)"}`
                                                                             }}
                                                                         >
                                                                             {(pet.type || pet.petType) === "dog" ? "🐶" : "🐱"} {pet.name}
@@ -939,7 +962,19 @@ export const BoardingCareSchedulePage = () => {
                                                         </Typography>
                                                     </TableCell>
                                                     <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                        <Button variant="outlined" size="small" onClick={() => moDialogChamSoc(row)} disabled={careLoading}>
+                                                        <Button
+                                                            variant="contained"
+                                                            size="small"
+                                                            onClick={() => moDialogChamSoc(row)}
+                                                            disabled={careLoading}
+                                                            sx={{
+                                                                bgcolor: "var(--palette-text-primary)",
+                                                                borderRadius: "var(--shape-borderRadius-sm)",
+                                                                fontWeight: 700,
+                                                                boxShadow: "none",
+                                                                "&:hover": { bgcolor: "var(--palette-grey-700)", boxShadow: "var(--customShadows-z8)" }
+                                                            }}
+                                                        >
                                                             Quản lý lịch
                                                         </Button>
                                                     </TableCell>
@@ -1041,9 +1076,22 @@ export const BoardingCareSchedulePage = () => {
                 />
             </Card>
 
-            <Dialog open={careDialogOpen} onClose={dongDialogChamSoc} fullWidth maxWidth="lg">
-                <DialogTitle>
-                    Quản lý lịch chăm sóc: {editingBooking?.code || "-"}
+            <Dialog
+                open={careDialogOpen}
+                onClose={dongDialogChamSoc}
+                fullWidth
+                maxWidth="lg"
+                PaperProps={{
+                    sx: {
+                        borderRadius: "var(--shape-borderRadius-lg)",
+                        boxShadow: "var(--customShadows-dialog)",
+                    }
+                }}
+            >
+                <DialogTitle sx={{ p: 3, bgcolor: "var(--palette-background-neutral)", borderBottom: "1px solid var(--palette-divider)" }}>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: "var(--palette-text-primary)" }}>
+                        Quản lý lịch chăm sóc: {editingBooking?.code || "-"}
+                    </Typography>
                 </DialogTitle>
                 <DialogContent dividers>
                     {careLoading ? (
@@ -1067,9 +1115,18 @@ export const BoardingCareSchedulePage = () => {
                                 onChange={(_e, val) => setCareTab(val)}
                                 sx={{
                                     mb: 3,
-                                    borderBottom: 1,
-                                    borderColor: "divider",
-                                    "& .MuiTab-root": { fontWeight: 700 }
+                                    borderBottom: "1px solid var(--palette-divider)",
+                                    "& .MuiTab-root": {
+                                        fontWeight: 700,
+                                        fontSize: "0.875rem",
+                                        textTransform: "none",
+                                        color: "var(--palette-text-secondary)",
+                                        "&.Mui-selected": { color: "var(--palette-text-primary)" }
+                                    },
+                                    "& .MuiTabs-indicator": {
+                                        bgcolor: "var(--palette-text-primary)",
+                                        height: 3
+                                    }
                                 }}
                             >
                                 <Tab label="Lịch ăn" />
@@ -1116,7 +1173,12 @@ export const BoardingCareSchedulePage = () => {
                                             <Button
                                                 variant="outlined"
                                                 size="small"
-                                                color="primary"
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    color: "var(--palette-primary-main)",
+                                                    borderColor: "var(--palette-primary-main)",
+                                                    "&:hover": { borderColor: "var(--palette-primary-dark)", bgcolor: "var(--palette-primary-lighter)" }
+                                                }}
                                                 onClick={() => {
                                                     const currentUserInHotel = hotelStaffOptions.find(opt => opt.value === user?.id);
                                                     const defaultStaff = currentUserInHotel || (hotelStaffOptions.length > 0 ? hotelStaffOptions[0] : null);
@@ -1160,7 +1222,12 @@ export const BoardingCareSchedulePage = () => {
                                             <Button
                                                 variant="outlined"
                                                 size="small"
-                                                color="primary"
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    color: "var(--palette-primary-main)",
+                                                    borderColor: "var(--palette-primary-main)",
+                                                    "&:hover": { borderColor: "var(--palette-primary-dark)", bgcolor: "var(--palette-primary-lighter)" }
+                                                }}
                                                 onClick={() => {
                                                     const currentUserInHotel = hotelStaffOptions.find(opt => opt.value === user?.id);
                                                     const defaultStaff = currentUserInHotel || (hotelStaffOptions.length > 0 ? hotelStaffOptions[0] : null);
@@ -1194,7 +1261,12 @@ export const BoardingCareSchedulePage = () => {
                                             <Button
                                                 variant="outlined"
                                                 size="small"
-                                                color="secondary"
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    color: "var(--palette-secondary-main)",
+                                                    borderColor: "var(--palette-secondary-main)",
+                                                    "&:hover": { borderColor: "var(--palette-secondary-dark)", bgcolor: "var(--palette-secondary-lighter)" }
+                                                }}
                                                 onClick={() => {
                                                     const currentUserInHotel = hotelStaffOptions.find(opt => opt.value === user?.id);
                                                     const defaultStaff = currentUserInHotel || (hotelStaffOptions.length > 0 ? hotelStaffOptions[0] : null);
@@ -1240,9 +1312,9 @@ export const BoardingCareSchedulePage = () => {
 
                                     {(() => {
                                         const groups = [
-                                            { type: "dog" as const, label: "Chó", color: "#3b82f6" },
-                                            { type: "cat" as const, label: "Mèo", color: "#ec4899" },
-                                            { type: "all" as const, label: "Chung / Khác", color: "#64748b" },
+                                            { type: "dog" as const, label: "Chó", color: "var(--palette-primary-main)" },
+                                            { type: "cat" as const, label: "Mèo", color: "var(--palette-secondary-main)" },
+                                            { type: "all" as const, label: "Chung / Khác", color: "var(--palette-grey-600)" },
                                         ];
 
                                         return groups.map((group) => {
@@ -1414,9 +1486,9 @@ export const BoardingCareSchedulePage = () => {
 
                                     {(() => {
                                         const groups = [
-                                            { type: "dog" as const, label: "Chó", color: "#3b82f6" },
-                                            { type: "cat" as const, label: "Mèo", color: "#ec4899" },
-                                            { type: "all" as const, label: "Chung / Khác", color: "#64748b" },
+                                            { type: "dog" as const, label: "Chó", color: "var(--palette-primary-main)" },
+                                            { type: "cat" as const, label: "Mèo", color: "var(--palette-secondary-main)" },
+                                            { type: "all" as const, label: "Chung / Khác", color: "var(--palette-grey-600)" },
                                         ];
 
                                         return groups.map((group) => {
@@ -1627,19 +1699,45 @@ export const BoardingCareSchedulePage = () => {
                         </Stack>
                     )}
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={dongDialogChamSoc} disabled={updateCareMut.isPending || resetCareTemplateMut.isPending}>Đóng</Button>
+                <DialogActions sx={{ p: 3, borderTop: "1px solid var(--palette-divider)" }}>
+                    <Button
+                        onClick={dongDialogChamSoc}
+                        disabled={updateCareMut.isPending || resetCareTemplateMut.isPending}
+                        sx={{ fontWeight: 700, color: "var(--palette-text-secondary)" }}
+                    >
+                        Hủy
+                    </Button>
+                    <Box sx={{ flexGrow: 1 }} />
                     {canAssignHotelStaff ? (
                         <Button
                             variant="outlined"
                             startIcon={<RestartAltIcon />}
                             onClick={taoLaiLichMau}
                             disabled={updateCareMut.isPending || resetCareTemplateMut.isPending || !editingBooking?._id}
+                            sx={{
+                                fontWeight: 700,
+                                borderRadius: "var(--shape-borderRadius-sm)",
+                                borderColor: "var(--palette-grey-300)",
+                                color: "var(--palette-text-primary)",
+                                "&:hover": { borderColor: "var(--palette-text-primary)", bgcolor: "var(--palette-background-neutral)" }
+                            }}
                         >
                             {resetCareTemplateMut.isPending ? "Đang tạo lại..." : "Tạo lại lịch mẫu"}
                         </Button>
                     ) : null}
-                    <Button variant="contained" onClick={luuLichChamSoc} disabled={updateCareMut.isPending || resetCareTemplateMut.isPending || !editingBooking?._id}>
+                    <Button
+                        variant="contained"
+                        onClick={luuLichChamSoc}
+                        disabled={updateCareMut.isPending || resetCareTemplateMut.isPending || !editingBooking?._id}
+                        sx={{
+                            bgcolor: "var(--palette-text-primary)",
+                            borderRadius: "var(--shape-borderRadius-sm)",
+                            fontWeight: 700,
+                            px: 3,
+                            boxShadow: "none",
+                            "&:hover": { bgcolor: "var(--palette-grey-700)", boxShadow: "var(--customShadows-z8)" }
+                        }}
+                    >
                         {updateCareMut.isPending ? "Đang lưu..." : "Lưu lịch chăm sóc"}
                     </Button>
                 </DialogActions>
