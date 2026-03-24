@@ -5,7 +5,9 @@ import { getBoardingBookingDetail } from "../../api/dashboard.api";
 import { formatCurrency } from "../../helpers";
 import { ClientBoardingPetDiary } from "./ClientBoardingPetDiary";
 import dayjs from "dayjs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { cancelBoardingBooking } from "../../api/boarding-booking.api";
+import { toast } from "react-toastify";
 
 export const BoardingBookingDetailPage = () => {
     const { id } = useParams();
@@ -16,10 +18,38 @@ export const BoardingBookingDetailPage = () => {
         enabled: !!id,
     });
 
-    // The API returns { booking: {...}, pets: [...], cage: {...}, timeline: [...] }
+    // The API returns { booking: {...}, pets: [...], cage: {...}, timeline: [...]  }
     const booking = res?.booking;
     const pets = res?.pets || [];
     const cage = res?.cage;
+    const queryClient = useQueryClient();
+
+    const cancelMutation = useMutation({
+        mutationFn: (reason: string) => cancelBoardingBooking(id!, reason),
+        onSuccess: () => {
+            toast.success("Đã hủy đơn hàng thành công!");
+            queryClient.invalidateQueries({ queryKey: ["boarding-booking", id] });
+        },
+        onError: (err: any) => {
+            toast.error(err?.response?.data?.message || "Lỗi khi hủy đơn hàng");
+        }
+    });
+
+    const handleCancel = () => {
+        if (!booking) return;
+        const minutes = dayjs().diff(dayjs(booking.createdAt), 'minute');
+        const isFree = minutes <= 30;
+
+        const msg = isFree
+            ? "Bạn có chắc chắn muốn hủy đơn hàng này không? (Hủy trước 30p sẽ được hoàn tiền)"
+            : "Đã quá 30 phút kể từ khi đặt. Hủy đơn lúc này bạn sẽ bị MẤT TIỀN CỌC. Bạn vẫn muốn tiếp tục?";
+
+        if (window.confirm(msg)) {
+            cancelMutation.mutate("Khách hàng tự hủy qua dashboard");
+        }
+    };
+
+    const isCancellable = booking && ["pending", "confirmed"].includes(booking.boardingStatus || booking.status) && booking.boardingStatus !== "cancelled";
 
     const breadcrumbs = [
         { label: "Trang chủ", to: "/" },
@@ -83,6 +113,15 @@ export const BoardingBookingDetailPage = () => {
                                 <span className="relative z-10">Trở lại</span>
                                 <div className="absolute top-0 left-0 w-full h-full bg-client-secondary transition-transform duration-500 ease-in-out transform scale-x-0 origin-left group-hover:scale-x-100"></div>
                             </Link>
+                            {isCancellable && (
+                                <button
+                                    onClick={handleCancel}
+                                    disabled={cancelMutation.isPending}
+                                    className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white font-[600] text-[14px] py-[12px] px-[20px] rounded-[8px] transition-all cursor-pointer disabled:opacity-50"
+                                >
+                                    {cancelMutation.isPending ? "Đang xử lý..." : "Hủy đặt chuồng"}
+                                </button>
+                            )}
                         </div>
 
                         <div className="border border-[#eee] rounded-[12px] w-full overflow-hidden">
@@ -161,10 +200,10 @@ export const BoardingBookingDetailPage = () => {
                                             )}
                                         </td>
                                         <td className="p-[20px] text-center text-[15px] font-[500] text-slate-600">
-                                            {dayjs(checkIn).format("DD/MM/YYYY")}
+                                            {dayjs(checkIn).format("HH:mm DD/MM/YYYY")}
                                         </td>
                                         <td className="p-[20px] text-center text-[15px] font-[500] text-slate-600">
-                                            {dayjs(checkOut).format("DD/MM/YYYY")}
+                                            {dayjs(checkOut).format("HH:mm DD/MM/YYYY")}
                                         </td>
                                         <td className="p-[20px] text-right font-[700] text-[18px] text-client-primary">
                                             {formatCurrency(booking.total || 0)}
@@ -187,7 +226,7 @@ export const BoardingBookingDetailPage = () => {
                                     Quy chuẩn nội trú
                                 </h4>
                                 <ul className="text-[14px] text-[#666] space-y-2 list-disc pl-5">
-                                    <li>Thời gian nhận phòng sau 14:00 và trả phòng trước 12:00.</li>
+                                    <li>Thời gian nhận phòng từ 09:00 và trả phòng trước 09:00 sáng hôm sau.</li>
                                     <li>Vui lòng cung cấp sổ tiêm phòng định kỳ cho bé khi nhận phòng.</li>
                                     <li>Chế độ dinh dưỡng và vận động được thực hiện theo yêu cầu riêng.</li>
                                     <li>Cập nhật hình ảnh/video hàng ngày qua tin nhắn.</li>
@@ -195,7 +234,7 @@ export const BoardingBookingDetailPage = () => {
                             </div>
 
                             {/* Nhật ký thú cưng */}
-                            <ClientBoardingPetDiary bookingId={booking._id} pets={pets} />
+                            <ClientBoardingPetDiary bookingId={booking._id} />
 
                         </div>
                     </div>

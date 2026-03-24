@@ -23,14 +23,20 @@ export const getSchedules = async (params?: any) => {
 };
 
 export const getCalendarData = async (month: number, year: number, departmentId?: string) => {
-    const params: any = { month, year };
-    if (departmentId) params.departmentId = departmentId;
-    const response = await apiApp.get(`${BASE_URL}/calendar`, { ...withAuth(), params });
+    const response = await apiApp.get(`${BASE_URL}/calendar`, {
+        ...withAuth(),
+        params: { month, year, departmentId }
+    });
     return response.data;
 };
 
 export const createSchedule = async (data: any) => {
     const response = await apiApp.post(BASE_URL, data, withAuth());
+    return response.data;
+};
+
+export const bulkCreateSchedules = async (data: any) => {
+    const response = await apiApp.post(`${BASE_URL}/bulk`, data, withAuth());
     return response.data;
 };
 
@@ -44,22 +50,17 @@ export const deleteSchedule = async (id: string) => {
     return response.data;
 };
 
-export const bulkCreateSchedules = async (data: any) => {
-    const response = await apiApp.post(`${BASE_URL}/bulk`, data, withAuth());
-    return response.data;
-};
-
 export const bulkDeleteSchedules = async (data: any) => {
     const response = await apiApp.post(`${BASE_URL}/bulk-delete`, data, withAuth());
     return response.data;
 };
 
 export const checkInSchedule = async (id: string) => {
-    const response = await apiApp.post(`${BASE_URL}/${id}/check-in`, {}, withAuth());
+    const response = await apiApp.patch(`${BASE_URL}/check-in/${id}`, {}, withAuth());
     return response.data;
 };
 
 export const checkOutSchedule = async (id: string) => {
-    const response = await apiApp.post(`${BASE_URL}/${id}/check-out`, {}, withAuth());
+    const response = await apiApp.patch(`${BASE_URL}/check-out/${id}`, {}, withAuth());
     return response.data;
 };

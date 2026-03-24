@@ -131,7 +131,7 @@ export const BoardingBookingPage = () => {
     setSize("");
   };
 
-  
+
 
   return (
     <>
@@ -146,7 +146,7 @@ export const BoardingBookingPage = () => {
         <div className="app-container -mt-[86px] relative z-[4]">
           <div className="rounded-[14px] bg-gradient-to-r from-[#fff1f7] to-[#ffeaf3] text-client-secondary border border-[#f3c8da] shadow-[0_20px_40px_-20px_rgba(214,104,154,.45)] px-[16px] py-[16px] grid grid-cols-4 xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 gap-[10px]">
             <div className="border border-[#efc0d4] bg-white/80 rounded-[10px] px-[10px] py-[8px]">
-              <p className="text-[11px] text-[#9d6d83] mb-[4px]">Check-in</p>
+              <p className="text-[11px] text-[#9d6d83] mb-[4px]">Check-in (Từ 09:00)</p>
               <input
                 type="date"
                 value={checkInDate}
@@ -156,7 +156,7 @@ export const BoardingBookingPage = () => {
               />
             </div>
             <div className="border border-[#efc0d4] bg-white/80 rounded-[10px] px-[10px] py-[8px]">
-              <p className="text-[11px] text-[#9d6d83] mb-[4px]">Check-out</p>
+              <p className="text-[11px] text-[#9d6d83] mb-[4px]">Check-out (Trước 09:00)</p>
               <input
                 type="date"
                 value={checkOutDate}
@@ -248,7 +248,7 @@ export const BoardingBookingPage = () => {
 
                   <div className="mt-[12px] flex items-end justify-between">
                     <div className="text-[15px] text-[#5f6570]">From <span className="text-[30px] font-[800] text-client-primary">{Number(c.dailyPrice || 0).toLocaleString()}đ</span> / đêm</div>
-                   
+
                   </div>
                 </div>
 
@@ -269,7 +269,7 @@ export const BoardingBookingPage = () => {
           </div>
         </div>
 
-        
+
       </div>
 
       <FooterSub />
