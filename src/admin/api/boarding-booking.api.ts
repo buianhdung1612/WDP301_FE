@@ -83,11 +83,23 @@ export interface BoardingExerciseItem {
     doneAt?: string | null;
 }
 
+export interface BoardingBelongingItem {
+    _id?: string;
+    name: string;
+    description?: string;
+    quantity?: number;
+    status: "received" | "returned";
+    images?: string[];
+    receivedAt?: string;
+    returnedAt?: string;
+}
+
 export const updateBoardingCareSchedule = async (
     id: string,
     payload: {
         feedingSchedule?: BoardingFeedingItem[];
         exerciseSchedule?: BoardingExerciseItem[];
+        belongings?: BoardingBelongingItem[];
         careDate?: string;
         resetTemplate?: boolean;
     }

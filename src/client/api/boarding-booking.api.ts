@@ -24,3 +24,6 @@ export const createBoardingBooking = (data: CreateBoardingBookingPayload) => {
 export const payBoardingBooking = (id: string, gateway: "zalopay" | "vnpay") => {
   return apiApp.post(`/api/v1/client/boarding/boarding-bookings/${id}/pay`, { gateway });
 };
+export const cancelBoardingBooking = (id: string, reason?: string) => {
+  return apiApp.patch(`/api/v1/client/boarding/boarding-bookings/${id}/cancel`, { reason });
+};

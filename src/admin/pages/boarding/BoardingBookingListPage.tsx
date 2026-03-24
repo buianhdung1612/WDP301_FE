@@ -6,6 +6,7 @@ import {
     Button,
     Card,
     Checkbox,
+    Chip,
     Collapse,
     CircularProgress,
     IconButton,
@@ -21,20 +22,18 @@ import {
     TableHead,
     TablePagination,
     TableRow,
-    TextField,
     Tabs,
     Typography,
 } from "@mui/material";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { Title } from "../../components/ui/Title";
 import { prefixAdmin } from "../../constants/routes";
 import { Search } from "../../components/ui/Search";
-import { getBoardingBookings, updateBoardingBookingStatus, updateBoardingPaymentStatus } from "../../api/boarding-booking.api";
+import { getBoardingBookings } from "../../api/boarding-booking.api";
 
 const TabBadge = styled("span")(() => ({
     height: "24px",
@@ -51,19 +50,12 @@ const TabBadge = styled("span")(() => ({
 }));
 
 const boardingStatusOptions = [
-    { value: "pending", label: "Chờ xử lý" },
-    { value: "held", label: "Đang giữ chỗ" },
-    { value: "confirmed", label: "Xác nhận" },
-    { value: "checked-in", label: "Nhận chuồng" },
-    { value: "checked-out", label: "Trả chuồng" },
-    { value: "cancelled", label: "Hủy" },
-];
-
-const paymentStatusOptions = [
-    { value: "unpaid", label: "Chưa thanh toán" },
-    { value: "partial", label: "Đặt cọc 20%" },
-    { value: "paid", label: "Thanh toán" },
-    { value: "refunded", label: "Hoàn tiền" },
+    { value: "pending", label: "Chờ xử lý", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)" },
+    { value: "held", label: "Giữ chỗ", color: "var(--palette-primary-dark)", bg: "var(--palette-primary-lighter)" },
+    { value: "confirmed", label: "Đã xác nhận", color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)" },
+    { value: "checked-in", label: "Nhận chuồng", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
+    { value: "checked-out", label: "Trả chuồng", color: "var(--palette-secondary-dark)", bg: "var(--palette-secondary-lighter)" },
+    { value: "cancelled", label: "Hủy", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
 ];
 
 const formatCurrency = (value: number) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value || 0);
@@ -81,7 +73,7 @@ const getPetSlotItems = (row: any) => {
 
 export const BoardingBookingListPage = () => {
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
+
 
     const [tabStatus, setTabStatus] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
@@ -113,28 +105,6 @@ export const BoardingBookingListPage = () => {
         return [];
     }, [res]);
     const pagination = res?.data?.pagination || { totalRecords: 0 };
-
-    const updateStatusMut = useMutation({
-        mutationFn: ({ id, status }: { id: string; status: string }) => updateBoardingBookingStatus(id, status),
-        onSuccess: () => {
-            toast.success("Cập nhật trạng thái lưu trú thành công");
-            queryClient.invalidateQueries({ queryKey: ["admin-boarding-bookings"] });
-        },
-        onError: (error: any) => {
-            toast.error(error?.response?.data?.message || "Không thể cập nhật trạng thái lưu trú");
-        },
-    });
-
-    const updatePaymentMut = useMutation({
-        mutationFn: ({ id, status }: { id: string; status: string }) => updateBoardingPaymentStatus(id, status),
-        onSuccess: () => {
-            toast.success("Cập nhật trạng thái thanh toán thành công");
-            queryClient.invalidateQueries({ queryKey: ["admin-boarding-bookings"] });
-        },
-        onError: (error: any) => {
-            toast.error(error?.response?.data?.message || "Không thể cập nhật trạng thái thanh toán");
-        },
-    });
 
     const statusCounts = res?.data?.statusCounts || {
         all: 0,
@@ -265,8 +235,8 @@ export const BoardingBookingListPage = () => {
                         { value: "pending", label: "Chờ xử lý", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)", activeColor: "var(--palette-warning-contrastText)", activeBg: "var(--palette-warning-main)" },
                         { value: "held", label: "Giữ chỗ", color: "var(--palette-primary-dark)", bg: "var(--palette-primary-lighter)", activeColor: "var(--palette-primary-contrastText)", activeBg: "var(--palette-primary-main)" },
                         { value: "confirmed", label: "Đã xác nhận", color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)", activeColor: "var(--palette-info-contrastText)", activeBg: "var(--palette-info-main)" },
-                        { value: "checked-in", label: "Đã nhận chuồng", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)", activeColor: "var(--palette-success-contrastText)", activeBg: "var(--palette-success-main)" },
-                        { value: "checked-out", label: "Đã trả chuồng", color: "var(--palette-secondary-dark)", bg: "var(--palette-secondary-lighter)", activeColor: "var(--palette-secondary-contrastText)", activeBg: "var(--palette-secondary-main)" },
+                        { value: "checked-in", label: "Nhận chuồng", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)", activeColor: "var(--palette-success-contrastText)", activeBg: "var(--palette-success-main)" },
+                        { value: "checked-out", label: "Trả chuồng", color: "var(--palette-secondary-dark)", bg: "var(--palette-secondary-lighter)", activeColor: "var(--palette-secondary-contrastText)", activeBg: "var(--palette-secondary-main)" },
                         { value: "cancelled", label: "Đã hủy", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)", activeColor: "var(--palette-error-contrastText)", activeBg: "var(--palette-error-main)" },
                     ].map((tab) => (
                         <Tab
@@ -334,8 +304,7 @@ export const BoardingBookingListPage = () => {
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Thời gian</TableCell>
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Tổng tiền</TableCell>
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }} align="right">Trạng thái</TableCell>
-                                <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }} align="right">Thanh toán</TableCell>
-                                <TableCell sx={{ borderBottom: "none", width: 80 }} align="right" />
+                                <TableCell sx={{ borderBottom: "none", width: 120 }} align="right" />
                             </TableRow>
                         </TableHead>
 
@@ -436,67 +405,27 @@ export const BoardingBookingListPage = () => {
                                                     </TableCell>
 
                                                     <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                        <TextField
-                                                            select
-                                                            size="small"
-                                                            value={String(row.boardingStatus || "")}
-                                                            onChange={(event) => {
-                                                                const nextStatus = String(event.target.value || "");
-                                                                if (!nextStatus || nextStatus === String(row.boardingStatus || "")) return;
-                                                                updateStatusMut.mutate({ id: row._id, status: nextStatus });
-                                                            }}
-                                                            disabled={updateStatusMut.isPending}
-                                                            sx={{
-                                                                minWidth: 170,
-                                                                "& .MuiInputBase-input": { py: "6px", fontSize: "0.8125rem", fontWeight: 600 },
-                                                            }}
-                                                        >
-                                                            {boardingStatusOptions.map((option) => (
-                                                                <MenuItem key={option.value} value={option.value}>
-                                                                    {option.label}
-                                                                </MenuItem>
-                                                            ))}
-                                                        </TextField>
+                                                        {(() => {
+                                                            const status = boardingStatusOptions.find(opt => opt.value === row.boardingStatus) || { label: row.boardingStatus, color: 'inherit', bg: 'transparent' };
+                                                            return (
+                                                                <Chip
+                                                                    label={status.label}
+                                                                    size="small"
+                                                                    sx={{
+                                                                        borderRadius: "var(--shape-borderRadius-sm)",
+                                                                        fontWeight: 700,
+                                                                        fontSize: '0.6875rem',
+                                                                        color: status.color,
+                                                                        bgcolor: status.bg,
+                                                                        height: '24px'
+                                                                    }}
+                                                                />
+                                                            );
+                                                        })()}
                                                     </TableCell>
 
-                                                    <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                        <TextField
-                                                            select
-                                                            size="small"
-                                                            value={String(row.paymentStatus || "")}
-                                                            onChange={(event) => {
-                                                                const nextStatus = String(event.target.value || "");
-                                                                if (!nextStatus || nextStatus === String(row.paymentStatus || "")) return;
-                                                                updatePaymentMut.mutate({ id: row._id, status: nextStatus });
-                                                            }}
-                                                            disabled={updatePaymentMut.isPending}
-                                                            sx={{
-                                                                minWidth: 160,
-                                                                "& .MuiInputBase-input": { py: "6px", fontSize: "0.8125rem", fontWeight: 600 },
-                                                            }}
-                                                        >
-                                                            {paymentStatusOptions.map((option) => (
-                                                                <MenuItem key={option.value} value={option.value}>
-                                                                    {option.label}
-                                                                </MenuItem>
-                                                            ))}
-                                                        </TextField>
-                                                    </TableCell>
-
-                                                    <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", width: 96 }}>
-                                                        <Stack direction="row" spacing={0} justifyContent="flex-end">
-                                                            <IconButton
-                                                                onClick={() => toggleRow(row._id)}
-                                                                sx={{
-                                                                    color: "var(--palette-text-primary)",
-                                                                    bgcolor: isOpen ? "var(--palette-action-hover)" : "transparent",
-                                                                    "&:hover": {
-                                                                        bgcolor: "rgba(var(--palette-action-activeChannel) / var(--palette-action-hoverOpacity))",
-                                                                    },
-                                                                }}
-                                                            >
-                                                                <Icon icon={isOpen ? "eva:arrow-ios-upward-fill" : "eva:arrow-ios-downward-fill"} width={20} />
-                                                            </IconButton>
+                                                    <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", width: 120 }}>
+                                                        <Stack direction="row" spacing={1} justifyContent="flex-end">
                                                             <IconButton
                                                                 onClick={(event) => handleOpenMenu(event, row._id)}
                                                                 sx={{
@@ -509,6 +438,18 @@ export const BoardingBookingListPage = () => {
                                                             >
                                                                 <Icon icon="eva:more-vertical-fill" width={20} />
                                                             </IconButton>
+                                                            <IconButton
+                                                                onClick={() => toggleRow(row._id)}
+                                                                sx={{
+                                                                    color: "var(--palette-text-primary)",
+                                                                    bgcolor: isOpen ? "var(--palette-action-hover)" : "transparent",
+                                                                    "&:hover": {
+                                                                        bgcolor: "rgba(var(--palette-action-activeChannel) / var(--palette-action-hoverOpacity))",
+                                                                    },
+                                                                }}
+                                                            >
+                                                                <Icon icon={isOpen ? "eva:arrow-ios-upward-fill" : "eva:arrow-ios-downward-fill"} width={20} />
+                                                            </IconButton>
                                                         </Stack>
                                                         <Menu
                                                             anchorEl={anchorEl[row._id]}
@@ -519,7 +460,7 @@ export const BoardingBookingListPage = () => {
                                                             slotProps={{
                                                                 paper: {
                                                                     sx: {
-                                                                        width: 240,
+                                                                        width: 180,
                                                                         boxShadow: "var(--customShadows-z20)",
                                                                         borderRadius: "var(--shape-borderRadius-md)",
                                                                         p: 0.5,
@@ -527,6 +468,15 @@ export const BoardingBookingListPage = () => {
                                                                 },
                                                             }}
                                                         >
+                                                            <MenuItem
+                                                                onClick={() => {
+                                                                    handleCloseMenu(row._id);
+                                                                    navigate(`/${prefixAdmin}/boarding/detail/${row._id}`);
+                                                                }}
+                                                            >
+                                                                <Icon icon="eva:eye-fill" width={18} style={{ marginRight: 8 }} />
+                                                                Chi tiết đơn
+                                                            </MenuItem>
                                                             <MenuItem
                                                                 onClick={() => {
                                                                     handleCloseMenu(row._id);
@@ -668,6 +618,6 @@ export const BoardingBookingListPage = () => {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Card>
-        </Box>
+        </Box >
     );
 };

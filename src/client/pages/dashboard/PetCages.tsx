@@ -20,6 +20,7 @@ import {
 import { ProductBanner } from "../product/sections/ProductBanner";
 import { Sidebar } from "./sections/Sidebar";
 import { getBoardingBookingDetail, getBoardingBookingList } from "../../api/dashboard.api";
+import { ClientBoardingPetDiary } from "./ClientBoardingPetDiary";
 
 const normalizeStatus = (value?: string) => String(value || "").toLowerCase().replace(/_/g, "-");
 const normalizeTime = (value?: string) => String(value || "").trim();
@@ -640,6 +641,13 @@ const CageCareDetailModal = ({
             )}
           </div>
         </section>
+
+        {/* Nhật ký lưu trú hàng ngày */}
+        {cage?.lastBooking?._id && (
+          <div className="mt-[18px]">
+            <ClientBoardingPetDiary bookingId={cage.lastBooking._id} />
+          </div>
+        )}
 
         <div className="mt-[20px] flex justify-end gap-[12px]">
           <button
