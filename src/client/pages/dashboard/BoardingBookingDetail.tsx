@@ -85,6 +85,63 @@ export const BoardingBookingDetailPage = () => {
                             </Link>
                         </div>
 
+                        {/* Boarding Stepper */}
+                        {["pending", "confirmed", "checked-in", "checked-out", "completed"].includes(booking.boardingStatus || booking.status) && (
+                            <div className="mb-[60px] pt-[20px] pb-[40px] px-[20px] bg-[#fdfdfd] border border-[#f5f5f5] rounded-[20px] relative">
+                                <div className="flex justify-between relative z-10 w-full max-w-[800px] mx-auto">
+                                    {[
+                                        { key: "pending", label: "Chờ xác nhận", icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-[20px] h-[20px]"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 18 4.5H6a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 6 18.75h.75m11.25-3V3.75m-11.25 15V6.75M12 9V3.75m-6 0h12" /></svg> },
+                                        { key: "confirmed", label: "Đã xác nhận", icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-[20px] h-[20px]"><path strokeLinecap="round" strokeLinejoin="round" d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 0 1 9 9v.375M10.125 2.25A3.375 3.375 0 0 1 13.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 0 1 3.375 3.375M9 15l2.25 2.25L15 12" /></svg> },
+                                        { key: "checked-in", label: "Đang lưu trú", icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-[20px] h-[20px]"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg> },
+                                        { key: "checked-out", label: "Hoàn thành", icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-[20px] h-[20px]"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" /></svg> },
+                                    ].map((step, index, arr) => {
+                                        const successFlow = ["pending", "confirmed", "checked-in", "checked-out"];
+                                        const currentStatus = String(booking.boardingStatus || booking.status || "").toLowerCase();
+                                        // Map 'completed' to 'checked-out' index
+                                        const normalizedCurrent = currentStatus === "completed" ? "checked-out" : currentStatus;
+                                        const currentIndex = successFlow.indexOf(normalizedCurrent);
+                                        const isPast = index < currentIndex;
+                                        const isCurrent = index === currentIndex;
+                                        const isLast = index === arr.length - 1;
+
+                                        return (
+                                            <div key={step.key} className="flex flex-col items-center flex-1 relative">
+                                                {!isLast && (
+                                                    <div className="absolute top-[30px] left-[50%] w-full h-[3px] bg-[#eee] -z-10">
+                                                        <div
+                                                            className="h-full bg-client-primary transition-all duration-700 ease-in-out"
+                                                            style={{ width: isPast ? "100%" : isCurrent ? "0%" : "0%" }}
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                <div
+                                                    className={`w-[60px] h-[60px] rounded-full flex items-center justify-center transition-all duration-500 shadow-md ${isCurrent || isPast
+                                                        ? "bg-gradient-to-br from-[#ff7e67] to-[#e1554e] text-white ring-4 ring-red-100"
+                                                        : "bg-white text-gray-400 border-[2px] border-[#eee]"
+                                                        }`}
+                                                >
+                                                    {step.icon}
+                                                </div>
+
+                                                <div className="mt-[15px] flex flex-col items-center">
+                                                    <span
+                                                        className={`text-[13px] font-[700] uppercase tracking-wider transition-colors duration-500 text-center ${isCurrent || isPast ? "text-client-secondary" : "text-gray-400"
+                                                            }`}
+                                                    >
+                                                        {step.label}
+                                                    </span>
+                                                    {isCurrent && (
+                                                        <span className="text-[10px] text-red-400 font-[500] animate-pulse mt-1">Đang thực hiện</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="border border-[#eee] rounded-[12px] w-full overflow-hidden">
                             <div className="flex justify-between items-center p-[30px] border-b border-[#eee]">
                                 <div className="flex items-center gap-[15px]">

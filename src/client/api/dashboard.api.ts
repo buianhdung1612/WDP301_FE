@@ -126,3 +126,12 @@ export const checkBoardingPaymentStatus = async (id: string) => {
         throw error;
     }
 };
+
+export const getDashboardOverview = async () => {
+    try {
+        const response = await apiApp.get(`${API_DASHBOARD}/overview`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

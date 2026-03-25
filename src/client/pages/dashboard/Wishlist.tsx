@@ -14,13 +14,12 @@ export const WishlistPage = () => {
     const breadcrumbs = [
         { label: "Trang chủ", to: "/" },
         { label: "Tài khoản", to: "/dashboard/profile" },
-        { label: "Sản phẩm yêu thích", to: "/dashboard/wishlist" },
+        { label: "Yêu thích", to: "/dashboard/wishlist" },
     ];
 
     const handleAddToCart = (item: any) => {
-        // Validation: If product has variants but none selected in wishlist
         if (item.detail.attributeList?.length > 0 && (!item.variant || item.variant.length === 0)) {
-            toast.warning("Vui lòng chọn các thuộc tính sản phẩm trước khi thêm vào giỏ hàng!");
+            toast.warning("Vui lòng chọn các thuộc tính trước khi thêm vào giỏ hàng!");
             navigate(`/product/detail/${item.detail.slug}`);
             return;
         }
@@ -42,7 +41,7 @@ export const WishlistPage = () => {
     return (
         <>
             <ProductBanner
-                pageTitle="Sản Phẩm Yêu Thích"
+                pageTitle="Yêu Thích"
                 breadcrumbs={breadcrumbs}
                 url="https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/06/bc-shop-details.jpg"
                 className="bg-top shadow-inner"
@@ -63,8 +62,8 @@ export const WishlistPage = () => {
                                 <table className="w-full border-collapse">
                                     <thead>
                                         <tr className="bg-[#f9f9f9] text-client-secondary font-secondary uppercase text-[14px]">
-                                            <th className="py-[15px] px-[20px] text-left rounded-l-[15px]">Ảnh Sản Phẩm</th>
-                                            <th className="py-[15px] px-[20px] text-left">Thông Tin Sản Phẩm</th>
+                                            <th className="py-[15px] px-[20px] text-left rounded-l-[15px]">Ảnh</th>
+                                            <th className="py-[15px] px-[20px] text-left">Thông Tin</th>
                                             <th className="py-[15px] px-[20px] text-left">Đơn Giá</th>
                                             <th className="py-[15px] px-[20px] text-center">Số Lượng</th>
                                             <th className="py-[15px] px-[20px] text-left">Tạm Tính</th>
@@ -108,9 +107,6 @@ export const WishlistPage = () => {
                                                                 className={`px-3 py-1 text-[18px] transition-colors ${item.quantity >= item.detail.stock ? 'opacity-30 cursor-not-allowed' : 'hover:text-client-primary cursor-pointer'}`}
                                                             >+</button>
                                                         </div>
-                                                        {item.quantity >= item.detail.stock && (
-                                                            <p className="text-[10px] text-client-primary text-center mt-1">Hết hàng!</p>
-                                                        )}
                                                     </td>
                                                     <td className="py-[25px] px-[20px] font-secondary text-client-primary font-bold">
                                                         {subtotal.toLocaleString()}đ
@@ -139,9 +135,9 @@ export const WishlistPage = () => {
                             </div>
                         ) : (
                             <div className="text-center py-[60px]">
-                                <p className="text-gray-400 italic mb-6 text-[18px]">Bạn chưa có sản phẩm yêu thích nào.</p>
+                                <p className="text-gray-400 italic mb-6 text-[18px]">Bạn chưa có mục yêu thích nào.</p>
                                 <Link to="/shop" className="bg-client-primary text-white font-secondary px-8 py-3 rounded-full hover:bg-client-secondary transition-all">
-                                    Đi mua sắm ngay
+                                    Khám phá ngay
                                 </Link>
                             </div>
                         )}

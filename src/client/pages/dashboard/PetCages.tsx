@@ -36,18 +36,18 @@ const SIZE_LABELS: Record<string, string> = {
 };
 
 const CARE_STATUS_META: Record<string, { label: string; className: string }> = {
-  pending: { label: "Chưa thực hiện", className: "bg-amber-100 text-amber-700" },
-  done: { label: "Đã hoàn thành", className: "bg-emerald-100 text-emerald-700" },
-  skipped: { label: "Bỏ qua", className: "bg-slate-200 text-slate-700" },
+  pending: { label: "Chưa thực hiện", className: "bg-gray-100 text-gray-600 border border-gray-200" },
+  done: { label: "Đã hoàn thành", className: "bg-green-50 text-green-700 border border-green-200" },
+  skipped: { label: "Bỏ qua", className: "bg-slate-100 text-slate-500 border border-slate-200" },
 };
 
 const BOARDING_STATUS_META: Record<string, { label: string; className: string }> = {
-  confirmed: { label: "Đã xác nhận", className: "bg-blue-100 text-blue-700" },
-  "checked-in": { label: "Đang lưu trú", className: "bg-violet-100 text-violet-700" },
-  "checked-out": { label: "Đã trả chuồng", className: "bg-emerald-100 text-emerald-700" },
-  held: { label: "Đang giữ chuồng", className: "bg-orange-100 text-orange-700" },
-  pending: { label: "Chờ xử lý", className: "bg-slate-200 text-slate-700" },
-  cancelled: { label: "Đã hủy", className: "bg-rose-100 text-rose-700" },
+  confirmed: { label: "Đã xác nhận", className: "bg-blue-50 text-blue-700 border border-blue-200" },
+  "checked-in": { label: "Đang lưu trú", className: "bg-purple-50 text-purple-700 border border-purple-200" },
+  "checked-out": { label: "Đã trả chuồng", className: "bg-green-50 text-green-700 border border-green-200" },
+  held: { label: "Đang giữ chuồng", className: "bg-orange-50 text-orange-700 border border-orange-200" },
+  pending: { label: "Chờ xử lý", className: "bg-gray-100 text-gray-600 border border-gray-200" },
+  cancelled: { label: "Đã hủy", className: "bg-red-50 text-red-700 border border-red-200" },
 };
 
 const isBookingEligibleForPetCages = (booking: any) => {
@@ -275,41 +275,41 @@ const DetailScheduleCard = ({
   const proofMedia = normalizeProofMedia(item?.proofMedia);
 
   return (
-    <div className="rounded-[18px] border border-[#eef2f7] bg-white px-[14px] py-[12px] shadow-[0_10px_22px_rgba(15,23,42,0.05)]">
-      <div className="flex items-start justify-between gap-[10px]">
+    <div className="rounded-[20px] bg-white border border-[#eee] p-[20px] shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between gap-[15px]">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-[8px]">
-            <span className="inline-flex items-center gap-[6px] rounded-full bg-[#fff4f1] px-[10px] py-[4px] text-[12px] font-[800] text-[#f97316]">
-              <Clock3 className="h-[13px] w-[13px]" />
+          <div className="flex flex-wrap items-center gap-[10px]">
+            <span className="inline-flex items-center gap-[6px] rounded-full bg-client-primary/10 px-[12px] py-[5px] text-[13px] font-bold text-client-primary">
+              <Clock3 className="h-[14px] w-[14px]" />
               {item?.time || "--:--"}
             </span>
-            <span className={`inline-flex rounded-full px-[10px] py-[4px] text-[11px] font-[800] ${statusMeta.className}`}>
+            <span className={`inline-flex rounded-full px-[12px] py-[5px] text-[12px] font-bold ${statusMeta.className}`}>
               {statusMeta.label}
             </span>
           </div>
-          <p className="mt-[10px] text-[15px] font-[800] text-client-secondary">
+          <p className="mt-[12px] text-[16px] font-bold text-client-secondary">
             {type === "feeding" ? item?.food || "Khẩu phần ăn" : item?.activity || "Hoạt động"}
           </p>
-          <p className="mt-[4px] text-[13px] leading-[1.7] text-[#64748b]">
+          <p className="mt-[5px] text-[14px] font-medium text-[#7d7b7b]">
             {type === "feeding"
               ? `Khẩu phần: ${item?.amount || "Đang cập nhật"}`
               : `Thời lượng: ${item?.durationMinutes || 0} phút`}
           </p>
           {item?.staffName || item?.staffId?.fullName ? (
-            <p className="mt-[4px] text-[12px] text-[#94a3b8]">
-              NVKS: {item?.staffName || item?.staffId?.fullName}
+            <p className="mt-[5px] text-[12px] text-[#9ca3af] font-medium italic">
+              Thực hiện bởi: {item?.staffName || item?.staffId?.fullName}
             </p>
           ) : null}
           {item?.note ? (
-            <p className="mt-[6px] text-[12px] leading-[1.65] text-[#94a3b8]">{item.note}</p>
+            <div className="mt-[10px] p-[10px] rounded-[10px] bg-[#f8fbff] text-[13px] text-[#64748b] border border-[#dbeafe] leading-relaxed">
+              {item.note}
+            </div>
           ) : null}
 
-          {proofMedia.length > 0 ? (
-            <div className="mt-[10px]">
-              <div className="mb-[8px] flex items-center justify-between gap-[10px]">
-                <p className="text-[11px] font-[800] uppercase tracking-[0.16em] text-[#94a3b8]">
-                  Minh chứng thực hiện
-                </p>
+          {proofMedia.length > 0 && (
+            <div className="mt-[15px] pt-[15px] border-t border-[#eee]">
+              <div className="mb-[10px] flex items-center justify-between">
+                <p className="text-[12px] font-bold uppercase tracking-[1px] text-[#9ca3af]">Minh chứng</p>
                 <button
                   type="button"
                   onClick={() =>
@@ -319,10 +319,10 @@ const DetailScheduleCard = ({
                       `${type === "feeding" ? "Gallery lịch ăn" : "Gallery lịch vận động"}`
                     )
                   }
-                  className="inline-flex items-center gap-[5px] rounded-full border border-[#e2e8f0] bg-white px-[8px] py-[4px] text-[11px] font-[800] text-client-secondary transition duration-300 hover:border-[#fb7185] hover:text-[#fb7185]"
+                  className="flex items-center gap-[6px] rounded-full border border-client-primary/30 bg-white px-[12px] py-[5px] text-[12px] font-bold text-client-primary hover:bg-client-primary hover:text-white transition-all shadow-sm"
                 >
-                  <Expand className="h-[11px] w-[11px]" />
-                  Xem gallery
+                  <Expand className="h-[13px] w-[13px]" />
+                  Xem tất cả
                 </button>
               </div>
               <div className="flex flex-wrap gap-[10px]">
@@ -362,7 +362,7 @@ const DetailScheduleCard = ({
                 ))}
               </div>
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     </div>
@@ -415,20 +415,20 @@ const CageCareDetailModal = ({
   const boardingStatusMeta = getBoardingStatusMeta(cage?.lastBooking?.boardingStatus);
 
   return (
-    <div className="fixed inset-0 z-[120] overflow-y-auto bg-[#0f172a]/55 px-[18px] py-[28px] backdrop-blur-[3px]">
-      <div className="mx-auto w-full max-w-[1180px] rounded-[32px] bg-[#f8fafc] p-[22px] shadow-[0_28px_90px_rgba(15,23,42,0.28)] xl:max-w-[980px] lg:p-[16px]">
-        <div className="flex items-center justify-between gap-[14px] border-b border-[#e2e8f0] pb-[18px]">
-          <div className="flex items-center gap-[12px]">
+    <div className="fixed inset-0 z-[120] overflow-y-auto bg-[#0f172a]/60 px-[18px] py-[40px] backdrop-blur-[4px]">
+      <div className="mx-auto w-full max-w-[1240px] rounded-[30px] bg-[#f8fbff] p-[30px] shadow-[0_30px_100px_rgba(15,23,42,0.3)] xl:max-w-[1000px] lg:p-[20px]">
+        <div className="flex items-center justify-between gap-[15px] border-b border-[#e2e8f0] pb-[25px]">
+          <div className="flex items-center gap-[15px]">
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-[44px] w-[44px] items-center justify-center rounded-[16px] border border-[#e2e8f0] bg-white text-client-secondary transition duration-300 hover:border-client-primary hover:text-client-primary"
+              className="inline-flex h-[48px] w-[48px] items-center justify-center rounded-[14px] border border-[#e2e8f0] bg-white text-client-secondary transition-all hover:border-client-primary hover:text-client-primary hover:shadow-sm shadow-inner"
             >
-              <ArrowLeft className="h-[18px] w-[18px]" />
+              <ArrowLeft className="h-[20px] w-[20px]" />
             </button>
             <div>
-              <h3 className="text-[30px] font-[800] leading-tight text-client-secondary">Lịch chăm sóc chi tiết</h3>
-              <p className="mt-[4px] text-[13px] text-[#64748b]">
+              <h3 className="text-[28px] font-secondary font-bold text-client-secondary leading-tight">Lịch chăm sóc chi tiết</h3>
+              <p className="mt-[5px] text-[14px] text-[#7d7b7b] font-medium uppercase tracking-wide">
                 Chuồng {cage?.displayCode || cage?.cageCode || "CHUỒNG"} • {dayjs().format("DD/MM/YYYY")}
               </p>
             </div>
@@ -436,16 +436,16 @@ const CageCareDetailModal = ({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-[42px] w-[42px] items-center justify-center rounded-[14px] border border-[#e2e8f0] bg-white text-[#64748b] transition duration-300 hover:border-[#fda4af] hover:text-[#fb7185]"
+            className="inline-flex h-[44px] w-[44px] items-center justify-center rounded-[12px] border border-[#eee] bg-white text-[#9ca3af] transition-all hover:bg-red-50 hover:text-red-500 hover:border-red-100"
           >
-            <X className="h-[18px] w-[18px]" />
+            <X className="h-[20px] w-[20px]" />
           </button>
         </div>
 
-        <div className="mt-[18px] rounded-[28px] border border-[#e7edf3] bg-white p-[20px] shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
-          <div className="flex items-center justify-between gap-[18px] lg:flex-col lg:items-start">
-            <div className="flex min-w-0 items-center gap-[18px]">
-              <div className="h-[104px] w-[104px] shrink-0 overflow-hidden rounded-[24px] bg-[#fff7ed]">
+        <div className="mt-[25px] rounded-[24px] bg-white p-[25px] shadow-[0px_8px_24px_#959da51a] border border-[#eee]">
+          <div className="flex items-center justify-between gap-[25px] lg:flex-col lg:items-start">
+            <div className="flex min-w-0 items-center gap-[25px]">
+              <div className="h-[120px] w-[120px] shrink-0 overflow-hidden rounded-[20px] bg-gray-100 border border-[#eee] shadow-sm">
                 {primaryPet?.avatar || cage?.avatar ? (
                   <img
                     src={primaryPet?.avatar || cage?.avatar}
@@ -453,64 +453,64 @@ const CageCareDetailModal = ({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center text-[12px] text-[#94a3b8]">Không có ảnh</div>
+                  <div className="flex h-full items-center justify-center text-[14px] text-[#9ca3af]">Không có ảnh</div>
                 )}
               </div>
               <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-[8px]">
-                  <h4 className="text-[30px] font-[800] leading-tight text-client-secondary">
+                <div className="flex flex-wrap items-center gap-[12px]">
+                  <h4 className="text-[32px] font-secondary font-bold text-client-secondary leading-none">
                     {primaryPet?.name || cage?.displayCode || cage?.cageCode || "Thú cưng"}
                   </h4>
-                  {primaryPet?.breed ? (
-                    <span className="rounded-full bg-[#fff2e8] px-[10px] py-[4px] text-[11px] font-[800] text-[#f97316]">
+                  {primaryPet?.breed && (
+                    <span className="rounded-full bg-client-primary/10 px-[12px] py-[6px] text-[12px] font-bold text-client-primary border border-client-primary/20">
                       {primaryPet.breed}
                     </span>
-                  ) : null}
-                  <span className={`rounded-full px-[10px] py-[4px] text-[11px] font-[800] ${boardingStatusMeta.className}`}>
+                  )}
+                  <span className={`rounded-full px-[12px] py-[6px] text-[12px] font-bold shadow-sm ${boardingStatusMeta.className}`}>
                     {boardingStatusMeta.label}
                   </span>
                 </div>
-                <p className="mt-[8px] text-[15px] text-[#64748b]">{petMeta || "Chưa có hồ sơ thú cưng chi tiết"}</p>
-                <div className="mt-[10px] flex flex-wrap gap-[8px] text-[12px] font-[700] text-[#64748b]">
-                  <span className="rounded-full bg-[#f8fafc] px-[10px] py-[6px]">{SIZE_LABELS[String(cage?.size || "")] || cage?.size || "Kích thước chưa rõ"}</span>
-                  <span className="rounded-full bg-[#f8fafc] px-[10px] py-[6px]">{Array.isArray(cage?.pets) ? cage.pets.length : 0} thú cưng</span>
-                  <span className="rounded-full bg-[#f8fafc] px-[10px] py-[6px]">
+                <p className="mt-[10px] text-[16px] text-[#7d7b7b] font-medium">{petMeta || "Chưa có hồ sơ thú cưng chi tiết"}</p>
+                <div className="mt-[15px] flex flex-wrap gap-[10px]">
+                  <span className="rounded-[10px] bg-[#f8f9fa] border border-[#eee] px-[12px] py-[6px] text-[13px] font-bold text-client-secondary">{SIZE_LABELS[String(cage?.size || "")] || cage?.size || "Kích thước chưa rõ"}</span>
+                  <span className="rounded-[10px] bg-[#f8f9fa] border border-[#eee] px-[12px] py-[6px] text-[13px] font-bold text-client-secondary">{Array.isArray(cage?.pets) ? cage.pets.length : 0} thú cưng</span>
+                  <span className="rounded-[10px] bg-[#f8f9fa] border border-[#eee] px-[12px] py-[6px] text-[13px] font-bold text-client-primary">
                     {getBoardingPaymentLabel(cage?.lastBooking)}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="w-full max-w-[360px] rounded-[24px] bg-[#fff8f1] px-[18px] py-[16px] lg:max-w-full">
-              <div className="flex items-center justify-between gap-[12px]">
+            <div className="w-full max-w-[380px] rounded-[24px] bg-[#f8fbff] border border-[#dbeafe] px-[20px] py-[20px] lg:max-w-full shadow-sm">
+              <div className="flex items-center justify-between gap-[15px]">
                 <div>
-                  <p className="text-[12px] font-[800] uppercase tracking-[0.18em] text-[#94a3b8]">Tiến độ hôm nay</p>
-                  <p className="mt-[8px] text-[28px] font-[800] text-[#f97316]">{careProgress.percent}%</p>
+                  <p className="text-[12px] font-bold uppercase tracking-[1px] text-[#9ca3af]">Tiến độ trong ngày</p>
+                  <p className="mt-[5px] text-[32px] font-secondary font-bold text-client-primary">{careProgress.percent}%</p>
                 </div>
-                <ProgressRing percent={careProgress.percent} size={82} stroke={8} />
+                <ProgressRing percent={careProgress.percent} size={88} stroke={8} />
               </div>
-              <div className="mt-[14px] h-[10px] overflow-hidden rounded-full bg-[#e2e8f0]">
+              <div className="mt-[15px] h-[12px] overflow-hidden rounded-full bg-gray-100 border border-[#eee]">
                 <div
-                  className="h-full rounded-full bg-[linear-gradient(90deg,_#f97316_0%,_#fb923c_100%)]"
+                  className="h-full rounded-full bg-client-primary shadow-[0_0_10px_rgba(249,115,22,0.3)] transition-all duration-1000"
                   style={{ width: `${careProgress.percent}%` }}
                 />
               </div>
-              <p className="mt-[8px] text-right text-[12px] text-[#94a3b8]">
-                {careProgress.done}/{careProgress.total} nhiệm vụ hoàn thành
+              <p className="mt-[10px] text-right text-[13px] font-medium text-[#7d7b7b]">
+                {careProgress.done}/{careProgress.total} công việc đã hoàn thành
               </p>
             </div>
           </div>
         </div>
 
-        <div className="mt-[18px] grid grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] gap-[18px] xl:grid-cols-1">
-          <section className="rounded-[28px] border border-[#e7edf3] bg-white p-[20px] shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
-            <div className="flex items-center gap-[12px]">
-              <div className="flex h-[46px] w-[46px] items-center justify-center rounded-[16px] bg-[#fff3e9] text-[#f97316]">
-                <UtensilsCrossed className="h-[22px] w-[22px]" />
+        <div className="mt-[25px] grid grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] gap-[25px] xl:grid-cols-1">
+          <section className="rounded-[24px] border border-[#eee] bg-white p-[25px] shadow-[0px_8px_24px_#959da514]">
+            <div className="flex items-center gap-[15px] mb-[20px] border-b border-[#f8f9fa] pb-[15px]">
+              <div className="flex h-[52px] w-[52px] items-center justify-center rounded-[16px] bg-client-primary/10 text-client-primary shadow-sm">
+                <UtensilsCrossed className="h-[24px] w-[24px]" />
               </div>
               <div>
-                <h4 className="text-[24px] font-[800] text-client-secondary">Lịch ăn</h4>
-                <p className="text-[13px] text-[#64748b]">{feedingSchedule.length} mục chăm sóc dinh dưỡng</p>
+                <h4 className="text-[22px] font-secondary font-bold text-client-secondary">Lịch ăn uống</h4>
+                <p className="text-[14px] text-[#7d7b7b] font-medium">{feedingSchedule.length} mục chăm sóc</p>
               </div>
             </div>
 
@@ -534,70 +534,69 @@ const CageCareDetailModal = ({
             </div>
           </section>
 
-          <section className="rounded-[28px] border border-[#e7edf3] bg-white p-[20px] shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
-            <div className="flex items-center gap-[12px]">
-              <div className="flex h-[46px] w-[46px] items-center justify-center rounded-[16px] bg-[#ecfeff] text-[#0891b2]">
-                <CalendarDays className="h-[22px] w-[22px]" />
+          <section className="rounded-[24px] border border-[#eee] bg-white p-[25px] shadow-[0px_8px_24px_#959da514]">
+            <div className="flex items-center gap-[15px] mb-[20px] border-b border-[#f8f9fa] pb-[15px]">
+              <div className="flex h-[52px] w-[52px] items-center justify-center rounded-[16px] bg-blue-50 text-blue-600 shadow-sm">
+                <CalendarDays className="h-[24px] w-[24px]" />
               </div>
               <div>
-                <h4 className="text-[24px] font-[800] text-client-secondary">Thông tin lưu trú</h4>
-                <p className="text-[13px] text-[#64748b]">Tổng quan lưu trú và ghi chú chăm sóc</p>
+                <h4 className="text-[22px] font-secondary font-bold text-client-secondary">Thông tin lưu trú</h4>
+                <p className="text-[14px] text-[#7d7b7b] font-medium">Tổng quan lưu trú và ghi chú</p>
               </div>
             </div>
 
-            <div className="mt-[16px] space-y-[12px]">
-              <div className="rounded-[20px] bg-[#f8fbff] p-[16px]">
-                <p className="text-[12px] font-[800] uppercase tracking-[0.18em] text-[#94a3b8]">Nhận / trả chuồng</p>
-                <p className="mt-[10px] text-[16px] font-[800] text-client-secondary">
+            <div className="space-y-[15px]">
+              <div className="rounded-[20px] bg-[#f8fbff] border border-[#dbeafe] p-[20px]">
+                <p className="text-[12px] font-bold uppercase tracking-[1px] text-[#9ca3af]">Thời gian lưu trú</p>
+                <p className="mt-[10px] text-[18px] font-bold text-client-secondary">
                   {cage?.lastBooking?.checkInDate
                     ? `${dayjs(cage.lastBooking.checkInDate).format("DD/MM/YYYY")} - ${dayjs(cage.lastBooking.checkOutDate).format("DD/MM/YYYY")}`
                     : "Chưa cập nhật"}
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-[12px] lg:grid-cols-1">
-                <div className="rounded-[20px] border border-[#eef2f7] bg-[#fcfdff] p-[16px]">
-                  <p className="text-[12px] font-[800] uppercase tracking-[0.18em] text-[#94a3b8]">Giá / ngày</p>
-                  <p className="mt-[8px] text-[20px] font-[800] text-[#fb7185]">
+              <div className="grid grid-cols-2 gap-[15px] lg:grid-cols-1">
+                <div className="rounded-[20px] border border-[#eee] bg-[#fcfdff] p-[20px]">
+                  <p className="text-[12px] font-bold uppercase tracking-[1px] text-[#9ca3af]">Giá lưu trú</p>
+                  <p className="mt-[8px] text-[22px] font-secondary font-bold text-client-primary">
                     {Number(cage?.dailyPrice || 0).toLocaleString("vi-VN")}đ
                   </p>
                 </div>
-                <div className="rounded-[20px] border border-[#eef2f7] bg-[#fcfdff] p-[16px]">
-                  <p className="text-[12px] font-[800] uppercase tracking-[0.18em] text-[#94a3b8]">Tiện nghi</p>
-                  <p className="mt-[8px] text-[20px] font-[800] text-client-secondary">
-                    {Array.isArray(cage?.amenities) ? cage.amenities.length : 0}
+                <div className="rounded-[20px] border border-[#eee] bg-[#fcfdff] p-[20px]">
+                  <p className="text-[12px] font-bold uppercase tracking-[1px] text-[#9ca3af]">Tiện nghi</p>
+                  <p className="mt-[8px] text-[22px] font-secondary font-bold text-client-secondary">
+                    {Array.isArray(cage?.amenities) ? cage.amenities.length : 0} dịch vụ
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-[20px] border border-[#eef2f7] bg-white p-[16px]">
-                <div className="flex items-center gap-[8px]">
-                  <ShieldCheck className="h-[18px] w-[18px] text-emerald-500" />
-                  <p className="text-[14px] font-[800] text-client-secondary">Ghi chú chăm sóc</p>
+              <div className="rounded-[20px] border border-[#eee] bg-white p-[20px]">
+                <div className="flex items-center gap-[10px]">
+                  <ShieldCheck className="h-[20px] w-[20px] text-emerald-500" />
+                  <p className="text-[15px] font-bold text-client-secondary">Ghi chú chăm sóc</p>
                 </div>
-                <p className="mt-[10px] text-[14px] leading-[1.75] text-[#64748b]">
+                <p className="mt-[10px] text-[14px] leading-relaxed text-[#7d7b7b] font-medium">
                   {cage?.lastBooking?.specialCare || cage?.lastBooking?.notes || primaryPet?.notes || "Chưa có ghi chú chăm sóc đặc biệt."}
                 </p>
               </div>
 
-              <div className="rounded-[20px] border border-dashed border-[#d7e3f4] bg-[#f8fbff] p-[16px]">
-                <div className="flex items-center gap-[8px]">
-                  <BedDouble className="h-[18px] w-[18px] text-[#3b82f6]" />
-                  <p className="text-[14px] font-[800] text-client-secondary">Thú cưng đang lưu trú</p>
+              <div className="rounded-[20px] border border-dashed border-[#dbeafe] bg-[#f8fbff] p-[20px]">
+                <div className="flex items-center gap-[10px]">
+                  <PawPrint className="h-[20px] w-[20px] text-client-primary" />
+                  <p className="text-[15px] font-bold text-client-secondary">Thú cưng đang lưu trú</p>
                 </div>
-                <div className="mt-[10px] flex flex-wrap gap-[8px]">
+                <div className="mt-[15px] flex flex-wrap gap-[10px]">
                   {Array.isArray(cage?.pets) && cage.pets.length > 0 ? (
                     cage.pets.map((pet: any) => (
                       <span
                         key={getPetKey(pet)}
-                        className="inline-flex items-center gap-[6px] rounded-full bg-white px-[10px] py-[6px] text-[12px] font-[700] text-[#475569]"
+                        className="inline-flex items-center gap-[8px] rounded-full bg-white border border-[#dbeafe] px-[12px] py-[8px] text-[13px] font-bold text-client-secondary shadow-sm"
                       >
-                        <PawPrint className="h-[13px] w-[13px] text-[#fb7185]" />
                         {getPetLabel(pet)}
                       </span>
                     ))
                   ) : (
-                    <span className="text-[13px] text-[#94a3b8]">Chưa cập nhật thú cưng</span>
+                    <span className="text-[14px] text-[#9ca3af] italic">Chưa cập nhật thú cưng</span>
                   )}
                 </div>
               </div>
@@ -605,23 +604,23 @@ const CageCareDetailModal = ({
           </section>
         </div>
 
-        <section className="mt-[18px] rounded-[28px] border border-[#e7edf3] bg-white p-[20px] shadow-[0_18px_40px_rgba(15,23,42,0.05)]">
-          <div className="flex items-center justify-between gap-[12px] lg:flex-col lg:items-start">
-            <div className="flex items-center gap-[12px]">
-              <div className="flex h-[46px] w-[46px] items-center justify-center rounded-[16px] bg-[#ecfdf5] text-[#059669]">
-                <Activity className="h-[22px] w-[22px]" />
+        <section className="mt-[25px] rounded-[24px] border border-[#eee] bg-white p-[25px] shadow-[0px_8px_24px_#959da514]">
+          <div className="flex items-center justify-between gap-[15px] mb-[20px] border-b border-[#f8f9fa] pb-[15px]">
+            <div className="flex items-center gap-[15px]">
+              <div className="flex h-[52px] w-[52px] items-center justify-center rounded-[16px] bg-green-50 text-green-600 shadow-sm">
+                <Activity className="h-[24px] w-[24px]" />
               </div>
               <div>
-                <h4 className="text-[24px] font-[800] text-client-secondary">Vận động</h4>
-                <p className="text-[13px] text-[#64748b]">Chi tiết các hoạt động đã lên lịch</p>
+                <h4 className="text-[22px] font-secondary font-bold text-client-secondary">Hoạt động vận động</h4>
+                <p className="text-[14px] text-[#7d7b7b] font-medium">Chi tiết vận động trong ngày</p>
               </div>
             </div>
-            <span className="rounded-full bg-[#f8fafc] px-[12px] py-[7px] text-[12px] font-[800] text-[#64748b]">
+            <span className="rounded-[12px] bg-[#f8f9fa] border border-[#eee] px-[15px] py-[8px] text-[14px] font-bold text-client-secondary">
               Tổng: {totalExerciseMinutes} phút
             </span>
           </div>
 
-          <div className="mt-[16px] grid grid-cols-2 gap-[14px] xl:grid-cols-1">
+          <div className="grid grid-cols-2 gap-[20px] xl:grid-cols-1">
             {exerciseSchedule.length > 0 ? (
               exerciseSchedule.map((item: any, index: number) => (
                 <DetailScheduleCard
@@ -634,24 +633,24 @@ const CageCareDetailModal = ({
                 />
               ))
             ) : (
-              <div className="col-span-full rounded-[18px] border border-dashed border-[#e2e8f0] bg-[#f8fafc] px-[16px] py-[18px] text-[14px] text-[#94a3b8]">
+              <div className="col-span-full rounded-[20px] border border-dashed border-[#dbeafe] bg-[#f8fbff] px-[20px] py-[30px] text-[15px] text-[#9ca3af] text-center font-medium italic">
                 Chưa có lịch vận động cho ngày này.
               </div>
             )}
           </div>
         </section>
 
-        <div className="mt-[20px] flex justify-end gap-[12px]">
+        <div className="mt-[30px] flex justify-end gap-[15px] border-t border-[#eee] pt-[25px]">
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center justify-center rounded-[16px] border border-[#f0b78b] bg-white px-[18px] py-[12px] text-[14px] font-[800] text-[#f97316] transition duration-300 hover:bg-[#fff7ed]"
+            className="px-[25px] py-[12px] rounded-[14px] border border-[#eee] bg-white text-client-secondary font-bold text-[15px] hover:bg-gray-50 transition-all shadow-sm active:scale-[0.98]"
           >
             Đóng
           </button>
           <Link
             to={`/hotels/${cage?.sourceCageId || cage?._id}`}
-            className="inline-flex items-center justify-center rounded-[16px] bg-[#f97316] px-[18px] py-[12px] text-[14px] font-[800] text-white shadow-[0_18px_35px_rgba(249,115,22,0.24)] transition duration-300 hover:bg-[#ea580c]"
+            className="px-[30px] py-[12px] rounded-[14px] bg-client-primary text-white font-bold text-[15px] hover:shadow-[0_8px_24px_rgba(249,115,22,0.4)] transition-all shadow-md active:scale-[0.98]"
           >
             Xem chi tiết chuồng
           </Link>
@@ -803,282 +802,281 @@ export const PetCagesPage = () => {
   return (
     <>
       <ProductBanner
-        pageTitle="chuồng thú cưng"
+        pageTitle="Chuồng thú cưng"
         breadcrumbs={breadcrumbs}
         url="https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/06/bc-shop-details.jpg"
-        className="bg-top"
+        className="bg-top shadow-inner"
       />
 
-      <div className="mt-[-150px] mb-[100px] app-container">
-        <div className="flex items-start gap-[20px] lg:flex-col">
-          <div className="sticky top-[120px] w-[320px] shrink-0 px-[12px] xl:w-[300px] lg:static lg:w-full">
-            <Sidebar />
+      <div className="mt-[-150px] mb-[100px] app-container flex items-stretch">
+        <div className="w-[25%] px-[12px] flex">
+          <Sidebar />
+        </div>
+
+        <div className="w-[75%] px-[12px] py-[100px]">
+          <div className="rounded-[20px] bg-white p-[35px] shadow-[0px_8px_24px_#959da533]">
+            <div className="flex items-center justify-between gap-[15px] md:flex-col md:items-start border-b border-[#eee] pb-[30px]">
+              <div>
+                <h3 className="text-[28px] font-secondary text-client-secondary">Chuồng thú cưng của bạn</h3>
+                <p className="text-[15px] text-[#7d7b7b] mt-[8px]">Theo dõi thông tin chuồng và tiến độ chăm sóc trong ngày.</p>
+              </div>
+              <div className="flex items-center gap-[20px] rounded-[15px] border border-[#eee] bg-[#f9f9f9] px-[25px] py-[15px]">
+                <ProgressRing percent={summary.completionPercent} size={68} stroke={7} />
+                <div>
+                  <p className="text-[12px] font-bold uppercase tracking-[0.5px] text-[#7d7b7b]">Tiến độ chăm sóc</p>
+                  <p className="text-[24px] font-bold text-client-secondary font-secondary">{summary.doneCareItems}/{summary.totalCareItems}</p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-[30px] flex flex-wrap gap-[15px]">
+              <span className="px-[15px] py-[10px] rounded-[12px] text-[14px] font-bold bg-[#f8f9fa] text-[#495057] border border-[#e9ecef] shadow-sm">Tổng Chuồng: {summary.totalCages}</span>
+              <span className="px-[15px] py-[10px] rounded-[12px] text-[14px] font-bold bg-client-primary/10 text-client-primary border border-client-primary/20 shadow-sm">Lịch ăn: {summary.totalFeeding}</span>
+              <span className="px-[15px] py-[10px] rounded-[12px] text-[14px] font-bold bg-[#e7f5ff] text-[#228be6] border border-[#d0ebff] shadow-sm">Vận động: {summary.totalExercise}</span>
+              <span className="px-[15px] py-[10px] rounded-[12px] text-[14px] font-bold bg-[#ebfbee] text-[#40c057] border border-[#d3f9d8] shadow-sm">Hoàn thành: {summary.doneCareItems}</span>
+            </div>
           </div>
 
-          <div className="min-w-0 flex-1 px-[12px] py-[40px]">
-            <div className="rounded-[16px] border border-[#f3d9bd] bg-gradient-to-r from-[#fff8ef] via-[#fffdf9] to-[#f8fbff] p-[20px] shadow-[0_10px_30px_rgba(149,157,165,0.2)] ">
-              <div className="flex items-center justify-between gap-[12px] md:flex-col md:items-start">
-                <div>
-                  <h3 className="text-[28px] leading-tight font-[700] text-client-secondary">Chuồng thú cưng của bạn</h3>
-                  <p className="text-[14px] text-[#6b7280] mt-[4px]">Theo dõi thông tin chuồng và tiến độ chăm sóc trong ngày.</p>
-                </div>
-                <div className="flex items-center gap-[12px] rounded-[12px] border border-[#e2e8f0] bg-white/80 px-[12px] py-[8px]">
-                  <ProgressRing percent={summary.completionPercent} size={68} stroke={7} />
-                  <div>
-                    <p className="text-[12px] font-[700] uppercase tracking-[0.4px] text-[#64748b]">Tiến độ chăm sóc</p>
-                    <p className="text-[20px] font-[800] text-client-secondary">{summary.doneCareItems}/{summary.totalCareItems}</p>
-                  </div>
-                </div>
+          {waitingPaymentCount > 0 && (
+            <div className="mt-[20px] rounded-[12px] border border-[#ffecb2] bg-[#fff9db] px-[20px] py-[12px] text-[14px] text-[#a67c00] font-medium shadow-sm">
+              Có {waitingPaymentCount} lịch khách sạn chưa đủ điều kiện hiển thị (thường do chưa thanh toán hoặc chưa xác nhận).
+            </div>
+          )}
+
+          <div className="mt-[25px] rounded-[24px] bg-white p-[25px] shadow-[0px_8px_24px_#959da51a] border border-[#eee]">
+            <div className="grid grid-cols-[1fr_1fr_auto] gap-[20px] items-end xl:grid-cols-2 lg:grid-cols-1">
+              <div className="space-y-[8px]">
+                <label className="text-[14px] font-bold text-client-secondary block">Lọc theo chuồng</label>
+                <select
+                  value={selectedCageId}
+                  onChange={(e) => setSelectedCageId(e.target.value)}
+                  className="w-full rounded-[14px] border border-[#eee] bg-[#f8f9fa] px-[15px] py-[12px] text-[15px] font-medium text-client-secondary focus:border-client-primary outline-none transition-all shadow-inner"
+                >
+                  <option value="all">Tất cả chuồng ({summary.totalCages})</option>
+                  {filterOptions.cageOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <div className="mt-[14px] flex flex-wrap gap-[8px]">
-                <span className="px-[10px] py-[6px] rounded-full text-[12px] font-[700] bg-slate-100 text-slate-700">Tổng Chuồng: {summary.totalCages}</span>
-                <span className="px-[10px] py-[6px] rounded-full text-[12px] font-[700] bg-amber-100 text-amber-700">Lịch ăn: {summary.totalFeeding}</span>
-                <span className="px-[10px] py-[6px] rounded-full text-[12px] font-[700] bg-cyan-100 text-cyan-700">Lịch vận động: {summary.totalExercise}</span>
-                <span className="px-[10px] py-[6px] rounded-full text-[12px] font-[700] bg-emerald-100 text-emerald-700">Đã hoàn thành: {summary.doneCareItems}</span>
+
+              <div className="space-y-[8px]">
+                <label className="text-[14px] font-bold text-client-secondary block">Lọc theo thú cưng</label>
+                <select
+                  value={selectedPetId}
+                  onChange={(e) => setSelectedPetId(e.target.value)}
+                  className="w-full rounded-[14px] border border-[#eee] bg-[#f8f9fa] px-[15px] py-[12px] text-[15px] font-medium text-client-secondary focus:border-client-primary outline-none transition-all shadow-inner"
+                >
+                  <option value="all">Tất cả thú cưng</option>
+                  {filterOptions.petOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="self-end pb-[2px]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCageId("all");
+                    setSelectedPetId("all");
+                  }}
+                  disabled={!isFiltered}
+                  className="h-[48px] rounded-[14px] border border-[#eee] px-[25px] text-[15px] font-bold text-client-secondary disabled:cursor-not-allowed disabled:opacity-40 hover:bg-client-primary hover:text-white hover:border-client-primary transition-all shadow-sm active:scale-[0.98]"
+                >
+                  Bỏ lọc
+                </button>
               </div>
             </div>
 
-            {waitingPaymentCount > 0 && (
-              <div className="mt-[14px] rounded-[12px] border border-[#fde68a] bg-[#fffbeb] px-[14px] py-[10px] text-[13px] text-[#92400e]">
-                Có {waitingPaymentCount} lịch khách sạn chưa đủ điều kiện hiển thị (thường do chưa thanh toán hoặc chưa xác nhận).
+            <div className="mt-[25px] pt-[20px] border-t border-[#eee] flex items-center justify-between gap-[10px] md:flex-col md:items-start">
+              <p className="text-[14px] text-[#7d7b7b]">
+                Đang hiển thị <span className="font-bold text-client-secondary">{filteredCages.length}</span> / {cages.length} chuồng
+              </p>
+              <div className="inline-flex rounded-[12px] border border-[#eee] bg-[#f9f9f9] p-[5px] shadow-inner">
+                <button
+                  type="button"
+                  onClick={() => setActiveCareTab("feeding")}
+                  className={`rounded-[10px] px-[20px] py-[8px] text-[14px] font-bold transition-all ${activeCareTab === "feeding" ? "bg-client-primary text-white shadow-md shadow-client-primary/30" : "text-[#7d7b7b] hover:bg-white hover:text-client-secondary"
+                    }`}
+                >
+                  Lịch ăn
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveCareTab("exercise")}
+                  className={`rounded-[10px] px-[20px] py-[8px] text-[14px] font-bold transition-all ${activeCareTab === "exercise" ? "bg-client-primary text-white shadow-md shadow-client-primary/30" : "text-[#7d7b7b] hover:bg-white hover:text-client-secondary"
+                    }`}
+                >
+                  Lịch vận động
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-[25px]">
+            {loading ? (
+              <div className="rounded-[20px] bg-white p-[50px] text-center shadow-[0px_8px_24px_#959da533]">
+                <p className="text-[16px] text-[#7d7b7b] italic font-medium">Đang tải dữ liệu chuồng thú cưng...</p>
+              </div>
+            ) : filteredCages.length === 0 ? (
+              <div className="rounded-[20px] bg-white p-[50px] text-center shadow-[0px_8px_24px_#959da533]">
+                <p className="text-[16px] text-[#7d7b7b] italic font-medium">Bạn chưa có lịch khách sạn nào phù hợp.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-[30px] xl:grid-cols-1">
+                {filteredCages.map((cage: any) => {
+                  const feedingSchedule = Array.isArray(cage?.lastBooking?.feedingSchedule)
+                    ? [...cage.lastBooking.feedingSchedule].sort(sortCareItems)
+                    : [];
+                  const exerciseSchedule = Array.isArray(cage?.lastBooking?.exerciseSchedule)
+                    ? [...cage.lastBooking.exerciseSchedule].sort(sortCareItems)
+                    : [];
+                  const boardingStatusMeta = getBoardingStatusMeta(cage?.lastBooking?.boardingStatus);
+                  const careProgress = getCareProgress(feedingSchedule, exerciseSchedule);
+
+                  return (
+                    <article
+                      key={cage._id}
+                      role="button"
+                      onClick={() => setSelectedCageDetail(cage)}
+                      className="rounded-[20px] bg-white overflow-hidden shadow-[0px_8px_24px_#959da533] hover:translate-y-[-5px] transition-all duration-300 cursor-pointer group border border-transparent hover:border-client-primary/20"
+                    >
+                      <div className="relative h-[200px] bg-gray-100">
+                        {cage.avatar ? (
+                          <img src={cage.avatar} alt={cage.displayCode || cage.cageCode} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[14px] text-gray-400">Không có hình</div>
+                        )}
+
+                        <div className="absolute inset-x-0 bottom-0 h-[80px] bg-gradient-to-t from-black/60 to-transparent" />
+                        <div className="absolute top-[15px] left-[15px] px-[12px] py-[6px] rounded-full text-[12px] font-bold bg-white/95 text-client-secondary shadow-sm">
+                          {(cage.type || "").toUpperCase() || "STANDARD"}
+                        </div>
+                        <div className={`absolute top-[15px] right-[15px] px-[12px] py-[6px] rounded-full text-[12px] font-bold shadow-sm ${boardingStatusMeta.className}`}>
+                          {boardingStatusMeta.label}
+                        </div>
+                        <div className="absolute left-[15px] bottom-[15px] text-white">
+                          <div className="text-[22px] font-secondary font-bold tracking-wide">{cage.displayCode || cage.cageCode || "CHUỒNG"}</div>
+                          <div className="text-[14px] opacity-90 font-medium">{SIZE_LABELS[String(cage.size || "")] || cage.size || "-"}</div>
+                        </div>
+                      </div>
+
+                      <div className="p-[25px]">
+                        <div className="flex items-start justify-between gap-[15px]">
+                          <div>
+                            <div className="text-[14px] text-[#7d7b7b] line-clamp-1">
+                              {Array.isArray(cage.pets) && cage.pets.length > 0
+                                ? `Thú cưng: ${cage.pets.map((pet: any) => getPetLabel(pet)).filter(Boolean).join(", ")}`
+                                : "Thú cưng: chưa cập nhật"}
+                            </div>
+                            {cage.slotCount > 1 && (
+                              <div className="mt-[5px] text-[13px] font-bold text-client-secondary"> Khu lưu trú: {cage.slotLabel}</div>
+                            )}
+                            <div className="mt-[15px] flex items-center gap-[12px]">
+                              <ProgressRing percent={careProgress.percent} size={56} stroke={6} />
+                              <div>
+                                <div className="text-[13px] font-bold text-client-secondary">Tiến độ chăm sóc</div>
+                                <div className="text-[12px] text-[#7d7b7b] font-medium">{careProgress.done}/{careProgress.total} mục hoàn thành</div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-[16px] font-secondary font-bold text-client-primary bg-client-primary/5 px-3 py-1.5 rounded-lg border border-client-primary/10">
+                            {Number(cage.dailyPrice || 0).toLocaleString("vi-VN")}đ
+                          </div>
+                        </div>
+
+                        <div className="mt-[20px] pt-[20px] border-t border-[#eee] space-y-[8px]">
+                          {cage.lastBooking?.checkInDate && (
+                            <div className="flex items-center gap-2 text-[13px] text-client-secondary">
+                              <CalendarDays className="w-4 h-4 text-client-primary" />
+                              <span className="font-medium text-[#7d7b7b]">Lưu trú:</span>
+                              <span className="font-bold">{dayjs(cage.lastBooking.checkInDate).format("DD/MM/YYYY")} - {dayjs(cage.lastBooking.checkOutDate).format("DD/MM/YYYY")}</span>
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-2 text-[13px] text-client-secondary">
+                            <ShieldCheck className="w-4 h-4 text-green-500" />
+                            <span className="font-medium text-[#7d7b7b]">Thanh toán:</span>
+                            <span className="font-bold text-client-primary">{getBoardingPaymentLabel(cage.lastBooking)}</span>
+                          </div>
+                        </div>
+
+                        {activeCareTab === "feeding" ? (
+                          <div className="mt-[20px] rounded-[15px] bg-[#f9f9f9] border border-[#eee] p-[15px]">
+                            <div className="mb-[10px] flex items-center justify-between">
+                              <p className="text-[14px] font-bold text-client-secondary">Lịch ăn uống</p>
+                              <span className="text-[12px] text-client-primary font-bold px-2 py-0.5 bg-client-primary/10 rounded-full">{feedingSchedule.length} mục</span>
+                            </div>
+                            {feedingSchedule.length > 0 ? (
+                              <div className="space-y-[8px]">
+                                {feedingSchedule.slice(0, 3).map((item: any, idx: number) => {
+                                  const statusMeta = getCareStatusMeta(item?.status);
+                                  return (
+                                    <div key={`feed-${idx}`} className="rounded-[12px] bg-white border border-[#eee] p-[12px] shadow-sm">
+                                      <div className="flex justify-between items-center mb-[5px]">
+                                        <span className="font-bold text-client-secondary text-[13px]">{item?.time || "--:--"}</span>
+                                        <span className={`px-[8px] py-[3px] rounded-full text-[10px] font-bold ${statusMeta.className}`}>{statusMeta.label}</span>
+                                      </div>
+                                      <p className="text-[13px] text-[#505050] font-medium">{item?.food || "Thức ăn"} {item?.amount ? `(${item.amount})` : ""}</p>
+                                      {(item?.staffName || item?.staffId?.fullName) && (
+                                        <div className="mt-[5px] text-[11px] text-[#7d7b7b] italic font-medium">Người thực hiện: {item?.staffName || item?.staffId?.fullName}</div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <p className="text-[13px] text-[#7d7b7b] italic text-center py-2">Chưa có lịch ăn uống.</p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="mt-[20px] rounded-[15px] bg-[#f0f7ff] border border-[#dbeafe] p-[15px]">
+                            <div className="mb-[10px] flex items-center justify-between">
+                              <p className="text-[14px] font-bold text-[#0f172a]">Lịch vận động</p>
+                              <span className="text-[12px] text-blue-600 font-bold px-2 py-0.5 bg-blue-100 rounded-full">{exerciseSchedule.length} mục</span>
+                            </div>
+                            {exerciseSchedule.length > 0 ? (
+                              <div className="space-y-[8px]">
+                                {exerciseSchedule.slice(0, 3).map((item: any, idx: number) => {
+                                  const statusMeta = getCareStatusMeta(item?.status);
+                                  return (
+                                    <div key={`exercise-${idx}`} className="rounded-[12px] bg-white border border-[#dbeafe] p-[12px] shadow-sm">
+                                      <div className="flex justify-between items-center mb-[5px]">
+                                        <span className="font-bold text-[#0f172a] text-[13px]">{item?.time || "--:--"}</span>
+                                        <span className={`px-[8px] py-[3px] rounded-full text-[10px] font-bold ${statusMeta.className}`}>{statusMeta.label}</span>
+                                      </div>
+                                      <p className="text-[13px] text-[#505050] font-medium">{item?.activity || "Vận động"}{item?.durationMinutes ? ` (${item.durationMinutes} phút)` : ""}</p>
+                                      {(item?.staffName || item?.staffId?.fullName) && (
+                                        <div className="mt-[5px] text-[11px] text-[#7d7b7b] italic font-medium">Người thực hiện: {item?.staffName || item?.staffId?.fullName}</div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <p className="text-[13px] text-[#7d7b7b] italic text-center py-2">Chưa có lịch vận động.</p>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="mt-[20px]">
+                          <Link
+                            to={`/hotels/${cage?.sourceCageId || cage?._id}`}
+                            onClick={(event) => event.stopPropagation()}
+                            className="w-full flex items-center justify-center gap-[8px] rounded-[12px] border border-client-primary text-client-primary bg-white py-[10px] text-[14px] font-bold hover:bg-client-primary hover:text-white transition-all shadow-sm active:scale-[0.98]"
+                          >
+                            Xem chi tiết chuồng
+                          </Link>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
             )}
-
-            <div className="mt-[14px] rounded-[16px] border border-[#e2e8f0] bg-white p-[16px] shadow-[0_6px_20px_rgba(15,23,42,0.08)]">
-              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-[12px] xl:grid-cols-2 lg:grid-cols-1">
-                <label className="text-[12px] font-[700] text-[#64748b]">
-                  Loc theo chuong
-                  <select
-                    value={selectedCageId}
-                    onChange={(e) => setSelectedCageId(e.target.value)}
-                    className="mt-[6px] h-[42px] w-full rounded-[10px] border border-[#d1d5db] px-[10px] text-[14px] text-[#0f172a] outline-none focus:border-client-primary"
-                  >
-                    <option value="all">Tất cả chuồng</option>
-                    {filterOptions.cageOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="text-[12px] font-[700] text-[#64748b]">
-                  Loc theo thu cung
-                  <select
-                    value={selectedPetId}
-                    onChange={(e) => setSelectedPetId(e.target.value)}
-                    className="mt-[6px] h-[42px] w-full rounded-[10px] border border-[#d1d5db] px-[10px] text-[14px] text-[#0f172a] outline-none focus:border-client-primary"
-                  >
-                    <option value="all">Tất cả thú cưng</option>
-                    {filterOptions.petOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <div className="self-end">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedCageId("all");
-                      setSelectedPetId("all");
-                    }}
-                    disabled={!isFiltered}
-                    className="h-[42px] rounded-[10px] border border-[#d1d5db] px-[14px] text-[13px] font-[700] text-[#334155] disabled:cursor-not-allowed disabled:opacity-60 hover:border-client-primary hover:text-client-primary transition-default"
-                  >
-                    Bỏ lọc
-                  </button>
-                </div>
-              </div>
-
-              <div className="mt-[12px] flex items-center justify-between gap-[10px] md:flex-col md:items-start">
-                <p className="text-[13px] text-[#64748b]">
-                  Đang hiển thị {filteredCages.length}/{cages.length} chuồng
-                </p>
-                <div className="inline-flex rounded-[10px] border border-[#dbeafe] bg-[#f8fbff] p-[3px]">
-                  <button
-                    type="button"
-                    onClick={() => setActiveCareTab("feeding")}
-                    className={`rounded-[8px] px-[14px] py-[6px] text-[13px] font-[700] transition-default ${activeCareTab === "feeding" ? "bg-client-primary text-white" : "text-[#0f172a] hover:bg-[#e2e8f0]"
-                      }`}
-                  >
-                    Lịch ăn
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveCareTab("exercise")}
-                    className={`rounded-[8px] px-[14px] py-[6px] text-[13px] font-[700] transition-default ${activeCareTab === "exercise" ? "bg-client-primary text-white" : "text-[#0f172a] hover:bg-[#e2e8f0]"
-                      }`}
-                  >
-                    Lịch vận động
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-[14px] rounded-[16px] bg-white p-[20px] shadow-[0_8px_24px_#959da533]">
-              {loading ? (
-                <p className="text-[14px] text-[#6b7280]">Đang tải dữ liệu...</p>
-              ) : filteredCages.length === 0 ? (
-                <p className="text-[14px] text-[#6b7280]">Bạn chưa có lịch khách sạn nào.</p>
-              ) : (
-                <div className="grid grid-cols-2 gap-[16px] xl:grid-cols-1">
-                  {filteredCages.map((cage: any) => {
-                    const feedingSchedule = Array.isArray(cage?.lastBooking?.feedingSchedule)
-                      ? [...cage.lastBooking.feedingSchedule].sort(sortCareItems)
-                      : [];
-                    const exerciseSchedule = Array.isArray(cage?.lastBooking?.exerciseSchedule)
-                      ? [...cage.lastBooking.exerciseSchedule].sort(sortCareItems)
-                      : [];
-                    const boardingStatusMeta = getBoardingStatusMeta(cage?.lastBooking?.boardingStatus);
-                    const careProgress = getCareProgress(feedingSchedule, exerciseSchedule);
-
-                    return (
-                      <article
-                        key={cage._id}
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => setSelectedCageDetail(cage)}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter" || event.key === " ") {
-                            event.preventDefault();
-                            setSelectedCageDetail(cage);
-                          }
-                        }}
-                        className="rounded-[14px] border border-[#ebecef] bg-white overflow-hidden shadow-[0_6px_18px_rgba(15,23,42,0.08)] hover:shadow-[0_10px_24px_rgba(15,23,42,0.12)] transition-all duration-300 cursor-pointer"
-                      >
-                        <div className="relative h-[168px] bg-[#f3f4f6]">
-                          {cage.avatar ? (
-                            <img src={cage.avatar} alt={cage.displayCode || cage.cageCode} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-[12px] text-[#9ca3af]">Không có hình</div>
-                          )}
-
-                          <div className="absolute inset-x-0 bottom-0 h-[68px] bg-gradient-to-t from-black/45 to-transparent" />
-                          <div className="absolute top-[10px] left-[10px] px-[10px] py-[5px] rounded-full text-[11px] font-[700] bg-white/90 text-[#0f172a]">
-                            {(cage.type || "").toUpperCase() || "STANDARD"}
-                          </div>
-                          <div className={`absolute top-[10px] right-[10px] px-[10px] py-[5px] rounded-full text-[11px] font-[700] ${boardingStatusMeta.className}`}>
-                            {boardingStatusMeta.label}
-                          </div>
-                          <div className="absolute left-[12px] bottom-[10px] text-white">
-                            <div className="text-[18px] font-[800] tracking-[0.4px]">{cage.displayCode || cage.cageCode || "CHUONG"}</div>
-                            <div className="text-[12px] opacity-90">{SIZE_LABELS[String(cage.size || "")] || cage.size || "-"}</div>
-                          </div>
-                        </div>
-
-                        <div className="p-[14px]">
-                          <div className="flex items-start justify-between gap-[10px]">
-                            <div>
-                              <div className="text-[13px] text-[#6b7280]">
-                                {Array.isArray(cage.pets) && cage.pets.length > 0
-                                  ? `Thú cưng: ${cage.pets.map((pet: any) => getPetLabel(pet)).filter(Boolean).join(", ")}`
-                                  : "Thú cưng: Chưa cập nhật"}
-                              </div>
-                              {cage.slotCount > 1 ? (
-                                <div className="mt-[4px] text-[12px] font-[700] text-[#64748b]">
-                                  Khu lưu trú: {cage.slotLabel}
-                                </div>
-                              ) : null}
-                              <div className="mt-[7px] flex items-center gap-[8px]">
-                                <ProgressRing percent={careProgress.percent} size={52} stroke={6} />
-                                <div>
-                                  <div className="text-[12px] font-[700] text-client-secondary">Chăm sóc hôm nay</div>
-                                  <div className="text-[12px] text-[#64748b]">{careProgress.done}/{careProgress.total} mục hoàn thành</div>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-[14px] font-[800] text-client-primary">
-                              {Number(cage.dailyPrice || 0).toLocaleString("vi-VN")}đ/ngày
-                            </div>
-                          </div>
-
-                          {cage.lastBooking?.checkInDate && (
-                            <div className="mt-[6px] text-[13px] text-[#6b7280]">
-                              Lưu trú: {dayjs(cage.lastBooking.checkInDate).format("DD/MM/YYYY")} - {dayjs(cage.lastBooking.checkOutDate).format("DD/MM/YYYY")}
-                            </div>
-                          )}
-
-                          <div className="mt-[6px] text-[13px] text-[#6b7280]">
-                            Thanh toán: {getBoardingPaymentLabel(cage.lastBooking)}
-                          </div>
-
-                          {activeCareTab === "feeding" ? (
-                            <div className="mt-[12px] rounded-[10px] border border-[#f3e8d5] bg-[#fffdf8] p-[10px]">
-                              <div className="mb-[6px] flex items-center justify-between">
-                                <p className="text-[13px] font-[700] text-client-secondary">Lịch ăn uống</p>
-                                <span className="text-[11px] text-[#6b7280]">{feedingSchedule.length} mục</span>
-                              </div>
-                              {feedingSchedule.length > 0 ? (
-                                <div className="space-y-[6px]">
-                                  {feedingSchedule.slice(0, 4).map((item: any, idx: number) => {
-                                    const statusMeta = getCareStatusMeta(item?.status);
-                                    return (
-                                      <div key={`feed-${idx}`} className="rounded-[8px] border border-[#f1f5f9] bg-white px-[8px] py-[7px] text-[12px] text-[#475569]">
-                                        <div className="flex flex-wrap items-center gap-[6px]">
-                                          <span className="font-[700] text-[#0f172a]">{item?.time || "--:--"}</span>
-                                          <span>{item?.food || "Thức ăn"} {item?.amount ? `(${item.amount})` : ""}</span>
-                                          <span className={`px-[6px] py-[2px] rounded-full text-[10px] font-[700] ${statusMeta.className}`}>{statusMeta.label}</span>
-                                        </div>
-                                        {(item?.staffName || item?.staffId?.fullName) && (
-                                          <div className="mt-[4px] text-[11px] text-[#64748b]">NVKS: {item?.staffName || item?.staffId?.fullName}</div>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              ) : (
-                                <p className="text-[12px] text-[#9ca3af]">Chưa có lịch ăn.</p>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="mt-[10px] rounded-[10px] border border-[#dbeafe] bg-[#f8fbff] p-[10px]">
-                              <div className="mb-[6px] flex items-center justify-between">
-                                <p className="text-[13px] font-[700] text-client-secondary">Lịch vận động</p>
-                                <span className="text-[11px] text-[#6b7280]">{exerciseSchedule.length} mục</span>
-                              </div>
-                              {exerciseSchedule.length > 0 ? (
-                                <div className="space-y-[6px]">
-                                  {exerciseSchedule.slice(0, 4).map((item: any, idx: number) => {
-                                    const statusMeta = getCareStatusMeta(item?.status);
-                                    return (
-                                      <div key={`exercise-${idx}`} className="rounded-[8px] border border-[#e2e8f0] bg-white px-[8px] py-[7px] text-[12px] text-[#475569]">
-                                        <div className="flex flex-wrap items-center gap-[6px]">
-                                          <span className="font-[700] text-[#0f172a]">{item?.time || "--:--"}</span>
-                                          <span>{item?.activity || "Vận động"}{item?.durationMinutes ? ` (${item.durationMinutes} phút)` : ""}</span>
-                                          <span className={`px-[6px] py-[2px] rounded-full text-[10px] font-[700] ${statusMeta.className}`}>{statusMeta.label}</span>
-                                        </div>
-                                        {(item?.staffName || item?.staffId?.fullName) && (
-                                          <div className="mt-[4px] text-[11px] text-[#64748b]">NVKS: {item?.staffName || item?.staffId?.fullName}</div>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              ) : (
-                                <p className="text-[12px] text-[#9ca3af]">Chưa có lịch vận động.</p>
-                              )}
-                            </div>
-                          )}
-
-                          <div className="mt-[12px]">
-                            <Link
-                              to={`/hotels/${cage?.sourceCageId || cage?._id}`}
-                              onClick={(event) => event.stopPropagation()}
-                              className="inline-flex items-center gap-[6px] rounded-[8px] border border-[#d4d4d8] bg-white px-[12px] py-[6px] text-[12px] font-[700] text-[#334155] hover:border-client-primary hover:text-client-primary transition-default"
-                            >
-                              Xem chi tiết chuồng
-                            </Link>
-                          </div>
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </div>
