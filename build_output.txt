@@ -1,0 +1,94 @@
+﻿
+> teddypet@0.0.0 build
+> tsc -b && vite build
+
+src/admin/components/dashboard/WelcomeWidget.tsx(1,27): error TS6133: 'Button' is declared but its value is never read.
+src/admin/components/dashboard/WelcomeWidget.tsx(1,35): error TS6133: 'ButtonProps' is declared but its value is never read.
+src/admin/components/OverrunAlerter.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/admin/pages/account-admin/AccountAdminDetailPage.tsx(14,5): error TS6133: 'Avatar' is declared but its value is never read.
+src/admin/pages/account-admin/AccountAdminDetailPage.tsx(15,5): error TS6133: 'Divider' is declared but its value is never read.
+src/admin/pages/account-admin/AccountAdminDetailPage.tsx(35,1): error TS6133: 'alpha' is declared but its value is never read.
+src/admin/pages/account-user/AccountUserDetailPage.tsx(14,5): error TS6133: 'Avatar' is declared but its value is never read.
+src/admin/pages/account-user/AccountUserDetailPage.tsx(15,5): error TS6133: 'Divider' is declared but its value is never read.
+src/admin/pages/boarding/BoardingCareSchedulePage.tsx(58,7): error TS6133: 'TabBadge' is declared but its value is never read.
+src/admin/pages/boarding/BoardingCareSchedulePage.tsx(70,7): error TS6133: 'MAX_VIDEO_PROOF_SIZE_MB' is declared but its value is never read.
+src/admin/pages/boarding/BoardingCareSchedulePage.tsx(72,7): error TS6133: 'calculateRecommendedPortion' is declared but its value is never read.
+src/admin/pages/boarding/BoardingCareSchedulePage.tsx(87,7): error TS6133: 'taoDongVanDong' is declared but its value is never read.
+src/admin/pages/boarding/BoardingCareSchedulePage.tsx(132,11): error TS6133: 'getFoodOptionsByPetType' is declared but its value is never read.
+src/admin/pages/boarding/BoardingCareSchedulePage.tsx(133,11): error TS6133: 'getExerciseOptionsByPetType' is declared but its value is never read.
+src/admin/pages/boarding/BoardingCareSchedulePage.tsx(141,11): error TS6133: 'capNhatDongVanDong' is declared but its value is never read.
+src/admin/pages/boarding/BoardingPetDiaryManager.tsx(129,26): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; key: string; sx: { display: "block"; width: string; }; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; key: string; sx: { display: "block"; width: string; }; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/admin/pages/boarding/BoardingPetDiaryManager.tsx(185,42): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; md: number; sx: { p: number; }; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; md: number; sx: { p: number; }; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/admin/pages/boarding/BoardingPetDiaryManager.tsx(198,42): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; md: number; sx: { p: number; }; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; md: number; sx: { p: number; }; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/admin/pages/boarding/BoardingPetDiaryManager.tsx(211,42): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; md: number; sx: { p: number; }; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; md: number; sx: { p: number; }; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/admin/pages/boarding/BoardingPetDiaryManager.tsx(224,42): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
+    Property 'component' is missing in type '{ children: Element; xs: number; sx: { p: number; }; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
+  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
+    Type '{ children: Element; xs: number; sx: { p: number; }; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+      Property 'xs' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
+src/admin/pages/booking/sections/BookingDialog.tsx(69,18): error TS2339: Property 'map' does not exist on type 'never[] | ApiResponse<any>'.
+  Property 'map' does not exist on type 'ApiResponse<any>'.
+src/admin/pages/booking/sections/BookingDialog.tsx(152,58): error TS2339: Property 'find' does not exist on type 'never[] | ApiResponse<any>'.
+  Property 'find' does not exist on type 'ApiResponse<any>'.
+src/admin/pages/chat/sections/ChatSidebar.tsx(3,5): error TS6133: 'Stack' is declared but its value is never read.
+src/admin/pages/coupon/CouponCreatePage.tsx(17,1): error TS6133: 'dayjs' is declared but its value is never read.
+src/admin/pages/product/configs/column.config.ts(51,9): error TS2322: Type '(params: RenderActionsCellProps) => JSX.Element' is not assignable to type '(params: GridRenderCellParams<IProduct, any, any, GridTreeNodeWithRender>) => ReactNode'.
+  Types of parameters 'params' and 'params' are incompatible.
+    Property 'isTrash' is missing in type 'GridRenderCellParams<IProduct, any, any, GridTreeNodeWithRender>' but required in type 'RenderActionsCellProps'.
+src/admin/pages/product/sections/ProductList.tsx(12,1): error TS6133: 'useProducts' is declared but its value is never read.
+src/admin/pages/role/RoleCreatePage.tsx(58,32): error TS2339: Property 'recordList' does not exist on type 'ApiResponse<any>'.
+src/admin/pages/role/RoleCreatePage.tsx(58,57): error TS2339: Property 'recordList' does not exist on type 'ApiResponse<any>'.
+src/admin/pages/role/RoleEditPage.tsx(61,32): error TS2339: Property 'recordList' does not exist on type 'ApiResponse<any>'.
+src/admin/pages/role/RoleEditPage.tsx(61,57): error TS2339: Property 'recordList' does not exist on type 'ApiResponse<any>'.
+src/admin/pages/service/ServiceCreatePage.tsx(1,204): error TS6133: 'Divider' is declared but its value is never read.
+src/admin/pages/service/ServiceEditPage.tsx(1,222): error TS6133: 'Divider' is declared but its value is never read.
+src/admin/pages/staff-panel/StaffCustomerListPage.tsx(8,11): error TS6133: 'user' is declared but its value is never read.
+src/client/hooks/useBooking.ts(2,25): error TS2305: Module '"../api/booking.api"' has no exported member 'getTimeSlots'.
+src/client/pages/boarding/BoardingBooking.tsx(4,35): error TS6133: 'Check' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(4,50): error TS6133: 'PawPrint' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(4,68): error TS6133: 'Sparkles' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(44,41): error TS6133: 'isLoadingPets' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(45,9): error TS6133: 'createBoarding' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(46,9): error TS6133: 'payBoarding' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(55,10): error TS6133: 'fullName' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(55,20): error TS6133: 'setFullName' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(56,10): error TS6133: 'phone' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(56,17): error TS6133: 'setPhone' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(57,10): error TS6133: 'email' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(57,17): error TS6133: 'setEmail' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(58,10): error TS6133: 'notes' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(58,17): error TS6133: 'setNotes' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(59,10): error TS6133: 'specialCare' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(59,23): error TS6133: 'setSpecialCare' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(60,10): error TS6133: 'paymentMethod' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(60,25): error TS6133: 'setPaymentMethod' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(61,10): error TS6133: 'paymentGateway' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(61,26): error TS6133: 'setPaymentGateway' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(62,10): error TS6133: 'pendingPaymentLinks' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(62,31): error TS6133: 'setPendingPaymentLinks' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(89,9): error TS6133: 'selectedPets' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(93,9): error TS6133: 'totalPrice' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(102,9): error TS6133: 'togglePet' is declared but its value is never read.
+src/client/pages/boarding/BoardingBooking.tsx(121,9): error TS6133: 'setQuickPickCage' is declared but its value is never read.
+src/client/routes/index.tsx(11,1): error TS6133: 'BookingPage' is declared but its value is never read.

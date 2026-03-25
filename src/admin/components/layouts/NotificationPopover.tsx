@@ -354,10 +354,12 @@ export const NotificationPopover = () => {
                                                 icon={
                                                     item.type === 'overrun' ? "solar:danger-bold-duotone" :
                                                         item.type === 'booking' ? "solar:calendar-mark-bold-duotone" :
-                                                            "solar:bell-bold-duotone"
+                                                            item.type === 'boarding' ? "solar:home-bold-duotone" :
+                                                                "solar:bell-bold-duotone"
                                                 }
                                                 width={24}
-                                                color={item.type === 'overrun' ? "#FF5630" : "#00B8D9"}
+                                                color={item.type === 'overrun' ? "#FF5630" :
+                                                    item.type === 'boarding' ? "#FFAB00" : "#00B8D9"}
                                             />
                                         </Box>
                                     </ListItemAvatar>
@@ -386,7 +388,7 @@ export const NotificationPopover = () => {
                                                 <Typography variant="caption" sx={{ color: 'text.disabled' }}>
                                                     {item.type === 'order' ? 'Đơn hàng' :
                                                         item.type === 'booking' ? 'Dịch vụ' :
-                                                            item.type === 'boarding' ? 'Đặt phòng' :
+                                                            item.type === 'boarding' ? 'Khách sạn' :
                                                                 item.type === 'overrun' ? 'Hệ thống' : 'Thông báo'}
                                                 </Typography>
                                             </Stack>

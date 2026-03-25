@@ -1,3 +1,4 @@
+﻿import { useState, useMemo, Fragment, SyntheticEvent, ChangeEvent, MouseEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Icon } from "@iconify/react";
 import {
@@ -7,8 +8,8 @@ import {
     Card,
     Checkbox,
     Chip,
-    CircularProgress,
     Collapse,
+    CircularProgress,
     IconButton,
     Menu,
     MenuItem,
@@ -26,7 +27,6 @@ import {
     Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import { ChangeEvent, Fragment, MouseEvent, SyntheticEvent, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getBoardingBookings, updateBoardingBookingStatus } from "../../api/boarding-booking.api";
@@ -34,7 +34,6 @@ import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { Search } from "../../components/ui/Search";
 import { Title } from "../../components/ui/Title";
 import { prefixAdmin } from "../../constants/routes";
-import { confirmAction } from "../../utils/swal";
 
 const TabBadge = styled("span")(() => ({
     height: "24px",
@@ -49,6 +48,15 @@ const TabBadge = styled("span")(() => ({
     fontWeight: 700,
     transition: "all 0.2s",
 }));
+
+const boardingStatusOptions = [
+    { value: "pending", label: "Chờ xử lý", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)" },
+    { value: "held", label: "Giữ chỗ", color: "var(--palette-primary-dark)", bg: "var(--palette-primary-lighter)" },
+    { value: "confirmed", label: "Đã xác nhận", color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)" },
+    { value: "checked-in", label: "Nhận chuồng", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
+    { value: "checked-out", label: "Trả chuồng", color: "var(--palette-secondary-dark)", bg: "var(--palette-secondary-lighter)" },
+    { value: "cancelled", label: "Hủy", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
+];
 
 const formatCurrency = (value: number) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value || 0);
 
@@ -88,6 +96,23 @@ export const BoardingBookingListPage = () => {
         queryFn: () => getBoardingBookings(filters),
     });
 
+    const updateStatusMutation = useMutation({
+        mutationFn: (data: { id: string; boardingStatus: string }) => updateBoardingBookingStatus(data.id, data.boardingStatus),
+        onSuccess: () => {
+            toast.success("Cập nhật trạng thái thành công");
+            queryClient.invalidateQueries({ queryKey: ["admin-boarding-bookings"] });
+        },
+        onError: (err: any) => {
+            toast.error(err?.response?.data?.message || "Lỗi khi cập nhật trạng thái");
+        }
+    });
+
+    const handleStatusUpdate = (id: string, status: string, label: string) => {
+        if (window.confirm(`Xác nhận chuyển đơn sang trạng thái ${label}?`)) {
+            updateStatusMutation.mutate({ id, boardingStatus: status });
+        }
+    };
+
     const bookings = useMemo(() => {
         if (!res) return [];
         const data = res as any;
@@ -99,25 +124,14 @@ export const BoardingBookingListPage = () => {
     }, [res]);
 
     const pagination = res?.data?.pagination || { totalRecords: 0 };
-
-    const updateStatusMut = useMutation({
-        mutationFn: ({ id, status }: { id: string; status: string }) => updateBoardingBookingStatus(id, status),
-        onSuccess: () => {
-            toast.success("Cập nhật trạng thái thành công");
-            queryClient.invalidateQueries({ queryKey: ["admin-boarding-bookings"] });
-        },
-        onError: (error: any) => {
-            toast.error(error?.response?.data?.message || "Không thể cập nhật trạng thái");
-        },
-    });
-
-    const handleStatusUpdate = (id: string, status: string, label: string) => {
-        confirmAction(
-            `Xác nhận ${label}?`,
-            `Bạn có chắc chắn muốn chuyển đơn sang trạng thái "${label}" không?`,
-            () => updateStatusMut.mutate({ id, status }),
-            "info"
-        );
+    const statusCounts = res?.data?.statusCounts || {
+        all: 0,
+        pending: 0,
+        held: 0,
+        confirmed: 0,
+        "checked-in": 0,
+        "checked-out": 0,
+        cancelled: 0,
     };
 
     const handleOpenMenu = (event: MouseEvent<HTMLElement>, id: string) => {
@@ -173,8 +187,6 @@ export const BoardingBookingListPage = () => {
     const toggleRow = (id: string) => {
         setOpenRows((prev) => (prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]));
     };
-
-    const statusCounts = res?.data?.statusCounts || { all: 0 };
 
     return (
         <Box sx={{ maxWidth: "1200px", mx: "auto", p: "calc(3 * var(--spacing))" }}>
@@ -237,13 +249,13 @@ export const BoardingBookingListPage = () => {
                     }}
                 >
                     {[
-                        { value: "all", label: "Tất cả", bg: "var(--palette-grey-800)", color: "var(--palette-common-white)" },
-                        { value: "pending", label: "Chờ xử lý", bg: "var(--palette-warning-lighter)", color: "var(--palette-warning-dark)" },
-                        { value: "held", label: "Giữ chỗ", bg: "var(--palette-info-lighter)", color: "var(--palette-info-dark)" },
-                        { value: "confirmed", label: "Xác nhận", bg: "var(--palette-info-lighter)", color: "var(--palette-info-dark)" },
-                        { value: "checked-in", label: "Đã nhận", bg: "var(--palette-success-lighter)", color: "var(--palette-success-dark)" },
-                        { value: "checked-out", label: "Đã trả", bg: "var(--palette-secondary-lighter)", color: "var(--palette-secondary-dark)" },
-                        { value: "cancelled", label: "Đã hủy", bg: "var(--palette-error-lighter)", color: "var(--palette-error-dark)" },
+                        { value: "all", label: "Tất cả", color: "var(--palette-common-white)", bg: "var(--palette-grey-800)" },
+                        { value: "pending", label: "Chờ xử lý", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)" },
+                        { value: "held", label: "Giữ chỗ", color: "var(--palette-primary-dark)", bg: "var(--palette-primary-lighter)" },
+                        { value: "confirmed", label: "Đã xác nhận", color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)" },
+                        { value: "checked-in", label: "Nhận chuồng", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
+                        { value: "checked-out", label: "Trả chuồng", color: "var(--palette-secondary-dark)", bg: "var(--palette-secondary-lighter)" },
+                        { value: "cancelled", label: "Đã hủy", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
                     ].map((tab) => (
                         <Tab
                             key={tab.value}
@@ -308,7 +320,7 @@ export const BoardingBookingListPage = () => {
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Thời gian</TableCell>
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }}>Tổng tiền</TableCell>
                                 <TableCell sx={{ borderBottom: "none", color: "var(--palette-text-secondary)", fontWeight: 600, fontSize: "0.875rem" }} align="right">Trạng thái</TableCell>
-                                <TableCell sx={{ borderBottom: "none", width: 80 }} align="right" />
+                                <TableCell sx={{ borderBottom: "none", width: 120 }} align="right" />
                             </TableRow>
                         </TableHead>
 
@@ -387,28 +399,23 @@ export const BoardingBookingListPage = () => {
                                                         <Typography sx={{ fontWeight: 500, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
                                                             {dayjs(row.checkInDate).format("DD/MM/YYYY")} - {dayjs(row.checkOutDate).format("DD/MM/YYYY")}
                                                         </Typography>
-                                                        <Typography sx={{ color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>
-                                                            {Number(row.numberOfDays || 0)} ngày lưu trú
-                                                        </Typography>
+                                                        {row.surcharge > 0 && (
+                                                            <Typography sx={{ color: "var(--palette-warning-main)", fontSize: "10px", fontWeight: 800, textTransform: "uppercase" }}>
+                                                                + Phụ thu trễ
+                                                            </Typography>
+                                                        )}
                                                     </Stack>
                                                 </TableCell>
 
                                                 <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <Typography sx={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
-                                                        {formatCurrency(Number(row.total || 0))}
+                                                    <Typography sx={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
+                                                        {formatCurrency(row.total)}
                                                     </Typography>
                                                 </TableCell>
 
                                                 <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
                                                     {(() => {
-                                                        const statusMap: any = {
-                                                            pending: { label: "Chờ xử lý", color: "var(--palette-warning-main)", bg: "var(--palette-warning-lighter)" },
-                                                            confirmed: { label: "Xác nhận", color: "var(--palette-info-main)", bg: "var(--palette-info-lighter)" },
-                                                            "checked-in": { label: "Đã nhận", color: "var(--palette-success-main)", bg: "var(--palette-success-lighter)" },
-                                                            "checked-out": { label: "Đã trả", color: "var(--palette-secondary-main)", bg: "var(--palette-secondary-lighter)" },
-                                                            cancelled: { label: "Đã hủy", color: "var(--palette-error-main)", bg: "var(--palette-error-lighter)" },
-                                                        };
-                                                        const status = statusMap[row.boardingStatus] || { label: row.boardingStatus, color: "var(--palette-text-disabled)", bg: "var(--palette-background-neutral)" };
+                                                        const status = boardingStatusOptions.find(opt => opt.value === row.boardingStatus) || { label: row.boardingStatus, color: 'inherit', bg: 'transparent' };
                                                         return (
                                                             <Chip
                                                                 label={status.label}
@@ -416,23 +423,35 @@ export const BoardingBookingListPage = () => {
                                                                 sx={{
                                                                     borderRadius: "var(--shape-borderRadius-sm)",
                                                                     fontWeight: 700,
-                                                                    fontSize: "0.6875rem",
+                                                                    fontSize: '0.6875rem',
                                                                     color: status.color,
                                                                     bgcolor: status.bg,
-                                                                    height: "24px",
+                                                                    height: '24px'
                                                                 }}
                                                             />
                                                         );
                                                     })()}
                                                 </TableCell>
 
-                                                <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", width: 80 }}>
-                                                    <Stack direction="row" spacing={0} justifyContent="flex-end">
-                                                        <IconButton onClick={() => toggleRow(row._id)}>
-                                                            <Icon icon={isOpen ? "eva:arrow-ios-upward-fill" : "eva:arrow-ios-downward-fill"} width={20} />
-                                                        </IconButton>
-                                                        <IconButton onClick={(event) => handleOpenMenu(event, row._id)}>
+                                                <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)", width: 120 }}>
+                                                    <Stack direction="row" spacing={1} justifyContent="flex-end">
+                                                        <IconButton
+                                                            onClick={(event) => handleOpenMenu(event, row._id)}
+                                                            sx={{
+                                                                color: "var(--palette-text-primary)",
+                                                                bgcolor: Boolean(anchorEl[row._id]) ? "var(--palette-action-hover)" : "transparent",
+                                                            }}
+                                                        >
                                                             <Icon icon="eva:more-vertical-fill" width={20} />
+                                                        </IconButton>
+                                                        <IconButton
+                                                            onClick={() => toggleRow(row._id)}
+                                                            sx={{
+                                                                color: "var(--palette-text-primary)",
+                                                                bgcolor: isOpen ? "var(--palette-action-hover)" : "transparent",
+                                                            }}
+                                                        >
+                                                            <Icon icon={isOpen ? "eva:arrow-ios-upward-fill" : "eva:arrow-ios-downward-fill"} width={20} />
                                                         </IconButton>
                                                     </Stack>
                                                     <Menu
@@ -460,20 +479,6 @@ export const BoardingBookingListPage = () => {
                                                             <Icon icon="solar:pen-bold" width={18} style={{ marginRight: 8 }} />
                                                             Sửa
                                                         </MenuItem>
-                                                        <MenuItem onClick={() => { handleCloseMenu(row._id); navigate(`/${prefixAdmin}/boarding/care-schedule`); }}>
-                                                            <Icon icon="solar:calendar-mark-bold" width={18} style={{ marginRight: 8 }} />
-                                                            Lịch chăm sóc
-                                                        </MenuItem>
-
-                                                        {["pending", "held"].includes(row.boardingStatus) && (
-                                                            <MenuItem
-                                                                onClick={() => { handleCloseMenu(row._id); handleStatusUpdate(row._id, "confirmed", "Xác nhận"); }}
-                                                                sx={{ color: "var(--palette-success-main)" }}
-                                                            >
-                                                                <Icon icon="eva:checkmark-circle-2-fill" width={18} style={{ marginRight: 8 }} />
-                                                                Xác nhận khách
-                                                            </MenuItem>
-                                                        )}
 
                                                         {row.boardingStatus === "confirmed" && (
                                                             <MenuItem
@@ -491,7 +496,7 @@ export const BoardingBookingListPage = () => {
                                                                 sx={{ color: "var(--palette-warning-main)" }}
                                                             >
                                                                 <Icon icon="solar:card-send-bold" width={18} style={{ marginRight: 8 }} />
-                                                                Trả chuồng (Hết)
+                                                                Trả chuồng
                                                             </MenuItem>
                                                         )}
                                                     </Menu>

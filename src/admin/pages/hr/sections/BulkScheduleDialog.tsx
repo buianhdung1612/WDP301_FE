@@ -160,6 +160,13 @@ export const BulkScheduleDialog = ({
                                             }}
                                             sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }}
                                         >
+                                            <MenuItem value="all" onClick={(e) => {
+                                                e.preventDefault();
+                                                field.onChange(filteredAccounts.map((a: any) => a._id));
+                                            }}>
+                                                <Checkbox checked={field.value.length === filteredAccounts.length && filteredAccounts.length > 0} />
+                                                <ListItemText primary="Chọn tất cả nhân viên" sx={{ fontWeight: 'bold' }} />
+                                            </MenuItem>
                                             {filteredAccounts.map((account: any) => {
                                                 const isBusy = busyStaffIds.includes(account._id);
                                                 const disabled = isBusy && !watchOverwrite;

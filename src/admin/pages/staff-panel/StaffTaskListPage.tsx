@@ -18,22 +18,10 @@ import {
 } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "react-toastify";
 import { useAuthStore } from "../../../stores/useAuthStore";
-import { useStartBooking, useUpdateBookingStatus } from "../booking/hooks/useBookingManagement";
 import { getBoardingBookings } from "../../api/boarding-booking.api";
 import { prefixAdmin } from "../../constants/routes";
 import { StaffServiceTaskPage } from "./StaffServiceTaskPage";
-
-/** Kiểm tra xem nhân viên có thuộc bộ phận Khách sạn/Boarding không */
-const isBoardingDepartment = (roles: any[]): boolean => {
-    if (!roles || roles.length === 0) return false;
-    const keywords = ["boarding", "khách sạn", "hotel", "lưu trú"];
-    return roles.some((role: any) => {
-        const depName = (role.departmentId?.name || role.departmentId?.code || "").toLowerCase();
-        return keywords.some(kw => depName.includes(kw));
-    });
-};
 
 /** Kiểm tra xem nhân viên có thuộc bộ phận Dịch vụ không */
 const isServiceDepartment = (roles: any[]): boolean => {
@@ -51,21 +39,16 @@ export const StaffTaskListPage = () => {
     const roles = user?.roles || [];
 
     // --- Định tuyến UI theo bộ phận ---
-    if (isServiceDepartment(roles)) {
+    if (user && isServiceDepartment(roles)) {
         return <StaffServiceTaskPage />;
     }
-    // Bộ phận Khách sạn hoặc chưa xác định → hiển thị UI Boarding bên dưới
-    // ----------------------------------------
 
     const [filterDate, setFilterDate] = useState(dayjs());
 
     const [selectedDetailBooking, setSelectedDetailBooking] = useState<any>(null);
 
-    const { mutate: startService } = useStartBooking();
-    const { mutate: updateStatus } = useUpdateBookingStatus();
-
     // Fetch Boarding data to count feeding/exercise tasks
-    const { data: boardingRes, isLoading, refetch } = useQuery({
+    const { data: boardingRes, isLoading } = useQuery({
         queryKey: ["admin-boarding-bookings-stats", filterDate.format("YYYY-MM-DD")],
         queryFn: () => getBoardingBookings({ limit: 1000 }),
         enabled: !!user
@@ -74,33 +57,6 @@ export const StaffTaskListPage = () => {
     const boardingBookings = useMemo(() => {
         return (boardingRes as any)?.data?.recordList || (Array.isArray(boardingRes?.data) ? boardingRes.data : []);
     }, [boardingRes]);
-
-    // Task management functions
-    const handleStart = (id: string, petId?: string) => {
-        startService({ id, petId }, {
-            onSuccess: () => {
-                toast.success("Đã bắt đầu thực hiện dịch vụ");
-                refetch();
-            },
-            onError: (error: any) => {
-                const message = error.response?.data?.message || "Lỗi khi bắt đầu dịch vụ";
-                toast.error(message);
-            }
-        });
-    };
-
-    const handleComplete = (id: string, petId?: string) => {
-        updateStatus({ id, status: "completed", petId }, {
-            onSuccess: () => {
-                toast.success("Đã hoàn thành dịch vụ");
-                refetch();
-            },
-            onError: (error: any) => {
-                const message = error.response?.data?.message || "Lỗi khi cập nhật trạng thái";
-                toast.error(message);
-            }
-        });
-    };
 
     const filteredBoarding = useMemo(() => {
         return boardingBookings.filter((b: any) => {
@@ -388,21 +344,12 @@ export const StaffTaskListPage = () => {
                                                         <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{f.time} — {f.food}</Typography>
                                                         <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>Lượng: {f.amount}</Typography>
                                                     </Box>
-                                                    {f.status === 'done' ? (
-                                                        <Icon icon="solar:check-circle-bold" style={{ color: '#007B55' }} />
-                                                    ) : (
-                                                        <Button
-                                                            variant="contained"
-                                                            size="small"
-                                                            onClick={() => handleComplete(b._id, b.petIds?.[0]?._id)}
-                                                            sx={{ borderRadius: '12px', fontWeight: 800, bgcolor: '#007B55', color: '#fff' }}
-                                                        >
-                                                            Cho ăn
-                                                        </Button>
+                                                    {f.status === 'done' && (
+                                                        <Icon icon="solar:check-circle-bold" style={{ color: '#007B55', width: 24, height: 24 }} />
                                                     )}
                                                 </Stack>
                                             </Box>
-                                        )) : <Typography variant="caption">Không có lịch cho ăn.</Typography>}
+                                        )) : <Typography variant="caption" sx={{ color: 'text.disabled', fontStyle: 'italic' }}>Không có lịch cho ăn.</Typography>}
 
                                         <Typography variant="overline" sx={{ color: '#B78103', fontWeight: 900, mt: 2 }}>Vận động</Typography>
                                         {exerciseToday.length > 0 ? exerciseToday.map((e: any, i: number) => (
@@ -415,21 +362,12 @@ export const StaffTaskListPage = () => {
                                                         <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{e.time} — {e.activity}</Typography>
                                                         <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>{e.durationMinutes} phút</Typography>
                                                     </Box>
-                                                    {e.status === 'done' ? (
-                                                        <Icon icon="solar:check-circle-bold" style={{ color: '#007B55' }} />
-                                                    ) : (
-                                                        <Button
-                                                            variant="outlined"
-                                                            size="small"
-                                                            onClick={() => handleStart(b._id, b.petIds?.[0]?._id)}
-                                                            sx={{ borderRadius: '12px', fontWeight: 800 }}
-                                                        >
-                                                            Bắt đầu
-                                                        </Button>
+                                                    {e.status === 'done' && (
+                                                        <Icon icon="solar:check-circle-bold" style={{ color: '#007B55', width: 24, height: 24 }} />
                                                     )}
                                                 </Stack>
                                             </Box>
-                                        )) : <Typography variant="caption">Không có lịch vận động.</Typography>}
+                                        )) : <Typography variant="caption" sx={{ color: 'text.disabled', fontStyle: 'italic' }}>Không có lịch vận động.</Typography>}
                                     </Stack>
                                 </Box>
 
@@ -437,10 +375,10 @@ export const StaffTaskListPage = () => {
                                     fullWidth
                                     variant="contained"
                                     size="large"
-                                    onClick={() => navigate(`/${prefixAdmin}/boarding/booking-list`)}
+                                    onClick={() => navigate(`/${prefixAdmin}/boarding/care-schedule?search=${b.code}`)}
                                     sx={{ bgcolor: '#111827', py: 2, borderRadius: '20px', fontWeight: 900, '&:hover': { bgcolor: '#1f2937' } }}
                                 >
-                                    Đi tới Quản lý Khách sạn
+                                    Xem lịch chăm sóc chi tiết
                                 </Button>
                             </DialogContent>
                         </>
