@@ -9,3 +9,8 @@ export const getClientPage = async (key: string): Promise<any> => {
     return response.data;
 };
 
+/** Lấy thông tin cài đặt chung */
+export const getGeneralSettings = async (): Promise<any> => {
+    const response = await apiApp.get(`${BASE_URL}/general`);
+    return response.data;
+};

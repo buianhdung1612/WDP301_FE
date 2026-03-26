@@ -14,17 +14,22 @@ import {
     ListItemText,
     alpha,
     Box,
+    Stack,
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import { toast } from 'react-toastify';
 import { useShifts } from '../hooks/useShifts';
 import { useAccounts } from '../../account-admin/hooks/useAccountAdmin';
 import { useSchedules } from '../hooks/useSchedules';
+import { useBookingConfig } from '../../booking/hooks/useBookingConfig';
+import { useRoles } from '../../role/hooks/useRole';
 import CloseIcon from '@mui/icons-material/Close';
 import { dialogStyles } from '../configs/styles.config';
+import { Icon } from '@iconify/react';
 
 interface BulkScheduleDialogProps {
     open: boolean;
@@ -41,8 +46,10 @@ export const BulkScheduleDialog = ({
     departmentId,
     loading = false,
 }: BulkScheduleDialogProps) => {
+    const { data: config } = useBookingConfig();
     const accountsRes = useAccounts({ departmentId, status: 'active' });
     const shiftsRes = useShifts({ departmentId, status: 'active' });
+    const { data: rolesRes } = useRoles();
 
     const accounts = useMemo(() => {
         if (!accountsRes.data) return [];
@@ -64,6 +71,16 @@ export const BulkScheduleDialog = ({
         return [];
     }, [shiftsRes.data]);
 
+    const roles = useMemo(() => {
+        if (!rolesRes) return [];
+        const data = rolesRes as any;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [rolesRes]);
+
     const filteredAccounts = accounts;
     const filteredShifts = shifts;
 
@@ -80,20 +97,72 @@ export const BulkScheduleDialog = ({
     const watchStartDate = watch('startDate');
     const watchEndDate = watch('endDate');
     const watchOverwrite = watch('overwrite');
+    const watchShiftId = watch('shiftId');
+    const watchStaffIds = watch('staffIds') || [];
 
     const { data: schedulesRes } = useSchedules({
         startDate: watchStartDate?.format('YYYY-MM-DD'),
         endDate: watchEndDate?.format('YYYY-MM-DD'),
-        departmentId
+        departmentId,
+        noLimit: true
     });
 
     const busyStaffIds = useMemo(() => {
-        const data = schedulesRes?.data;
+        const payload = schedulesRes?.data as any;
+        const data = payload?.data || payload;
         const records = Array.isArray(data?.recordList)
             ? data.recordList
             : (Array.isArray(data) ? data : []);
         return [...new Set(records.map((s: any) => s.staffId?._id || s.staffId))];
     }, [schedulesRes]);
+
+    // Calculate staffing status per role
+    const staffingStatus = useMemo(() => {
+        if (!config || !watchShiftId) return null;
+
+        const rule = config.staffingRules?.find((r: any) => r.shiftId === watchShiftId);
+        if (!rule) return null;
+
+        const payload = schedulesRes?.data as any;
+        const data = payload?.data || payload;
+        const records = Array.isArray(data?.recordList)
+            ? data.recordList
+            : (Array.isArray(data) ? data : []);
+
+        const statusPerRole = rule.roleRequirements.map((req: any) => {
+            const roleObj = roles.find((r: any) => r._id === req.roleId);
+
+            const staffIdsInThisRole = accounts
+                .filter((a: any) => (a.roles || []).some((r: any) =>
+                    (typeof r === 'string' ? r === req.roleId : r._id === req.roleId)
+                ))
+                .map((a: any) => a._id);
+
+            const newlyAddedCount = watchStaffIds.filter(id => staffIdsInThisRole.includes(id)).length;
+
+            const totalDays = dayjs(watchEndDate).diff(dayjs(watchStartDate), 'day') + 1;
+            const existingCountTotal = records.filter((s: any) =>
+                (s.shiftId?._id === watchShiftId || s.shiftId === watchShiftId) &&
+                staffIdsInThisRole.includes(s.staffId?._id || s.staffId)
+            ).length;
+
+            const existingAvg = totalDays > 0 ? Math.ceil(existingCountTotal / totalDays) : 0;
+
+            return {
+                roleId: req.roleId,
+                roleName: roleObj?.name || req.roleName || 'Nhân viên',
+                required: req.minStaff,
+                currentAvg: existingAvg,
+                newlyAdded: newlyAddedCount,
+                totalAvg: existingAvg + newlyAddedCount,
+                isExcess: (existingAvg + newlyAddedCount) > req.minStaff
+            };
+        });
+
+        return statusPerRole;
+    }, [config, watchShiftId, schedulesRes, accounts, roles, watchStaffIds, watchStartDate, watchEndDate]);
+
+    const isExcessive = staffingStatus?.some(s => s.isExcess);
 
     useEffect(() => {
         if (open) {
@@ -108,6 +177,10 @@ export const BulkScheduleDialog = ({
     }, [open, reset]);
 
     const onSubmit = (data: any) => {
+        if (isExcessive) {
+            toast.error("Phát hiện dư thừa nhân sự! Số lượng nhân viên chọn vượt quá định mức trong cấu hình Booking.");
+            return;
+        }
         const selectedShift = shifts.find((s: any) => s._id === data.shiftId);
         onSave({
             ...data,
@@ -150,6 +223,20 @@ export const BulkScheduleDialog = ({
                                             label="Nhân viên"
                                             error={!!error}
                                             helperText={error?.message}
+                                            onChange={(e) => {
+                                                const { value } = e.target;
+                                                const currentVal = Array.isArray(value) ? value : [];
+
+                                                if (currentVal[currentVal.length - 1] === 'all') {
+                                                    if (field.value.length === filteredAccounts.length && filteredAccounts.length > 0) {
+                                                        field.onChange([]);
+                                                    } else {
+                                                        field.onChange(filteredAccounts.map((a: any) => a._id));
+                                                    }
+                                                    return;
+                                                }
+                                                field.onChange(value);
+                                            }}
                                             SelectProps={{
                                                 multiple: true,
                                                 renderValue: (selected: any) =>
@@ -160,10 +247,7 @@ export const BulkScheduleDialog = ({
                                             }}
                                             sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }}
                                         >
-                                            <MenuItem value="all" onClick={(e) => {
-                                                e.preventDefault();
-                                                field.onChange(filteredAccounts.map((a: any) => a._id));
-                                            }}>
+                                            <MenuItem value="all">
                                                 <Checkbox checked={field.value.length === filteredAccounts.length && filteredAccounts.length > 0} />
                                                 <ListItemText primary="Chọn tất cả nhân viên" sx={{ fontWeight: 'bold' }} />
                                             </MenuItem>
@@ -185,7 +269,11 @@ export const BulkScheduleDialog = ({
                                                     >
                                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                             <Checkbox checked={field.value.indexOf(account._id) > -1} />
-                                                            <ListItemText primary={`${account.fullName} (${account.email})`} />
+                                                            <ListItemText
+                                                                primary={account.fullName}
+                                                                secondary={`${account.email} ${account.rolesName?.length ? `• ${account.rolesName.join(', ')}` : ''}`}
+                                                                secondaryTypographyProps={{ variant: 'caption', sx: { color: 'text.disabled', fontWeight: 600 } }}
+                                                            />
                                                         </Box>
                                                         {isBusy && (
                                                             <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 700, ml: 1 }}>
@@ -232,6 +320,45 @@ export const BulkScheduleDialog = ({
                                     }}
                                 />
                             </Grid>
+
+                            {staffingStatus && (
+                                <Grid size={{ xs: 12 }}>
+                                    <Box sx={{
+                                        p: 2,
+                                        bgcolor: alpha(isExcessive ? '#FFAB00' : '#00A76F', 0.08),
+                                        borderRadius: "var(--shape-borderRadius-md)",
+                                        border: '1px solid',
+                                        borderColor: alpha(isExcessive ? '#FFAB00' : '#00A76F', 0.24)
+                                    }}>
+                                        <Stack spacing={1.5}>
+                                            <Stack direction="row" spacing={1} alignItems="center" sx={{ color: isExcessive ? '#B76E00' : '#118D57' }}>
+                                                <Icon icon={isExcessive ? "solar:info-circle-bold-duotone" : "solar:check-circle-bold-duotone"} width={20} />
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                                                    {isExcessive ? 'Định mức nhân sự: Dư người hoặc đã đủ' : 'Định mức nhân sự: Đang thiếu'}
+                                                    {isExcessive && " (Vượt quá Booking Config)"}
+                                                </Typography>
+                                            </Stack>
+                                            <Stack spacing={0.75}>
+                                                {staffingStatus.map((s: any, idx: number) => (
+                                                    <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                                                            {s.roleName}:
+                                                        </Typography>
+                                                        <Typography variant="caption" sx={{ fontWeight: 700, color: s.isExcess ? '#FF5630' : 'text.primary' }}>
+                                                            {s.totalAvg} / {s.required} (Hiện có {s.currentAvg}{s.newlyAdded > 0 ? `, thêm ${s.newlyAdded}` : ''})
+                                                        </Typography>
+                                                    </Box>
+                                                ))}
+                                            </Stack>
+                                            {isExcessive && (
+                                                <Typography variant="caption" sx={{ color: '#B76E00', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                    * Lưu ý: Bạn đang phân công nhiều hơn số lượng tối thiểu trong cấu hình.
+                                                </Typography>
+                                            )}
+                                        </Stack>
+                                    </Box>
+                                </Grid>
+                            )}
 
                             <Grid size={{ xs: 12, sm: 6 }}>
                                 <Controller

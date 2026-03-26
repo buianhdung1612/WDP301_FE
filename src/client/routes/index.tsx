@@ -44,12 +44,14 @@ import { BoardingBookingDetailPage } from "../pages/dashboard/BoardingBookingDet
 import { AuthGuard } from "../components/guards/AuthGuard";
 import { StaticPage } from "../pages/static/StaticPage";
 import { FaqPage } from "../pages/static/FaqPage";
+import { ContactPage } from "../pages/static/ContactPage";
 
 export const ClientRoutes: RouteObject[] = [
     { path: "/", element: <HomePage /> },
     { path: "/about", element: <StaticPage /> },
     { path: "/stores", element: <StaticPage /> },
     { path: "/faq", element: <FaqPage /> },
+    { path: "/contact", element: <ContactPage /> },
     { path: "/policy/:type", element: <StaticPage /> },
     { path: "/product/detail/:slug", element: <ProductDetailPage /> },
 

@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 
 interface SocialItem {
     icon: React.ElementType;
@@ -19,9 +18,9 @@ export const SocialIcon = ({ items }: SocialIconProps) => {
                      rounded-[10px] flex items-center justify-center cursor-pointer 
                      hover:text-client-secondary hover:bg-white transition-default"
                 >
-                    <Link to={to}>
+                    <a href={to} target="_blank" rel="noopener noreferrer">
                         <Icon strokeWidth={2} className="w-[16px] h-[16px]" />
-                    </Link>
+                    </a>
                 </li>
             ))}
         </ul>

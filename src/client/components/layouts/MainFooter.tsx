@@ -96,7 +96,10 @@ const FooterLogoSVG = () => {
     );
 };
 
+import { useSettingGeneral } from "../../hooks/useSettings";
+
 export const MainFooter = () => {
+    const { data: general } = useSettingGeneral();
     return (
         <>
             <footer className="bg-[#FFF0F0]">
@@ -113,7 +116,7 @@ export const MainFooter = () => {
                                     </Link>
                                 </div>
                                 <div className="text-center text-client-text leading-[1.75] px-[20px] font-[500]">
-                                    Khám phá thế giới tuyệt vời của thú cưng tại TeddyPet! Chúng tôi cam kết mang đến những sản phẩm chất lượng cao, từ thức ăn dinh dưỡng đến đồ chơi an toàn, giúp những người bạn bốn chân của bạn luôn khỏe mạnh và vui vẻ.
+                                    {general?.websiteName ? `Khám phá thế giới tuyệt vời của thú cưng tại ${general.websiteName}! Chúng tôi cam kết mang đến những sản phẩm chất lượng cao, từ thức ăn dinh dưỡng đến đồ chơi an toàn, giúp những người bạn bốn chân của bạn luôn khỏe mạnh và vui vẻ.` : 'Đang tải thông tin...'}
                                 </div>
                                 <SocialIconCircle className="justify-center" />
                             </div>
@@ -134,19 +137,19 @@ export const MainFooter = () => {
                                 <ul className="flex flex-col gap-[20px]">
                                     <li className="flex">
                                         <HomeIcon className="text-client-text" style={{ fontSize: "22px" }} />
-                                        <span className="pl-[8px] text-client-text text-[17px] cursor-pointer">No: 58 A, East Madison Street, Baltimore, MD, USA 4508</span>
+                                        <span className="pl-[8px] text-client-text text-[17px]">{general?.address || 'Đang tải...'}</span>
                                     </li>
                                     <li className="flex items-center">
                                         <PhoneIcon className="text-client-text" style={{ fontSize: "22px" }} />
-                                        <span className="pl-[8px] text-client-text text-[17px] hover:text-client-primary transition-default cursor-pointer">+1234 567 890</span>
+                                        <span className="pl-[8px] text-client-text text-[17px] hover:text-client-primary transition-default cursor-pointer">{general?.phone || 'Đang tải...'}</span>
                                     </li>
                                     <li className="flex items-center">
                                         <EmailIcon className="text-client-text" style={{ fontSize: "22px" }} />
-                                        <span className="pl-[8px] text-client-text text-[17px] hover:text-client-primary transition-default cursor-pointer">teddypet@gmail.com</span>
+                                        <span className="pl-[8px] text-client-text text-[17px] hover:text-client-primary transition-default cursor-pointer">{general?.email || 'Đang tải...'}</span>
                                     </li>
                                     <li className="flex items-center">
                                         <LanguageIcon className="text-client-text" style={{ fontSize: "22px" }} />
-                                        <span className="pl-[8px] text-client-text text-[17px] hover:text-client-primary transition-default cursor-pointer">www.example.com</span>
+                                        <span className="pl-[8px] text-client-text text-[17px] hover:text-client-primary transition-default cursor-pointer">{general?.websiteDomain || 'www.example.com'}</span>
                                     </li>
                                 </ul>
                             </div>

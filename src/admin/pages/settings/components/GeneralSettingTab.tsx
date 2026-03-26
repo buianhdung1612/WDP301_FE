@@ -30,7 +30,6 @@ export const GeneralSettingTab = () => {
             copyright: "",
             facebook: "",
             instagram: "",
-            youtube: "",
             breeds: [],
             defaultPassword: ""
         }
@@ -168,18 +167,6 @@ export const GeneralSettingTab = () => {
                                             fullWidth
                                             label="Instagram"
                                             InputProps={{ startAdornment: <Icon icon="logos:instagram-icon" width={24} style={{ marginRight: 8 }} /> }}
-                                        />
-                                    )}
-                                />
-                                <Controller
-                                    name="youtube"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField
-                                            {...field}
-                                            fullWidth
-                                            label="Youtube"
-                                            InputProps={{ startAdornment: <Icon icon="logos:youtube-icon" width={24} style={{ marginRight: 8 }} /> }}
                                         />
                                     )}
                                 />

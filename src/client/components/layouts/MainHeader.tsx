@@ -8,8 +8,10 @@ import { logout as logoutApi } from "../../api/auth.api";
 import { getSuggestions } from "../../api/product.api";
 import { toast } from "react-toastify";
 import { useState, useEffect, useRef } from "react";
+import { useSettingGeneral } from "../../hooks/useSettings";
 
 export const MainHeader = () => {
+    const { data: general } = useSettingGeneral();
     const navigate = useNavigate();
     const [keyword, setKeyword] = useState("");
     const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -93,7 +95,7 @@ export const MainHeader = () => {
                     {/* Logo */}
                     <div className="w-[15%] flex justify-center">
                         <Link to="/">
-                            <img src="https://i.imgur.com/V2kwkkK.png" alt="" className="w-[190px] object-cover z-10" />
+                            <img src={general?.logo || "https://i.imgur.com/V2kwkkK.png"} alt={general?.websiteName || ""} className="w-[190px] object-cover z-10" />
                         </Link>
                     </div>
 
@@ -222,17 +224,19 @@ export const MainHeader = () => {
                                 <User stroke="2" className="w-[25px] h-[25px]" />
                             </Link>
                         )}
-                        <Button
-                            content="Liên hệ"
-                            background="bg-client-secondary"
-                            hoverBackground="group-hover:bg-client-primary"
-                            svgColor="text-client-secondary"
-                            hoverSvgColor="group-hover:text-client-primary"
-                            textColor="text-white"
-                            hoverTextColor="text-white"
-                            iconColor="before:bg-white after:bg-white"
-                            hoverIconColor="hover:before:bg-white hover:after:bg-white"
-                        />
+                        <Link to="/contact">
+                            <Button
+                                content="Liên hệ"
+                                background="bg-client-secondary"
+                                hoverBackground="group-hover:bg-client-primary"
+                                svgColor="text-client-secondary"
+                                hoverSvgColor="group-hover:text-client-primary"
+                                textColor="text-white"
+                                hoverTextColor="text-white"
+                                iconColor="before:bg-white after:bg-white"
+                                hoverIconColor="hover:before:bg-white hover:after:bg-white"
+                            />
+                        </Link>
                     </div>
                 </div>
             </div>

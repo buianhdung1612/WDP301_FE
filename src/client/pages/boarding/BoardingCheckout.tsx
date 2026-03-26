@@ -271,7 +271,7 @@ export const BoardingCheckoutPage = () => {
                 <section className="rounded-[30px] border border-[#f0e4dd] bg-white px-[30px] py-[32px] shadow-[0_24px_56px_rgba(42,27,17,0.06)]">
                   <div className="flex items-start justify-between gap-[20px] md:flex-col">
                     <div>
-                      <p className="text-[15px] font-[700] uppercase tracking-[0.28em] text-client-primary/80">Review Booking</p>
+                      <p className="text-[15px] font-[700] uppercase tracking-[0.28em] text-client-primary/80">Xem lại đơn hàng</p>
                       <h1 className="mt-[10px] text-[46px] font-[800] leading-[1.04] tracking-[-0.04em] text-client-secondary 2xl:text-[40px] md:text-[32px]">
                         Kiểm tra thông tin lưu trú trước khi thanh toán
                       </h1>
@@ -307,7 +307,7 @@ export const BoardingCheckoutPage = () => {
                               {draft.cageCode} - {draft.cageType}
                             </h2>
                             <p className="mt-[8px] text-[16px] text-[#697384]">
-                              {displayNights} {displayNights > 1 ? "đêm" : "đêm"} x {safeQuantity} phòng x {formatVnd(draft.dailyPrice)}
+                              {safeQuantity} phòng x {displayNights} đêm x {formatVnd(draft.dailyPrice)}
                             </p>
                           </div>
                           <div className="inline-flex h-[38px] items-center rounded-full border border-[#d8f1dc] bg-[#effaf1] px-[14px] text-[12px] font-[800] uppercase tracking-[0.16em] text-[#1c8c4a]">
@@ -384,7 +384,7 @@ export const BoardingCheckoutPage = () => {
                 <section className="rounded-[30px] border border-[#f0e4dd] bg-white px-[30px] py-[30px] shadow-[0_24px_56px_rgba(42,27,17,0.06)]">
                   <div className="flex items-start justify-between gap-[16px] md:flex-col">
                     <div>
-                      <p className="text-[15px] font-[700] uppercase tracking-[0.28em] text-client-primary/80">Payment Method</p>
+                      <p className="text-[15px] font-[700] uppercase tracking-[0.28em] text-client-primary/80">Phương thức thanh toán</p>
                       <h2 className="mt-[10px] text-[36px] font-[800] leading-[1.08] tracking-[-0.04em] text-client-secondary md:text-[30px]">
                         Chọn cách thanh toán phù hợp
                       </h2>
@@ -482,7 +482,7 @@ export const BoardingCheckoutPage = () => {
               <aside className="space-y-[16px]">
                 <div className="sticky top-[24px] space-y-[16px] xl:static">
                   <div className="rounded-[30px] border border-[#f0e4dd] bg-white px-[28px] py-[28px] shadow-[0_24px_56px_rgba(42,27,17,0.06)]">
-                    <p className="text-[15px] font-[700] uppercase tracking-[0.28em] text-client-primary/80">Order Summary</p>
+                    <p className="text-[15px] font-[700] uppercase tracking-[0.28em] text-client-primary/80">Tóm tắt đơn hàng</p>
                     <h2 className="mt-[10px] text-[34px] font-[800] leading-[1.08] tracking-[-0.04em] text-client-secondary">Tóm tắt thanh toán</h2>
 
                     <div className="mt-[22px] space-y-[14px] rounded-[22px] border border-[#f2e7de] bg-[#fffaf7] p-[18px]">
@@ -579,11 +579,11 @@ export const BoardingCheckoutPage = () => {
                   <div className="flex flex-wrap items-center justify-center gap-[18px] rounded-[20px] border border-[#f0e6df] bg-white px-[20px] py-[16px] text-[12px] font-[800] uppercase tracking-[0.18em] text-[#94a0ae] shadow-[0_12px_30px_rgba(42,27,17,0.04)]">
                     <span className="inline-flex items-center gap-[8px]">
                       <ShieldCheck className="h-[14px] w-[14px] text-client-primary" />
-                      Secure SSL
+                      Bảo mật SSL
                     </span>
                     <span className="inline-flex items-center gap-[8px]">
                       <CheckCircle2 className="h-[14px] w-[14px] text-client-primary" />
-                      Guaranteed
+                      Đảm bảo
                     </span>
                   </div>
                 </div>

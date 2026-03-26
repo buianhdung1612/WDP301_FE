@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useMemo, useEffect } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -24,13 +24,14 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useForm, Controller } from 'react-hook-form';
 import dayjs from 'dayjs';
 import { toast } from 'react-toastify';
-import { bulkDeleteSchedules } from '../../../api/work-schedule.api';
+import { useAccounts } from '../../account-admin/hooks/useAccountAdmin';
 
 interface BulkDeleteDialogProps {
     open: boolean;
     onClose: () => void;
-    accounts: any[];
-    onSuccess: () => void;
+    onDelete: (data: any) => void;
+    departmentId?: string;
+    loading?: boolean;
 }
 
 const dialogStyles = {
@@ -59,10 +60,26 @@ const dialogStyles = {
     }
 };
 
-export const BulkDeleteDialog: React.FC<BulkDeleteDialogProps> = ({ open, onClose, accounts = [], onSuccess }) => {
-    const [loading, setLoading] = useState(false);
+export const BulkDeleteDialog: React.FC<BulkDeleteDialogProps> = ({
+    open,
+    onClose,
+    onDelete,
+    departmentId,
+    loading = false
+}) => {
+    const accountsRes = useAccounts({ departmentId, status: 'active' });
 
-    const { control, handleSubmit, reset, watch, setValue } = useForm({
+    const accounts = useMemo(() => {
+        if (!accountsRes.data) return [];
+        const data = accountsRes.data;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [accountsRes.data]);
+
+    const { control, handleSubmit, reset, watch } = useForm({
         defaultValues: {
             staffIds: [] as string[],
             startDate: dayjs().startOf('week'),
@@ -70,45 +87,28 @@ export const BulkDeleteDialog: React.FC<BulkDeleteDialogProps> = ({ open, onClos
         }
     });
 
-    const selectedStaffIds = watch('staffIds') || [];
-
-    const handleSelectAll = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const allIds = (accounts || []).map(a => a._id);
-        if (selectedStaffIds.length === allIds.length && allIds.length > 0) {
-            setValue('staffIds', []);
-        } else {
-            setValue('staffIds', allIds);
+    useEffect(() => {
+        if (open) {
+            reset({
+                staffIds: [],
+                startDate: dayjs().startOf('week'),
+                endDate: dayjs().endOf('week')
+            });
         }
-    };
+    }, [open, reset]);
+
+    const selectedStaffIds = watch('staffIds') || [];
 
     const onSubmit = async (data: any) => {
         if (!data.staffIds || data.staffIds.length === 0) {
             toast.error('Vui lòng chọn ít nhất một nhân viên');
             return;
         }
-        try {
-            setLoading(true);
-            const res = await bulkDeleteSchedules({
-                staffIds: data.staffIds,
-                startDate: data.startDate.format('YYYY-MM-DD'),
-                endDate: data.endDate.format('YYYY-MM-DD')
-            });
-
-            if (res.code === 200) {
-                toast.success('Xóa ca làm việc thành công');
-                onSuccess();
-                onClose();
-                reset();
-            } else {
-                toast.error(res.message || 'Có lỗi xảy ra');
-            }
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Không thể xóa ca làm việc');
-        } finally {
-            setLoading(false);
-        }
+        onDelete({
+            staffIds: data.staffIds,
+            startDate: data.startDate.format('YYYY-MM-DD'),
+            endDate: data.endDate.format('YYYY-MM-DD')
+        });
     };
 
     return (
@@ -131,7 +131,7 @@ export const BulkDeleteDialog: React.FC<BulkDeleteDialogProps> = ({ open, onClos
                 </IconButton>
             </DialogTitle>
             <form onSubmit={handleSubmit(onSubmit)}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
                     <DialogContent>
                         <Box sx={{ mb: 3, p: 2, bgcolor: alpha('#FF5630', 0.08), borderRadius: "var(--shape-borderRadius-md)", border: '1px solid', borderColor: alpha('#FF5630', 0.16) }}>
                             <Typography variant="body2" sx={{ color: '#B71D18', fontWeight: 600 }}>
@@ -153,6 +153,19 @@ export const BulkDeleteDialog: React.FC<BulkDeleteDialogProps> = ({ open, onClos
                                         placeholder="Chọn nhân viên"
                                         error={!!error}
                                         helperText={error?.message}
+                                        onChange={(e) => {
+                                            const { value } = e.target;
+                                            // Handle "Select All"
+                                            if (Array.isArray(value) && value[value.length - 1] === 'all') {
+                                                if (selectedStaffIds.length === accounts.length && accounts.length > 0) {
+                                                    field.onChange([]);
+                                                } else {
+                                                    field.onChange(accounts.map((a: any) => a._id));
+                                                }
+                                                return;
+                                            }
+                                            field.onChange(value);
+                                        }}
                                         SelectProps={{
                                             multiple: true,
                                             renderValue: (selected: any) => {
@@ -164,15 +177,15 @@ export const BulkDeleteDialog: React.FC<BulkDeleteDialogProps> = ({ open, onClos
                                                     .join(', ');
                                             }
                                         }}
-                                        sx={{ 
-                                            bgcolor: "var(--palette-background-paper)", 
+                                        sx={{
+                                            bgcolor: "var(--palette-background-paper)",
                                             borderRadius: "var(--shape-borderRadius)",
                                             '& .MuiInputBase-root': { height: '56px' }
                                         }}
                                     >
-                                        <MenuItem value="all" onClick={handleSelectAll}>
-                                            <Checkbox 
-                                                checked={selectedStaffIds.length === (accounts?.length || 0) && (accounts?.length || 0) > 0} 
+                                        <MenuItem value="all">
+                                            <Checkbox
+                                                checked={selectedStaffIds.length === (accounts?.length || 0) && (accounts?.length || 0) > 0}
                                                 indeterminate={selectedStaffIds.length > 0 && selectedStaffIds.length < (accounts?.length || 0)}
                                             />
                                             <ListItemText primary="Chọn tất cả nhân viên" sx={{ '& .MuiTypography-root': { fontWeight: 700 } }} />
@@ -188,7 +201,7 @@ export const BulkDeleteDialog: React.FC<BulkDeleteDialogProps> = ({ open, onClos
                             />
 
                             <Grid container spacing={2}>
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <Controller
                                         name="startDate"
                                         control={control}
@@ -210,7 +223,7 @@ export const BulkDeleteDialog: React.FC<BulkDeleteDialogProps> = ({ open, onClos
                                     />
                                 </Grid>
 
-                                <Grid item xs={12} sm={6}>
+                                <Grid size={{ xs: 12, sm: 6 }}>
                                     <Controller
                                         name="endDate"
                                         control={control}
@@ -274,3 +287,4 @@ export const BulkDeleteDialog: React.FC<BulkDeleteDialogProps> = ({ open, onClos
         </Dialog>
     );
 };
+

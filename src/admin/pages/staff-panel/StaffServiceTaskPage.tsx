@@ -200,6 +200,12 @@ export const StaffServiceTaskPage = () => {
                                 <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ md: 'center' }}>
                                     {/* Giờ & Mã */}
                                     <Box sx={{ minWidth: '150px' }}>
+                                        {task.originalStart && dayjs(task.originalStart).format("HH:mm") !== dayjs(task.start).format("HH:mm") && (
+                                            <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 700, textDecoration: 'line-through', display: 'flex', alignItems: 'center', mb: -0.5, gap: 0.5 }}>
+                                                <Icon icon="solar:clock-circle-bold" width={12} />
+                                                Gốc: {dayjs(task.originalStart).format("HH:mm")}
+                                            </Typography>
+                                        )}
                                         <Typography variant="h5" sx={{ fontWeight: 800, color: 'var(--palette-primary-main)' }}>
                                             {dayjs(task.start).format("HH:mm")}
                                         </Typography>

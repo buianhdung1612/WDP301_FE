@@ -23,6 +23,12 @@ import {
     useMarkAllAsRead,
     useArchiveAllNotifications,
 } from "../../hooks/useNotification";
+import { useStaffTasks, useUpdateBookingStatus } from "../../pages/booking/hooks/useBookingManagement";
+import { confirmAction } from "../../utils/swal";
+import { useAuthStore } from "../../../stores/useAuthStore";
+import { prefixAdmin } from "../../constants/routes";
+import { toast } from "react-toastify";
+import { Card, Avatar } from "@mui/material"; // Removed duplicate Tooltip here
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import 'dayjs/locale/vi';
@@ -35,6 +41,22 @@ export const NotificationPopover = () => {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [tab, setTab] = useState("all");
+    const { user } = useAuthStore();
+
+    // Fetch in-progress tasks
+    const { data: staffTasksRes, refetch: refetchTasks } = useStaffTasks({
+        status: "in-progress",
+        noLimit: true
+    });
+    const { mutate: updateStatus } = useUpdateBookingStatus();
+
+    const inProgressTasks = (staffTasksRes?.data || []).map((task: any) => {
+        // Find which pet the current staff is assigned to in this booking
+        const assignedPetMapping = task.petStaffMap?.find((m: any) =>
+            (m.staffId === user?.id || m.staffId?._id === user?.id) && m.status === 'in-progress'
+        );
+        return assignedPetMapping ? { ...task, activePetMapping: assignedPetMapping } : null;
+    }).filter(Boolean);
 
     const { data: res } = useNotifications();
     const { mutate: markAsRead } = useMarkAsRead();
@@ -63,6 +85,18 @@ export const NotificationPopover = () => {
             navigate(item.link);
             handleClose();
         }
+    };
+
+    const handleCompleteTask = (id: string, petId: string) => {
+        confirmAction("Hoàn thành dịch vụ?", "Xác nhận bạn đã hoàn thành dịch vụ cho bé này.", () => {
+            updateStatus({ id, status: "completed", petId }, {
+                onSuccess: () => {
+                    toast.success("Đã hoàn thành dịch vụ!");
+                    refetchTasks();
+                },
+                onError: (err: any) => toast.error(err.response?.data?.message || "Lỗi khi cập nhật")
+            });
+        }, "success");
     };
 
     return (
@@ -155,6 +189,67 @@ export const NotificationPopover = () => {
                         </Tooltip>
                     </Stack>
                 </Box>
+
+                {/* IN-PROGRESS TASKS SECTION */}
+                {inProgressTasks.length > 0 && (
+                    <Box sx={{ p: 2, bgcolor: 'var(--palette-warning-lighter)', borderBottom: '1px solid var(--palette-divider)' }}>
+                        <Typography variant="overline" sx={{ color: 'var(--palette-warning-darker)', fontWeight: 800, mb: 1.5, display: 'block', fontSize: '10px' }}>
+                            🚀 CÔNG VIỆC HIỆN TẠI ({inProgressTasks.length})
+                        </Typography>
+                        <Stack spacing={1}>
+                            {inProgressTasks.map((task: any) => (
+                                <Card key={task._id} variant="outlined" sx={{ p: 1.5, borderRadius: '12px', bgcolor: 'background.paper', border: '1px solid var(--palette-warning-light)', boxShadow: 'var(--customShadows-z1)' }}>
+                                    <Stack direction="row" spacing={1.5} alignItems="center">
+                                        <Badge
+                                            overlap="circular"
+                                            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                                            badgeContent={<Icon icon="solar:play-bold" width={8} style={{ color: 'white' }} />}
+                                            sx={{ '& .MuiBadge-badge': { bgcolor: 'var(--palette-warning-main)', width: 14, height: 14, minWidth: 14, border: '2px solid white' } }}
+                                        >
+                                            <Avatar src={task.activePetMapping.petId?.avatar} sx={{ width: 40, height: 40 }} />
+                                        </Badge>
+                                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                                            <Typography variant="subtitle2" noWrap sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                                                {task.activePetMapping.petId?.name} — {task.serviceId?.name}
+                                            </Typography>
+                                            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+                                                #{task.code}
+                                            </Typography>
+                                        </Box>
+                                        <Stack direction="row" spacing={0.5}>
+                                            <Tooltip title="Hoàn thành">
+                                                <IconButton
+                                                    size="small"
+                                                    sx={{
+                                                        bgcolor: 'var(--palette-success-lighter)',
+                                                        color: 'var(--palette-success-dark)',
+                                                        '&:hover': { bgcolor: 'var(--palette-success-light)' }
+                                                    }}
+                                                    onClick={(e) => { e.stopPropagation(); handleCompleteTask(task._id, task.activePetMapping.petId?._id); }}
+                                                >
+                                                    <Icon icon="solar:check-circle-bold" width={18} />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Xem">
+                                                <IconButton
+                                                    size="small"
+                                                    sx={{
+                                                        bgcolor: 'var(--palette-info-lighter)',
+                                                        color: 'var(--palette-info-dark)',
+                                                        '&:hover': { bgcolor: 'var(--palette-info-light)' }
+                                                    }}
+                                                    onClick={(e) => { e.stopPropagation(); navigate(`/${prefixAdmin}/booking/detail/${task._id}`); handleClose(); }}
+                                                >
+                                                    <Icon icon="solar:eye-bold" width={18} />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Stack>
+                                    </Stack>
+                                </Card>
+                            ))}
+                        </Stack>
+                    </Box>
+                )}
 
                 <Tabs
                     value={tab}

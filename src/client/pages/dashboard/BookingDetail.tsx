@@ -350,7 +350,14 @@ export const BookingDetailPage = () => {
                                             </div>
                                         </td>
                                         <td className="p-[20px] text-center text-[15px] font-[500]">{dayjs(booking.start).format("DD/MM/YYYY")}</td>
-                                        <td className="p-[20px] text-center text-[15px] font-[500] text-client-primary">{dayjs(booking.start).format("HH:mm")}</td>
+                                        <td className="p-[20px] text-center text-[14px]">
+                                            {booking.originalStart && dayjs(booking.originalStart).format("HH:mm") !== dayjs(booking.start).format("HH:mm") && (
+                                                <span className="text-[11px] text-red-500 line-through opacity-50 mr-2">
+                                                    {dayjs(booking.originalStart).format("HH:mm")}
+                                                </span>
+                                            )}
+                                            <span className="font-[600] text-client-primary">{dayjs(booking.start).format("HH:mm")}</span>
+                                        </td>
                                         <td className="p-[20px] text-right font-[700] text-[18px] text-client-primary">
                                             {formatCurrency(booking.total || 0)}
                                         </td>

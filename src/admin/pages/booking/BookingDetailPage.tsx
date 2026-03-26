@@ -794,6 +794,11 @@ export const BookingDetailPage = () => {
                                             <Box>
                                                 <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', display: 'block' }}>Thời gian thực hiện dự kiến</Typography>
                                                 <Typography variant="body2" sx={{ fontWeight: 600, color: booking.isOverrun ? 'error.main' : 'var(--palette-text-primary)' }}>
+                                                    {booking.originalStart && dayjs(booking.originalStart).format("HH:mm") !== dayjs(booking.start).format("HH:mm") && (
+                                                        <Box component="span" sx={{ color: 'text.disabled', textDecoration: 'line-through', mr: 1, fontSize: '0.75rem' }}>
+                                                            {dayjs(booking.originalStart).format("HH:mm")}
+                                                        </Box>
+                                                    )}
                                                     {dayjs(booking.start).format("HH:mm")} - {dayjs(booking.end).format("HH:mm")}
                                                 </Typography>
                                                 {booking.isOverrun && (

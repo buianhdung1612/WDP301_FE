@@ -45,7 +45,7 @@ export const BoardingPaymentSuccessPage = () => {
 
         <h1 className="text-[30px] font-secondary text-client-secondary">
           {isLoading && bookingId
-            ? "Dang xac nhan thanh toan..."
+            ? "Đang xác nhận thanh toán..."
             : paid || partial || !bookingId || isCodFlow
               ? partial
                 ? "Bạn đã đặt cọc thành công"
@@ -67,7 +67,17 @@ export const BoardingPaymentSuccessPage = () => {
 
         {!!bookingId && (
           <p className="text-[12px] text-[#6b7280] mt-[8px]">
-            Trạng thái hiện tại: {isCodFlow ? "thanh toán tại quầy" : (paymentStatus || (failed ? "failed" : "pending"))} / {data?.booking?.boardingStatus || "-"}
+            Trạng thái hiện tại: {isCodFlow ? "Thanh toán tại quầy" : (
+              paymentStatus === "paid" ? "Đã thanh toán" :
+                paymentStatus === "partial" ? "Đã đặt cọc" :
+                  failed ? "Thất bại" : "Đang xử lý"
+            )} / {
+              data?.booking?.boardingStatus === "pending" ? "Đang chờ" :
+                data?.booking?.boardingStatus === "confirmed" ? "Đã xác nhận" :
+                  data?.booking?.boardingStatus === "active" ? "Đang lưu trú" :
+                    data?.booking?.boardingStatus === "completed" ? "Đã hoàn thành" :
+                      data?.booking?.boardingStatus === "cancelled" ? "Đã hủy" : (data?.booking?.boardingStatus || "-")
+            }
           </p>
         )}
 

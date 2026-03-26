@@ -5,8 +5,10 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
 import { Autoplay } from "swiper/modules";
 import { SocialIconCircle } from "../ui/SocialIconsCircle";
+import { useSettingGeneral } from "../../hooks/useSettings";
 
 export const FooterSub = () => {
+    const { data: general } = useSettingGeneral();
     return (
         <footer className="w-full p-[20px]">
             <div className="bg-[#FFF0F0] rounded-[20px]">
@@ -59,18 +61,21 @@ export const FooterSub = () => {
                 <div className="app-container pb-[30px] flex gap-[20px] border-b border-[#1029371A]">
                     <div className="w-[48%] pr-[60px] border-r border-[#1029371A]">
                         <Link to="/">
-                            <img src="https://i.imgur.com/e0kYVCi.png" alt="" className="w-[250px] object-cover z-10" />
+                            <img src={general?.logo || "https://i.imgur.com/e0kYVCi.png"} alt={general?.websiteName || ""} className="w-[250px] object-cover z-10" />
                         </Link>
-                        <p className="my-[40px] text-client-text">Bởi những điều đáng quý khiến người ta phải đau khổ, nó mang đến niềm vui được lựa chọn; không vì hư vô, mà vì một thứ gì đó cụ thể. Nó là sự chấp nhận một điều dễ dàng và đáng tôn trọng là niềm vui sướng.</p>
+                        <p className="my-[40px] text-client-text">
+                            {general?.websiteName ? `Khám phá thế giới tuyệt vời của thú cưng tại ${general.websiteName}! Chúng tôi cam kết mang đến những sản phẩm chất lượng cao, từ thức ăn dinh dưỡng đến đồ chơi an toàn, giúp những người bạn bốn chân của bạn luôn khỏe mạnh và vui vẻ.` : 'Đang tải thông tin...'}
+                        </p>
                         <div className="flex items-center gap-[20px]">
                             <div className="font-secondary text-client-primary text-[40px]">Tải ứng dụng: </div>
                             <div className="flex items-center">
-                                <Link to={"#"} className="m-[5px]">
-                                    <img src="https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/apple-store.png" alt="Teddy Pet" />
+                                <Link to={"#"} className="m-[5px] hover:scale-105 transition-transform duration-300">
+                                    <img src="https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/play-store.png" alt="Play Store" />
                                 </Link>
-                                <Link to={"#"} className="m-[5px]">
-                                    <img src="https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/play-store.png" alt="Teddy Pet" />
-                                </Link>
+                            </div>
+                            <div className="flex flex-col items-start leading-[1.2]">
+                                <span className="text-[10px] uppercase font-[700] tracking-wider text-[#79808a]">Tải trên</span>
+                                <span className="text-[15px] font-[800] text-client-secondary">CH Play</span>
                             </div>
                         </div>
                     </div>
@@ -80,15 +85,15 @@ export const FooterSub = () => {
                             <ul className="flex flex-wrap gap-y-[15px] gap-x-[30px] mb-[20px]">
                                 <li className="flex items-center">
                                     <LocationOnIcon className="text-client-primary" style={{ fontSize: "20px" }} />
-                                    <span className="pl-[8px] text-client-text">No: 58 A, East Madison Street, Baltimore, MD, USA 4508</span>
+                                    <span className="pl-[8px] text-client-text">{general?.address || 'Đang tải...'}</span>
                                 </li>
                                 <li className="flex items-center">
                                     <PhoneIcon className="text-client-primary" style={{ fontSize: "20px" }} />
-                                    <span className="pl-[8px] text-client-text hover:text-client-primary transition-default cursor-pointer">+1234 567 890</span>
+                                    <span className="pl-[8px] text-client-text hover:text-client-primary transition-default cursor-pointer">{general?.phone || 'Đang tải...'}</span>
                                 </li>
                                 <li className="flex items-center">
                                     <EmailIcon className="text-client-primary" style={{ fontSize: "20px" }} />
-                                    <span className="pl-[8px] text-client-text hover:text-client-primary transition-default cursor-pointer">teddypet@gmail.com</span>
+                                    <span className="pl-[8px] text-client-text hover:text-client-primary transition-default cursor-pointer">{general?.email || 'Đang tải...'}</span>
                                 </li>
                             </ul>
                             <SocialIconCircle />
@@ -125,7 +130,9 @@ export const FooterSub = () => {
                     </div>
                 </div>
                 <div className="app-container py-[30px] flex items-center justify-between">
-                    <div className="text-client-text">© <span className="text-client-secondary hover:text-client-primary transition-default cursor-pointer">Designthemes</span> all rights Reserved</div>
+                    <div className="text-client-text">
+                        {general?.copyright || `© ${new Date().getFullYear()} ${general?.websiteName || 'TeddyPet'}. All rights Reserved.`}
+                    </div>
                     <div className="flex items-center text-client-text">
                         <Link to={"/policy/terms"} className="hover:text-client-primary transition-default cursor-pointer">Điều khoản Sử dụng</Link>
                         <span className="mx-[10px]">|</span>

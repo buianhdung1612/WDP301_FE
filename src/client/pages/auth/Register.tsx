@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { register as registerApi } from "../../api/auth.api";
 import { toast } from "react-toastify";
-import { Header } from "../../components/layouts/Header";
 import { ArrowRight } from "iconoir-react";
 
 
@@ -73,7 +72,6 @@ export const RegisterPage = () => {
 
     return (
         <>
-            <Header />
             <div className="app-container my-[100px]">
                 <div className="flex items-center justify-center mx-auto max-w-[1200px]">
                     <div className="w-[570px] h-[850px] relative z-10">

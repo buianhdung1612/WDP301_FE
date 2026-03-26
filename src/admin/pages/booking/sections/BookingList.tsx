@@ -373,7 +373,12 @@ export const BookingList = () => {
                                             </TableCell>
 
                                             <TableCell sx={{ borderBottom: '1px dashed var(--palette-background-neutral)' }}>
-                                                <Stack spacing={0.25}>
+                                                <Stack spacing={0}>
+                                                    {row.originalStart && dayjs(row.originalStart).format("HH:mm") !== dayjs(row.start).format("HH:mm") && (
+                                                        <Typography sx={{ color: 'var(--palette-error-main)', fontSize: '10px', textDecoration: 'line-through', fontWeight: 800, opacity: 0.9 }}>
+                                                            Gốc: {dayjs(row.originalStart).format("HH:mm")}
+                                                        </Typography>
+                                                    )}
                                                     <Typography sx={{ fontWeight: 400, fontSize: '0.875rem', color: 'var(--palette-text-primary)' }}>
                                                         {dayjs(row.start).format("DD MMM YYYY")}
                                                     </Typography>

@@ -231,6 +231,11 @@ export const BookingHistoryPage = () => {
                                                     {booking.serviceId?.name || "N/A"}
                                                 </td>
                                                 <td className="p-[20px] text-[15px] text-[#7d7b7b]">
+                                                    {booking.originalStart && dayjs(booking.originalStart).format("HH:mm") !== dayjs(booking.start).format("HH:mm") && (
+                                                        <div className="text-[11px] text-red-500 line-through opacity-60">
+                                                            {dayjs(booking.originalStart).format("HH:mm")}
+                                                        </div>
+                                                    )}
                                                     <div className="font-[500]">{dayjs(booking.start).format("DD/MM/YYYY")}</div>
                                                     <div className="text-[13px]">{dayjs(booking.start).format("HH:mm")}</div>
                                                 </td>

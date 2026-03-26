@@ -55,7 +55,6 @@ export const SettingGeneralPage = () => {
             defaultPassword: "password123",
             facebook: "",
             instagram: "",
-            youtube: "",
             serviceColors: [],
             breeds: [],
             privacyPolicy: "",
@@ -426,19 +425,6 @@ export const SettingGeneralPage = () => {
                                             <TextField
                                                 {...field}
                                                 label="Instagram URL"
-                                                fullWidth
-                                                error={!!fieldState.error}
-                                                helperText={fieldState.error?.message}
-                                            />
-                                        )}
-                                    />
-                                    <Controller
-                                        name="youtube"
-                                        control={control}
-                                        render={({ field, fieldState }) => (
-                                            <TextField
-                                                {...field}
-                                                label="Youtube URL"
                                                 fullWidth
                                                 error={!!fieldState.error}
                                                 helperText={fieldState.error?.message}

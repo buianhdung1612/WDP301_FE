@@ -1,12 +1,15 @@
 import { Facebook, Instagram, MailSolid } from "iconoir-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom"
+import { Link } from "react-router-dom";
+import { useSettingGeneral } from "../../hooks/useSettings";
 import { SocialIcon } from "../ui/SocialIcon";
 
 export const TopBar = () => {
+    const { data: general } = useSettingGeneral();
+
     const socialItems = [
-        { icon: Facebook, to: "/" },
-        { icon: Instagram, to: "/" },
+        { icon: Facebook, to: general?.facebook || "#" },
+        { icon: Instagram, to: general?.instagram || "#" },
     ];
 
     const texts = [
@@ -63,9 +66,9 @@ export const TopBar = () => {
                         </div>
 
                     </div>
-                    <Link to={"/"} className="flex items-center text-white hover:text-[#FFFFFFBF] transition-[color] duration-300">
+                    <Link to={"/contact"} className="flex items-center text-white hover:text-[#FFFFFFBF] transition-[color] duration-300">
                         <MailSolid className="w-[17px] h-[17px] mr-[10px] text-white" />
-                        <span>teddypet@gmail.com</span>
+                        <span>{general?.email || "loading..."}</span>
                     </Link>
                 </div>
             </div>

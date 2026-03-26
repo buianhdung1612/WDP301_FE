@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { login as loginApi } from "../../api/auth.api";
-import { Header } from "../../components/layouts/Header";
 import { FooterSub } from "../../components/layouts/FooterSub";
 import { ArrowRight } from "iconoir-react";
 
@@ -59,8 +58,6 @@ export const LoginPage = () => {
 
     return (
         <>
-            <Header />
-
             <div className="app-container my-[100px]">
                 <div className="flex items-center justify-center mx-auto max-w-[1200px]">
                     <div className="w-[570px] h-[680px] relative z-10">

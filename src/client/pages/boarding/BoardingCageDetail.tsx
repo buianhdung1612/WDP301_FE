@@ -28,15 +28,15 @@ const STATUS_META: Record<string, { label: string; className: string }> = {
 };
 
 const FALLBACK_GALLERY = [
-  "https://source.unsplash.com/1600x1000/?dog-kennel",
-  "https://source.unsplash.com/1600x1000/?pet-hotel-cage",
-  "https://source.unsplash.com/1600x1000/?cat-room,pet",
-  "https://source.unsplash.com/1600x1000/?pet-boarding",
-  "https://source.unsplash.com/1600x1000/?dog-cat-hotel",
+  "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=1200",
+  "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=1200",
+  "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?auto=format&fit=crop&q=80&w=1200",
+  "https://images.unsplash.com/photo-1591768793355-74d04bb6608f?auto=format&fit=crop&q=80&w=1200",
+  "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&q=80&w=1200",
 ];
 
 const PLACEHOLDER_IMAGE =
-  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='700'><rect width='100%' height='100%' fill='%23f3f4f6'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%236b7280' font-size='28'>Khong co hinh chuong</text></svg>";
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='700'><rect width='100%' height='100%' fill='%23f3f4f6'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%236b7280' font-size='28' font-family='sans-serif'>Không có hình ảnh</text></svg>";
 
 const WEEK_DAYS = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 const ROOM_CAPACITY_DEFAULT = 4;
@@ -269,8 +269,13 @@ export const BoardingCageDetailPage = () => {
   }, [availableCages, cage]);
 
   useEffect(() => {
-    if (!selectedImage && galleryImages.length > 0) setSelectedImage(galleryImages[0]);
-  }, [galleryImages, selectedImage]);
+    if (galleryImages.length > 0) {
+      const isMissingOrBroken = !selectedImage || !galleryImages.includes(selectedImage) || brokenImages.includes(selectedImage);
+      if (isMissingOrBroken) {
+        setSelectedImage(galleryImages[0]);
+      }
+    }
+  }, [galleryImages, selectedImage, brokenImages]);
 
   useEffect(() => {
     const maxRooms = Math.max(1, Math.min(ROOM_CAPACITY_DEFAULT, Number(quantity) || 1));
@@ -418,9 +423,9 @@ export const BoardingCageDetailPage = () => {
           <div className="flex flex-wrap items-center gap-[8px] text-[13px] text-[#7d8794]">
             <Link to="/" className="hover:text-client-secondary transition-default">Trang chủ</Link>
             <span className="text-[#a1a9b4] mx-1">/</span>
-            <Link to="/hotels" className="hover:text-client-secondary transition-default">Danh sách phòng</Link>
+            <Link to="/hotels" className="hover:text-client-secondary transition-default">Khách sạn</Link>
             <span className="text-[#a1a9b4] mx-1">/</span>
-            <span className="font-[700] text-client-secondary">{(cage as any).cageCode || "Chuồng"} - {String((cage as any).type || "standard").toUpperCase()}</span>
+            <span className="font-[700] text-client-secondary">{(cage as any).cageCode || "Chuồng"} - {String((cage as any).type || "STANDARD").toUpperCase()}</span>
           </div>
 
           <div className="mt-[18px] grid grid-cols-[minmax(0,1.3fr)_380px] gap-[24px] xl:grid-cols-1">
@@ -488,7 +493,7 @@ export const BoardingCageDetailPage = () => {
 
               <section className="rounded-[28px] border border-[#eadfd4] bg-white px-[24px] py-[24px] shadow-[0_24px_48px_rgba(36,24,14,0.05)]">
                 <div className="flex items-end justify-between gap-[16px] md:flex-col md:items-start">
-                  <div><p className="text-[13px] font-[800] uppercase tracking-[0.24em] text-client-primary/80">Availability</p><h2 className="mt-[8px] text-[36px] font-[800] leading-[1.08] tracking-[-0.03em] text-client-secondary md:text-[30px]">Lịch trống</h2></div>
+                  <div><p className="text-[13px] font-[800] uppercase tracking-[0.24em] text-client-primary/80">Khả dụng</p><h2 className="mt-[8px] text-[36px] font-[800] leading-[1.08] tracking-[-0.03em] text-client-secondary md:text-[30px]">Lịch trống</h2></div>
                   <p className="max-w-[420px] text-[14px] leading-[1.7] text-[#6b7582]">Bạn có thể chọn trực tiếp ngày nhận và trả phòng trên lịch bên dưới. Phần này được giữ lại để tiện kiểm tra tình trạng trống.</p>
                 </div>
                 <div className="mt-[18px] overflow-hidden rounded-[24px] border border-[#ebe2d8] bg-white">

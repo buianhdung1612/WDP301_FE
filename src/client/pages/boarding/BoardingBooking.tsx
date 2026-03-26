@@ -1,16 +1,11 @@
 ﻿import { useMemo, useState } from "react";
 import dayjs from "dayjs";
-import { toast } from "react-toastify";
-import { BedDouble, CalendarDays, Check, MapPin, PawPrint, Search, Sparkles } from "lucide-react";
+import { BedDouble, CalendarDays, MapPin, Search } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuthStore } from "../../../stores/useAuthStore";
 import { FooterSub } from "../../components/layouts/FooterSub";
-import { useMyPets } from "../../hooks/usePet";
 import { ProductBanner } from "../product/sections/ProductBanner";
 import {
   useAvailableCages,
-  useCreateBoardingBooking,
-  usePayBoardingBooking,
 } from "../../hooks/useBoarding";
 
 const ROOM_CAPACITY_DEFAULT = 4;
@@ -40,28 +35,9 @@ const breadcrumbs = [
 ];
 
 export const BoardingBookingPage = () => {
-  const { user } = useAuthStore();
-  const { data: myPets = [], isLoading: isLoadingPets } = useMyPets(!!user);
-  const { mutateAsync: createBoarding } = useCreateBoardingBooking();
-  const { mutateAsync: payBoarding } = usePayBoardingBooking();
-
-  const [selectedPetIds, setSelectedPetIds] = useState<string[]>([]);
-  const [petCageMap, setPetCageMap] = useState<Record<string, string>>({});
-
   const [checkInDate, setCheckInDate] = useState(dayjs().format("YYYY-MM-DD"));
   const [checkOutDate, setCheckOutDate] = useState(dayjs().add(1, "day").format("YYYY-MM-DD"));
   const [size, setSize] = useState<string>("");
-
-  const [fullName, setFullName] = useState(user?.fullName || "");
-  const [phone, setPhone] = useState(user?.phone || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [notes, setNotes] = useState("");
-  const [specialCare, setSpecialCare] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"prepaid" | "pay_at_site">("pay_at_site");
-  const [paymentGateway, setPaymentGateway] = useState<"zalopay" | "vnpay">("zalopay");
-  const [pendingPaymentLinks, setPendingPaymentLinks] = useState<
-    { bookingId: string; petName: string; paymentUrl: string }[]
-  >([]);
 
   const { data: cages = [], isLoading: isLoadingCages } = useAvailableCages(
     checkInDate,
@@ -70,62 +46,6 @@ export const BoardingBookingPage = () => {
     size || undefined
   );
   const cagesSafe = useMemo(() => (Array.isArray(cages) ? cages : []), [cages]);
-
-  const totalDays = useMemo(() => {
-    const start = dayjs(checkInDate);
-    const end = dayjs(checkOutDate);
-    const diff = end.diff(start, "day");
-    return diff > 0 ? diff : 0;
-  }, [checkInDate, checkOutDate]);
-
-  const cageMapById = useMemo(() => {
-    const map: Record<string, any> = {};
-    cagesSafe.forEach((c: any) => {
-      map[c._id] = c;
-    });
-    return map;
-  }, [cagesSafe]);
-
-  const selectedPets = useMemo(() => {
-    return myPets.filter((pet: any) => selectedPetIds.includes(pet._id));
-  }, [myPets, selectedPetIds]);
-
-  const totalPrice = useMemo(() => {
-    if (!totalDays) return 0;
-    return selectedPetIds.reduce((sum, petId) => {
-      const cageId = petCageMap[petId];
-      const cage = cageMapById[cageId];
-      return sum + (cage?.dailyPrice || 0) * totalDays;
-    }, 0);
-  }, [selectedPetIds, petCageMap, cageMapById, totalDays]);
-
-  const togglePet = (petId: string) => {
-    setSelectedPetIds((prev) => {
-      const exists = prev.includes(petId);
-      if (exists) {
-        setPetCageMap((old) => {
-          const next = { ...old };
-          delete next[petId];
-          return next;
-        });
-        return prev.filter((id) => id !== petId);
-      }
-      return [...prev, petId];
-    });
-  };
-
-  const setPetCage = (petId: string, cageId: string) => {
-    setPetCageMap((prev) => ({ ...prev, [petId]: cageId }));
-  };
-
-  const setQuickPickCage = (cageId: string) => {
-    if (!selectedPetIds.length) {
-      toast.info("Hãy chọn thú cưng ở phần Đặt phòng nhanh để gán chuồng.");
-      return;
-    }
-    setPetCage(selectedPetIds[0], cageId);
-    toast.success("Đã gán chuồng cho thú cưng đầu tiên trong danh sách chọn.");
-  };
 
   const clearFilters = () => {
     setSize("");
@@ -184,7 +104,7 @@ export const BoardingBookingPage = () => {
               className="rounded-[10px] border border-[#f0e4d8] bg-[#f9f5f0] text-client-secondary hover:bg-client-primary hover:border-client-primary hover:text-white transition-default text-[14px] font-[800] flex items-center justify-center gap-[8px]"
             >
               <Search className="w-4 h-4" />
-              Search Now
+              Tìm ngay
             </button>
           </div>
         </div>
@@ -192,20 +112,20 @@ export const BoardingBookingPage = () => {
         <div className="app-container mt-[28px]">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-[8px] mb-[16px] border-b border-[#eadfd4] pb-[10px]">
             <div className="text-[32px] font-secondary text-client-secondary leading-[1.1]">
-              {cagesSafe.length} Rooms found
+              {cagesSafe.length} phòng được tìm thấy
             </div>
             <button
               type="button"
               onClick={clearFilters}
               className="text-[14px] font-[700] text-client-primary hover:text-client-secondary"
             >
-              Clear Filter
+              Xóa bộ lọc
             </button>
           </div>
 
           {isLoadingCages && <div className="text-[13px] text-[#637381] py-[18px]">Đang tải...</div>}
-          {!isLoadingCages && cagesSafe.length === 0 && (
-            <div className="text-[13px] text-[#637381] py-[18px]">Không có phòng trống phù hợp.</div>
+          {cagesSafe.length === 0 && !isLoadingCages && (
+            <div className="text-center py-[100px] text-[#818181]">Không có phòng nào trống trong thời gian này.</div>
           )}
 
           <div className="grid grid-cols-3 xl:grid-cols-2 lg:grid-cols-1 gap-[26px]">
@@ -237,7 +157,7 @@ export const BoardingBookingPage = () => {
                     <span className="inline-flex items-center gap-[5px]">
                       <MapPin className="w-3.5 h-3.5 text-client-primary" />
                       {c.soldOut
-                        ? "Sold Out"
+                        ? "Đã hết phòng"
                         : `Còn ${Math.max(0, Number(c.remainingRooms ?? ROOM_CAPACITY_DEFAULT))}/${Math.max(1, Number(c.totalRooms ?? ROOM_CAPACITY_DEFAULT))} phòng`}
                     </span>
                   </div>
@@ -247,21 +167,21 @@ export const BoardingBookingPage = () => {
                   </p>
 
                   <div className="mt-[12px] flex items-end justify-between">
-                    <div className="text-[15px] text-[#5f6570]">From <span className="text-[30px] font-[800] text-client-primary">{Number(c.dailyPrice || 0).toLocaleString()}đ</span> / đêm</div>
+                    <div className="text-[15px] text-[#5f6570]">Từ <span className="text-[30px] font-[800] text-client-primary">{Number(c.dailyPrice || 0).toLocaleString()}đ</span> / đêm</div>
 
                   </div>
                 </div>
 
                 {c.soldOut ? (
                   <div className="block text-center border-t border-[#f0e4d8] bg-[#f6d8de] text-[#9f1239] py-[13px] text-[18px] font-secondary cursor-not-allowed">
-                    Sold Out
+                    Đã hết phòng
                   </div>
                 ) : (
                   <Link
                     to={`/hotels/${c._id}`}
                     className="block text-center border-t border-[#f0e4d8] bg-[#f9f5f0] hover:bg-client-primary hover:text-white transition-default py-[13px] text-[18px] font-secondary text-client-secondary"
                   >
-                    Book Now
+                    Đặt ngay
                   </Link>
                 )}
               </article>

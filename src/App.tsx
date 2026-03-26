@@ -5,7 +5,6 @@ import { LayoutAdmin } from './admin/layouts/LayoutAdmin';
 import { ClientRoutes } from './client/routes/index';
 import { AdminRoutes, AdminAuthRoutes } from './admin/routes/index';
 import { useScrollToTop } from './client/hooks/useScrollToTop';
-import { LoginPage } from './client/pages/auth/Login';
 import { ToastContainer } from 'react-toastify';
 
 const ScrollToTopWrapper = ({ children }: { children: React.ReactNode }) => {
@@ -28,7 +27,6 @@ function App() {
               </Route>
             ))}
           </Route>
-          <Route path="/auth/login" element={<LoginPage />} />
 
           {/* Admin Routes */}
           <Route path='/admin'>
@@ -42,7 +40,7 @@ function App() {
             </Route>
           </Route>
         </Routes>
-           <ToastContainer
+        <ToastContainer
           position="top-right"
           autoClose={3000}
           hideProgressBar={false}
