@@ -55,8 +55,11 @@ const isBookingEligibleForPetCages = (booking: any) => {
   const paymentMethod = String(booking?.paymentMethod || "").toLowerCase();
   const paymentStatus = normalizeStatus(booking?.paymentStatus || "unpaid");
 
-  const allowedStatuses = new Set(["confirmed", "checked-in", "checked-out"]);
-  if (!allowedStatuses.has(status)) return false;
+  // Only show confirmed (upcoming) and currently checked-in stays
+  // Hide checked-out immediately to keep dashboard relevant
+  if (status !== "confirmed" && status !== "checked-in") {
+    return false;
+  }
 
   if (paymentMethod === "prepaid") return paymentStatus === "paid";
   return true;

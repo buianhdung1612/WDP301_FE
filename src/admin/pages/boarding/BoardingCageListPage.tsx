@@ -40,6 +40,7 @@ const trangThaiChuongOptions = [
     { value: "available", label: "Sẵn sàng" },
     { value: "occupied", label: "Đang sử dụng" },
     { value: "maintenance", label: "Bảo trì" },
+    { value: "under-cleaning", label: "Đang dọn dẹp" },
 ];
 
 const TabBadge = styled("span")(() => ({
@@ -61,6 +62,7 @@ const getCageStatusMeta = (status?: string) => {
         available: { label: "Sẵn sàng", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
         occupied: { label: "Đang sử dụng", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)" },
         maintenance: { label: "Bảo trì", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
+        "under-cleaning": { label: "Đang dọn dẹp", color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)" },
     };
     return map[String(status || "")] || { label: status || "-", color: "var(--palette-text-disabled)", bg: "var(--palette-background-neutral)" };
 };
@@ -179,6 +181,7 @@ export const BoardingCageListPage = () => {
             available: tabStatus === "available" ? total : 0,
             occupied: tabStatus === "occupied" ? total : 0,
             maintenance: tabStatus === "maintenance" ? total : 0,
+            "under-cleaning": tabStatus === "under-cleaning" ? total : 0,
         };
     }, [pagination.totalRecords, tabStatus]);
 
@@ -364,6 +367,7 @@ export const BoardingCageListPage = () => {
                         { value: "available", label: "Sẵn sàng", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)", activeColor: "var(--palette-success-contrastText)", activeBg: "var(--palette-success-main)" },
                         { value: "occupied", label: "Đang sử dụng", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)", activeColor: "var(--palette-warning-contrastText)", activeBg: "var(--palette-warning-main)" },
                         { value: "maintenance", label: "Bảo trì", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)", activeColor: "var(--palette-error-contrastText)", activeBg: "var(--palette-error-main)" },
+                        { value: "under-cleaning", label: "Đang dọn dẹp", color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)", activeColor: "var(--palette-info-contrastText)", activeBg: "var(--palette-info-main)" },
                     ].map((tab) => (
                         <Tab
                             key={tab.value}
@@ -541,6 +545,19 @@ export const BoardingCageListPage = () => {
                                                             <Icon icon="solar:pen-bold" width={18} style={{ marginRight: 8 }} />
                                                             Sửa
                                                         </MenuItem>
+
+                                                        {row.status === "under-cleaning" && (
+                                                            <MenuItem
+                                                                onClick={() => {
+                                                                    handleCloseMenu(row._id);
+                                                                    updateMut.mutate({ id: row._id, payload: { status: "available" } });
+                                                                }}
+                                                                sx={{ color: "var(--palette-success-main)" }}
+                                                            >
+                                                                <Icon icon="solar:washing-machine-minimalistic-bold" width={18} style={{ marginRight: 8 }} />
+                                                                Hoàn tất dọn dẹp
+                                                            </MenuItem>
+                                                        )}
                                                         <MenuItem
                                                             onClick={() => {
                                                                 handleCloseMenu(row._id);
