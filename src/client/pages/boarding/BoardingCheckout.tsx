@@ -21,7 +21,7 @@ import {
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { FooterSub } from "../../components/layouts/FooterSub";
 import { ProductBanner } from "../product/sections/ProductBanner";
-import { useCreateBoardingBooking, usePayBoardingBooking } from "../../hooks/useBoarding";
+import { useCreateBoardingBooking, usePayBoardingBooking, useBoardingConfig } from "../../hooks/useBoarding";
 import { useMyPets } from "../../hooks/usePet";
 
 type BoardingCheckoutDraft = {
@@ -62,8 +62,6 @@ type PaymentOptionCardProps = {
 
 const DRAFT_STORAGE_KEY = "boarding-checkout-draft";
 const MAX_ROOMS_PER_CAGE = 4;
-const COUNTER_DEPOSIT_MIN_NIGHTS = 2;
-const COUNTER_DEPOSIT_PERCENT = 20;
 
 const breadcrumbs = [
   { label: "Trang chủ", to: "/" },
@@ -140,10 +138,14 @@ export const BoardingCheckoutPage = () => {
     }
   }, [stateDraft]);
 
+  const { data: config } = useBoardingConfig();
   const [draft] = useState<BoardingCheckoutDraft | null>(initialDraft);
   const [paymentMode, setPaymentMode] = useState<"full" | "deposit">(initialDraft?.paymentMode || "full");
   const [paymentGateway, setPaymentGateway] = useState<"zalopay" | "vnpay">(initialDraft?.paymentGateway || "zalopay");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const finalDepositMinDays = config?.minDaysForDeposit ?? 2;
+  const finalDepositPercent = config?.depositPercentage ?? 20;
 
   const safeQuantity = Math.max(1, Math.min(MAX_ROOMS_PER_CAGE, Number(draft?.quantity || 1)));
 
@@ -173,8 +175,8 @@ export const BoardingCheckoutPage = () => {
   const serviceFee = 0;
   const taxFee = 0;
   const grandTotal = subtotal + serviceFee + taxFee;
-  const requiresCounterDeposit = paymentMode === "deposit" && displayNights >= COUNTER_DEPOSIT_MIN_NIGHTS;
-  const depositAmount = requiresCounterDeposit ? Math.round(subtotal * (COUNTER_DEPOSIT_PERCENT / 100)) : 0;
+  const requiresCounterDeposit = paymentMode === "deposit" && displayNights >= finalDepositMinDays;
+  const depositAmount = requiresCounterDeposit ? Math.round(subtotal * (finalDepositPercent / 100)) : 0;
   const toPay = paymentMode === "full" ? grandTotal : depositAmount;
   const remaining = paymentMode === "full" ? 0 : Math.max(grandTotal - toPay, 0);
   const supportPhone = "1900-PETCARE";
@@ -183,7 +185,7 @@ export const BoardingCheckoutPage = () => {
     paymentMode === "full"
       ? "Thanh toán online toàn bộ"
       : requiresCounterDeposit
-        ? `Thanh toán tại quầy + cọc ${COUNTER_DEPOSIT_PERCENT}%`
+        ? `Thanh toán tại quầy + cọc ${finalDepositPercent}%`
         : "Thanh toán tại quầy";
 
   const handleConfirmCheckout = async () => {
@@ -276,8 +278,8 @@ export const BoardingCheckoutPage = () => {
                         Kiểm tra thông tin lưu trú trước khi thanh toán
                       </h1>
                       <p className="mt-[10px] max-w-[720px] text-[16px] leading-[1.75] text-[#6e7784]">
-                        Xác nhận lại chuồng, thú cưng và phương thức thanh toán. Nếu chọn thanh toán tại quầy từ 2 đêm trở lên,
-                        hệ thống sẽ yêu cầu cọc trước 20% để giữ chuồng.
+                        Xác nhận lại chuồng, thú cưng và phương thức thanh toán. Nếu chọn thanh toán tại quầy từ {finalDepositMinDays} đêm trở lên,
+                        hệ thống sẽ yêu cầu cọc trước {finalDepositPercent}% để giữ chuồng.
                       </p>
                     </div>
                     <div className="inline-flex h-[42px] items-center rounded-full border border-[#f4d6c7] bg-[#fff4ee] px-[16px] text-[13px] font-[800] uppercase tracking-[0.18em] text-client-primary">
@@ -406,15 +408,15 @@ export const BoardingCheckoutPage = () => {
                       active={paymentMode === "deposit"}
                       icon={<Store className="h-[26px] w-[26px]" />}
                       title="Thanh toán tại quầy"
-                      description="Thanh toán khi nhận chuồng. Đơn từ 2 đêm trở lên phải cọc 20% trước."
+                      description={`Thanh toán khi nhận chuồng. Đơn từ ${finalDepositMinDays} đêm trở lên phải cọc ${finalDepositPercent}% trước.`}
                       onClick={() => setPaymentMode("deposit")}
                     />
                   </div>
 
                   {requiresCounterDeposit ? (
                     <div className="mt-[16px] rounded-[20px] border border-[#fed7aa] bg-[#fff7ed] px-[18px] py-[14px] text-[14px] leading-[1.7] text-[#9a3412]">
-                      Đơn lưu trú từ {COUNTER_DEPOSIT_MIN_NIGHTS} đêm trở lên chọn thanh toán tại quầy sẽ cần cọc trước{" "}
-                      <span className="font-[800]">{COUNTER_DEPOSIT_PERCENT}%</span>, tương đương{" "}
+                      Đơn lưu trú từ {finalDepositMinDays} đêm trở lên chọn thanh toán tại quầy sẽ cần cọc trước{" "}
+                      <span className="font-[800]">{finalDepositPercent}%</span>, tương đương{" "}
                       <span className="font-[800]">{formatVnd(depositAmount)}</span>. Phần còn lại{" "}
                       <span className="font-[800]">{formatVnd(remaining)}</span> thanh toán khi nhận chuồng.
                     </div>

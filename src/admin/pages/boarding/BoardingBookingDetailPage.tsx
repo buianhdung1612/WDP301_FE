@@ -229,9 +229,14 @@ export const BoardingBookingDetailPage = () => {
                                     <Typography variant="subtitle2" fontWeight={700}>x{booking.numberOfDays}</Typography>
                                 </Stack>
                                 {booking.surcharge > 0 && (
-                                    <Stack direction="row" justifyContent="space-between">
-                                        <Typography variant="body2" color="text.warning">Phụ phí</Typography>
-                                        <Typography variant="subtitle2" fontWeight={700}>{formatCurrency(booking.surcharge)}</Typography>
+                                    <Stack spacing={0.5}>
+                                        <Stack direction="row" justifyContent="space-between">
+                                            <Typography variant="body2" color="warning.main" fontWeight={600}>Phụ phí phát sinh</Typography>
+                                            <Typography variant="subtitle2" fontWeight={700} color="warning.main">+{formatCurrency(booking.surcharge)}</Typography>
+                                        </Stack>
+                                        <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                                            Lý do: {booking.surchargeReason || "Trả chuồng trễ"}
+                                        </Typography>
                                     </Stack>
                                 )}
                                 <Box sx={{ borderTop: '1px solid var(--palette-divider)', pt: 2 }}>

@@ -74,6 +74,8 @@ export const PERMISSIONS_GROUPED = [
             { id: "boarding_booking_delete", name: "Hủy/Xóa lịch khách sạn" },
             { id: "boarding_booking_checkin", name: "Xác nhận nhận chuồng (Check-in)" },
             { id: "boarding_booking_checkout", name: "Xác nhận trả chuồng (Check-out)" },
+            { id: "boarding_config_view", name: "Xem cấu hình khách sạn" },
+            { id: "boarding_config_edit", name: "Chỉnh sửa cấu hình khách sạn" },
         ]
     },
     {
