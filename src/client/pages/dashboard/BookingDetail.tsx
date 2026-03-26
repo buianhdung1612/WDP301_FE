@@ -81,14 +81,25 @@ export const BookingDetailPage = () => {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case "completed": return "text-[#05A845]";
-            case "confirmed": return "text-[#007BFF]";
-            case "pending": return "text-[#f97316]";
-            case "cancelled": return "text-[#ff0000]";
-            case "in-progress": return "text-[#FFAB00]";
-            case "delayed": return "text-[#FF5630]";
-            case "request_cancel": return "text-[#f97316]";
-            default: return "text-[#7d7b7b]";
+            case "completed":
+            case "paid":
+                return "text-[#05A845]";
+            case "confirmed":
+                return "text-[#007BFF]";
+            case "pending":
+            case "unpaid":
+                return "text-[#f97316]";
+            case "cancelled":
+            case "refunded":
+                return "text-[#ff0000]";
+            case "in-progress":
+                return "text-[#FFAB00]";
+            case "delayed":
+                return "text-[#FF5630]";
+            case "request_cancel":
+                return "text-[#f97316]";
+            default:
+                return "text-[#7d7b7b]";
         }
     };
 
@@ -99,6 +110,7 @@ export const BookingDetailPage = () => {
             "completed": "Hoàn thành",
             "cancelled": "Đã hủy",
             "delayed": "Trễ giờ",
+            "refunded": "Đã hoàn tiền",
             "in-progress": "Đang làm",
             "request_cancel": "Chờ duyệt hủy/hoàn tiền"
         };
@@ -134,7 +146,7 @@ export const BookingDetailPage = () => {
                         </div>
 
                         {/* Booking Stepper */}
-                        {["pending", "confirmed", "in-progress", "completed"].includes(booking.bookingStatus) && (
+                        {["pending", "confirmed", "in-progress", "completed", "cancelled"].includes(booking.bookingStatus) && (
                             <div className="mb-[60px] pt-[20px] pb-[40px] px-[20px] bg-[#fdfdfd] border border-[#f5f5f5] rounded-[20px] relative">
                                 <div className="flex justify-between relative z-10 w-full max-w-[800px] mx-auto">
                                     {[
@@ -144,10 +156,29 @@ export const BookingDetailPage = () => {
                                         { key: "completed", label: "Hoàn thành", icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-[20px] h-[20px]"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" /></svg> },
                                     ].map((step, index, arr) => {
                                         const successFlow = ["pending", "confirmed", "in-progress", "completed"];
+                                        const isCancelled = booking.bookingStatus === "cancelled";
                                         const currentIndex = successFlow.indexOf(booking.bookingStatus);
-                                        const isPast = index < currentIndex;
-                                        const isCurrent = index === currentIndex;
+                                        const isPast = currentIndex !== -1 && index < currentIndex;
+                                        const isCurrent = currentIndex !== -1 && index === currentIndex;
                                         const isLast = index === arr.length - 1;
+
+                                        let stepColorClass = "";
+                                        let labelColorClass = "";
+
+                                        if (isCancelled) {
+                                            const history = booking.statusHistory || [];
+                                            const wasStepReached = index === 0 || history.some((h: any) => h.status === step.key);
+                                            stepColorClass = wasStepReached ? "bg-gradient-to-br from-gray-400 to-gray-600 text-white" : "bg-white text-gray-300 border-[2px] border-[#eee]";
+                                            labelColorClass = wasStepReached ? "text-gray-600" : "text-gray-300";
+                                        } else {
+                                            if (isCurrent || isPast) {
+                                                stepColorClass = "bg-gradient-to-br from-[#ff7e67] to-[#e1554e] text-white ring-4 ring-red-100";
+                                                labelColorClass = "text-client-secondary";
+                                            } else {
+                                                stepColorClass = "bg-white text-gray-400 border-[2px] border-[#eee]";
+                                                labelColorClass = "text-gray-400";
+                                            }
+                                        }
 
                                         return (
                                             <div key={step.key} className="flex flex-col items-center flex-1 relative">
@@ -155,29 +186,24 @@ export const BookingDetailPage = () => {
                                                     <div className="absolute top-[30px] left-[50%] w-full h-[3px] bg-[#eee] -z-10">
                                                         <div
                                                             className="h-full bg-client-primary transition-all duration-700 ease-in-out"
-                                                            style={{ width: isPast ? "100%" : isCurrent ? "0%" : "0%" }}
+                                                            style={{
+                                                                width: (isPast && !isCancelled) ? "100%" : "0%"
+                                                            }}
                                                         />
                                                     </div>
                                                 )}
-
-                                                <div
-                                                    className={`w-[60px] h-[60px] rounded-full flex items-center justify-center transition-all duration-500 shadow-md ${isCurrent || isPast
-                                                        ? "bg-gradient-to-br from-[#ff7e67] to-[#e1554e] text-white ring-4 ring-red-100"
-                                                        : "bg-white text-gray-400 border-[2px] border-[#eee]"
-                                                        }`}
-                                                >
+                                                <div className={`w-[60px] h-[60px] rounded-full flex items-center justify-center transition-all duration-500 shadow-md ${stepColorClass}`}>
                                                     {step.icon}
                                                 </div>
-
                                                 <div className="mt-[15px] flex flex-col items-center">
-                                                    <span
-                                                        className={`text-[13px] font-[700] uppercase tracking-wider transition-colors duration-500 text-center ${isCurrent || isPast ? "text-client-secondary" : "text-gray-400"
-                                                            }`}
-                                                    >
+                                                    <span className={`text-[13px] font-[700] uppercase tracking-wider transition-colors duration-500 text-center ${labelColorClass}`}>
                                                         {step.label}
                                                     </span>
-                                                    {isCurrent && (
+                                                    {isCurrent && !isCancelled && (
                                                         <span className="text-[10px] text-red-400 font-[500] animate-pulse mt-1">Đang thực hiện</span>
+                                                    )}
+                                                    {isCancelled && booking.bookingStatus === step.key && (
+                                                        <span className="text-[10px] text-red-600 font-[700] mt-1">ĐÃ HỦY</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -263,6 +289,11 @@ export const BookingDetailPage = () => {
                                                 )}
                                             </>
                                         )}
+                                        {booking.bookingStatus === "cancelled" && (
+                                            <p className="text-[14px] bg-red-50 text-red-600 p-3 rounded-lg border border-red-100 mt-2">
+                                                <span className="font-bold">Lý do hủy:</span> {booking.cancelledReason || "Theo yêu cầu của khách hàng"}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -326,15 +357,6 @@ export const BookingDetailPage = () => {
                                     </tr>
                                 </tbody>
                                 <tfoot>
-                                    {/* Surcharge summary hidden based on user request */}
-                                    {/* {booking.petStaffMap?.some((m: any) => m.surchargeAmount > 0) && (
-                                        <tr>
-                                            <td colSpan={3} className="p-[20px] pb-0 text-right font-[600] text-[#7d7b7b]">Phụ phí quá giờ:</td>
-                                            <td className="p-[20px] pb-0 text-right font-[700] text-[16px] text-[#FF5630]">
-                                                +{formatCurrency(booking.petStaffMap.reduce((sum: number, m: any) => sum + (m.surchargeAmount || 0), 0))}
-                                            </td>
-                                        </tr>
-                                    )} */}
                                     <tr>
                                         <td colSpan={3} className="p-[20px] text-right font-[600] text-[#7d7b7b]">Thành tiền:</td>
                                         <td className="p-[20px] text-right font-[800] text-[22px] text-client-primary">{formatCurrency(booking.total || 0)}</td>
@@ -359,7 +381,7 @@ export const BookingDetailPage = () => {
                         </div>
                     </div>
                 </div>
-            </div >
+            </div>
 
             <CancelModal
                 isOpen={isCancelModalOpen}

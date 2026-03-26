@@ -66,6 +66,7 @@ export const OrderHistoryPage = () => {
     const getStatusColor = (status: string) => {
         switch (status) {
             case "completed":
+            case "shipped":
             case "confirmed":
             case "shipping":
             case "paid":
@@ -89,6 +90,7 @@ export const OrderHistoryPage = () => {
             "pending": "Chờ xác nhận",
             "confirmed": "Đã xác nhận",
             "shipping": "Đang giao hàng",
+            "shipped": "Đã giao hàng",
             "completed": "Giao thành công",
             "cancelled": "Đã hủy",
             "returned": "Trả hàng",

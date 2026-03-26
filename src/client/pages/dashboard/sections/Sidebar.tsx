@@ -1,4 +1,4 @@
-﻿import { Camera, AlignJustify, ShoppingBag, User, Arcade, Heart, Star, Lock, LogOut } from "iconoir-react";
+﻿import { Camera, AlignJustify, ShoppingBag, ClipboardCheck, MoneySquare, Building, User, MapPin, Heart, Star, Lock, LogOut } from "iconoir-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../../../stores/useAuthStore";
 import { logout as logoutApi } from "../../../api/auth.api";
@@ -6,6 +6,17 @@ import { toast } from "react-toastify";
 import React, { useState } from "react";
 import { changeAvatar } from "../../../api/dashboard.api";
 import { uploadImagesToCloudinary } from "../../../../admin/api/uploadCloudinary.api";
+
+const PawPrint = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <ellipse cx="8" cy="14.5" rx="3.5" ry="4" transform="rotate(-15 8 14.5)" />
+    <ellipse cx="16" cy="14.5" rx="3.5" ry="4" transform="rotate(15 16 14.5)" />
+    <ellipse cx="5.5" cy="7" rx="2" ry="2.5" />
+    <ellipse cx="10" cy="5" rx="2" ry="2.5" />
+    <ellipse cx="14" cy="5" rx="2" ry="2.5" />
+    <ellipse cx="18.5" cy="7" rx="2" ry="2.5" />
+  </svg>
+);
 
 export const Sidebar = () => {
   const location = useLocation();
@@ -97,19 +108,19 @@ export const Sidebar = () => {
             </li>
             <li>
               <Link to="/dashboard/bookings" className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/booking") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                <AlignJustify className="w-[20px] h-[20px]" />
+                <ClipboardCheck className="w-[20px] h-[20px]" />
                 Đơn dịch vụ
               </Link>
             </li>
             <li>
               <Link to="/dashboard/transactions" className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname === "/dashboard/transactions" ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                <AlignJustify className="w-[20px] h-[20px]" />
+                <MoneySquare className="w-[20px] h-[20px]" />
                 Lịch sử giao dịch
               </Link>
             </li>
             <li>
               <Link to="/dashboard/pet-cages" className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/pet-cages") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                <ShoppingBag className="w-[20px] h-[20px]" />
+                <Building className="w-[20px] h-[20px]" />
                 Chuồng thú cưng
               </Link>
             </li>
@@ -123,13 +134,13 @@ export const Sidebar = () => {
             </li>
             <li>
               <Link to="/dashboard/address" className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/address") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                <Arcade className="w-[20px] h-[20px]" />
+                <MapPin className="w-[20px] h-[20px]" />
                 Địa chỉ
               </Link>
             </li>
             <li>
               <Link to="/dashboard/pet" className={`inline-flex items-center gap-[10px] text-[15px] py-[10px] px-[25px] transition-default w-full ${pathname.startsWith("/dashboard/pet") && !pathname.startsWith("/dashboard/pet-cages") ? "text-client-primary" : "text-[#7d7b7b] hover:text-client-primary"}`}>
-                <Heart className="w-[20px] h-[20px]" />
+                <PawPrint className="w-[20px] h-[20px]" />
                 Thú cưng
               </Link>
             </li>

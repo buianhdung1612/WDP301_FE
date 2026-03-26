@@ -8,6 +8,7 @@ import { SocialLoginTab } from "./components/SocialLoginTab";
 import { AppPasswordTab } from "./components/AppPasswordTab";
 import { GeneralSettingTab } from "./components/GeneralSettingTab";
 import { PointSettingTab } from "./components/PointSettingTab";
+import { StaticPageTab } from "./components/StaticPageTab";
 import { prefixAdmin } from "../../constants/routes";
 
 
@@ -22,7 +23,14 @@ export const SettingsPage = () => {
         { label: "Thanh toán", path: "payment", component: <PaymentTab /> },
         { label: "Đăng nhập MXH", path: "social", component: <SocialLoginTab /> },
         { label: "Mật khẩu ứng dụng", path: "app-password", component: <AppPasswordTab /> },
+        { label: "Về chúng tôi", path: "page-about", component: <StaticPageTab pageKey="page-about" label="Về chúng tôi" /> },
+        { label: "Câu hỏi (FAQ)", path: "page-faq", component: <StaticPageTab pageKey="page-faq" label="Câu hỏi thường gặp" /> },
+        { label: "Bảo mật", path: "page-privacy", component: <StaticPageTab pageKey="page-privacy" label="Chính sách bảo mật" /> },
+        { label: "Điều khoản", path: "page-terms", component: <StaticPageTab pageKey="page-terms" label="Điều khoản & Điều kiện" /> },
+        { label: "Vận chuyển", path: "page-shipping", component: <StaticPageTab pageKey="page-shipping" label="Chính sách vận chuyển" /> },
+        { label: "Đổi trả", path: "page-returns", component: <StaticPageTab pageKey="page-returns" label="Chính sách đổi trả" /> },
     ];
+
 
     const currentTabPath = location.pathname.split("/").pop();
     const currentTabIndex = tabs.findIndex(t => t.path === currentTabPath);
@@ -49,7 +57,10 @@ export const SettingsPage = () => {
                 <Tabs
                     value={activeIndex}
                     onChange={handleChangeTab}
+                    variant="scrollable"
+                    scrollButtons="auto"
                     sx={{
+
                         mb: 4,
                         borderBottom: 1,
                         borderColor: 'divider',

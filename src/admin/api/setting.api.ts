@@ -85,3 +85,16 @@ export const updateSettingPoint = async (data: any): Promise<ApiResponse<any>> =
     const response = await apiApp.patch(`${BASE_URL}/point`, data, withAuth());
     return response.data;
 };
+
+/** Lấy thông tin trang tĩnh theo key */
+export const getSettingPage = async (key: string): Promise<ApiResponse<any>> => {
+    const response = await apiApp.get(`${BASE_URL}/page/${key}`, withAuth());
+    return response.data;
+};
+
+/** Cập nhật trang tĩnh theo key */
+export const updateSettingPage = async (key: string, data: any): Promise<ApiResponse<any>> => {
+    const response = await apiApp.patch(`${BASE_URL}/page/${key}`, data, withAuth());
+    return response.data;
+};
+

@@ -154,19 +154,19 @@ export const MainFooter = () => {
                                 <h3 className="text-client-secondary mb-[20px] font-secondary text-[24px] capitalize">Trợ giúp</h3>
                                 <ul className="flex flex-col gap-[20px]">
                                     <li className="text-client-text text-[17px] hover:text-client-primary transition-default cursor-pointer">
-                                        <Link to="#">Theo Dõi Đơn Hàng</Link>
+                                        <Link to="/dashboard/orders">Theo Dõi Đơn Hàng</Link>
                                     </li>
                                     <li className="text-client-text text-[17px] hover:text-client-primary transition-default cursor-pointer">
-                                        <Link to="#">Câu Hỏi Thường Gặp</Link>
+                                        <Link to="/faq">Câu Hỏi Thường Gặp</Link>
                                     </li>
                                     <li className="text-client-text text-[17px] hover:text-client-primary transition-default cursor-pointer">
-                                        <Link to="#">Tài Khoản Của Tôi</Link>
+                                        <Link to="/dashboard/profile">Tài Khoản Của Tôi</Link>
                                     </li>
                                     <li className="text-client-text text-[17px] hover:text-client-primary transition-default cursor-pointer">
-                                        <Link to="#">Đơn Hàng Của Bạn</Link>
+                                        <Link to="/dashboard/orders">Đơn Hàng Của Bạn</Link>
                                     </li>
                                     <li className="text-client-text text-[17px] hover:text-client-primary transition-default cursor-pointer">
-                                        <Link to="#">Bảng Giá / Dịch Vụ</Link>
+                                        <Link to="/services">Bảng Giá / Dịch Vụ</Link>
                                     </li>
                                 </ul>
                             </div>
@@ -174,19 +174,19 @@ export const MainFooter = () => {
                                 <h3 className="text-client-secondary mb-[20px] font-secondary text-[24px] capitalize">Về Chúng Tôi</h3>
                                 <ul className="flex flex-col gap-[20px]">
                                     <li className="text-client-text text-[17px] hover:text-client-primary transition-default cursor-pointer">
-                                        <Link to="#">Tin Tức</Link>
+                                        <Link to="/blogs">Tin Tức</Link>
                                     </li>
                                     <li className="text-client-text text-[17px] hover:text-client-primary transition-default cursor-pointer">
-                                        <Link to="#">Dịch Vụ</Link>
+                                        <Link to="/services">Dịch Vụ</Link>
                                     </li>
                                     <li className="text-client-text text-[17px] hover:text-client-primary transition-default cursor-pointer">
-                                        <Link to="#">Câu Chuyện Chúng Tôi</Link>
+                                        <Link to="/about">Câu Chuyện Chúng Tôi</Link>
                                     </li>
                                     <li className="text-client-text text-[17px] hover:text-client-primary transition-default cursor-pointer">
-                                        <Link to="#">Liên Hệ</Link>
+                                        <Link to="/contact">Liên Hệ</Link>
                                     </li>
                                     <li className="text-client-text text-[17px] hover:text-client-primary transition-default cursor-pointer">
-                                        <Link to="#">Địa Chỉ Cửa Hàng</Link>
+                                        <Link to="/stores">Địa Chỉ Cửa Hàng</Link>
                                     </li>
                                 </ul>
                             </div>

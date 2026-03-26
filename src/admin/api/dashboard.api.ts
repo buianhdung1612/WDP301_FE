@@ -1,4 +1,4 @@
-import { apiApp } from '../../api';
+﻿import { apiApp } from '../../api';
 import Cookies from 'js-cookie';
 
 const BASE_URL = '/api/v1/admin/dashboard';
@@ -24,5 +24,13 @@ export const getAnalyticsStats = async () => {
 
 export const getSystemStats = async () => {
     const response = await apiApp.get(`${BASE_URL}/system-stats`, withAuth());
+    return response.data;
+};
+
+export const getStaffingStatus = async (date?: string) => {
+    const response = await apiApp.get(`${BASE_URL}/staffing-status`, {
+        ...withAuth(),
+        params: { date }
+    });
     return response.data;
 };

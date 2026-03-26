@@ -67,3 +67,12 @@ export const settingAppPasswordSchema = z.object({
 });
 
 export type SettingAppPasswordFormValues = z.infer<typeof settingAppPasswordSchema>;
+
+/** Schema for Static Pages */
+export const settingPageSchema = z.object({
+    title: z.string().min(1, "Vui lòng nhập tiêu đề trang"),
+    content: z.string().optional().or(z.literal("")),
+});
+
+export type SettingPageFormValues = z.infer<typeof settingPageSchema>;
+

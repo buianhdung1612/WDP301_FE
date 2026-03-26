@@ -8,8 +8,9 @@ import { LoginPage } from "../pages/auth/Login";
 import { ForgotPasswordPage } from "../pages/auth/ForgotPassword";
 import { OTPPasswordPage } from "../pages/auth/OTPPassword";
 import { ResetPasswordPage } from "../pages/auth/ResetPassword";
-import { BookingPage } from "../pages/booking/Booking";
 import { ServicePage } from "../pages/service/Service";
+
+
 import { ServiceDetailPage } from "../pages/service/ServiceDetail";
 import { ServiceCheckoutPage } from "../pages/service/ServiceCheckout";
 import { CartPage } from "../pages/cart/Cart";
@@ -41,10 +42,17 @@ import { BookingDetailPage } from "../pages/dashboard/BookingDetail";
 import { TransactionHistoryPage } from "../pages/dashboard/TransactionHistory";
 import { BoardingBookingDetailPage } from "../pages/dashboard/BoardingBookingDetail";
 import { AuthGuard } from "../components/guards/AuthGuard";
+import { StaticPage } from "../pages/static/StaticPage";
+import { FaqPage } from "../pages/static/FaqPage";
 
 export const ClientRoutes: RouteObject[] = [
     { path: "/", element: <HomePage /> },
+    { path: "/about", element: <StaticPage /> },
+    { path: "/stores", element: <StaticPage /> },
+    { path: "/faq", element: <FaqPage /> },
+    { path: "/policy/:type", element: <StaticPage /> },
     { path: "/product/detail/:slug", element: <ProductDetailPage /> },
+
     { path: "/shop", element: <ProductListPage /> },
     { path: "/blogs", element: <BlogListPage /> },
     { path: "/cart", element: <CartPage /> },

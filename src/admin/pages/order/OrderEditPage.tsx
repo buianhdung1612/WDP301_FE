@@ -444,6 +444,7 @@ export const OrderEditPage = () => {
                                         <MenuItem value="pending">Chờ xác nhận</MenuItem>
                                         <MenuItem value="confirmed">Đã xác nhận</MenuItem>
                                         <MenuItem value="shipping">Đang giao</MenuItem>
+                                        <MenuItem value="shipped">Đã giao hàng</MenuItem>
                                         <MenuItem value="completed">Giao thành công</MenuItem>
                                         <MenuItem value="cancelled">Hủy</MenuItem>
                                         <MenuItem value="returned">Trả hàng</MenuItem>

@@ -41,3 +41,11 @@ export const cancelOrder = async (id: string, reason?: string) => {
         throw error;
     }
 };
+export const confirmReceipt = async (id: string) => {
+    try {
+        const response = await apiApp.patch(`${API_ORDER}/${id}/confirm-receipt`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

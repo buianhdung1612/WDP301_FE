@@ -5,9 +5,34 @@ import {
     getSettingPayment, updateSettingPayment,
     getSettingLoginSocial, updateSettingLoginSocial,
     getSettingAppPassword, updateSettingAppPassword,
-    getSettingPoint, updateSettingPoint
+    getSettingPoint, updateSettingPoint,
+    getSettingPage, updateSettingPage
 } from "../../../api/setting.api";
 import { toast } from "react-toastify";
+
+/** Hook quản lý trang tĩnh */
+export const useSettingPage = (key: string) => {
+    return useQuery({
+        queryKey: ["settingPage", key],
+        queryFn: () => getSettingPage(key),
+        select: (data) => data.data,
+    });
+};
+
+export const useUpdateSettingPage = (key: string) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: any) => updateSettingPage(key, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["settingPage", key] });
+            toast.success("Cập nhật trang thành công");
+        },
+        onError: () => {
+            toast.error("Cập nhật trang thất bại");
+        }
+    });
+};
+
 
 /** Hook quản lý cài đặt chung */
 export const useSettingGeneral = () => {

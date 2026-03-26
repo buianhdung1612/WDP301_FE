@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+﻿import React, { useState } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -7,76 +7,108 @@ import {
     Button,
     TextField,
     MenuItem,
-    Grid,
-    IconButton,
-    Typography,
     Checkbox,
     ListItemText,
-    alpha,
+    IconButton,
+    Typography,
     Box,
+    alpha,
     Stack,
+    Grid
 } from '@mui/material';
-import { useForm, Controller } from 'react-hook-form';
+import { Close as CloseIcon } from '@mui/icons-material';
+import { Icon } from '@iconify/react';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { useForm, Controller } from 'react-hook-form';
 import dayjs from 'dayjs';
-import { useAccounts } from '../../account-admin/hooks/useAccountAdmin';
-import CloseIcon from '@mui/icons-material/Close';
-import { dialogStyles } from '../configs/styles.config';
-import { Icon } from '@iconify/react';
+import { toast } from 'react-toastify';
+import { bulkDeleteSchedules } from '../../../api/work-schedule.api';
 
 interface BulkDeleteDialogProps {
     open: boolean;
     onClose: () => void;
-    onDelete: (data: any) => void;
-    departmentId?: string;
-    loading?: boolean;
+    accounts: any[];
+    onSuccess: () => void;
 }
 
-export const BulkDeleteDialog = ({
-    open,
-    onClose,
-    onDelete,
-    departmentId,
-    loading = false,
-}: BulkDeleteDialogProps) => {
-    const accountsRes = useAccounts({ departmentId, status: 'active' });
-    const accounts = useMemo(() => {
-        if (!accountsRes.data) return [];
-        const data = accountsRes.data;
-        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
-        if (Array.isArray(data.recordList)) return data.recordList;
-        if (Array.isArray(data.data)) return data.data;
-        if (Array.isArray(data)) return data;
-        return [];
-    }, [accountsRes.data]);
+const dialogStyles = {
+    "& .MuiDialog-paper": {
+        borderRadius: "var(--shape-borderRadius-lg)",
+        boxShadow: "var(--customShadows-dialog)",
+        border: '1px solid',
+        borderColor: 'divider',
+        overflow: 'hidden'
+    },
+    "& .MuiDialogTitle-root": {
+        p: '20px 24px',
+        bgcolor: 'background.paper',
+        borderBottom: '1px solid',
+        borderColor: 'divider'
+    },
+    "& .MuiDialogContent-root": {
+        p: '24px !important',
+        bgcolor: 'var(--palette-background-neutral) !important'
+    },
+    "& .MuiDialogActions-root": {
+        p: '16px 24px',
+        borderTop: '1px solid',
+        borderColor: 'divider',
+        bgcolor: 'background.paper'
+    }
+};
 
-    const { control, handleSubmit, reset } = useForm({
+export const BulkDeleteDialog: React.FC<BulkDeleteDialogProps> = ({ open, onClose, accounts = [], onSuccess }) => {
+    const [loading, setLoading] = useState(false);
+
+    const { control, handleSubmit, reset, watch, setValue } = useForm({
         defaultValues: {
             staffIds: [] as string[],
             startDate: dayjs().startOf('week'),
-            endDate: dayjs().endOf('week'),
+            endDate: dayjs().endOf('week')
         }
     });
 
-    useEffect(() => {
-        if (open) {
-            reset({
-                staffIds: [],
-                startDate: dayjs().startOf('week'),
-                endDate: dayjs().endOf('week'),
-            });
-        }
-    }, [open, reset]);
+    const selectedStaffIds = watch('staffIds') || [];
 
-    const onSubmit = (data: any) => {
-        onDelete({
-            ...data,
-            departmentId,
-            startDate: data.startDate.toDate(),
-            endDate: data.endDate.toDate(),
-        });
+    const handleSelectAll = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const allIds = (accounts || []).map(a => a._id);
+        if (selectedStaffIds.length === allIds.length && allIds.length > 0) {
+            setValue('staffIds', []);
+        } else {
+            setValue('staffIds', allIds);
+        }
+    };
+
+    const onSubmit = async (data: any) => {
+        if (!data.staffIds || data.staffIds.length === 0) {
+            toast.error('Vui lòng chọn ít nhất một nhân viên');
+            return;
+        }
+        try {
+            setLoading(true);
+            const res = await bulkDeleteSchedules({
+                staffIds: data.staffIds,
+                startDate: data.startDate.format('YYYY-MM-DD'),
+                endDate: data.endDate.format('YYYY-MM-DD')
+            });
+
+            if (res.code === 200) {
+                toast.success('Xóa ca làm việc thành công');
+                onSuccess();
+                onClose();
+                reset();
+            } else {
+                toast.error(res.message || 'Có lỗi xảy ra');
+            }
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Không thể xóa ca làm việc');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -99,15 +131,15 @@ export const BulkDeleteDialog = ({
                 </IconButton>
             </DialogTitle>
             <form onSubmit={handleSubmit(onSubmit)}>
-                <DialogContent sx={{ bgcolor: 'var(--palette-background-neutral) !important', py: '24px !important' }}>
-                    <Box sx={{ mb: 3, p: 2, bgcolor: alpha('#FF5630', 0.08), borderRadius: "var(--shape-borderRadius-md)", border: '1px solid', borderColor: alpha('#FF5630', 0.16) }}>
-                        <Typography variant="body2" sx={{ color: '#B71D18', fontWeight: 600 }}>
-                            Lưu ý: Hệ thống sẽ xóa các ca làm việc của nhân viên được chọn trong khoảng thời gian này.
-                        </Typography>
-                    </Box>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DialogContent>
+                        <Box sx={{ mb: 3, p: 2, bgcolor: alpha('#FF5630', 0.08), borderRadius: "var(--shape-borderRadius-md)", border: '1px solid', borderColor: alpha('#FF5630', 0.16) }}>
+                            <Typography variant="body2" sx={{ color: '#B71D18', fontWeight: 600 }}>
+                                Lưu ý: Hệ thống sẽ xóa các ca làm việc của nhân viên được chọn trong khoảng thời gian này.
+                            </Typography>
+                        </Box>
 
-                    <Grid container spacing={2.5}>
-                        <Grid size={{ xs: 12 }}>
+                        <Stack spacing={3}>
                             <Controller
                                 name="staffIds"
                                 control={control}
@@ -117,118 +149,128 @@ export const BulkDeleteDialog = ({
                                         {...field}
                                         select
                                         fullWidth
-                                        label="Chọn nhân viên"
+                                        label="Nhân viên"
+                                        placeholder="Chọn nhân viên"
                                         error={!!error}
                                         helperText={error?.message}
                                         SelectProps={{
                                             multiple: true,
-                                            renderValue: (selected: any) =>
-                                                accounts
-                                                    .filter((a: any) => selected.includes(a._id))
+                                            renderValue: (selected: any) => {
+                                                const s = selected || [];
+                                                if (s.length === (accounts?.length || 0) && (accounts?.length || 0) > 0) return 'Tất cả nhân viên';
+                                                return (accounts || [])
+                                                    .filter((a: any) => s.includes(a._id))
                                                     .map((a: any) => a.fullName)
-                                                    .join(', ')
+                                                    .join(', ');
+                                            }
                                         }}
-                                        sx={{ bgcolor: "var(--palette-background-paper)", borderRadius: "var(--shape-borderRadius)" }}
+                                        sx={{ 
+                                            bgcolor: "var(--palette-background-paper)", 
+                                            borderRadius: "var(--shape-borderRadius)",
+                                            '& .MuiInputBase-root': { height: '56px' }
+                                        }}
                                     >
-                                        <MenuItem value="all" onClick={(e) => {
-                                            e.preventDefault();
-                                            field.onChange(accounts.map((a: any) => a._id));
-                                        }}>
-                                            <Checkbox checked={field.value.length === accounts.length && accounts.length > 0} />
-                                            <ListItemText primary="Chọn tất cả nhân viên" sx={{ fontWeight: 'bold' }} />
+                                        <MenuItem value="all" onClick={handleSelectAll}>
+                                            <Checkbox 
+                                                checked={selectedStaffIds.length === (accounts?.length || 0) && (accounts?.length || 0) > 0} 
+                                                indeterminate={selectedStaffIds.length > 0 && selectedStaffIds.length < (accounts?.length || 0)}
+                                            />
+                                            <ListItemText primary="Chọn tất cả nhân viên" sx={{ '& .MuiTypography-root': { fontWeight: 700 } }} />
                                         </MenuItem>
-                                        {accounts.map((account: any) => (
+                                        {(accounts || []).map((account: any) => (
                                             <MenuItem key={account._id} value={account._id}>
-                                                <Checkbox checked={field.value.indexOf(account._id) > -1} />
+                                                <Checkbox checked={selectedStaffIds.indexOf(account._id) > -1} />
                                                 <ListItemText primary={account.fullName} secondary={account.email} />
                                             </MenuItem>
                                         ))}
                                     </TextField>
                                 )}
                             />
-                        </Grid>
 
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <Controller
-                                    name="startDate"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <DatePicker
-                                            {...field}
-                                            label="Từ ngày"
-                                            sx={{
-                                                width: '100%',
-                                                bgcolor: "var(--palette-background-paper)",
-                                                borderRadius: "var(--shape-borderRadius)"
-                                            }}
-                                        />
-                                    )}
-                                />
-                            </LocalizationProvider>
-                        </Grid>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={6}>
+                                    <Controller
+                                        name="startDate"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <DatePicker
+                                                {...field}
+                                                label="Từ ngày"
+                                                slotProps={{
+                                                    textField: {
+                                                        fullWidth: true,
+                                                        sx: {
+                                                            bgcolor: "var(--palette-background-paper)",
+                                                            borderRadius: "var(--shape-borderRadius)"
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                </Grid>
 
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <Controller
-                                    name="endDate"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <DatePicker
-                                            {...field}
-                                            label="Đến ngày"
-                                            sx={{
-                                                width: '100%',
-                                                bgcolor: "var(--palette-background-paper)",
-                                                borderRadius: "var(--shape-borderRadius)"
-                                            }}
-                                        />
-                                    )}
-                                />
-                            </LocalizationProvider>
-                        </Grid>
-                    </Grid>
-                </DialogContent>
-                <DialogActions sx={{ p: '16px 24px', gap: 1.5 }}>
-                    <Button
-                        onClick={onClose}
-                        variant="outlined"
-                        sx={{
-                            borderRadius: "var(--shape-borderRadius)",
-                            textTransform: 'none',
-                            fontWeight: 700,
-                            padding: '8px 20px',
-                            color: 'var(--palette-text-primary)',
-                        }}
-                    >
-                        Hủy bỏ
-                    </Button>
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="error"
-                        disabled={loading}
-                        sx={{
-                            borderRadius: "var(--shape-borderRadius)",
-                            textTransform: 'none',
-                            fontWeight: 700,
-                            padding: '8px 20px',
-                            boxShadow: 'none',
-                            bgcolor: 'var(--palette-error-main)',
-                            '&:hover': {
-                                bgcolor: '#B71D18',
-                            }
-                        }}
-                    >
-                        {loading ? 'Đang xóa...' : 'Xác nhận xóa'}
-                    </Button>
-                </DialogActions>
+                                <Grid item xs={12} sm={6}>
+                                    <Controller
+                                        name="endDate"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <DatePicker
+                                                {...field}
+                                                label="Đến ngày"
+                                                slotProps={{
+                                                    textField: {
+                                                        fullWidth: true,
+                                                        sx: {
+                                                            bgcolor: "var(--palette-background-paper)",
+                                                            borderRadius: "var(--shape-borderRadius)"
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                </Grid>
+                            </Grid>
+                        </Stack>
+                    </DialogContent>
+                    <DialogActions sx={{ p: '16px 24px', gap: 1.5 }}>
+                        <Button
+                            onClick={onClose}
+                            variant="outlined"
+                            sx={{
+                                borderRadius: "var(--shape-borderRadius)",
+                                textTransform: 'none',
+                                fontWeight: 700,
+                                padding: '8px 20px',
+                                color: 'var(--palette-text-primary)',
+                                borderColor: 'rgba(145, 158, 171, 0.32)',
+                            }}
+                        >
+                            Hủy
+                        </Button>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            disabled={loading}
+                            sx={{
+                                borderRadius: "var(--shape-borderRadius)",
+                                textTransform: 'none',
+                                fontWeight: 700,
+                                padding: '8px 20px',
+                                bgcolor: '#FF5630',
+                                boxShadow: 'none',
+                                color: 'white',
+                                '&:hover': {
+                                    bgcolor: '#B71D18',
+                                }
+                            }}
+                        >
+                            {loading ? 'Đang xóa...' : 'Xác nhận xóa'}
+                        </Button>
+                    </DialogActions>
+                </LocalizationProvider>
             </form>
         </Dialog>
     );
 };
-
-
-
-
-

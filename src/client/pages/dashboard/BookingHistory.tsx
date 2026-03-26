@@ -1,16 +1,21 @@
 import { ProductBanner } from "../product/sections/ProductBanner";
 import { Link } from "react-router-dom";
 import { Sidebar } from "./sections/Sidebar";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getMyBookings, cancelBooking } from "../../api/booking.api";
+import { getMyPets } from "../../api/pet.api";
 import { formatCurrency } from "../../helpers";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import { CancelModal } from "../../components/ui/CancelModal";
+import Select from "react-select";
+import { Icon } from "@iconify/react";
 
 
 export const BookingHistoryPage = () => {
     const [bookings, setBookings] = useState<any[]>([]);
+    const [pets, setPets] = useState<any[]>([]);
+    const [selectedPet, setSelectedPet] = useState<string>("");
     const [loading, setLoading] = useState(true);
     const [isCanceling, setIsCanceling] = useState(false);
     const [cancelModal, setCancelModal] = useState<{ isOpen: boolean; booking: any }>({ isOpen: false, booking: null });
@@ -35,9 +40,36 @@ export const BookingHistoryPage = () => {
         }
     };
 
+    const fetchPets = async () => {
+        try {
+            const response = await getMyPets();
+            if (response.code === 200) {
+                setPets(response.data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch pets:", error);
+        }
+    };
+
     useEffect(() => {
         fetchBookings();
+        fetchPets();
     }, []);
+
+    const filteredBookings = useMemo(() => {
+        if (!selectedPet) return bookings;
+        return bookings.filter(b =>
+            b.petIds?.some((p: any) => (p._id || p.id) === selectedPet)
+        );
+    }, [bookings, selectedPet]);
+
+    const petOptions = useMemo(() => [
+        { value: "", label: "Tất cả các bé" },
+        ...pets.map(pet => ({
+            value: pet._id,
+            label: pet.name
+        }))
+    ], [pets]);
 
     const handleCancelBooking = (booking: any) => {
         setCancelModal({ isOpen: true, booking });
@@ -72,6 +104,7 @@ export const BookingHistoryPage = () => {
             case "pending":
                 return "bg-orange-100 text-orange-700";
             case "cancelled":
+            case "refunded":
                 return "bg-red-100 text-red-700";
             case "in-progress":
                 return "bg-yellow-100 text-yellow-700";
@@ -95,6 +128,7 @@ export const BookingHistoryPage = () => {
             "no-show": "Không đến",
             "in-progress": "Đang thực hiện",
             "delayed": "Trễ hẹn",
+            "refunded": "Đã hoàn tiền",
             "request_cancel": "Chờ duyệt hủy/hoàn tiền"
         };
         return map[status] || status;
@@ -119,10 +153,56 @@ export const BookingHistoryPage = () => {
                             <h3 className="text-[24px] font-black text-[#181818]">
                                 Lịch sử đặt lịch
                             </h3>
-                            <Link className="relative overflow-hidden group bg-client-primary rounded-[8px] px-[25px] py-[12px] font-[500] text-[14px] text-white flex items-center gap-[8px]" to="/services">
-                                <span className="relative z-10">Đặt lịch mới</span>
-                                <div className="absolute top-0 left-0 w-full h-full bg-client-secondary transition-transform duration-500 ease-in-out transform scale-x-0 origin-left group-hover:scale-x-100"></div>
-                            </Link>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="hidden sm:block">
+                                        <Icon icon="mdi:paw" className="text-client-primary text-lg opacity-50" />
+                                    </div>
+                                    <Select
+                                        options={petOptions}
+                                        value={petOptions.find(opt => opt.value === selectedPet)}
+                                        onChange={(opt: any) => setSelectedPet(opt?.value || "")}
+                                        placeholder="Lọc theo bé cưng"
+                                        isSearchable={false}
+                                        className="min-w-[200px]"
+                                        styles={{
+                                            control: (base, state) => ({
+                                                ...base,
+                                                borderRadius: '10px',
+                                                padding: '2px 5px',
+                                                fontSize: '14px',
+                                                fontWeight: '500',
+                                                backgroundColor: '#fff',
+                                                borderColor: state.isFocused ? '#FF6262' : '#eee',
+                                                boxShadow: 'none',
+                                                '&:hover': { borderColor: '#FF6262' },
+                                                cursor: 'pointer'
+                                            }),
+                                            option: (base, state) => ({
+                                                ...base,
+                                                fontSize: '14px',
+                                                fontWeight: state.isSelected ? '600' : '400',
+                                                backgroundColor: state.isSelected ? '#FF6262' : state.isFocused ? '#FFF5F5' : '#fff',
+                                                color: state.isSelected ? '#fff' : '#181818',
+                                                '&:active': { backgroundColor: '#FF6262' },
+                                                cursor: 'pointer'
+                                            }),
+                                            menu: (base) => ({
+                                                ...base,
+                                                borderRadius: '12px',
+                                                overflow: 'hidden',
+                                                boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                                                border: '1px solid #eee',
+                                                zIndex: 50
+                                            })
+                                        }}
+                                    />
+                                </div>
+                                <Link className="relative overflow-hidden group bg-client-primary rounded-[8px] px-[25px] py-[12px] font-[500] text-[14px] text-white flex items-center gap-[8px]" to="/services">
+                                    <span className="relative z-10">Đặt lịch mới</span>
+                                    <div className="absolute top-0 left-0 w-full h-full bg-client-secondary transition-transform duration-500 ease-in-out transform scale-x-0 origin-left group-hover:scale-x-100"></div>
+                                </Link>
+                            </div>
                         </div>
 
                         <div className="border border-[#eee] rounded-[12px] overflow-hidden">
@@ -141,10 +221,10 @@ export const BookingHistoryPage = () => {
                                 <tbody className="divide-y divide-[#eee]">
                                     {loading ? (
                                         <tr><td colSpan={7} className="p-[20px] text-center text-[16px]">Đang tải...</td></tr>
-                                    ) : bookings.length === 0 ? (
+                                    ) : filteredBookings.length === 0 ? (
                                         <tr><td colSpan={7} className="p-[20px] text-center text-[16px]">Chưa có lịch đặt nào</td></tr>
                                     ) : (
-                                        bookings.map((booking, idx) => (
+                                        filteredBookings.map((booking, idx) => (
                                             <tr key={idx} className="hover:bg-gray-50 transition-colors">
                                                 <td className="p-[20px] text-[15px] text-[#7d7b7b]">#{booking.code}</td>
                                                 <td className="p-[20px] text-[15px] font-[500] text-client-secondary">
@@ -220,3 +300,4 @@ export const BookingHistoryPage = () => {
         </>
     );
 };
+

@@ -23,7 +23,7 @@ export const FooterSub = () => {
                                 <input type="email" placeholder="Nhập Email của bạn tại đây" name="email" className="py-[16px] px-[32px] rounded-[35px] w-full text-client-text text-[14px] bg-white border border-[#d7d7d7] outline-none" />
                                 <button className="absolute right-0 top-[50%] translate-y-[-50%] rounded-r-[40px] px-[32px] py-[16px] bg-client-secondary hover:bg-[#FFF3E2] text-white hover:text-client-secondary text-[15px] font-secondary transition-colors duration-[350ms] ease-in-out cursor-pointer">Đăng ký</button>
                             </div>
-                            <p className="text-white text-center mt-[13px]">*Áp dụng một số ngoại lệ. Vui lòng Xem <Link to="#" className="underline transition-default hover:text-client-secondary">Điều khoản & Điều kiện</Link></p>
+                            <p className="text-white text-center mt-[13px]">*Áp dụng một số ngoại lệ. Vui lòng Xem <Link to="/policy/terms" className="underline transition-default hover:text-client-secondary">Điều khoản & Điều kiện</Link></p>
                         </form>
                     </div>
                 </div>
@@ -97,28 +97,28 @@ export const FooterSub = () => {
                             <h3 className="mb-[20px] text-[40px] font-secondary text-client-secondary">Tìm hiểu chúng tôi</h3>
                             <ul className="flex flex-wrap gap-x-[20px] gap-y-[10px]">
                                 <li className="m-[5px] text-client-text hover:text-client-primary transition-default">
-                                    <Link to={"#"}>Đơn hàng của bạn</Link>
+                                    <Link to={"/dashboard/orders"}>Đơn hàng của bạn</Link>
                                 </li>
                                 <li className="m-[5px] text-client-text hover:text-client-primary transition-default">
-                                    <Link to={"#"}>Đổi trả & Thay thế</Link>
+                                    <Link to={"/policy/returns"}>Đổi trả & Thay thế</Link>
                                 </li>
                                 <li className="m-[5px] text-client-text hover:text-client-primary transition-default">
-                                    <Link to={"#"}>Giá cước & Chính sách vận chuyển</Link>
+                                    <Link to={"/policy/shipping"}>Giá cước & Chính sách vận chuyển</Link>
                                 </li>
                                 <li className="m-[5px] text-client-text hover:text-client-primary transition-default">
-                                    <Link to={"#"}>Hoàn tiền và Trả hàng</Link>
+                                    <Link to={"/policy/returns"}>Hoàn tiền và Trả hàng</Link>
                                 </li>
                                 <li className="m-[5px] text-client-text hover:text-client-primary transition-default">
-                                    <Link to={"#"}>Chính sách bảo mật</Link>
+                                    <Link to={"/policy/privacy"}>Chính sách bảo mật</Link>
                                 </li>
                                 <li className="m-[5px] text-client-text hover:text-client-primary transition-default">
-                                    <Link to={"#"}>Điều khoản và Điều kiện</Link>
+                                    <Link to={"/policy/terms"}>Điều khoản và Điều kiện</Link>
                                 </li>
                                 <li className="m-[5px] text-client-text hover:text-client-primary transition-default">
-                                    <Link to={"#"}>Cài đặt Cookie</Link>
+                                    <Link to={"/policy/privacy"}>Cài đặt Cookie</Link>
                                 </li>
                                 <li className="m-[5px] text-client-text hover:text-client-primary transition-default">
-                                    <Link to={"#"}>Trung tâm trợ giúp</Link>
+                                    <Link to={"/faq"}>Trung tâm trợ giúp</Link>
                                 </li>
                             </ul>
                         </div>
@@ -127,9 +127,9 @@ export const FooterSub = () => {
                 <div className="app-container py-[30px] flex items-center justify-between">
                     <div className="text-client-text">© <span className="text-client-secondary hover:text-client-primary transition-default cursor-pointer">Designthemes</span> all rights Reserved</div>
                     <div className="flex items-center text-client-text">
-                        <Link to={"#"} className="hover:text-client-primary transition-default cursor-pointer">Điều khoản Sử dụng</Link>
+                        <Link to={"/policy/terms"} className="hover:text-client-primary transition-default cursor-pointer">Điều khoản Sử dụng</Link>
                         <span className="mx-[10px]">|</span>
-                        <Link to={"#"} className="hover:text-client-primary transition-default cursor-pointer">Chính sách Quyền riêng tư</Link>
+                        <Link to={"/policy/privacy"} className="hover:text-client-primary transition-default cursor-pointer">Chính sách Quyền riêng tư</Link>
                     </div>
                 </div>
             </div>

@@ -16,10 +16,11 @@ export const Copyright = () => {
                     <Link to="/" className="hover:text-client-secondary transition-[color] duration-300 ease-linear">Designthemes.</Link>
                 </p>
                 <span className="text-white">
-                    <Link to="/" className="hover:text-client-secondary transition-[color] duration-300 ease-linear">Privacy & Cookies</Link>
+                    <Link to="/policy/privacy" className="hover:text-client-secondary transition-[color] duration-300 ease-linear">Privacy & Cookies</Link>
                     &nbsp; |&nbsp;
-                    <Link to="/" className="hover:text-client-secondary transition-[color] duration-300 ease-linear">Terms of services</Link>
+                    <Link to="/policy/terms" className="hover:text-client-secondary transition-[color] duration-300 ease-linear">Terms of services</Link>
                 </span>
+
             </div>
         </section>
     )

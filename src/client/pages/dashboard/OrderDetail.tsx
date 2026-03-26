@@ -7,7 +7,7 @@ import { getOrderDetail } from "../../api/dashboard.api";
 import { formatCurrency } from "../../helpers";
 import dayjs from "dayjs";
 
-import { exportInvoicePdf, cancelOrder } from "../../api/order.api";
+import { exportInvoicePdf, cancelOrder, confirmReceipt } from "../../api/order.api";
 import { toast } from "react-toastify";
 import { createReview } from "../../api/review.api";
 import { useMutation } from "@tanstack/react-query";
@@ -172,17 +172,36 @@ export const OrderDetailPage = () => {
         }
     };
 
+    const handleConfirmReceipt = async () => {
+        if (!id || !order) return;
+        try {
+            const res = await confirmReceipt(id);
+            if (res.code === "success") {
+                toast.success(res.message || "Xác nhận nhận hàng thành công!");
+                fetchOrder();
+            } else {
+                toast.error(res.message || "Xác nhận thất bại!");
+            }
+        } catch (error) {
+            toast.error("Đã có lỗi xảy ra!");
+        }
+    };
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case "completed":
+            case "paid":
+            case "shipped":
+                return "text-[#05A845]";
             case "confirmed":
             case "shipping":
-                return "text-[#05A845]";
+                return "text-[#007BFF]";
             case "pending":
             case "unpaid":
-                return "text-[#007BFF]";
+                return "text-[#f97316]";
             case "cancelled":
             case "returned":
+            case "refunded":
                 return "text-[#ff0000]";
             case "request_cancel":
                 return "text-[#f97316]";
@@ -196,11 +215,13 @@ export const OrderDetailPage = () => {
             "pending": "Chờ xác nhận",
             "confirmed": "Đã xác nhận",
             "shipping": "Đang giao hàng",
+            "shipped": "Đã giao hàng",
             "completed": "Giao thành công",
             "cancelled": "Đã hủy",
             "returned": "Trả hàng",
             "unpaid": "Chưa thanh toán",
             "paid": "Đã thanh toán",
+            "delayed": "Trễ hẹn",
             "refunded": "Đã hoàn tiền",
             "request_cancel": "Chờ duyệt hủy/hoàn tiền"
         };
@@ -236,53 +257,64 @@ export const OrderDetailPage = () => {
                         </div>
 
                         {/* Order Stepper */}
-                        {["pending", "confirmed", "shipping", "completed"].includes(order.orderStatus) && (
+                        {["pending", "confirmed", "shipping", "shipped", "completed"].includes(order.orderStatus) && (
                             <div className="mb-[60px] pt-[20px] pb-[40px] px-[20px] bg-[#fdfdfd] border border-[#f5f5f5] rounded-[20px] relative">
-                                <div className="flex justify-between relative z-10 w-full max-w-[800px] mx-auto">
+                                <div className="flex justify-between relative z-10 w-full max-w-[850px] mx-auto">
                                     {[
                                         { key: "pending", label: "Chờ xác nhận", icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-[20px] h-[20px]"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 18 4.5H6a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 6 18.75h.75m11.25-3V3.75m-11.25 15V6.75M12 9V3.75m-6 0h12" /></svg> },
                                         { key: "confirmed", label: "Đã xác nhận", icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-[20px] h-[20px]"><path strokeLinecap="round" strokeLinejoin="round" d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 0 1 9 9v.375M10.125 2.25A3.375 3.375 0 0 1 13.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 0 1 3.375 3.375M9 15l2.25 2.25L15 12" /></svg> },
-                                        { key: "shipping", label: "Đang giao hàng", icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-[20px] h-[20px]"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.806H14.25M16.5 18.75h-2.25m0-11.177V3.75M14.25 7.573V3.75M2.25 13.5h14.505a4.502 4.502 0 0 1 1.84.395m-14.505 0a1.121 1.121 0 0 0 1.121 1.132v.003h12.262" /></svg> },
-                                        { key: "completed", label: "Hoàn thành", icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-[20px] h-[20px]"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" /></svg> },
+                                        { key: "shipping", label: "Đang giao", icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-[20px] h-[20px]"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.806H14.25M16.5 18.75h-2.25m0-11.177V3.75M14.25 7.573V3.75M2.25 13.5h14.505a4.502 4.502 0 0 1 1.84.395m-14.505 0a1.121 1.121 0 0 0 1.121 1.132v.003h12.262" /></svg> },
+                                        { key: "shipped", label: "Đã giao hàng", icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-[20px] h-[20px]"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" /></svg> },
+                                        { key: "completed", label: "Hoàn thành", icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-[20px] h-[20px]"><path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.563.563 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.563.563 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" /></svg> },
                                     ].map((step, index, arr) => {
-                                        const successFlow = ["pending", "confirmed", "shipping", "completed"];
+                                        const successFlow = ["pending", "confirmed", "shipping", "shipped", "completed"];
+                                        const isCancelled = order.orderStatus === "cancelled";
+                                        const isReturned = order.orderStatus === "returned";
+
                                         const currentIndex = successFlow.indexOf(order.orderStatus);
-                                        const isPast = index < currentIndex;
-                                        const isCurrent = index === currentIndex;
+                                        const isPast = currentIndex !== -1 && index < currentIndex;
+                                        const isCurrent = currentIndex !== -1 && index === currentIndex;
                                         const isLast = index === arr.length - 1;
+
+                                        let stepColorClass = "";
+                                        let labelColorClass = "";
+
+                                        if (isCancelled || isReturned) {
+                                            const wasStepReached = index === 0 || (order.statusHistory || []).some((h: any) => h.status === step.key);
+                                            stepColorClass = wasStepReached ? "bg-gradient-to-br from-gray-400 to-gray-600 text-white" : "bg-white text-gray-300 border-[2px] border-[#eee]";
+                                            labelColorClass = wasStepReached ? "text-gray-600" : "text-gray-300";
+                                        } else {
+                                            if (isCurrent || isPast) {
+                                                stepColorClass = "bg-gradient-to-br from-[#ff7e67] to-[#e1554e] text-white ring-4 ring-red-100";
+                                                labelColorClass = "text-client-secondary";
+                                            } else {
+                                                stepColorClass = "bg-white text-gray-400 border-[2px] border-[#eee]";
+                                                labelColorClass = "text-gray-400";
+                                            }
+                                        }
 
                                         return (
                                             <div key={step.key} className="flex flex-col items-center flex-1 relative">
-                                                {/* Connecting Line */}
                                                 {!isLast && (
                                                     <div className="absolute top-[30px] left-[50%] w-full h-[3px] bg-[#eee] -z-10">
                                                         <div
                                                             className="h-full bg-client-primary transition-all duration-700 ease-in-out"
-                                                            style={{ width: isPast ? "100%" : isCurrent ? "0%" : "0%" }}
+                                                            style={{ width: (isPast && !isCancelled && !isReturned) ? "100%" : "0%" }}
                                                         />
                                                     </div>
                                                 )}
-
-                                                {/* Circle Icon */}
-                                                <div
-                                                    className={`w-[60px] h-[60px] rounded-full flex items-center justify-center transition-all duration-500 shadow-md ${isCurrent || isPast
-                                                        ? "bg-gradient-to-br from-[#ff7e67] to-[#e1554e] text-white ring-4 ring-red-100"
-                                                        : "bg-white text-gray-400 border-[2px] border-[#eee]"
-                                                        }`}
-                                                >
+                                                <div className={`w-[60px] h-[60px] rounded-full flex items-center justify-center transition-all duration-500 shadow-md ${stepColorClass}`}>
                                                     {step.icon}
                                                 </div>
-
-                                                {/* Label */}
                                                 <div className="mt-[15px] flex flex-col items-center">
-                                                    <span
-                                                        className={`text-[13px] font-[700] uppercase tracking-wider transition-colors duration-500 text-center ${isCurrent || isPast ? "text-client-secondary" : "text-gray-400"
-                                                            }`}
-                                                    >
+                                                    <span className={`text-[13px] font-[700] uppercase tracking-wider transition-colors duration-500 text-center ${labelColorClass}`}>
                                                         {step.label}
                                                     </span>
-                                                    {isCurrent && (
+                                                    {isCurrent && !isCancelled && !isReturned && (
                                                         <span className="text-[10px] text-red-400 font-[500] animate-pulse mt-1">Đang thực hiện</span>
+                                                    )}
+                                                    {(isCancelled || isReturned) && order.orderStatus === step.key && (
+                                                        <span className="text-[10px] text-red-600 font-[700] mt-1 uppercase">{isCancelled ? "Đã hủy" : "Trả hàng"}</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -311,9 +343,9 @@ export const OrderDetailPage = () => {
                                                 <span className="text-[#7d7b7b]">Thanh toán: </span>
                                                 <span className={`font-[500] ${getStatusColor(order.paymentStatus)}`}>{getStatusText(order.paymentStatus)}</span>
                                             </p>
-                                            {order.orderStatus === "cancelled" && order.cancelledReason && (
+                                            {(order.orderStatus === "cancelled" || order.orderStatus === "returned") && (
                                                 <p className="text-[14px] bg-red-50 text-red-600 p-3 rounded-lg border border-red-100 mt-2">
-                                                    <span className="font-bold">Lý do hủy:</span> {order.cancelledReason}
+                                                    <span className="font-bold">Lý do {order.orderStatus === "cancelled" ? "hủy" : "trả hàng"}:</span> {order.cancelledReason || "Theo yêu cầu của khách hàng"}
                                                 </p>
                                             )}
                                         </div>
@@ -326,6 +358,18 @@ export const OrderDetailPage = () => {
                                                 {exporting && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
                                                 Xuất hóa đơn
                                             </button>
+
+                                            {order.orderStatus === "shipped" && (
+                                                <button
+                                                    onClick={handleConfirmReceipt}
+                                                    className="bg-[#05A845] hover:bg-[#048a39] transition-default text-white font-[600] text-[14px] py-[15px] px-[20px] rounded-[6px] cursor-pointer flex items-center justify-center gap-2 w-full shadow-lg animate-bounce-subtle"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-[18px] h-[18px]">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                                                    </svg>
+                                                    Đã nhận được hàng
+                                                </button>
+                                            )}
 
                                             {(order.orderStatus === "pending" || order.orderStatus === "confirmed") && (
                                                 <button
