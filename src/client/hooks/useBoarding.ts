@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createBoardingBooking, payBoardingBooking } from "../api/boarding-booking.api";
 import { getAvailableCages } from "../api/boarding-cage.api";
 import {
   createBoardingCageReview,
@@ -8,6 +7,11 @@ import {
   getFoodTemplates,
   getExerciseTemplates,
 } from "../api/boarding-cage-detail.api";
+import {
+  createBoardingBooking,
+  payBoardingBooking,
+  getBoardingConfig,
+} from "../api/boarding-booking.api";
 
 export const useCreateBoardingBooking = () => {
   return useMutation({
@@ -102,5 +106,15 @@ export const useExerciseTemplates = (petType: string = "all") => {
       const res = await getExerciseTemplates(petType);
       return res.data?.data || [];
     },
+  });
+};
+export const useBoardingConfig = () => {
+  return useQuery({
+    queryKey: ["boarding-config"],
+    queryFn: async () => {
+      const res = await getBoardingConfig();
+      return res.data;
+    },
+    staleTime: 1000 * 60 * 10, // 10 minutes
   });
 };

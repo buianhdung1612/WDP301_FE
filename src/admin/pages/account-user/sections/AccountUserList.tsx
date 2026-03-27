@@ -43,7 +43,7 @@ const TabBadge = styled('span')(() => ({
     transition: 'all 0.2s',
 }));
 
-export const AccountUserList = ({ createdBy }: { createdBy?: string }) => {
+export const AccountUserList = ({ createdBy, assignedStaffId }: { createdBy?: string; assignedStaffId?: string }) => {
     const navigate = useNavigate();
     const [status, setStatus] = useState('all');
     const [search, setSearch] = useState('');
@@ -54,6 +54,7 @@ export const AccountUserList = ({ createdBy }: { createdBy?: string }) => {
         ...(status !== 'all' && { status }),
         ...(search && { q: search }),
         ...(createdBy && { createdBy }),
+        ...(assignedStaffId && { assignedStaffId }),
         page: page + 1,
         limit: pageSize,
     };
