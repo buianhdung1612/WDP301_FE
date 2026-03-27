@@ -30,6 +30,8 @@ import {
     Tooltip,
     Autocomplete,
     Paper,
+    LinearProgress,
+    Grid,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
@@ -57,6 +59,7 @@ import {
 } from "../../api/boarding-booking.api";
 import { getFoodTemplates, getExerciseTemplates } from "../../api/pet-care-template.api";
 import { uploadMediaToCloudinary } from "../../api/uploadCloudinary.api";
+
 
 const trangThaiChamSocOptions: Array<{ value: "pending" | "done" | "skipped"; label: string }> = [
     { value: "pending", label: "Chưa thực hiện" },
@@ -679,150 +682,205 @@ export const BoardingCareSchedulePage = () => {
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((r: any) => (
-                                        <Fragment key={r._id}>
-                                            <TableRow
-                                                hover
-                                                sx={{
-                                                    "&:hover": { bgcolor: "var(--palette-action-hover)" },
-                                                    transition: "background-color 0.2s"
-                                                }}
-                                            >
-                                                <TableCell>
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={() => setOpenRows(p => p.includes(r._id) ? p.filter(id => id !== r._id) : [...p, r._id])}
-                                                    >
-                                                        <Icon icon={openRows.includes(r._id) ? "eva:arrow-ios-upward-fill" : "eva:arrow-ios-downward-fill"} width={20} />
-                                                    </IconButton>
-                                                </TableCell>
-                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <Typography
-                                                        onClick={() => setOpenRows(p => p.includes(r._id) ? p.filter(id => id !== r._id) : [...p, r._id])}
-                                                        sx={{
-                                                            fontWeight: 700,
-                                                            fontSize: "0.875rem",
-                                                            color: "var(--palette-primary-main)",
-                                                            cursor: "pointer",
-                                                            "&:hover": { textDecoration: "underline" }
-                                                        }}
-                                                    >
-                                                        #{r.code?.toUpperCase().slice(-6)}
-                                                    </Typography>
-                                                    <Typography variant="caption" sx={{ color: "var(--palette-text-secondary)", display: "block", fontSize: "0.75rem", fontWeight: 500 }}>
-                                                        {dayjs(r.createdAt).format("DD/MM/YYYY HH:mm")}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <Stack direction="row" spacing={1.5} alignItems="center">
-                                                        <Avatar src={r.userId?.avatar} variant="rounded" sx={{ width: 36, height: 36 }} />
-                                                        <Box>
-                                                            <Typography sx={{ fontWeight: 600, fontSize: "0.875rem" }}>{r.fullName || r.userId?.fullName}</Typography>
-                                                            <Typography sx={{ variant: "caption", color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>{r.phone}</Typography>
-                                                        </Box>
-                                                    </Stack>
-                                                </TableCell>
-                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <Typography sx={{ fontSize: "0.875rem" }}>
-                                                        {dayjs(r.checkInDate).format("DD/MM")} - {dayjs(r.checkOutDate).format("DD/MM")}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <Stack direction="row" spacing={1}>
-                                                        <Box sx={{ px: 1, py: 0.5, borderRadius: 1, bgcolor: "var(--palette-warning-lighter)", color: "var(--palette-warning-dark)", display: "flex", alignItems: "center", gap: 0.5, fontSize: "0.75rem", fontWeight: 700 }}>
-                                                            <Icon icon="fluent:food-24-filled" width={14} /> {r.scheduleSummary?.feedingCount || 0}
-                                                        </Box>
-                                                        <Box sx={{ px: 1, py: 0.5, borderRadius: 1, bgcolor: "var(--palette-success-lighter)", color: "var(--palette-success-dark)", display: "flex", alignItems: "center", gap: 0.5, fontSize: "0.75rem", fontWeight: 700 }}>
-                                                            <Icon icon="solar:run-bold" width={14} /> {r.scheduleSummary?.exerciseCount || 0}
-                                                        </Box>
-                                                    </Stack>
-                                                </TableCell>
-                                                <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <Button
-                                                        variant="contained"
-                                                        size="small"
-                                                        onClick={() => moDialog(r)}
-                                                        sx={{
-                                                            bgcolor: "var(--palette-text-primary)",
-                                                            color: "var(--palette-common-white)",
-                                                            fontWeight: 700,
-                                                            minHeight: "2rem",
-                                                            textTransform: "none",
-                                                            "&:hover": { bgcolor: "var(--palette-grey-700)" }
-                                                        }}
-                                                    >
-                                                        Quản lý
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell colSpan={6} sx={{ p: 0, bgcolor: "var(--palette-background-neutral)" }}>
-                                                    <Collapse in={openRows.includes(r._id)}>
-                                                        <Box p={3} sx={{ bgcolor: "var(--palette-background-neutral)", borderRadius: "var(--shape-borderRadius-md)", mx: 2, mb: 2 }}>
-                                                            <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 800, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                                <Icon icon="solar:paw-print-bold" width={20} />
-                                                                Danh sách thú cưng trong đơn
-                                                            </Typography>
-                                                            <Stack spacing={2}>
-                                                                {(r.petIds || []).map((pet: any) => (
-                                                                    <Paper
-                                                                        key={pet._id}
-                                                                        variant="outlined"
-                                                                        sx={{
-                                                                            p: 1.5,
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            justifyContent: 'space-between',
-                                                                            borderRadius: "var(--shape-borderRadius-md)",
-                                                                            bgcolor: "var(--palette-common-white)"
-                                                                        }}
-                                                                    >
-                                                                        <Stack direction="row" spacing={2} alignItems="center">
-                                                                            <Avatar src={pet.avatar} sx={{ width: 44, height: 44, border: "2px solid var(--palette-divider)" }} />
-                                                                            <Box>
-                                                                                <Typography sx={{ fontWeight: 700 }}>{pet.name}</Typography>
-                                                                                <Stack direction="row" spacing={1} alignItems="center">
-                                                                                    <Typography variant="caption" color="text.secondary">
-                                                                                        {pet.type === 'dog' ? 'Chó' : 'Mèo'} • {pet.weight}kg
-                                                                                    </Typography>
-                                                                                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                                                                        <Box sx={{ px: 0.6, py: 0.2, borderRadius: 0.5, bgcolor: "var(--palette-warning-lighter)", color: "var(--palette-warning-dark)", fontSize: "0.65rem", fontWeight: 800 }}>
-                                                                                            {(r.feedingSchedule || []).filter((i: any) => !i.petId || String(i.petId) === String(pet._id)).length} Lịch ăn
-                                                                                        </Box>
-                                                                                        <Box sx={{ px: 0.6, py: 0.2, borderRadius: 0.5, bgcolor: "var(--palette-success-lighter)", color: "var(--palette-success-dark)", fontSize: "0.65rem", fontWeight: 800 }}>
-                                                                                            {(r.exerciseSchedule || []).filter((i: any) => !i.petId || String(i.petId) === String(pet._id)).length} Vận động
-                                                                                        </Box>
-                                                                                    </Box>
-                                                                                </Stack>
-                                                                            </Box>
-                                                                        </Stack>
-                                                                        <Button
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            startIcon={<Icon icon="solar:clipboard-check-bold" />}
-                                                                            onClick={() => moDialog(r, pet._id)}
-                                                                            sx={{
-                                                                                fontWeight: 700,
-                                                                                borderRadius: "var(--shape-borderRadius)",
-                                                                                textTransform: 'none'
-                                                                            }}
-                                                                        >
-                                                                            Chăm sóc {pet.name}
-                                                                        </Button>
-                                                                    </Paper>
-                                                                ))}
-                                                            </Stack>
-                                                            <Box sx={{ mt: 2, pt: 2, borderTop: "1px dashed var(--palette-divider)" }}>
-                                                                <Typography variant="caption" sx={{ color: "var(--palette-text-secondary)", fontStyle: 'italic' }}>
-                                                                    Đơn hàng hiện đang ở trạng thái {r.boardingStatus}. Khách hàng đã thanh toán đầy đủ.
-                                                                </Typography>
+                                    filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((r: any) => {
+                                        const isExpired = r.checkOutDate && dayjs().diff(dayjs(r.checkOutDate), 'day') > 2;
+                                        return (
+                                            <Fragment key={r._id}>
+                                                <TableRow
+                                                    hover
+                                                    sx={{
+                                                        "&:hover": { bgcolor: "var(--palette-action-hover)" },
+                                                        transition: "background-color 0.2s"
+                                                    }}
+                                                >
+                                                    <TableCell>
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => setOpenRows(p => p.includes(r._id) ? p.filter(id => id !== r._id) : [...p, r._id])}
+                                                        >
+                                                            <Icon icon={openRows.includes(r._id) ? "eva:arrow-ios-upward-fill" : "eva:arrow-ios-downward-fill"} width={20} />
+                                                        </IconButton>
+                                                    </TableCell>
+                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                        <Typography
+                                                            onClick={() => setOpenRows(p => p.includes(r._id) ? p.filter(id => id !== r._id) : [...p, r._id])}
+                                                            sx={{
+                                                                fontWeight: 700,
+                                                                fontSize: "0.875rem",
+                                                                color: "var(--palette-primary-main)",
+                                                                cursor: "pointer",
+                                                                "&:hover": { textDecoration: "underline" }
+                                                            }}
+                                                        >
+                                                            #{r.code?.toUpperCase().slice(-6)}
+                                                        </Typography>
+                                                        <Typography variant="caption" sx={{ color: "var(--palette-text-secondary)", display: "block", fontSize: "0.75rem", fontWeight: 500 }}>
+                                                            {dayjs(r.createdAt).format("DD/MM/YYYY HH:mm")}
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                        <Stack direction="row" spacing={1.5} alignItems="center">
+                                                            <Avatar src={r.userId?.avatar} variant="rounded" sx={{ width: 36, height: 36 }} />
+                                                            <Box>
+                                                                <Typography sx={{ fontWeight: 600, fontSize: "0.875rem" }}>{r.fullName || r.userId?.fullName}</Typography>
+                                                                <Typography sx={{ variant: "caption", color: "var(--palette-text-secondary)", fontSize: "0.75rem" }}>{r.phone}</Typography>
                                                             </Box>
-                                                        </Box>
-                                                    </Collapse>
-                                                </TableCell>
-                                            </TableRow>
-                                        </Fragment>
-                                    ))
+                                                        </Stack>
+                                                    </TableCell>
+                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                        <Typography sx={{ fontSize: "0.875rem" }}>
+                                                            {dayjs(r.checkInDate).format("DD/MM")} - {dayjs(r.checkOutDate).format("DD/MM")}
+                                                        </Typography>
+                                                    </TableCell>
+                                                    <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                        <Stack direction="row" spacing={1}>
+                                                            <Box sx={{ px: 1, py: 0.5, borderRadius: 1, bgcolor: "var(--palette-warning-lighter)", color: "var(--palette-warning-dark)", display: "flex", alignItems: "center", gap: 0.5, fontSize: "0.75rem", fontWeight: 700 }}>
+                                                                <Icon icon="fluent:food-24-filled" width={14} /> {r.scheduleSummary?.feedingCount || 0}
+                                                            </Box>
+                                                            <Box sx={{ px: 1, py: 0.5, borderRadius: 1, bgcolor: "var(--palette-success-lighter)", color: "var(--palette-success-dark)", display: "flex", alignItems: "center", gap: 0.5, fontSize: "0.75rem", fontWeight: 700 }}>
+                                                                <Icon icon="solar:run-bold" width={14} /> {r.scheduleSummary?.exerciseCount || 0}
+                                                            </Box>
+                                                        </Stack>
+                                                    </TableCell>
+                                                    <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
+                                                        <Button
+                                                            variant="contained"
+                                                            size="small"
+                                                            disabled={!!isExpired}
+                                                            onClick={() => moDialog(r)}
+                                                            sx={{
+                                                                bgcolor: isExpired ? "var(--palette-grey-400)" : "var(--palette-text-primary)",
+                                                                color: "var(--palette-common-white)",
+                                                                fontWeight: 700,
+                                                                minHeight: "2rem",
+                                                                textTransform: "none",
+                                                                "&:hover": { bgcolor: isExpired ? "var(--palette-grey-400)" : "var(--palette-grey-700)" }
+                                                            }}
+                                                        >
+                                                            {isExpired ? "Đã khóa" : "Quản lý"}
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                                <TableRow>
+                                                    <TableCell colSpan={6} sx={{ p: 0, bgcolor: "var(--palette-background-neutral)" }}>
+                                                        <Collapse in={openRows.includes(r._id)}>
+                                                            <Box p={3} sx={{ bgcolor: "var(--palette-background-neutral)", borderRadius: "var(--shape-borderRadius-md)", mx: 2, mb: 2 }}>
+                                                                <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 800, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                    <Icon icon="solar:paw-print-bold" width={20} />
+                                                                    Danh sách thú cưng trong đơn
+                                                                </Typography>
+                                                                <Grid container spacing={2.5}>
+                                                                    {(r.petIds || []).map((pet: any) => {
+                                                                        const fList = (r.feedingSchedule || []).filter((i: any) => !i.petId || String(i.petId) === String(pet._id));
+                                                                        const fDone = fList.filter((i: any) => i.status === 'done').length;
+                                                                        const fTotal = fList.length;
+
+                                                                        const eList = (r.exerciseSchedule || []).filter((i: any) => !i.petId || String(i.petId) === String(pet._id));
+                                                                        const eDone = eList.filter((i: any) => i.status === 'done').length;
+                                                                        const eTotal = eList.length;
+
+                                                                        return (
+                                                                            <Grid item xs={12} sm={6} key={pet._id}>
+                                                                                <Paper
+                                                                                    sx={{
+                                                                                        p: 2.5,
+                                                                                        borderRadius: "var(--shape-borderRadius-lg)",
+                                                                                        bgcolor: "var(--palette-common-white)",
+                                                                                        border: "1px solid var(--palette-divider)",
+                                                                                        boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+                                                                                        position: 'relative',
+                                                                                        overflow: 'hidden',
+                                                                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                                                        '&:hover': {
+                                                                                            boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+                                                                                            transform: 'translateY(-4px)',
+                                                                                            borderColor: 'var(--palette-primary-main)'
+                                                                                        },
+                                                                                        '&::before': {
+                                                                                            content: '""',
+                                                                                            position: 'absolute',
+                                                                                            left: 0, top: 0, bottom: 0, width: 4,
+                                                                                            bgcolor: pet.type === 'dog' ? 'var(--palette-info-main)' : 'var(--palette-warning-main)'
+                                                                                        }
+                                                                                    }}
+                                                                                >
+                                                                                    <Stack direction="row" spacing={2.5} alignItems="flex-start">
+                                                                                        <Avatar
+                                                                                            src={pet.avatar}
+                                                                                            sx={{
+                                                                                                width: 64,
+                                                                                                height: 64,
+                                                                                                borderRadius: 2,
+                                                                                                boxShadow: "var(--customShadows-z8)",
+                                                                                                bgcolor: 'var(--palette-background-neutral)'
+                                                                                            }}
+                                                                                        />
+                                                                                        <Box flexGrow={1}>
+                                                                                            <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 0.5 }}>{pet.name}</Typography>
+                                                                                            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+                                                                                                <Typography variant="caption" sx={{ fontWeight: 600, color: "var(--palette-text-secondary)", bgcolor: "var(--palette-background-neutral)", px: 1, py: 0.25, borderRadius: 0.5 }}>
+                                                                                                    {pet.type === 'dog' ? 'Chó' : 'Mèo'} • {pet.weight}kg
+                                                                                                </Typography>
+                                                                                            </Stack>
+
+                                                                                            <Stack spacing={1.5}>
+                                                                                                <Box>
+                                                                                                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+                                                                                                        <Typography variant="caption" sx={{ fontWeight: 700, color: 'var(--palette-warning-dark)', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                                                                            <Icon icon="fluent:food-24-filled" width={14} /> Lịch ăn
+                                                                                                        </Typography>
+                                                                                                        <Typography variant="caption" sx={{ fontWeight: 800 }}>{fDone}/{fTotal}</Typography>
+                                                                                                    </Stack>
+                                                                                                    <LinearProgress variant="determinate" value={fTotal > 0 ? (fDone / fTotal) * 100 : 0} color="warning" sx={{ height: 6, borderRadius: 3, bgcolor: 'var(--palette-warning-lighter)' }} />
+                                                                                                </Box>
+                                                                                                <Box>
+                                                                                                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+                                                                                                        <Typography variant="caption" sx={{ fontWeight: 700, color: 'var(--palette-success-dark)', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                                                                            <Icon icon="solar:run-bold" width={14} /> Vận động
+                                                                                                        </Typography>
+                                                                                                        <Typography variant="caption" sx={{ fontWeight: 800 }}>{eDone}/{eTotal}</Typography>
+                                                                                                    </Stack>
+                                                                                                    <LinearProgress variant="determinate" value={eTotal > 0 ? (eDone / eTotal) * 100 : 0} color="success" sx={{ height: 6, borderRadius: 3, bgcolor: 'var(--palette-success-lighter)' }} />
+                                                                                                </Box>
+                                                                                            </Stack>
+
+                                                                                            <Button
+                                                                                                fullWidth
+                                                                                                variant="contained"
+                                                                                                size="small"
+                                                                                                disabled={!!isExpired}
+                                                                                                onClick={() => moDialog(r, pet._id)}
+                                                                                                startIcon={<Icon icon={isExpired ? "solar:lock-bold" : "solar:clipboard-check-bold"} />}
+                                                                                                sx={{
+                                                                                                    mt: 2.5,
+                                                                                                    fontWeight: 800,
+                                                                                                    borderRadius: 1.5,
+                                                                                                    textTransform: 'none',
+                                                                                                    bgcolor: isExpired ? 'var(--palette-action-disabledBackground)' : 'var(--palette-text-primary)',
+                                                                                                    '&:hover': { bgcolor: isExpired ? 'var(--palette-action-disabledBackground)' : 'var(--palette-grey-800)' }
+                                                                                                }}
+                                                                                            >
+                                                                                                {isExpired ? "Đã khóa" : `Chăm sóc ${pet.name}`}
+                                                                                            </Button>
+                                                                                        </Box>
+                                                                                    </Stack>
+                                                                                </Paper>
+                                                                            </Grid>
+                                                                        );
+                                                                    })}
+                                                                </Grid>
+                                                                <Box sx={{ mt: 2, pt: 2, borderTop: "1px dashed var(--palette-divider)" }}>
+                                                                    <Typography variant="caption" sx={{ color: "var(--palette-text-secondary)", fontStyle: 'italic' }}>
+                                                                        Đơn hàng hiện đang ở trạng thái {r.boardingStatus}. Khách hàng đã thanh toán đầy đủ.
+                                                                    </Typography>
+                                                                </Box>
+                                                            </Box>
+                                                        </Collapse>
+                                                    </TableCell>
+                                                </TableRow>
+                                            </Fragment>
+                                        );
+                                    })
                                 )}
                             </TableBody>
                         </Table>
