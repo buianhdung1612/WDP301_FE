@@ -17,7 +17,8 @@ interface RenderCreatedAtCellProps {
 }
 
 export const RenderTitleCell = (params: GridRenderCellParams) => {
-    const { name, avatar, altImage, id } = params.row;
+    const { name, avatar, altImage } = params.row;
+    const id = params.row._id || params.row.id;
     const navigate = useNavigate();
 
     return (
@@ -151,7 +152,7 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
     const { mutate: deleteBrand } = useDeleteBrand();
     const { mutate: restoreBrand } = useRestoreBrand();
     const { mutate: forceDeleteBrand } = useDeletePermanentBrand();
-    const id = params.row.id;
+    const id = params.row._id || params.row.id;
     const isTrash = params.row.deleted;
 
     const handleEdit = () => {

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { GridColDef } from '@mui/x-data-grid';
-import { RenderActionsCell, RenderCreatedAtCell, RenderProductCell, RenderStatusCell, RenderStockCell } from '../utils/render-cells';
+import { RenderActionsCell, RenderProductCell, RenderStatusCell, RenderStockCell } from '../utils/render-cells';
 import { IProduct } from '../configs/types';
 import { useMemo } from 'react';
 
@@ -17,12 +17,10 @@ export const useProductColumns = (isTrash: boolean = false) => {
             renderCell: RenderProductCell,
         },
         {
-            field: "createdAt",
-            headerName: t("admin.common.created_at") || "Created At",
-            width: 160,
+            field: "category",
+            headerName: t("admin.product.fields.category") || "Danh mục",
+            width: 180,
             filterable: true,
-            type: "date",
-            renderCell: RenderCreatedAtCell,
         },
         {
             field: "brandName",

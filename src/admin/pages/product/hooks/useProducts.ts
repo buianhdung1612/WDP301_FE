@@ -45,6 +45,7 @@ export const useProducts = () => {
             stock: item.stock || 0,
             price: item.priceNew || item.priceOld || 0,
             status: item.status || 'draft',
+            brandName: item.brandName || 'N/A',
         }));
     }, [data]);
 
