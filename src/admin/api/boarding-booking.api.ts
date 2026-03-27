@@ -71,6 +71,8 @@ export interface BoardingFeedingItem {
     staffName?: string;
     status?: "pending" | "done" | "skipped";
     petType?: "dog" | "cat" | "all";
+    petId?: string;
+    petName?: string;
     doneAt?: string | null;
 }
 
@@ -85,6 +87,8 @@ export interface BoardingExerciseItem {
     staffName?: string;
     status?: "pending" | "done" | "skipped";
     petType?: "dog" | "cat" | "all";
+    petId?: string;
+    petName?: string;
     doneAt?: string | null;
 }
 

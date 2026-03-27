@@ -55,7 +55,8 @@ export const BoardingConfigPage = () => {
             minDaysForDeposit: 2,
             autoCancelHeldHours: 2,
             bookingCancellationPeriod: 24,
-            refundPercentage: 80
+            refundPercentage: 80,
+            maxCagesPerStaff: 10
         },
     });
 
@@ -159,6 +160,27 @@ export const BoardingConfigPage = () => {
                                     <TextField {...field} label="Số ngày ở tối thiểu để yêu cầu đặt cọc" fullWidth type="number"
                                         InputProps={{ endAdornment: <InputAdornment position="end">ngày</InputAdornment> }}
                                         onChange={(e) => field.onChange(Number(e.target.value))} />
+                                )} />
+                            </Grid>
+                        </Grid>
+                    </Card>
+
+                    {/* Nhân sự & Phân công */}
+                    <Card sx={{ p: 4, borderRadius: '24px', boxShadow: "0 8px 32px rgba(0,0,0,0.03)", border: `1px solid ${BRAND_COLORS.border}` }}>
+                        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 4 }}>
+                            <Box sx={{ p: 1, bgcolor: alpha("#10b981", 0.1), borderRadius: '12px', color: "#10b981" }}>
+                                <Icon icon="solar:users-group-rounded-bold-duotone" width={24} />
+                            </Box>
+                            <Typography variant="h6" sx={{ fontWeight: 800 }}>Nhân sự & Phân công</Typography>
+                        </Stack>
+
+                        <Grid container spacing={4}>
+                            <Grid size={{ xs: 12, md: 12 }}>
+                                <Controller name="maxCagesPerStaff" control={control} render={({ field }) => (
+                                    <TextField {...field} label="Giới hạn số chuồng tối đa cho mỗi nhân viên" fullWidth type="number"
+                                        InputProps={{ endAdornment: <InputAdornment position="end">chuồng / NV</InputAdornment> }}
+                                        onChange={(e) => field.onChange(Number(e.target.value))}
+                                        helperText="Hệ thống sẽ dừng tự động gán chuồng cho nhân viên nếu họ đã đạt giới hạn này trong ngày." />
                                 )} />
                             </Grid>
                         </Grid>
