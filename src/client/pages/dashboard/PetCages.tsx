@@ -69,6 +69,15 @@ const sortCareItems = (a: any, b: any) => normalizeTime(a?.time).localeCompare(n
 
 const getCareStatusMeta = (status?: string) => CARE_STATUS_META[String(status || "pending")] || CARE_STATUS_META.pending;
 
+const filterCareSchedule = (schedule: any[], petId: any) => {
+  if (!Array.isArray(schedule)) return [];
+  const targetId = String(petId || "").trim();
+  return schedule.filter((item: any) => {
+    if (!item.petId) return true; // Legacy fallback
+    return String(item.petId || "").trim() === targetId;
+  });
+};
+
 const getBoardingStatusMeta = (status?: string) => {
   const key = normalizeStatus(status);
   return BOARDING_STATUS_META[key] || { label: status || "Không rõ", className: "bg-slate-200 text-slate-700" };
@@ -399,14 +408,11 @@ const CageCareDetailModal = ({
     };
   }, []);
 
-  const feedingSchedule = Array.isArray(cage?.lastBooking?.feedingSchedule)
-    ? [...cage.lastBooking.feedingSchedule].sort(sortCareItems)
-    : [];
-  const exerciseSchedule = Array.isArray(cage?.lastBooking?.exerciseSchedule)
-    ? [...cage.lastBooking.exerciseSchedule].sort(sortCareItems)
-    : [];
-  const careProgress = getCareProgress(feedingSchedule, exerciseSchedule);
   const primaryPet = cage?.pet || (Array.isArray(cage?.pets) && cage.pets.length > 0 ? cage.pets[0] : null);
+  const currentPetId = primaryPet?._id;
+  const feedingSchedule = filterCareSchedule(cage?.lastBooking?.feedingSchedule, currentPetId).sort(sortCareItems);
+  const exerciseSchedule = filterCareSchedule(cage?.lastBooking?.exerciseSchedule, currentPetId).sort(sortCareItems);
+  const careProgress = getCareProgress(feedingSchedule, exerciseSchedule);
   const petMeta = [
     primaryPet?.age ? `${primaryPet.age} tuổi` : null,
     typeof primaryPet?.weight === "number" ? `${primaryPet.weight}kg` : null,
@@ -769,20 +775,22 @@ export const PetCagesPage = () => {
 
   const summary = useMemo(() => {
     const totalCages = filteredCages.length;
-    const totalFeeding = filteredCages.reduce(
-      (sum, cage) => sum + (Array.isArray(cage?.lastBooking?.feedingSchedule) ? cage.lastBooking.feedingSchedule.length : 0),
-      0
-    );
-    const totalExercise = filteredCages.reduce(
-      (sum, cage) => sum + (Array.isArray(cage?.lastBooking?.exerciseSchedule) ? cage.lastBooking.exerciseSchedule.length : 0),
-      0
-    );
+    const totalFeeding = filteredCages.reduce((sum, cage) => {
+      const petId = cage.pet?._id;
+      return sum + filterCareSchedule(cage?.lastBooking?.feedingSchedule, petId).length;
+    }, 0);
+    const totalExercise = filteredCages.reduce((sum, cage) => {
+      const petId = cage.pet?._id;
+      return sum + filterCareSchedule(cage?.lastBooking?.exerciseSchedule, petId).length;
+    }, 0);
     const doneFeeding = filteredCages.reduce((sum, cage) => {
-      const list = Array.isArray(cage?.lastBooking?.feedingSchedule) ? cage.lastBooking.feedingSchedule : [];
+      const petId = cage.pet?._id;
+      const list = filterCareSchedule(cage?.lastBooking?.feedingSchedule, petId);
       return sum + list.filter((item: any) => normalizeStatus(item?.status) === "done").length;
     }, 0);
     const doneExercise = filteredCages.reduce((sum, cage) => {
-      const list = Array.isArray(cage?.lastBooking?.exerciseSchedule) ? cage.lastBooking.exerciseSchedule : [];
+      const petId = cage.pet?._id;
+      const list = filterCareSchedule(cage?.lastBooking?.exerciseSchedule, petId);
       return sum + list.filter((item: any) => normalizeStatus(item?.status) === "done").length;
     }, 0);
     const totalCareItems = totalFeeding + totalExercise;
@@ -938,12 +946,9 @@ export const PetCagesPage = () => {
             ) : (
               <div className="grid grid-cols-2 gap-[30px] xl:grid-cols-1">
                 {filteredCages.map((cage: any) => {
-                  const feedingSchedule = Array.isArray(cage?.lastBooking?.feedingSchedule)
-                    ? [...cage.lastBooking.feedingSchedule].sort(sortCareItems)
-                    : [];
-                  const exerciseSchedule = Array.isArray(cage?.lastBooking?.exerciseSchedule)
-                    ? [...cage.lastBooking.exerciseSchedule].sort(sortCareItems)
-                    : [];
+                  const currentPetId = cage.pet?._id;
+                  const feedingSchedule = filterCareSchedule(cage?.lastBooking?.feedingSchedule, currentPetId).sort(sortCareItems);
+                  const exerciseSchedule = filterCareSchedule(cage?.lastBooking?.exerciseSchedule, currentPetId).sort(sortCareItems);
                   const boardingStatusMeta = getBoardingStatusMeta(cage?.lastBooking?.boardingStatus);
                   const careProgress = getCareProgress(feedingSchedule, exerciseSchedule);
 

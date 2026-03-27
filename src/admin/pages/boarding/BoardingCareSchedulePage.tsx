@@ -1,5 +1,5 @@
 ﻿import dayjs from "dayjs";
-import { Fragment, useMemo, useState, useEffect, useRef } from "react";
+import React, { Fragment, useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
     Avatar,
@@ -51,8 +51,8 @@ import {
     getBoardingBookings,
     getBoardingHotelStaffs,
     updateBoardingCareSchedule,
-    type BoardingExerciseItem,
-    type BoardingFeedingItem,
+    type BoardingExerciseItem as BaseBoardingExerciseItem,
+    type BoardingFeedingItem as BaseBoardingFeedingItem,
     type BoardingProofMediaItem,
 } from "../../api/boarding-booking.api";
 import { getFoodTemplates, getExerciseTemplates } from "../../api/pet-care-template.api";
@@ -77,12 +77,221 @@ const calculateRecommendedPortion = (pets: any[]) => {
     return gramPerMeal > 0 ? `${gramPerMeal}g` : "";
 };
 
-const taoDongLichAn = (petType: "dog" | "cat" | "all" = "all"): BoardingFeedingItem => ({
-    time: "", food: "", amount: "", note: "", proofMedia: [], staffId: "", staffName: "", status: "pending", petType,
+interface BoardingFeedingItem extends BaseBoardingFeedingItem {
+    _autoSplit?: boolean;
+}
+
+interface BoardingExerciseItem extends BaseBoardingExerciseItem {
+    _autoSplit?: boolean;
+}
+
+const taoDongLichAn = (petType: "dog" | "cat" | "all" = "all", petId?: string, petName?: string): BoardingFeedingItem => ({
+    time: "", food: "", amount: "", note: "", proofMedia: [], staffId: "", staffName: "", status: "pending", petType, petId, petName,
 });
 
-const taoDongVanDong = (petType: "dog" | "cat" | "all" = "all"): BoardingExerciseItem => ({
-    time: "", activity: "", durationMinutes: 0, note: "", proofMedia: [], staffId: "", staffName: "", status: "pending", petType,
+const taoDongVanDong = (petType: "dog" | "cat" | "all" = "all", petId?: string, petName?: string): BoardingExerciseItem => ({
+    time: "", activity: "", durationMinutes: 0, note: "", proofMedia: [], staffId: "", staffName: "", status: "pending", petType, petId, petName,
+});
+
+const getStaffIdFromObject = (s: any) => (typeof s === "string" ? s : s?._id || "");
+const getStaffNameFromObject = (s: any) => (typeof s === "string" ? "" : s?.fullName || "");
+const normalizeProofMedia = (p: any): BoardingProofMediaItem[] => (Array.isArray(p) ? p : []).map(i => ({
+    url: typeof i === "string" ? i : i?.url || "",
+    kind: (i?.kind || "image") as "image" | "video"
+})).filter(i => !!i.url);
+
+// Memoized Sub-components for better performance
+const FeedingRow = React.memo(({
+    item,
+    foodOptions,
+    staffOptions,
+    statusOptions,
+    onUpdate,
+    onDelete,
+    onAddMedia,
+    onRemoveMedia,
+    onViewMedia
+}: {
+    item: BoardingFeedingItem;
+    idx: number;
+    foodOptions: string[];
+    staffOptions: any[];
+    statusOptions: any[];
+    onUpdate: (data: Partial<BoardingFeedingItem>) => void;
+    onDelete: () => void;
+    onAddMedia: (files: FileList) => void;
+    onRemoveMedia: (mIdx: number) => void;
+    onViewMedia: (mIdx: number) => void;
+}) => {
+    return (
+        <Paper variant="outlined" sx={{ p: 2.5, borderRadius: "var(--shape-borderRadius-md)", position: 'relative', bgcolor: '#fcfcfc', borderStyle: 'solid', borderColor: 'var(--palette-divider)' }}>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
+                <TextField size="small" type="time" label="Giờ" value={item.time} onChange={e => onUpdate({ time: e.target.value })} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} slotProps={{ inputLabel: { shrink: true } }} />
+                {item._autoSplit && (
+                    <Box sx={{ px: 1, py: 0.25, bgcolor: "var(--palette-success-lighter)", color: "var(--palette-success-dark)", borderRadius: 1, fontSize: '0.7rem', fontWeight: 700 }}>
+                        Đã tách riêng
+                    </Box>
+                )}
+                {!item.petId && (
+                    <Box sx={{ px: 1, py: 0.25, bgcolor: "var(--palette-info-lighter)", color: "var(--palette-info-dark)", borderRadius: 1, fontSize: '0.7rem', fontWeight: 700 }}>
+                        Dùng chung
+                    </Box>
+                )}
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                <Autocomplete
+                    fullWidth
+                    size="small"
+                    freeSolo
+                    options={foodOptions}
+                    value={item.food || ""}
+                    onChange={(_, newValue) => onUpdate({ food: newValue || "" })}
+                    onInputChange={(_, newInputValue) => onUpdate({ food: newInputValue })}
+                    renderInput={(params) => <TextField {...params} label="Loại thức ăn" sx={{ '& .MuiInputBase-root': { fontWeight: 700 } }} />}
+                    sx={{ flexGrow: 1 }}
+                />
+                <TextField size="small" label="Khẩu phần" value={item.amount} onChange={e => onUpdate({ amount: e.target.value })} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} />
+                <TextField size="small" select label="Nhân viên" value={item.staffId} onChange={e => onUpdate({ staffId: e.target.value })} sx={{ width: 180, flexShrink: 0 }}>
+                    {staffOptions.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+                </TextField>
+                <TextField size="small" select label="Trạng thái" value={item.status} onChange={e => onUpdate({ status: e.target.value as any })} sx={{ width: 150, flexShrink: 0 }}>
+                    {statusOptions.map(o => <MenuItem key={o.value} value={o.value} sx={{ fontWeight: 600 }}>{o.label}</MenuItem>)}
+                </TextField>
+                <IconButton color="error" size="small" onClick={onDelete} sx={{ mt: 0.5 }}><Icon icon="solar:trash-bin-trash-bold" width={20} /></IconButton>
+            </Box>
+            <TextField fullWidth size="small" label="Ghi chú cho bữa ăn" value={item.note} onChange={e => onUpdate({ note: e.target.value })} sx={{ mt: 2 }} />
+
+            <Box sx={{ mt: 2 }}>
+                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ gap: 1 }}>
+                    <Button
+                        component="label"
+                        variant="outlined"
+                        startIcon={<CloudUploadOutlinedIcon />}
+                        sx={{ height: 80, width: 140, borderStyle: 'dashed', borderRadius: 1.5, textTransform: 'none', fontWeight: 700, flexDirection: 'column', gap: 0.5 }}
+                    >
+                        Tải minh chứng
+                        <Typography variant="caption" sx={{ fontSize: '0.65rem', opacity: 0.7 }}>Tối đa 5 file, dưới 5MB/file</Typography>
+                        <input type="file" hidden multiple accept="image/*,video/*" onChange={e => e.target.files && onAddMedia(e.target.files)} />
+                    </Button>
+
+                    {(item.proofMedia || []).map((m: any, mIdx: number) => (
+                        <Box key={mIdx} sx={{ position: 'relative', width: 80, height: 80, borderRadius: 1.5, overflow: 'hidden', border: '1px solid var(--palette-divider)' }}>
+                            {m.kind === "video" ? (
+                                <Box sx={{ width: '100%', height: '100%', bgcolor: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} onClick={() => onViewMedia(mIdx)}>
+                                    <Icon icon="solar:videocamera-record-bold" width={24} color="white" />
+                                </Box>
+                            ) : (
+                                <img src={m.url} style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }} onClick={() => onViewMedia(mIdx)} alt="Proof" />
+                            )}
+                            <IconButton
+                                size="small"
+                                onClick={() => onRemoveMedia(mIdx)}
+                                sx={{ position: 'absolute', top: 2, right: 2, bgcolor: 'rgba(255,255,255,0.8)', padding: 0.25, '&:hover': { bgcolor: '#fff' } }}
+                            >
+                                <DeleteOutlineIcon sx={{ fontSize: 14, color: 'error.main' }} />
+                            </IconButton>
+                        </Box>
+                    ))}
+                </Stack>
+            </Box>
+        </Paper>
+    );
+});
+
+const ExerciseRow = React.memo(({
+    item,
+    exerciseOptions,
+    staffOptions,
+    statusOptions,
+    onUpdate,
+    onDelete,
+    onAddMedia,
+    onRemoveMedia,
+    onViewMedia
+}: {
+    item: BoardingExerciseItem;
+    idx: number;
+    exerciseOptions: string[];
+    staffOptions: any[];
+    statusOptions: any[];
+    onUpdate: (data: Partial<BoardingExerciseItem>) => void;
+    onDelete: () => void;
+    onAddMedia: (files: FileList) => void;
+    onRemoveMedia: (mIdx: number) => void;
+    onViewMedia: (mIdx: number) => void;
+}) => {
+    return (
+        <Paper variant="outlined" sx={{ p: 2.5, borderRadius: "var(--shape-borderRadius-md)", position: 'relative', bgcolor: '#fcfcfc', borderStyle: 'solid', borderColor: 'var(--palette-divider)' }}>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
+                <TextField size="small" type="time" label="Giờ" value={item.time} onChange={e => onUpdate({ time: e.target.value })} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} slotProps={{ inputLabel: { shrink: true } }} />
+                {item._autoSplit && (
+                    <Box sx={{ px: 1, py: 0.25, bgcolor: "var(--palette-success-lighter)", color: "var(--palette-success-dark)", borderRadius: 1, fontSize: '0.7rem', fontWeight: 700 }}>
+                        Đã tách riêng
+                    </Box>
+                )}
+                {!item.petId && (
+                    <Box sx={{ px: 1, py: 0.25, bgcolor: "var(--palette-info-lighter)", color: "var(--palette-info-dark)", borderRadius: 1, fontSize: '0.7rem', fontWeight: 700 }}>
+                        Dùng chung
+                    </Box>
+                )}
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                <Autocomplete
+                    fullWidth
+                    size="small"
+                    freeSolo
+                    options={exerciseOptions}
+                    value={item.activity || ""}
+                    onChange={(_, newValue) => onUpdate({ activity: newValue || "" })}
+                    onInputChange={(_, newInputValue) => onUpdate({ activity: newInputValue })}
+                    renderInput={(params) => <TextField {...params} label="Hoạt động" sx={{ '& .MuiInputBase-root': { fontWeight: 700 } }} />}
+                    sx={{ flexGrow: 1 }}
+                />
+                <TextField size="small" label="Thời lượng (p)" type="number" value={item.durationMinutes} onChange={e => onUpdate({ durationMinutes: Number(e.target.value) })} sx={{ width: 100, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} />
+                <TextField size="small" select label="Nhân viên" value={item.staffId} onChange={e => onUpdate({ staffId: e.target.value })} sx={{ width: 180, flexShrink: 0 }}>
+                    {staffOptions.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+                </TextField>
+                <TextField size="small" select label="Trạng thái" value={item.status} onChange={e => onUpdate({ status: e.target.value as any })} sx={{ width: 150, flexShrink: 0 }}>
+                    {statusOptions.map(o => <MenuItem key={o.value} value={o.value} sx={{ fontWeight: 600 }}>{o.label}</MenuItem>)}
+                </TextField>
+                <IconButton color="error" size="small" onClick={onDelete} sx={{ mt: 0.5 }}><Icon icon="solar:trash-bin-trash-bold" width={20} /></IconButton>
+            </Box>
+            <TextField fullWidth size="small" label="Ghi chú vận động" value={item.note} onChange={e => onUpdate({ note: e.target.value })} sx={{ mt: 2 }} />
+
+            <Box sx={{ mt: 2 }}>
+                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ gap: 1 }}>
+                    <Button
+                        component="label"
+                        variant="outlined"
+                        startIcon={<CloudUploadOutlinedIcon />}
+                        sx={{ height: 80, width: 140, borderStyle: 'dashed', borderRadius: 1.5, textTransform: 'none', fontWeight: 700, flexDirection: 'column', gap: 0.5 }}
+                    >
+                        Tải minh chứng
+                        <input type="file" hidden multiple accept="image/*,video/*" onChange={e => e.target.files && onAddMedia(e.target.files)} />
+                    </Button>
+
+                    {(item.proofMedia || []).map((m: any, mIdx: number) => (
+                        <Box key={mIdx} sx={{ position: 'relative', width: 80, height: 80, borderRadius: 1.5, overflow: 'hidden', border: '1px solid var(--palette-divider)' }}>
+                            {m.kind === "video" ? (
+                                <Box sx={{ width: '100%', height: '100%', bgcolor: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} onClick={() => onViewMedia(mIdx)}>
+                                    <Icon icon="solar:videocamera-record-bold" width={24} color="white" />
+                                </Box>
+                            ) : (
+                                <img src={m.url} style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }} onClick={() => onViewMedia(mIdx)} alt="Proof" />
+                            )}
+                            <IconButton
+                                size="small"
+                                onClick={() => onRemoveMedia(mIdx)}
+                                sx={{ position: 'absolute', top: 2, right: 2, bgcolor: 'rgba(255,255,255,0.8)', padding: 0.25, '&:hover': { bgcolor: '#fff' } }}
+                            >
+                                <DeleteOutlineIcon sx={{ fontSize: 14, color: 'error.main' }} />
+                            </IconButton>
+                        </Box>
+                    ))}
+                </Stack>
+            </Box>
+        </Paper>
+    );
 });
 
 export const BoardingCareSchedulePage = () => {
@@ -99,22 +308,42 @@ export const BoardingCareSchedulePage = () => {
     const [editingBooking, setEditingBooking] = useState<any>(null);
     const [feedingDraft, setFeedingDraft] = useState<BoardingFeedingItem[]>([]);
     const [exerciseDraft, setExerciseDraft] = useState<BoardingExerciseItem[]>([]);
-    const [uploadingProofKey, setUploadingProofKey] = useState<string>("");
-    const [proofViewer, setProofViewer] = useState<{ open: boolean; items: BoardingProofMediaItem[]; index: number; title: string; }>({ open: false, items: [], index: 0, title: "" });
+    const [proofViewer, setProofViewer] = useState<{ open: boolean; items: BoardingProofMediaItem[]; index: number; }>({ open: false, items: [], index: 0 });
     const [careTab, setCareTab] = useState(0);
     const [speciesFilter, setSpeciesFilter] = useState("all");
     const [openRows, setOpenRows] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<"room" | "task">("room");
+    const [selectedPetId, setSelectedPetId] = useState<string>("");
+
+    const selectedPetObj = useMemo(() => {
+        const sid = String(selectedPetId || "");
+        return (editingBooking?.petIds || []).find((p: any) => String(p._id) === sid);
+    }, [editingBooking, selectedPetId]);
+
+    const suggestedPortion = useMemo(() => {
+        if (!selectedPetId) return calculateRecommendedPortion(editingBooking?.petIds || []);
+        const pet = (editingBooking?.petIds || []).find((p: any) => p._id === selectedPetId);
+        return calculateRecommendedPortion(pet ? [pet] : []);
+    }, [editingBooking, selectedPetId]);
+
+    const feedingCount = useMemo(() => {
+        const sid = String(selectedPetId || "");
+        return feedingDraft.filter(i => !i.petId || String(i.petId) === sid).length;
+    }, [feedingDraft, selectedPetId]);
+
+    const exerciseCount = useMemo(() => {
+        const sid = String(selectedPetId || "");
+        return exerciseDraft.filter(i => !i.petId || String(i.petId) === sid).length;
+    }, [exerciseDraft, selectedPetId]);
 
     const canAssignHotelStaff = useMemo(() => {
         const p = Array.isArray(user?.permissions) ? user.permissions : [];
         return p.includes("account_admin_view") || p.includes("account_admin_edit") || p.includes("role_permissions");
     }, [user]);
 
-    const { data, isLoading } = useQuery({ queryKey: ["admin-boarding-bookings"], queryFn: () => getBoardingBookings({ limit: 1000 }) });
+    const { data: bookingsRes, isLoading } = useQuery({ queryKey: ["admin-boarding-bookings"], queryFn: () => getBoardingBookings({ limit: 1000 }) });
     const { data: hotelStaffRes } = useQuery({ queryKey: ["admin-boarding-hotel-staffs", careDate], queryFn: () => getBoardingHotelStaffs(careDate || undefined), enabled: true });
 
-    // Fetch Food & Exercise Templates
     const petTypeForTemplates = useMemo(() => {
         const types = (editingBooking?.petIds || []).map((p: any) => (p.type || p.petType || "").toLowerCase());
         if (types.includes("dog") && types.includes("cat")) return "all";
@@ -151,35 +380,61 @@ export const BoardingCareSchedulePage = () => {
         return list.map((s: any) => ({ value: s._id, label: s.fullName || "NV" }));
     }, [hotelStaffRes]);
 
-    const suggestedPortion = useMemo(() => calculateRecommendedPortion(editingBooking?.petIds || []), [editingBooking]);
+    const capNhatDongLichAn = useCallback((idx: number, p: Partial<BoardingFeedingItem>) => {
+        setFeedingDraft(prev => {
+            const next = [...prev];
+            next[idx] = { ...next[idx], ...p };
+            return next;
+        });
+    }, []);
 
-    const getStaffId = (v: any) => (v && typeof v === "object" ? String(v._id || "") : String(v || ""));
-    const getStaffName = (sid: string, fb?: string) => hotelStaffOptions.find(i => i.value === sid)?.label || String(fb || "");
+    const capNhatDongVanDong = useCallback((idx: number, p: Partial<BoardingExerciseItem>) => {
+        setExerciseDraft(prev => {
+            const next = [...prev];
+            next[idx] = { ...next[idx], ...p };
+            return next;
+        });
+    }, []);
 
-    const normalizeProofMedia = (items: any): BoardingProofMediaItem[] => (Array.isArray(items) ? items : []).map(i => ({ url: String(i?.url || i || "").trim(), kind: (String(i?.kind || "").toLowerCase() === "video" ? "video" : "image") as "video" | "image" })).filter(i => !!i.url);
-
-    const capNhatDongLichAn = (i: number, p: Partial<BoardingFeedingItem>) => setFeedingDraft(prev => prev.map((item, idx) => idx === i ? { ...item, ...p } : item));
-    const capNhatDongVanDong = (i: number, p: Partial<BoardingExerciseItem>) => setExerciseDraft(prev => prev.map((item, idx) => idx === i ? { ...item, ...p } : item));
-
-    const xoaMinhChung = (t: "f" | "e", ri: number, mi: number) => {
-        const setter = t === "f" ? setFeedingDraft : setExerciseDraft;
-        setter(prev => prev.map((item, idx) => idx === ri ? { ...item, proofMedia: normalizeProofMedia(item.proofMedia).filter((_, i) => i !== mi) } : item));
-    };
-
-    const taiMinhChung = async (t: "f" | "e", ri: number, files: FileList | null) => {
-        if (!files?.length) return;
-        const list = Array.from(files);
-        if (list.some(f => !f.type.startsWith("image/") && !f.type.startsWith("video/"))) { toast.error("Chỉ hỗ trợ ảnh/video"); return; }
-        const current = normalizeProofMedia((t === "f" ? feedingDraft : exerciseDraft)[ri]?.proofMedia).length;
-        if (current + list.length > MAX_PROOF_MEDIA_PER_ROW) { toast.error("Vượt quá số lượng minh chứng cho phép"); return; }
+    const handleUploadMedia = useCallback(async (type: "f" | "e", idx: number, files: FileList) => {
+        const loadingToast = toast.loading("Đang tải ảnh...");
         try {
-            setUploadingProofKey(`${t}-${ri}`);
-            const uploaded = await uploadMediaToCloudinary(list);
-            const setter = t === "f" ? setFeedingDraft : setExerciseDraft;
-            setter(prev => prev.map((item, idx) => idx === ri ? { ...item, proofMedia: [...normalizeProofMedia(item.proofMedia), ...uploaded] } : item));
-            toast.success("Đã tải minh chứng");
-        } catch (e: any) { toast.error("Lỗi tải file"); } finally { setUploadingProofKey(""); }
-    };
+            const validFiles = Array.from(files).filter(file => {
+                if (file.size > MAX_IMAGE_PROOF_SIZE_MB * 1024 * 1024) throw new Error(`File ${file.name} quá lớn (>5MB)`);
+                return true;
+            });
+            const results = await uploadMediaToCloudinary(validFiles);
+            const mediaItems: BoardingProofMediaItem[] = results.map(res => ({ url: res.url, kind: res.kind }));
+
+            if (type === "f") {
+                setFeedingDraft(prev => {
+                    const next = [...prev];
+                    next[idx] = { ...next[idx], proofMedia: [...normalizeProofMedia(next[idx].proofMedia), ...mediaItems] };
+                    return next;
+                });
+            } else {
+                setExerciseDraft(prev => {
+                    const next = [...prev];
+                    next[idx] = { ...next[idx], proofMedia: [...normalizeProofMedia(next[idx].proofMedia), ...mediaItems] };
+                    return next;
+                });
+            }
+            toast.update(loadingToast, { render: "Đã tải lên", type: "success", isLoading: false, autoClose: 2000 });
+        } catch (err: any) {
+            toast.update(loadingToast, { render: err.message || "Lỗi tải ảnh", type: "error", isLoading: false, autoClose: 3000 });
+        }
+    }, []);
+
+    const handleRemoveMedia = useCallback((type: "f" | "e", rowIdx: number, mediaIdx: number) => {
+        const setter = type === "f" ? setFeedingDraft : setExerciseDraft;
+        setter(prev => prev.map((item, idx) => idx === rowIdx ? { ...item, proofMedia: normalizeProofMedia(item.proofMedia).filter((_, i) => i !== mediaIdx) } : item));
+    }, []);
+
+    const handleViewMedia = useCallback((type: "f" | "e", rowIdx: number, mediaIdx: number) => {
+        const list = type === "f" ? feedingDraft : exerciseDraft;
+        const item = list[rowIdx];
+        if (item?.proofMedia) setProofViewer({ open: true, items: normalizeProofMedia(item.proofMedia), index: mediaIdx });
+    }, [feedingDraft, exerciseDraft]);
 
     const validateProof = (items: any[], label: string) => {
         const fail = items.findIndex(i => i.status === "done" && !normalizeProofMedia(i.proofMedia).length);
@@ -187,12 +442,60 @@ export const BoardingCareSchedulePage = () => {
         return true;
     };
 
-    const apDungDuLieu = (b: any, opts?: { kDate?: boolean }) => {
+    const apDungDuLieu = useCallback((b: any, opts?: { kDate?: boolean; startPetId?: string }) => {
         setEditingBooking(b);
-        setFeedingDraft((b.feedingSchedule || []).map((i: any) => ({ ...i, proofMedia: normalizeProofMedia(i.proofMedia), staffId: getStaffId(i.staffId), staffName: i.staffName || i.staffId?.fullName || "" })));
-        setExerciseDraft((b.exerciseSchedule || []).map((i: any) => ({ ...i, proofMedia: normalizeProofMedia(i.proofMedia), staffId: getStaffId(i.staffId), staffName: i.staffName || i.staffId?.fullName || "" })));
+        const pets = b.petIds || [];
+        if (opts?.startPetId) {
+            setSelectedPetId(String(opts.startPetId));
+        } else if (pets.length > 0) {
+            setSelectedPetId(String(pets[0]._id));
+        }
+
+        const rawFeeding = b.feedingSchedule || [];
+        const rawExercise = b.exerciseSchedule || [];
+
+        const needsSplit = (pets.length > 1) && (rawFeeding.some((i: any) => !i.petId) || rawExercise.some((i: any) => !i.petId));
+
+        let finalFeeding = [...rawFeeding];
+        let finalExercise = [...rawExercise];
+
+        if (needsSplit) {
+            const nextF: any[] = [];
+            rawFeeding.forEach((item: any) => {
+                if (!item.petId) {
+                    pets.forEach((p: any) => nextF.push({ ...item, petId: p._id, petName: p.name, _autoSplit: true }));
+                } else {
+                    nextF.push(item);
+                }
+            });
+            finalFeeding = nextF;
+
+            const nextE: any[] = [];
+            rawExercise.forEach((item: any) => {
+                if (!item.petId) {
+                    pets.forEach((p: any) => nextE.push({ ...item, petId: p._id, petName: p.name, _autoSplit: true }));
+                } else {
+                    nextE.push(item);
+                }
+            });
+            finalExercise = nextE;
+        }
+
+        setFeedingDraft(finalFeeding.map((i: any) => ({
+            ...i,
+            proofMedia: normalizeProofMedia(i.proofMedia),
+            staffId: getStaffIdFromObject(i.staffId),
+            staffName: i.staffName || getStaffNameFromObject(i.staffId)
+        })));
+
+        setExerciseDraft(finalExercise.map((i: any) => ({
+            ...i,
+            proofMedia: normalizeProofMedia(i.proofMedia),
+            staffId: getStaffIdFromObject(i.staffId),
+            staffName: i.staffName || getStaffNameFromObject(i.staffId)
+        })));
         if (!opts?.kDate) setCareDate(dayjs(b.checkInDate).isValid() ? dayjs(b.checkInDate).format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD"));
-    };
+    }, []);
 
     const updateCareMut = useMutation({
         mutationFn: ({ id, payload }: any) => updateBoardingCareSchedule(id, payload),
@@ -200,7 +503,7 @@ export const BoardingCareSchedulePage = () => {
         onError: (e: any) => toast.error(e?.response?.data?.message || "Lỗi cập nhật"),
     });
 
-    const allRows = useMemo(() => (data as any)?.data?.recordList || (data as any)?.data || [], [data]);
+    const allRows = useMemo(() => (bookingsRes as any)?.data?.recordList || (bookingsRes as any)?.data || [], [bookingsRes]);
     const eligibleRows = useMemo(() => allRows.filter((i: any) => i.paymentStatus === "paid" || ["confirmed", "checked-in"].includes(i.boardingStatus)), [allRows]);
 
     const filteredRows = useMemo(() => {
@@ -212,8 +515,8 @@ export const BoardingCareSchedulePage = () => {
         return l;
     }, [eligibleRows, searchQuery, speciesFilter, onlyMyAssign, user]);
 
-    const moDialog = async (row: any) => {
-        try { setCareLoading(true); setEditingBooking(row); setCareDialogOpen(true); const res = await getBoardingBookingDetail(row._id); if (res?.data) apDungDuLieu(res.data); } catch { toast.error("Lỗi tải dữ liệu"); setCareDialogOpen(false); } finally { setCareLoading(false); }
+    const moDialog = async (row: any, startPetId?: string) => {
+        try { setCareLoading(true); setEditingBooking(row); setCareDialogOpen(true); const res = await getBoardingBookingDetail(row._id); if (res?.data) apDungDuLieu(res.data, { startPetId }); } catch { toast.error("Lỗi tải dữ liệu"); setCareDialogOpen(false); } finally { setCareLoading(false); }
     };
 
     const hasOpened = useRef(false);
@@ -225,32 +528,19 @@ export const BoardingCareSchedulePage = () => {
     const luuCare = () => {
         if (!editingBooking?._id || !validateProof(feedingDraft, "Lịch ăn") || !validateProof(exerciseDraft, "Lịch vận động")) return;
         const payload = {
-            feedingSchedule: feedingDraft.map(i => ({ ...i, staffId: getStaffId(i.staffId), staffName: getStaffName(getStaffId(i.staffId), i.staffName) })),
-            exerciseSchedule: exerciseDraft.map(i => ({ ...i, staffId: getStaffId(i.staffId), staffName: getStaffName(getStaffId(i.staffId), i.staffName) })),
+            feedingSchedule: feedingDraft.map(i => {
+                const sid = getStaffIdFromObject(i.staffId);
+                const sn = i.staffName || hotelStaffOptions.find(o => o.value === sid)?.label || "";
+                return { ...i, staffId: sid, staffName: sn };
+            }),
+            exerciseSchedule: exerciseDraft.map(i => {
+                const sid = getStaffIdFromObject(i.staffId);
+                const sn = i.staffName || hotelStaffOptions.find(o => o.value === sid)?.label || "";
+                return { ...i, staffId: sid, staffName: sn };
+            }),
             careDate
         };
         updateCareMut.mutate({ id: editingBooking._id, payload });
-    };
-
-    const renderProof = (t: "f" | "e", ri: number, item: any) => {
-        const pm = normalizeProofMedia(item.proofMedia);
-        const loading = uploadingProofKey === `${t}-${ri}`;
-        return (
-            <Box sx={{ mt: 1, p: 1, border: "1px dashed #ddd", borderRadius: 1.5, bgcolor: "#f9f9f9" }}>
-                <Stack direction="row" spacing={1} alignItems="center">
-                    <Button component="label" variant="outlined" size="small" startIcon={<CloudUploadOutlinedIcon />} disabled={loading}>{loading ? "..." : "Tải minh chứng"}<input hidden type="file" multiple onChange={e => { taiMinhChung(t, ri, e.target.files); e.target.value = ""; }} /></Button>
-                    <Typography variant="caption" color="textSecondary">Tối đa {MAX_PROOF_MEDIA_PER_ROW} file, dưới {MAX_IMAGE_PROOF_SIZE_MB}MB/file</Typography>
-                </Stack>
-                <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mt: 1 }}>
-                    {pm.map((m, mi) => (
-                        <Box key={mi} sx={{ position: "relative", width: 60, height: 60, borderRadius: 1, overflow: "hidden", border: "1px solid #eee" }} onClick={() => setProofViewer({ open: true, items: pm, index: mi, title: "Minh chứng" })}>
-                            {m.kind === "video" ? <video src={m.url} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <img src={m.url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
-                            <IconButton size="small" color="error" onClick={e => { e.stopPropagation(); xoaMinhChung(t, ri, mi); }} sx={{ position: "absolute", top: 0, right: 0, p: 0.2, bgcolor: "rgba(255,255,255,0.7)" }}><DeleteOutlineIcon fontSize="small" /></IconButton>
-                        </Box>
-                    ))}
-                </Stack>
-            </Box>
-        );
     };
 
     return (
@@ -407,7 +697,16 @@ export const BoardingCareSchedulePage = () => {
                                                     </IconButton>
                                                 </TableCell>
                                                 <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
-                                                    <Typography sx={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
+                                                    <Typography
+                                                        onClick={() => setOpenRows(p => p.includes(r._id) ? p.filter(id => id !== r._id) : [...p, r._id])}
+                                                        sx={{
+                                                            fontWeight: 700,
+                                                            fontSize: "0.875rem",
+                                                            color: "var(--palette-primary-main)",
+                                                            cursor: "pointer",
+                                                            "&:hover": { textDecoration: "underline" }
+                                                        }}
+                                                    >
                                                         #{r.code?.toUpperCase().slice(-6)}
                                                     </Typography>
                                                     <Typography variant="caption" sx={{ color: "var(--palette-text-secondary)", display: "block", fontSize: "0.75rem", fontWeight: 500 }}>
@@ -459,9 +758,65 @@ export const BoardingCareSchedulePage = () => {
                                             <TableRow>
                                                 <TableCell colSpan={6} sx={{ p: 0, bgcolor: "var(--palette-background-neutral)" }}>
                                                     <Collapse in={openRows.includes(r._id)}>
-                                                        <Box p={3}>
-                                                            <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 800 }}>Dịch vụ bổ sung & Ghi chú khách hàng</Typography>
-                                                            <Typography variant="body2" color="textSecondary">Đơn hàng hiện đang ở trạng thái {r.boardingStatus}. Khách hàng đã thanh toán đầy đủ.</Typography>
+                                                        <Box p={3} sx={{ bgcolor: "var(--palette-background-neutral)", borderRadius: "var(--shape-borderRadius-md)", mx: 2, mb: 2 }}>
+                                                            <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 800, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                <Icon icon="solar:paw-print-bold" width={20} />
+                                                                Danh sách thú cưng trong đơn
+                                                            </Typography>
+                                                            <Stack spacing={2}>
+                                                                {(r.petIds || []).map((pet: any) => (
+                                                                    <Paper
+                                                                        key={pet._id}
+                                                                        variant="outlined"
+                                                                        sx={{
+                                                                            p: 1.5,
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'space-between',
+                                                                            borderRadius: "var(--shape-borderRadius-md)",
+                                                                            bgcolor: "var(--palette-common-white)"
+                                                                        }}
+                                                                    >
+                                                                        <Stack direction="row" spacing={2} alignItems="center">
+                                                                            <Avatar src={pet.avatar} sx={{ width: 44, height: 44, border: "2px solid var(--palette-divider)" }} />
+                                                                            <Box>
+                                                                                <Typography sx={{ fontWeight: 700 }}>{pet.name}</Typography>
+                                                                                <Stack direction="row" spacing={1} alignItems="center">
+                                                                                    <Typography variant="caption" color="text.secondary">
+                                                                                        {pet.type === 'dog' ? 'Chó' : 'Mèo'} • {pet.weight}kg
+                                                                                    </Typography>
+                                                                                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                                                                        <Box sx={{ px: 0.6, py: 0.2, borderRadius: 0.5, bgcolor: "var(--palette-warning-lighter)", color: "var(--palette-warning-dark)", fontSize: "0.65rem", fontWeight: 800 }}>
+                                                                                            {(r.feedingSchedule || []).filter((i: any) => !i.petId || String(i.petId) === String(pet._id)).length} Lịch ăn
+                                                                                        </Box>
+                                                                                        <Box sx={{ px: 0.6, py: 0.2, borderRadius: 0.5, bgcolor: "var(--palette-success-lighter)", color: "var(--palette-success-dark)", fontSize: "0.65rem", fontWeight: 800 }}>
+                                                                                            {(r.exerciseSchedule || []).filter((i: any) => !i.petId || String(i.petId) === String(pet._id)).length} Vận động
+                                                                                        </Box>
+                                                                                    </Box>
+                                                                                </Stack>
+                                                                            </Box>
+                                                                        </Stack>
+                                                                        <Button
+                                                                            variant="outlined"
+                                                                            size="small"
+                                                                            startIcon={<Icon icon="solar:clipboard-check-bold" />}
+                                                                            onClick={() => moDialog(r, pet._id)}
+                                                                            sx={{
+                                                                                fontWeight: 700,
+                                                                                borderRadius: "var(--shape-borderRadius)",
+                                                                                textTransform: 'none'
+                                                                            }}
+                                                                        >
+                                                                            Chăm sóc {pet.name}
+                                                                        </Button>
+                                                                    </Paper>
+                                                                ))}
+                                                            </Stack>
+                                                            <Box sx={{ mt: 2, pt: 2, borderTop: "1px dashed var(--palette-divider)" }}>
+                                                                <Typography variant="caption" sx={{ color: "var(--palette-text-secondary)", fontStyle: 'italic' }}>
+                                                                    Đơn hàng hiện đang ở trạng thái {r.boardingStatus}. Khách hàng đã thanh toán đầy đủ.
+                                                                </Typography>
+                                                            </Box>
                                                         </Box>
                                                     </Collapse>
                                                 </TableCell>
@@ -545,26 +900,48 @@ export const BoardingCareSchedulePage = () => {
                                 </Button>
                             </Stack>
 
-                            <Tabs
-                                value={careTab}
-                                onChange={(_, v) => setCareTab(v)}
-                                sx={{
-                                    "& .MuiTabs-indicator": { backgroundColor: "var(--palette-text-primary)", height: 3 },
-                                    borderBottom: "1px solid var(--palette-divider)"
-                                }}
-                            >
-                                <Tab label={`Lịch ăn (${feedingDraft.length})`} sx={{ textTransform: 'none', fontWeight: 800 }} />
-                                <Tab label={`Vận động (${exerciseDraft.length})`} sx={{ textTransform: 'none', fontWeight: 800 }} />
-                                <Tab label="Nhật ký hàng ngày" sx={{ textTransform: 'none', fontWeight: 800 }} />
+                            <Tabs value={careTab} onChange={(_, v) => setCareTab(v)} sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}>
+                                <Tab label={`Lịch ăn (${feedingCount})`} sx={{ fontWeight: 700, textTransform: 'none', fontSize: '0.95rem' }} />
+                                <Tab label={`Vận động (${exerciseCount})`} sx={{ fontWeight: 700, textTransform: 'none', fontSize: '0.95rem' }} />
+                                <Tab label="Nhật ký hàng ngày" sx={{ fontWeight: 700, textTransform: 'none', fontSize: '0.95rem' }} />
                             </Tabs>
 
                             {careTab === 0 && (
-                                <Box sx={{ spaceY: 2 }}>
+                                <Box>
+                                    <Stack direction="row" spacing={1.5} sx={{ mb: 3, overflowX: "auto", pb: 1 }}>
+                                        {(editingBooking?.petIds || []).map((pet: any) => (
+                                            <Button
+                                                key={pet._id}
+                                                variant={String(selectedPetId) === String(pet._id) ? "contained" : "outlined"}
+                                                onClick={() => setSelectedPetId(String(pet._id))}
+                                                sx={{
+                                                    borderRadius: '20px',
+                                                    minWidth: 'max-content',
+                                                    px: 2,
+                                                    py: 1,
+                                                    textTransform: 'none',
+                                                    fontWeight: 700,
+                                                    bgcolor: String(selectedPetId) === String(pet._id) ? 'var(--palette-text-primary)' : 'transparent',
+                                                    color: String(selectedPetId) === String(pet._id) ? '#fff' : 'text.secondary',
+                                                    '&:hover': {
+                                                        bgcolor: String(selectedPetId) === String(pet._id) ? '#000' : 'var(--palette-action-hover)'
+                                                    }
+                                                }}
+                                                startIcon={<Avatar src={pet.avatar} sx={{ width: 28, height: 28 }} />}
+                                            >
+                                                {pet.name}
+                                            </Button>
+                                        ))}
+                                    </Stack>
+
                                     <Button
                                         variant="outlined"
                                         size="small"
                                         startIcon={<AddIcon />}
-                                        onClick={() => setFeedingDraft(p => [...p, taoDongLichAn()])}
+                                        onClick={() => {
+                                            const type = (selectedPetObj?.type || selectedPetObj?.petType || "all").toLowerCase() as any;
+                                            setFeedingDraft(p => [...p, taoDongLichAn(type, selectedPetId, selectedPetObj?.name)]);
+                                        }}
                                         sx={{
                                             mb: 2,
                                             fontWeight: 700,
@@ -575,48 +952,67 @@ export const BoardingCareSchedulePage = () => {
                                             "&:hover": { bgcolor: "var(--palette-primary-light)", borderColor: "transparent" }
                                         }}
                                     >
-                                        Thêm bữa ăn mới
+                                        Thêm bữa ăn cho {selectedPetObj?.name || "thú cưng"}
                                     </Button>
                                     <Stack spacing={2}>
-                                        {feedingDraft.map((i, idx) => (
-                                            <Paper key={idx} variant="outlined" sx={{ p: 2.5, borderRadius: "var(--shape-borderRadius-md)", position: 'relative', bgcolor: '#fcfcfc', borderStyle: 'solid', borderColor: 'var(--palette-divider)' }}>
-                                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-                                                    <TextField size="small" type="time" label="Giờ" value={i.time} onChange={e => capNhatDongLichAn(idx, { time: e.target.value })} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} slotProps={{ inputLabel: { shrink: true } }} />
-                                                    <Autocomplete
-                                                        fullWidth
-                                                        size="small"
-                                                        freeSolo
-                                                        options={foodOptions}
-                                                        value={i.food || ""}
-                                                        onChange={(_, newValue) => capNhatDongLichAn(idx, { food: newValue || "" })}
-                                                        onInputChange={(_, newInputValue) => capNhatDongLichAn(idx, { food: newInputValue })}
-                                                        renderInput={(params) => <TextField {...params} label="Loại thức ăn" sx={{ '& .MuiInputBase-root': { fontWeight: 700 } }} />}
-                                                        sx={{ flexGrow: 1 }}
-                                                    />
-                                                    <TextField size="small" label="Khẩu phần" value={i.amount} onChange={e => capNhatDongLichAn(idx, { amount: e.target.value })} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} />
-                                                    <TextField size="small" select label="Nhân viên" value={i.staffId} onChange={e => capNhatDongLichAn(idx, { staffId: e.target.value })} sx={{ width: 180, flexShrink: 0 }}>
-                                                        {hotelStaffOptions.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
-                                                    </TextField>
-                                                    <TextField size="small" select label="Trạng thái" value={i.status} onChange={e => capNhatDongLichAn(idx, { status: e.target.value as any })} sx={{ width: 150, flexShrink: 0 }}>
-                                                        {trangThaiChamSocOptions.map(o => <MenuItem key={o.value} value={o.value} sx={{ fontWeight: 600 }}>{o.label}</MenuItem>)}
-                                                    </TextField>
-                                                    <IconButton color="error" size="small" onClick={() => setFeedingDraft(p => p.filter((_, x) => x !== idx))} sx={{ mt: 0.5 }}><Icon icon="solar:trash-bin-trash-bold" width={20} /></IconButton>
-                                                </Box>
-                                                <TextField fullWidth size="small" label="Ghi chú cho bữa ăn" value={i.note} onChange={e => capNhatDongLichAn(idx, { note: e.target.value })} sx={{ mt: 2 }} />
-                                                {renderProof("f", idx, i)}
-                                            </Paper>
-                                        ))}
+                                        {feedingDraft
+                                            .map((item, originalIdx) => ({ item, originalIdx }))
+                                            .filter(({ item }) => !item.petId || String(item.petId) === String(selectedPetId))
+                                            .map(({ item, originalIdx }) => (
+                                                <FeedingRow
+                                                    key={originalIdx}
+                                                    item={item}
+                                                    idx={originalIdx}
+                                                    foodOptions={foodOptions}
+                                                    staffOptions={hotelStaffOptions}
+                                                    statusOptions={trangThaiChamSocOptions}
+                                                    onUpdate={(data) => capNhatDongLichAn(originalIdx, data)}
+                                                    onDelete={() => setFeedingDraft(p => p.filter((_, x) => x !== originalIdx))}
+                                                    onAddMedia={(files) => handleUploadMedia("f", originalIdx, files)}
+                                                    onRemoveMedia={(mIdx) => handleRemoveMedia("f", originalIdx, mIdx)}
+                                                    onViewMedia={(mIdx) => handleViewMedia("f", originalIdx, mIdx)}
+                                                />
+                                            ))}
                                     </Stack>
                                 </Box>
                             )}
 
                             {careTab === 1 && (
-                                <Box sx={{ spaceY: 2 }}>
+                                <Box>
+                                    <Stack direction="row" spacing={1.5} sx={{ mb: 3, overflowX: "auto", pb: 1 }}>
+                                        {(editingBooking?.petIds || []).map((pet: any) => (
+                                            <Button
+                                                key={pet._id}
+                                                variant={String(selectedPetId) === String(pet._id) ? "contained" : "outlined"}
+                                                onClick={() => setSelectedPetId(String(pet._id))}
+                                                sx={{
+                                                    borderRadius: '20px',
+                                                    minWidth: 'max-content',
+                                                    px: 2,
+                                                    py: 1,
+                                                    textTransform: 'none',
+                                                    fontWeight: 700,
+                                                    bgcolor: String(selectedPetId) === String(pet._id) ? 'var(--palette-text-primary)' : 'transparent',
+                                                    color: String(selectedPetId) === String(pet._id) ? '#fff' : 'text.secondary',
+                                                    '&:hover': {
+                                                        bgcolor: String(selectedPetId) === String(pet._id) ? '#000' : 'var(--palette-action-hover)'
+                                                    }
+                                                }}
+                                                startIcon={<Avatar src={pet.avatar} sx={{ width: 28, height: 28 }} />}
+                                            >
+                                                {pet.name}
+                                            </Button>
+                                        ))}
+                                    </Stack>
+
                                     <Button
                                         variant="outlined"
                                         size="small"
                                         startIcon={<AddIcon />}
-                                        onClick={() => setExerciseDraft(p => [...p, taoDongVanDong()])}
+                                        onClick={() => {
+                                            const type = (selectedPetObj?.type || selectedPetObj?.petType || "all").toLowerCase() as any;
+                                            setExerciseDraft(p => [...p, taoDongVanDong(type, selectedPetId, selectedPetObj?.name)]);
+                                        }}
                                         sx={{
                                             mb: 2,
                                             fontWeight: 700,
@@ -627,37 +1023,27 @@ export const BoardingCareSchedulePage = () => {
                                             "&:hover": { bgcolor: "var(--palette-primary-light)", borderColor: "transparent" }
                                         }}
                                     >
-                                        Thêm hoạt động mới
+                                        Thêm hoạt động cho {selectedPetObj?.name || "thú cưng"}
                                     </Button>
                                     <Stack spacing={2}>
-                                        {exerciseDraft.map((i, idx) => (
-                                            <Paper key={idx} variant="outlined" sx={{ p: 2.5, borderRadius: "var(--shape-borderRadius-md)", position: 'relative', bgcolor: '#fcfcfc', borderStyle: 'solid', borderColor: 'var(--palette-divider)' }}>
-                                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-                                                    <TextField size="small" type="time" label="Giờ" value={i.time} onChange={e => capNhatDongVanDong(idx, { time: e.target.value })} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} slotProps={{ inputLabel: { shrink: true } }} />
-                                                    <Autocomplete
-                                                        fullWidth
-                                                        size="small"
-                                                        freeSolo
-                                                        options={exerciseOptions}
-                                                        value={i.activity || ""}
-                                                        onChange={(_, newValue) => capNhatDongVanDong(idx, { activity: newValue || "" })}
-                                                        onInputChange={(_, newInputValue) => capNhatDongVanDong(idx, { activity: newInputValue })}
-                                                        renderInput={(params) => <TextField {...params} label="Hoạt động" sx={{ '& .MuiInputBase-root': { fontWeight: 700 } }} />}
-                                                        sx={{ flexGrow: 1 }}
-                                                    />
-                                                    <TextField size="small" label="Thời lượng (p)" type="number" value={i.durationMinutes} onChange={e => capNhatDongVanDong(idx, { durationMinutes: Number(e.target.value) })} sx={{ width: 100, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} />
-                                                    <TextField size="small" select label="Nhân viên" value={i.staffId} onChange={e => capNhatDongVanDong(idx, { staffId: e.target.value })} sx={{ width: 180, flexShrink: 0 }}>
-                                                        {hotelStaffOptions.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
-                                                    </TextField>
-                                                    <TextField size="small" select label="Trạng thái" value={i.status} onChange={e => capNhatDongVanDong(idx, { status: e.target.value as any })} sx={{ width: 150, flexShrink: 0 }}>
-                                                        {trangThaiChamSocOptions.map(o => <MenuItem key={o.value} value={o.value} sx={{ fontWeight: 600 }}>{o.label}</MenuItem>)}
-                                                    </TextField>
-                                                    <IconButton color="error" size="small" onClick={() => setExerciseDraft(p => p.filter((_, x) => x !== idx))} sx={{ mt: 0.5 }}><Icon icon="solar:trash-bin-trash-bold" width={20} /></IconButton>
-                                                </Box>
-                                                <TextField fullWidth size="small" label="Ghi chú vận động" value={i.note} onChange={e => capNhatDongVanDong(idx, { note: e.target.value })} sx={{ mt: 2 }} />
-                                                {renderProof("e", idx, i)}
-                                            </Paper>
-                                        ))}
+                                        {exerciseDraft
+                                            .map((item, originalIdx) => ({ item, originalIdx }))
+                                            .filter(({ item }) => !item.petId || String(item.petId) === String(selectedPetId))
+                                            .map(({ item, originalIdx }) => (
+                                                <ExerciseRow
+                                                    key={originalIdx}
+                                                    item={item}
+                                                    idx={originalIdx}
+                                                    exerciseOptions={exerciseOptions}
+                                                    staffOptions={hotelStaffOptions}
+                                                    statusOptions={trangThaiChamSocOptions}
+                                                    onUpdate={(data) => capNhatDongVanDong(originalIdx, data)}
+                                                    onDelete={() => setExerciseDraft(p => p.filter((_, x) => x !== originalIdx))}
+                                                    onAddMedia={(files) => handleUploadMedia("e", originalIdx, files)}
+                                                    onRemoveMedia={(mIdx) => handleRemoveMedia("e", originalIdx, mIdx)}
+                                                    onViewMedia={(mIdx) => handleViewMedia("e", originalIdx, mIdx)}
+                                                />
+                                            ))}
                                     </Stack>
                                 </Box>
                             )}
@@ -694,7 +1080,7 @@ export const BoardingCareSchedulePage = () => {
             <Dialog open={proofViewer.open} onClose={() => setProofViewer(p => ({ ...p, open: false }))} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: "var(--shape-borderRadius-lg)" } }}>
                 <DialogContent sx={{ p: 0, bgcolor: "#000", textAlign: "center", position: 'relative' }}>
                     <IconButton onClick={() => setProofViewer(p => ({ ...p, open: false }))} sx={{ position: 'absolute', top: 10, right: 10, color: '#fff', bgcolor: 'rgba(0,0,0,0.3)', '&:hover': { bgcolor: 'rgba(0,0,0,0.5)' } }}><Icon icon="eva:close-fill" /></IconButton>
-                    {proofViewer.items[proofViewer.index]?.kind === "video" ? <video src={proofViewer.items[proofViewer.index]?.url} controls style={{ maxWidth: "100%", maxHeight: "85vh" }} /> : <img src={proofViewer.items[proofViewer.index]?.url} style={{ maxWidth: "100%", maxHeight: "85vh" }} />}
+                    {proofViewer.items[proofViewer.index]?.kind === "video" ? <video src={proofViewer.items[proofViewer.index]?.url} controls style={{ maxWidth: "100%", maxHeight: "85vh" }} /> : <img src={proofViewer.items[proofViewer.index]?.url} style={{ maxWidth: "100%", maxHeight: "85vh" }} alt="Viewer" />}
                 </DialogContent>
             </Dialog>
         </Box>
