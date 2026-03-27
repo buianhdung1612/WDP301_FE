@@ -8,7 +8,7 @@ import {
     RenderCreatedAtCell
 } from '../utils/render-cells';
 
-export const useProductCategoryColumns = () => {
+export const useProductCategoryColumns = (isTrash: boolean = false) => {
     const { t } = useTranslation();
 
     const columns: GridColDef<any>[] = useMemo(() => [
@@ -41,9 +41,11 @@ export const useProductCategoryColumns = () => {
             renderCell: RenderStatusCell,
         },
         {
-            field: "view",
-            headerName: t("admin.common.views") || "Views",
+            field: "productCount",
+            headerName: t("admin.product_category.fields.product_count") || "Số sản phẩm",
             width: 140,
+            align: 'center',
+            headerAlign: 'center',
         },
         {
             field: 'actions',
@@ -52,9 +54,9 @@ export const useProductCategoryColumns = () => {
             sortable: false,
             filterable: false,
             align: 'right',
-            renderCell: RenderActionsCell,
+            renderCell: (params) => <RenderActionsCell {...params} isTrash={isTrash} />,
         },
-    ], [t]);
+    ], [t, isTrash]);
 
     return columns;
 };

@@ -38,7 +38,7 @@ export const ProductCategoryList = ({ isTrash = false }: { isTrash?: boolean }) 
         setIsTrash(isTrash);
     }, [isTrash, setIsTrash]);
 
-    const columns = useProductCategoryColumns();
+    const columns = useProductCategoryColumns(isTrash);
     const localeText = useDataGridLocale();
 
     return (

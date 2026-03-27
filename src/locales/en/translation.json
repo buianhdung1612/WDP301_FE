@@ -162,7 +162,8 @@
             "fields": {
                 "name": "Category Name",
                 "parent": "Parent Category",
-                "description_placeholder": "Title, description, image..."
+                "description_placeholder": "Title, description, image...",
+                "product_count": "Product Count"
             }
         },
         "tiptap": {

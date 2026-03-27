@@ -1,4 +1,4 @@
-import { Box, createTheme, FormControl, InputLabel, MenuItem, OutlinedInput, Select, Stack, TextField, ThemeProvider, useTheme, Button, Checkbox, FormControlLabel, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Switch, Divider } from "@mui/material"
+import { Box, createTheme, FormControl, InputLabel, MenuItem, OutlinedInput, Select, Stack, TextField, ThemeProvider, useTheme, Button, Checkbox, FormControlLabel, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Switch, Divider, ListItemText } from "@mui/material"
 import { useTranslation } from "react-i18next";
 import { Breadcrumb } from "../../components/ui/Breadcrumb"
 import { Title } from "../../components/ui/Title"
@@ -15,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createProductSchema } from "../../schemas/product.schema";
 import { LoadingButton } from "../../components/ui/LoadingButton";
 import { useBrands } from "../brand/hooks/useBrand";
+import { useBreeds } from "../account-user/hooks/useBreed";
 
 interface CustomFile extends File {
     preview: string;
@@ -64,6 +65,8 @@ export const ProductCreatePage = () => {
             variants: [],
             isFood: false,
             expiryDate: "",
+            suitableBreeds: [],
+            minAge: 0,
         },
     });
 
@@ -76,11 +79,15 @@ export const ProductCreatePage = () => {
     const toggle = (setter: Dispatch<SetStateAction<boolean>>) =>
         () => setter(prev => !prev);
 
+    const [petType, setPetType] = useState<string>("all");
     const [files, setFiles] = useState<CustomFile[]>([]);
     const [variants, setVariants] = useState<Variant[]>([]);
 
     const { data: createData } = useCreateProductData();
-    const { data: brands = [] } = useBrands();
+    const { data: brandsRes } = useBrands({ limit: 1000 });
+    const brands = (brandsRes as any)?.data?.recordList || [];
+    const { data: breedsRes } = useBreeds({ limit: 1000 });
+    const breeds = (breedsRes as any)?.data?.recordList || [];
     const { mutate: create, isPending } = useCreateProduct();
 
     const attributes = createData?.attributeList || [];
@@ -246,6 +253,7 @@ export const ProductCreatePage = () => {
             }))),
             attributes: JSON.stringify(data.attributes),
             images: JSON.stringify(data.images.map((f: any) => f.name || f)),
+            suitableBreeds: JSON.stringify(data.suitableBreeds),
             priceOld: String(data.priceOld),
             priceNew: String(data.priceNew),
             stock: String(data.stock),
@@ -333,21 +341,6 @@ export const ProductCreatePage = () => {
                                 />
                                 <Controller
                                     name="description"
-                                    control={control}
-                                    render={({ field, fieldState }) => (
-                                        <TextField
-                                            {...field}
-                                            label={t('admin.common.description')}
-                                            multiline
-                                            rows={4}
-                                            fullWidth
-                                            error={!!fieldState.error}
-                                            helperText={fieldState.error?.message}
-                                        />
-                                    )}
-                                />
-                                <Controller
-                                    name="content"
                                     control={control}
                                     render={({ field }) => (
                                         <Tiptap
@@ -473,22 +466,116 @@ export const ProductCreatePage = () => {
                                     />
 
                                     {watch("isFood") && (
-                                        <Controller
-                                            name="expiryDate"
-                                            control={control}
-                                            render={({ field, fieldState }) => (
-                                                <TextField
-                                                    {...field}
-                                                    label="Ngày hết hạn"
-                                                    type="datetime-local"
-                                                    fullWidth
-                                                    InputLabelProps={{ shrink: true }}
-                                                    inputProps={{ min: new Date().toISOString().slice(0, 16) }}
-                                                    error={!!fieldState.error}
-                                                    helperText={fieldState.error?.message}
+                                        <>
+                                            <Controller
+                                                name="expiryDate"
+                                                control={control}
+                                                render={({ field, fieldState }) => (
+                                                    <TextField
+                                                        {...field}
+                                                        label="Ngày hết hạn"
+                                                        type="datetime-local"
+                                                        fullWidth
+                                                        InputLabelProps={{ shrink: true }}
+                                                        inputProps={{ min: new Date().toISOString().slice(0, 16) }}
+                                                        error={!!fieldState.error}
+                                                        helperText={fieldState.error?.message}
+                                                    />
+                                                )}
+                                            />
+                                            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                                                <FormControl fullWidth>
+                                                    <InputLabel id="pet-type-label">Loại thú cưng</InputLabel>
+                                                    <Select
+                                                        labelId="pet-type-label"
+                                                        value={petType}
+                                                        label="Loại thú cưng"
+                                                        onChange={(e) => setPetType(e.target.value)}
+                                                    >
+                                                        <MenuItem value="all">Tất cả</MenuItem>
+                                                        <MenuItem value="dog">Chó</MenuItem>
+                                                        <MenuItem value="cat">Mèo</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                                <Controller
+                                                    name="suitableBreeds"
+                                                    control={control}
+                                                    render={({ field }) => {
+                                                        const filteredBreeds = petType === "all"
+                                                            ? breeds
+                                                            : breeds.filter((b: any) => b.type === petType);
+
+                                                        return (
+                                                            <FormControl fullWidth>
+                                                                <InputLabel id="breeds-label">Giống thú cưng ({petType === "all" ? "Tất cả" : petType === "dog" ? "Chó" : "Mèo"})</InputLabel>
+                                                                <Select
+                                                                    {...field}
+                                                                    labelId="breeds-label"
+                                                                    multiple
+                                                                    input={<OutlinedInput label={`Giống thú cưng (${petType === "all" ? "Tất cả" : petType === "dog" ? "Chó" : "Mèo"})`} />}
+                                                                    renderValue={(selected) => (
+                                                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                                                            {(selected as string[]).map((value) => (
+                                                                                <Typography key={value} variant="body2" sx={{ bgcolor: 'var(--palette-background-neutral)', px: 1, borderRadius: 1 }}>
+                                                                                    {breeds.find((b: any) => (b.id || b._id) === value)?.name || value}
+                                                                                </Typography>
+                                                                            ))}
+                                                                        </Box>
+                                                                    )}
+                                                                >
+                                                                    <MenuItem
+                                                                        value="all"
+                                                                        onClick={() => {
+                                                                            const isSelectedAll = field.value.length === filteredBreeds.length;
+                                                                            if (isSelectedAll) {
+                                                                                field.onChange([]);
+                                                                            } else {
+                                                                                field.onChange(filteredBreeds.map((b: any) => b.id || b._id));
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <Checkbox checked={field.value.length === filteredBreeds.length && filteredBreeds.length > 0} />
+                                                                        <ListItemText primary="Chọn tất cả" />
+                                                                    </MenuItem>
+                                                                    {filteredBreeds.map((breed: any) => {
+                                                                        const breedId = breed.id || breed._id;
+                                                                        return (
+                                                                            <MenuItem key={breedId} value={breedId}>
+                                                                                <Checkbox checked={field.value.indexOf(breedId) > -1} />
+                                                                                <ListItemText primary={`${breed.name} (${breed.type === 'dog' ? 'Chó' : 'Mèo'})`} />
+                                                                            </MenuItem>
+                                                                        );
+                                                                    })}
+                                                                </Select>
+                                                            </FormControl>
+                                                        );
+                                                    }}
                                                 />
-                                            )}
-                                        />
+                                            </Box>
+                                            <Controller
+                                                name="minAge"
+                                                control={control}
+                                                render={({ field, fieldState }) => {
+                                                    const months = Number(field.value) || 0;
+                                                    let ageText = `${months} tháng`;
+                                                    if (months >= 12) {
+                                                        const years = Math.floor(months / 12);
+                                                        const remMonths = months % 12;
+                                                        ageText = `${years} năm ${remMonths > 0 ? `${remMonths} tháng` : ''}`;
+                                                    }
+                                                    return (
+                                                        <TextField
+                                                            {...field}
+                                                            label="Độ tuổi tối thiểu (Tháng)"
+                                                            type="number"
+                                                            fullWidth
+                                                            error={!!fieldState.error}
+                                                            helperText={fieldState.error?.message || `Tương đương: ${ageText}`}
+                                                        />
+                                                    );
+                                                }}
+                                            />
+                                        </>
                                     )}
                                 </Box>
                             </Stack>

@@ -175,7 +175,8 @@
             "fields": {
                 "name": "Tên danh mục",
                 "parent": "Danh mục cha",
-                "description_placeholder": "Tiêu đề, mô tả, hình ảnh..."
+                "description_placeholder": "Tiêu đề, mô tả, hình ảnh...",
+                "product_count": "Số sản phẩm"
             }
         },
         "tiptap": {

@@ -1,6 +1,6 @@
 import { Avatar, Box, Link, ListItemText } from "@mui/material";
 import { GridActionsCell, GridActionsCellItem, GridRenderCellParams } from "@mui/x-data-grid";
-import { DeleteIcon, EditIcon, EyeIcon } from "../../../assets/icons/index";
+import { DeleteIcon, EditIcon, EyeIcon, ReloadIcon } from "../../../assets/icons/index";
 import { COLORS } from "../configs/constants";
 import { useProductCategoryData } from "../hooks/useProductCategory";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import { confirmDelete } from "../../../utils/swal";
-import RestoreIcon from '@mui/icons-material/Restore';
+// dayjs locale already set
 
 dayjs.locale('vi');
 interface RenderCreatedAtCellProps {
@@ -156,10 +156,15 @@ export const RenderStatusCell = (params: GridRenderCellParams) => {
     );
 }
 
+interface RenderActionsCellProps extends GridRenderCellParams {
+    isTrash: boolean;
+}
+
 // Actions
-export const RenderActionsCell = (params: GridRenderCellParams) => {
+export const RenderActionsCell = (params: RenderActionsCellProps) => {
+    const { isTrash, ...paramsRest } = params;
     const navigate = useNavigate();
-    const { deleteCategory, restoreCategory, forceDeleteCategory, isTrash } = useProductCategoryData();
+    const { deleteCategory, restoreCategory, forceDeleteCategory } = useProductCategoryData();
     const _id = params.row._id;
 
     const handleEdit = () => {
@@ -178,6 +183,10 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                     } else {
                         toast.error(res.message);
                     }
+                },
+                onError: (error: any) => {
+                    const message = error.response?.data?.message || "Có lỗi xảy ra khi xóa danh mục";
+                    toast.error(message);
                 }
             });
         });
@@ -196,8 +205,8 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
     };
 
     return (
-        <GridActionsCell {...params}>
-            {!isTrash && (
+        <GridActionsCell {...paramsRest}>
+            {!isTrash ? (
                 <>
                     <GridActionsCellItem
                         icon={<EyeIcon />}
@@ -228,11 +237,9 @@ export const RenderActionsCell = (params: GridRenderCellParams) => {
                         onClick={handleEdit}
                     />
                 </>
-            )}
-
-            {isTrash && (
+            ) : (
                 <GridActionsCellItem
-                    icon={<RestoreIcon />}
+                    icon={<ReloadIcon />}
                     label="Khôi phục"
                     showInMenu
                     {...({

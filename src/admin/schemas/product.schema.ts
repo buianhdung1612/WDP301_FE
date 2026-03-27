@@ -32,6 +32,8 @@ export const createProductSchema = z.object({
     variants: z.array(variantSchema).optional().default([]),
     isFood: z.boolean().optional().default(false),
     expiryDate: z.string().optional().default(""),
+    suitableBreeds: z.array(z.string()).optional().default([]),
+    minAge: z.string().or(z.number()).transform(v => Number(v)).optional().default(0),
 }).refine((data) => {
     if (data.isFood && !data.expiryDate) return false;
     if (data.isFood && data.expiryDate) {
