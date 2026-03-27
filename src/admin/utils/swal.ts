@@ -8,7 +8,7 @@ export const confirmDelete = (text: string, onConfirm: () => void) => {
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#6366f1', // Primary color for cancel button
+        cancelButtonColor: '#6366f1',
         confirmButtonText: 'Đồng ý',
         cancelButtonText: 'Hủy'
     }).then((result) => {
@@ -24,7 +24,7 @@ export const confirmAction = (title: string, text: string, onConfirm: () => void
         text: text,
         icon: icon,
         showCancelButton: true,
-        confirmButtonColor: '#10b981', // Success color
+        confirmButtonColor: '#10b981',
         cancelButtonColor: '#6b7280',
         confirmButtonText: 'Xác nhận',
         cancelButtonText: 'Hủy'
@@ -42,5 +42,29 @@ export const confirmSuccess = (title: string, text: string) => {
         icon: 'success',
         confirmButtonColor: '#10b981',
         confirmButtonText: 'Đóng'
+    });
+};
+
+export const confirmInput = (title: string, label: string, onConfirm: (value: string) => void) => {
+    Swal.fire({
+        title: title,
+        input: 'number',
+        inputLabel: label,
+        inputValue: 15,
+        showCancelButton: true,
+        confirmButtonColor: '#6366f1',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Xác nhận',
+        cancelButtonText: 'Quay lại',
+        inputValidator: (value) => {
+            if (!value || parseInt(value) <= 0) {
+                return 'Vui lòng nhập số phút hợp lệ';
+            }
+            return null;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            onConfirm(result.value);
+        }
     });
 };

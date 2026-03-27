@@ -16,13 +16,9 @@ import { LoadingButton } from "../../components/ui/LoadingButton";
 import { CategoryParentSelect } from "../../components/ui/CategoryTreeSelect";
 import { SwitchButton } from "../../components/ui/SwitchButton";
 import { useParams, useNavigate } from "react-router-dom";
+import { confirmAction } from "../../utils/swal";
 
 const PET_TYPES = ["DOG", "CAT"];
-const BOOKING_TYPES = [
-    { value: 'HOTEL', label: 'Khách sạn' },
-    { value: 'STANDALONE', label: 'Dịch vụ lẻ' },
-    { value: 'BOTH', label: 'Cả hai' },
-];
 
 export const ServiceCategoryEditPage = () => {
     const { id } = useParams();
@@ -53,7 +49,6 @@ export const ServiceCategoryEditPage = () => {
             parentId: "",
             status: "active",
             avatar: "",
-            bookingTypes: "STANDALONE",
             petTypes: ["DOG", "CAT"],
         },
     });
@@ -67,26 +62,38 @@ export const ServiceCategoryEditPage = () => {
                 parentId: category.parentId || "",
                 status: category.status || "active",
                 avatar: category.avatar || "",
-                bookingTypes: category.bookingTypes || "STANDALONE",
                 petTypes: category.petTypes || ["DOG", "CAT"],
             });
         }
     }, [category, reset]);
 
     const onSubmit = (data: ServiceCategoryFormValues) => {
-        update({ id: id as string, data }, {
-            onSuccess: (response) => {
-                if (response.code === 200 || response.success) {
-                    toast.success("Cập nhật danh mục thành công!");
-                    navigate(`/${prefixAdmin}/service/categories`);
-                } else {
-                    toast.error(response.message || "Cập nhật thất bại");
+        const executeUpdate = () => {
+            update({ id: id as string, data }, {
+                onSuccess: (response) => {
+                    if (response.code === 200 || response.success) {
+                        toast.success("Cập nhật danh mục thành công!");
+                        navigate(`/${prefixAdmin}/service/categories`);
+                    } else {
+                        toast.error(response.message || "Cập nhật thất bại");
+                    }
+                },
+                onError: () => {
+                    toast.error("Cập nhật danh mục thất bại");
                 }
-            },
-            onError: () => {
-                toast.error("Cập nhật danh mục thất bại");
-            }
-        });
+            });
+        };
+
+        if (data.status === "inactive" && category?.status !== "inactive") {
+            confirmAction(
+                "Xác nhận tạm ẩn?",
+                "Nếu bạn tạm ẩn danh mục này, tất cả các dịch vụ thuộc danh mục này cũng sẽ bị tạm ẩn. Bạn có chắc chắn?",
+                executeUpdate,
+                "warning"
+            );
+        } else {
+            executeUpdate();
+        }
     };
 
     if (isFetching) {
@@ -166,20 +173,6 @@ export const ServiceCategoryEditPage = () => {
                             <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))" }}>
                                     <Controller
-                                        name="bookingTypes"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <FormControl fullWidth>
-                                                <InputLabel>Loại đặt chỗ</InputLabel>
-                                                <Select {...field} label="Loại đặt chỗ">
-                                                    {BOOKING_TYPES.map(type => (
-                                                        <MenuItem key={type.value} value={type.value}>{type.label}</MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                        )}
-                                    />
-                                    <Controller
                                         name="petTypes"
                                         control={control}
                                         render={({ field }) => (
@@ -229,7 +222,3 @@ export const ServiceCategoryEditPage = () => {
         </>
     );
 };
-
-
-
-

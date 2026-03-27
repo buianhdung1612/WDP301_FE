@@ -7,6 +7,7 @@ import {
     assignStaffToBooking,
     startBooking,
     rescheduleBooking,
+    extendBooking,
     getAvailableSlots,
     getRecommendedStaff,
     getStaffTasks,
@@ -94,6 +95,18 @@ export const useRescheduleBooking = () => {
         onSuccess: (_data, variables) => {
             queryClient.invalidateQueries({ queryKey: ["booking", variables.id] });
             queryClient.invalidateQueries({ queryKey: ["bookings"] });
+        },
+    });
+};
+
+export const useExtendBooking = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, minutes }: { id: string; minutes: number }) => extendBooking(id, minutes),
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ["booking", variables.id] });
+            queryClient.invalidateQueries({ queryKey: ["bookings"] });
+            queryClient.invalidateQueries({ queryKey: ["staff-tasks"] });
         },
     });
 };

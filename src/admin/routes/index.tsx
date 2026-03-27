@@ -32,7 +32,9 @@ import { ServiceCreatePage } from "../pages/service/ServiceCreatePage";
 import { ServiceEditPage } from "../pages/service/ServiceEditPage";
 import { ServiceDetailPage } from "../pages/service/ServiceDetailPage";
 import { ServiceCategoryListPage } from "../pages/service-category/ServiceCategoryListPage";
+import { ServiceCategoryCreatePage } from "../pages/service-category/ServiceCategoryCreatePage";
 import { ServiceCategoryEditPage } from "../pages/service-category/ServiceCategoryEditPage";
+import { ServiceCategoryDetailPage } from "../pages/service-category/ServiceCategoryDetailPage";
 import { RoleListPage } from "../pages/role/RoleListPage";
 import { RoleCreatePage } from "../pages/role/RoleCreatePage";
 import { RoleEditPage } from "../pages/role/RoleEditPage";
@@ -102,8 +104,9 @@ export const AdminRoutes = [
     { path: "service/edit/:id", element: <PermissionGuard permission="service_edit"><ServiceEditPage /></PermissionGuard> },
     { path: "service/detail/:id", element: <PermissionGuard permission="service_view"><ServiceDetailPage /></PermissionGuard> },
     { path: "service/categories", element: <PermissionGuard permission="service_category_view"><ServiceCategoryListPage /></PermissionGuard> },
-    { path: "service/categories/create", element: <PermissionGuard permission="service_category_create"><ServiceCreatePage /></PermissionGuard> },
+    { path: "service/categories/create", element: <PermissionGuard permission="service_category_create"><ServiceCategoryCreatePage /></PermissionGuard> },
     { path: "service/categories/edit/:id", element: <PermissionGuard permission="service_category_edit"><ServiceCategoryEditPage /></PermissionGuard> },
+    { path: "service/categories/detail/:id", element: <PermissionGuard permission="service_category_view"><ServiceCategoryDetailPage /></PermissionGuard> },
     { path: "blog/list", element: <PermissionGuard permission="blog_view"><BlogListPage /></PermissionGuard> },
     { path: "blog/create", element: <PermissionGuard permission="blog_create"><BlogCreatePage /></PermissionGuard> },
     { path: "blog/edit/:id", element: <PermissionGuard permission="blog_edit"><BlogEditPage /></PermissionGuard> },

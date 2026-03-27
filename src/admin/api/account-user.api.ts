@@ -41,3 +41,17 @@ export const deleteUser = async (id: string) => {
     const response = await apiApp.delete(`${BASE_URL}/delete/${id}`, withAuth());
     return response.data;
 };
+export const getUserAddresses = async (userId: string) => {
+    const response = await apiApp.get(`${BASE_URL}/address/${userId}`, withAuth());
+    return response.data;
+};
+
+export const deleteUserAddress = async (id: string) => {
+    const response = await apiApp.delete(`${BASE_URL}/address/delete/${id}`, withAuth());
+    return response.data;
+};
+
+export const setUserAddressDefault = async (id: string) => {
+    const response = await apiApp.patch(`${BASE_URL}/address/set-default/${id}`, {}, withAuth());
+    return response.data;
+};

@@ -76,7 +76,7 @@ export const ServiceDetailPage = () => {
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 4, mt: 0.5 }}>
                 <Box sx={{ display: "flex", alignItems: "flex-start" }}>
                     <IconButton
-                        onClick={() => navigate(-1)}
+                        onClick={() => navigate(`/${prefixAdmin}/service/list`)}
                         sx={{ color: "var(--palette-action-active)", p: 0.75, mr: 1, mt: 0.25 }}
                     >
                         <Icon icon="eva:arrow-ios-back-fill" width={20} />
@@ -388,46 +388,6 @@ export const ServiceDetailPage = () => {
                             </Stack>
                         </Card>
 
-                        {/* Hành động nhanh */}
-                        <Card sx={{ p: 3, borderRadius: "var(--shape-borderRadius-lg)", boxShadow: "var(--customShadows-card)" }}>
-                            <Typography sx={{ fontSize: "1.125rem", fontWeight: 600, mb: 2 }}>Hành động</Typography>
-                            <Stack spacing={1.5}>
-                                <Button
-                                    fullWidth
-                                    variant="outlined"
-                                    startIcon={<Icon icon="solar:pen-bold" />}
-                                    onClick={() => navigate(`/${prefixAdmin}/service/edit/${id}`)}
-                                    sx={{
-                                        justifyContent: "flex-start",
-                                        fontWeight: 600,
-                                        textTransform: "none",
-                                        borderRadius: "var(--shape-borderRadius-md)",
-                                        borderColor: "var(--palette-divider)",
-                                        color: "var(--palette-text-primary)",
-                                        "&:hover": { bgcolor: "var(--palette-background-neutral)", borderColor: "var(--palette-text-primary)" },
-                                    }}
-                                >
-                                    Chỉnh sửa dịch vụ
-                                </Button>
-                                <Button
-                                    fullWidth
-                                    variant="outlined"
-                                    startIcon={<Icon icon="solar:list-bold" />}
-                                    onClick={() => navigate(`/${prefixAdmin}/service/list`)}
-                                    sx={{
-                                        justifyContent: "flex-start",
-                                        fontWeight: 600,
-                                        textTransform: "none",
-                                        borderRadius: "var(--shape-borderRadius-md)",
-                                        borderColor: "var(--palette-divider)",
-                                        color: "var(--palette-text-secondary)",
-                                        "&:hover": { bgcolor: "var(--palette-background-neutral)" },
-                                    }}
-                                >
-                                    Danh sách dịch vụ
-                                </Button>
-                            </Stack>
-                        </Card>
                     </Stack>
                 </Grid>
             </Grid>

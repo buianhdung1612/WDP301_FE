@@ -79,6 +79,11 @@ export const rescheduleBooking = async (id: string, data: { start: string, end: 
     return response.data;
 };
 
+export const extendBooking = async (id: string, minutes: number) => {
+    const response = await apiApp.patch(`${BASE_URL}/${id}/extend`, { minutes }, withAuth());
+    return response.data;
+};
+
 export const updateBooking = async (id: string, data: any) => {
     const response = await apiApp.patch(`${BASE_URL}/${id}/update`, data, withAuth());
     return response.data;

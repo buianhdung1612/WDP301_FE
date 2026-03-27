@@ -9,7 +9,7 @@ const baseServiceSchema = z.object({
     procedure: z.string().optional(),
     duration: z.number().min(1, "Thời lượng dự kiến phải lớn hơn 0"),
     minDuration: z.number().min(1, "Thời lượng tối thiểu phải lớn hơn 0"),
-    maxDuration: z.number().min(1, "Thời lượng tối đa phải lớn hơn 0"),
+    maxExtensionMinutes: z.number().min(0, "Thời gian gia hạn không được âm"),
     petTypes: z.array(z.string()).min(1, "Vui lòng chọn ít nhất một loại thú cưng"),
     pricingType: z.enum(["fixed", "by-weight"]),
     basePrice: z.number().optional(),
@@ -27,8 +27,4 @@ export const serviceSchema = baseServiceSchema
     .refine((data) => data.minDuration <= data.duration, {
         message: "Thời lượng tối thiểu không được lớn hơn thời lượng dự kiến",
         path: ["minDuration"],
-    })
-    .refine((data) => data.duration <= data.maxDuration, {
-        message: "Thời lượng dự kiến không được lớn hơn thời lượng tối đa",
-        path: ["maxDuration"],
     });

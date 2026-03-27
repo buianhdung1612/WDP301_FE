@@ -17,10 +17,10 @@ import {
 import { Icon } from "@iconify/react";
 import { useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
-import { useBookingDetail, useUpdateBookingStatus, useUpdateBooking, useBookings } from "./hooks/useBookingManagement";
+import { useBookingDetail, useUpdateBookingStatus, useUpdateBooking, useBookings, useExtendBooking } from "./hooks/useBookingManagement";
 import { toast } from "react-toastify";
 import { prefixAdmin } from "../../constants/routes";
-import { confirmAction } from "../../utils/swal";
+import { confirmAction, confirmInput } from "../../utils/swal";
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField } from "@mui/material";
 
 const STATUS_OPTIONS: { [key: string]: { label: string; color: string; bg: string } } = {
@@ -41,7 +41,7 @@ const PAYMENT_STATUS_OPTIONS: { [key: string]: { label: string; color: string; b
     refunded: { label: "Đã hoàn tiền", color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)" },
 };
 
-const AffectedBookingsSection = ({ affected, currentEnd, navigate, onBulkRescheduleClick }: any) => {
+const AffectedBookingsSection = ({ affected, currentEnd, navigate, onBulkRescheduleClick, onExtendClick }: any) => {
     if (affected.length === 0) return null;
 
     return (
@@ -67,26 +67,45 @@ const AffectedBookingsSection = ({ affected, currentEnd, navigate, onBulkResched
                 <Typography variant="h6" sx={{ color: 'var(--palette-error-main)', fontWeight: 700, flexGrow: 1 }}>
                     Xử lý xung đột lịch trình ({affected.length})
                 </Typography>
-                <Button
-                    size="small"
-                    variant="contained"
-                    color="error"
-                    startIcon={<Icon icon="solar:history-bold" />}
-                    onClick={() => onBulkRescheduleClick(affected)}
-                    sx={{
-                        fontWeight: 800,
-                        fontSize: '0.7rem',
-                        textTransform: 'none',
-                        borderRadius: '20px',
-                        boxShadow: '0 4px 12px rgba(255, 86, 48, 0.24)'
-                    }}
-                >
-                    Dời tất cả lịch sau (+phút)
-                </Button>
+
+                <Stack direction="row" spacing={1}>
+                    <Button
+                        size="small"
+                        variant="outlined"
+                        color="error"
+                        startIcon={<Icon icon="solar:clock-circle-bold" />}
+                        onClick={onExtendClick}
+                        sx={{
+                            fontWeight: 800,
+                            fontSize: '0.7rem',
+                            textTransform: 'none',
+                            borderRadius: '20px',
+                            bgcolor: 'white'
+                        }}
+                    >
+                        Gia hạn +
+                    </Button>
+                    <Button
+                        size="small"
+                        variant="contained"
+                        color="error"
+                        startIcon={<Icon icon="solar:history-bold" />}
+                        onClick={() => onBulkRescheduleClick(affected)}
+                        sx={{
+                            fontWeight: 800,
+                            fontSize: '0.7rem',
+                            textTransform: 'none',
+                            borderRadius: '20px',
+                            boxShadow: '0 4px 12px rgba(255, 86, 48, 0.24)'
+                        }}
+                    >
+                        Dời tất cả lịch sau
+                    </Button>
+                </Stack>
             </Stack>
 
             <Typography variant="body2" sx={{ color: 'var(--palette-text-secondary)', mb: 2 }}>
-                Các lịch đặt sau của nhân viên này bị trùng lặp do việc quá giờ. Vui lòng chọn hành động xử lý:
+                Lịch dự kiến kết thúc hiện tại: <strong>{dayjs(currentEnd).format('HH:mm')}</strong>. Các lịch tiếp theo bị ảnh hưởng:
             </Typography>
 
             <Stack spacing={2}>
@@ -110,10 +129,7 @@ const AffectedBookingsSection = ({ affected, currentEnd, navigate, onBulkResched
                             </Typography>
                             <Stack direction="row" spacing={1.5} alignItems="center">
                                 <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 600 }}>
-                                    Mới: {dayjs(currentEnd).format('HH:mm')} (Chậm trễ)
-                                </Typography>
-                                <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', textDecoration: 'line-through' }}>
-                                    Cũ: {dayjs(b.start).format('HH:mm')}
+                                    Xung đột: {dayjs(currentEnd).format('HH:mm')} &gt; {dayjs(b.start).format('HH:mm')}
                                 </Typography>
                             </Stack>
                         </Stack>
@@ -206,7 +222,17 @@ export const BookingDetailPage = () => {
     const booking = bookingRes?.data;
     const { mutate: updateStatus } = useUpdateBookingStatus();
     const { mutate: updateBooking } = useUpdateBooking();
+    const { mutate: extendTime } = useExtendBooking();
     const [rescheduleOpen, setRescheduleOpen] = useState(false);
+
+    const handleExtend = () => {
+        confirmInput("Gia hạn dịch vụ", "Số phút cần thêm (Ước lượng)", (minutes) => {
+            extendTime({ id: id || "", minutes: parseInt(minutes) }, {
+                onSuccess: () => { toast.success("Đã gia hạn thành công"); refetch(); },
+                onError: (error: any) => toast.error(error.response?.data?.message || "Lỗi khi gia hạn")
+            });
+        });
+    };
 
     // Tìm các lịch bị ảnh hưởng
     const sid = booking?.staffIds?.[0]?._id || booking?.staffIds?.[0];
@@ -579,6 +605,7 @@ export const BookingDetailPage = () => {
                                 onBulkRescheduleClick={() => {
                                     setRescheduleOpen(true);
                                 }}
+                                onExtendClick={handleExtend}
                             />
                         )}
 

@@ -17,8 +17,9 @@ import { LoadingButton } from "../../components/ui/LoadingButton";
 import { SwitchButton } from "../../components/ui/SwitchButton";
 import { CategoryParentSelect } from "../../components/ui/CategoryTreeSelect";
 import { Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { UploadFiles } from "../../components/ui/UploadFiles";
+import { Icon } from "@iconify/react";
 
 const PET_TYPES = ["DOG", "CAT"];
 const PRICING_TYPES = [
@@ -68,7 +69,7 @@ export const ServiceEditPage = () => {
             departmentId: "",
             duration: 30,
             minDuration: 30,
-            maxDuration: 60,
+            maxExtensionMinutes: 30,
             petTypes: ["DOG", "CAT"],
             pricingType: "fixed",
             basePrice: 0,
@@ -96,7 +97,7 @@ export const ServiceEditPage = () => {
                 departmentId: service.departmentId || "",
                 duration: service.duration || 30,
                 minDuration: service.minDuration || 30,
-                maxDuration: service.maxDuration || 60,
+                maxExtensionMinutes: service.maxExtensionMinutes || 30,
                 petTypes: service.petTypes || ["DOG", "CAT"],
                 pricingType: service.pricingType || "fixed",
                 basePrice: service.basePrice || 0,
@@ -142,7 +143,15 @@ export const ServiceEditPage = () => {
         <>
             <div className="mb-[calc(5*var(--spacing))] gap-[calc(2*var(--spacing))] flex items-start justify-end">
                 <div className="mr-auto">
-                    <Title title="Chỉnh sửa dịch vụ" />
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <IconButton
+                            onClick={() => navigate(`/${prefixAdmin}/service/list`)}
+                            sx={{ color: "var(--palette-action-active)", p: 0.75, mr: 1, mt: 0.25 }}
+                        >
+                            <Icon icon="eva:arrow-ios-back-fill" width={20} />
+                        </IconButton>
+                        <Title title="Chỉnh sửa dịch vụ" />
+                    </Box>
                     <Breadcrumb
                         items={[
                             { label: "Dashboard", to: "/" },
@@ -236,16 +245,16 @@ export const ServiceEditPage = () => {
                                         )}
                                     />
                                     <Controller
-                                        name="maxDuration"
+                                        name="maxExtensionMinutes"
                                         control={control}
                                         render={({ field, fieldState }) => (
                                             <TextField
                                                 {...field}
                                                 type="number"
-                                                label="Thời lượng tối đa (phút)"
-                                                placeholder="Tự động hoàn thành đơn"
+                                                label="Gia hạn tối đa (phút)"
+                                                placeholder="Ví dụ: 30"
                                                 error={!!fieldState.error}
-                                                helperText={fieldState.error?.message}
+                                                helperText={fieldState.error?.message || "Tổng thời gian gia hạn cho phép (khi bận quá giờ)"}
                                                 onChange={(e) => field.onChange(Number(e.target.value))}
                                             />
                                         )}

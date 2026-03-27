@@ -29,11 +29,6 @@ export const columnsConfig: GridColDef<IServiceCategory>[] = [
         renderCell: RenderPetTypesCell,
     },
     {
-        field: "bookingTypes",
-        headerName: "Loại đặt chỗ",
-        width: 140,
-    },
-    {
         field: "createdAt",
         headerName: "Thời gian tạo",
         width: 160,

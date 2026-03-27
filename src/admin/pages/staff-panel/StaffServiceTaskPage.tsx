@@ -19,8 +19,8 @@ import {
 import { Icon } from "@iconify/react";
 import { toast } from "react-toastify";
 import { useAuthStore } from "../../../stores/useAuthStore";
-import { useStaffTasks, useStartBooking, useUpdateBookingStatus } from "../booking/hooks/useBookingManagement";
-import { confirmAction } from "../../utils/swal";
+import { useStaffTasks, useStartBooking, useUpdateBookingStatus, useExtendBooking } from "../booking/hooks/useBookingManagement";
+import { confirmAction, confirmInput } from "../../utils/swal";
 import { prefixAdmin } from "../../constants/routes";
 import { useNavigate } from "react-router-dom";
 import { useCallback, useEffect } from "react";
@@ -98,6 +98,18 @@ export const StaffServiceTaskPage = () => {
 
     const { mutate: startService, isPending: isStarting } = useStartBooking();
     const { mutate: updateStatus, isPending: isUpdating } = useUpdateBookingStatus();
+    const { mutate: extendTime, isPending: isExtending } = useExtendBooking();
+
+    const handleExtend = (id: string) => {
+        confirmInput("Gia hạn dịch vụ", "Số phút cần thêm (Ước lượng)", (minutes) => {
+            setProcessingItem({ id });
+            extendTime({ id, minutes: parseInt(minutes) }, {
+                onSuccess: () => { toast.success("Đã gia hạn thành công"); refetch(); },
+                onError: (error: any) => toast.error(error.response?.data?.message || "Lỗi khi gia hạn"),
+                onSettled: () => setProcessingItem(null)
+            });
+        });
+    };
 
     const tasks = bookingsRes?.data || [];
 
@@ -299,22 +311,38 @@ export const StaffServiceTaskPage = () => {
                                                                             minDuration={task.serviceId?.minDuration || 0}
                                                                             maxDuration={task.serviceId?.maxDuration || 0}
                                                                         />
-                                                                        <Button
-                                                                            variant="contained"
-                                                                            size="small"
-                                                                            color="success"
-                                                                            startIcon={(isUpdating && processingItem?.id === task._id)
-                                                                                ? <CircularProgress size={16} color="inherit" />
-                                                                                : <Icon icon="eva:checkmark-circle-2-fill" />
-                                                                            }
-                                                                            onClick={() => handleComplete(task._id, m.petId?._id)}
-                                                                            disabled={(isUpdating && processingItem?.id === task._id) ||
-                                                                                (task.serviceId?.minDuration > 0 && dayjs().diff(dayjs(m.startedAt), 'minute') < task.serviceId.minDuration)
-                                                                            }
-                                                                            sx={{ borderRadius: "var(--shape-borderRadius)", textTransform: 'none' }}
-                                                                        >
-                                                                            Hoàn thành
-                                                                        </Button>
+                                                                        <Stack direction="row" spacing={1}>
+                                                                            <Button
+                                                                                variant="outlined"
+                                                                                size="small"
+                                                                                color="info"
+                                                                                startIcon={(isExtending && processingItem?.id === task._id)
+                                                                                    ? <CircularProgress size={16} color="inherit" />
+                                                                                    : <Icon icon="solar:clock-circle-bold" />
+                                                                                }
+                                                                                onClick={() => handleExtend(task._id)}
+                                                                                disabled={isExtending && processingItem?.id === task._id}
+                                                                                sx={{ borderRadius: "var(--shape-borderRadius)", textTransform: 'none' }}
+                                                                            >
+                                                                                Gia hạn
+                                                                            </Button>
+                                                                            <Button
+                                                                                variant="contained"
+                                                                                size="small"
+                                                                                color="success"
+                                                                                startIcon={(isUpdating && processingItem?.id === task._id)
+                                                                                    ? <CircularProgress size={16} color="inherit" />
+                                                                                    : <Icon icon="eva:checkmark-circle-2-fill" />
+                                                                                }
+                                                                                onClick={() => handleComplete(task._id, m.petId?._id)}
+                                                                                disabled={(isUpdating && processingItem?.id === task._id) ||
+                                                                                    (task.serviceId?.minDuration > 0 && dayjs().diff(dayjs(m.startedAt), 'minute') < task.serviceId.minDuration)
+                                                                                }
+                                                                                sx={{ borderRadius: "var(--shape-borderRadius)", textTransform: 'none' }}
+                                                                            >
+                                                                                Hoàn thành
+                                                                            </Button>
+                                                                        </Stack>
                                                                     </Stack>
                                                                 )}
                                                             </>

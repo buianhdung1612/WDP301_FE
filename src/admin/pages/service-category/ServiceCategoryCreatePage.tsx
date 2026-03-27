@@ -17,11 +17,6 @@ import { CategoryParentSelect } from "../../components/ui/CategoryTreeSelect";
 import { SwitchButton } from "../../components/ui/SwitchButton";
 
 const PET_TYPES = ["DOG", "CAT"];
-const BOOKING_TYPES = [
-    { value: 'HOTEL', label: 'Khách sạn' },
-    { value: 'STANDALONE', label: 'Dịch vụ lẻ' },
-    { value: 'BOTH', label: 'Cả hai' },
-];
 
 export const ServiceCategoryCreatePage = () => {
     const [expandedDetail, setExpandedDetail] = useState(true);
@@ -46,7 +41,6 @@ export const ServiceCategoryCreatePage = () => {
             parentId: "",
             status: "active",
             avatar: "",
-            bookingTypes: "STANDALONE",
             petTypes: ["DOG", "CAT"],
         },
     });
@@ -139,20 +133,6 @@ export const ServiceCategoryCreatePage = () => {
                         >
                             <Stack p="calc(3 * var(--spacing))" gap="calc(3 * var(--spacing))">
                                 <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "calc(3 * var(--spacing)) calc(2 * var(--spacing))" }}>
-                                    <Controller
-                                        name="bookingTypes"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <FormControl fullWidth>
-                                                <InputLabel>Loại đặt chỗ</InputLabel>
-                                                <Select {...field} label="Loại đặt chỗ">
-                                                    {BOOKING_TYPES.map(type => (
-                                                        <MenuItem key={type.value} value={type.value}>{type.label}</MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                        )}
-                                    />
                                     <Controller
                                         name="petTypes"
                                         control={control}

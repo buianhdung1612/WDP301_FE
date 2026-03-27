@@ -5,7 +5,6 @@ export interface IServiceCategory {
     description: string;
     avatar: string;
     parentId: string;
-    bookingTypes: string;
     petTypes: string[];
     status: 'active' | 'inactive';
     createdAt: Date;

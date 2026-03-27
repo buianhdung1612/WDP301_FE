@@ -137,10 +137,7 @@ export const BookingPage = () => {
 
     // Services Filter
     const filteredServices = useMemo(() => {
-        return allServices.filter((s: any) => {
-            const bookingType = s.categoryId?.bookingTypes;
-            return !bookingType || bookingType === "STANDALONE" || bookingType === "BOTH";
-        });
+        return allServices;
     }, [allServices]);
 
     const selectedService = useMemo(() => {

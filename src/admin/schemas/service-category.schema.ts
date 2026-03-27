@@ -6,7 +6,6 @@ export const serviceCategorySchema = z.object({
     parentId: z.string().optional(),
     description: z.string().optional(),
     avatar: z.string().optional(),
-    bookingTypes: z.enum(["HOTEL", "STANDALONE", "BOTH"]),
     petTypes: z.array(z.string()),
     status: z.enum(["active", "inactive"]),
 });

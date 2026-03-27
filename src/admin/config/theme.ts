@@ -224,6 +224,16 @@ export const adminTheme = createTheme({
         },
         MuiDataGrid: {
             styleOverrides: {
+                panel: {
+                    '& .MuiPaper-root': {
+                        ...backgroundPopup,
+                    }
+                },
+                menu: {
+                    '& .MuiPaper-root': {
+                        ...backgroundPopup,
+                    }
+                },
                 panelContent: {
                     ...backgroundPopup,
                 },

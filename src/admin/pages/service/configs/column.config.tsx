@@ -22,6 +22,7 @@ export const columnsConfig: GridColDef<IService>[] = [
         headerName: "Danh mục",
         width: 150,
         renderCell: RenderCategoryCell,
+        valueGetter: (params: any) => params?.name || params,
     },
     {
         field: "pricingType",
