@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { getBoardingBookingList } from "../../api/dashboard.api";
 import { FooterSub } from "../../components/layouts/FooterSub";
-import { useAvailableCages, useBoardingCageDetail, useBoardingCageReviews, useCreateBoardingCageReview, useExerciseTemplates, useFoodTemplates } from "../../hooks/useBoarding";
+import { useAvailableCages, useBoardingCageDetail, useBoardingCageReviews, useCreateBoardingCageReview, useFoodTemplates } from "../../hooks/useBoarding";
 import { useMyPets } from "../../hooks/usePet";
 
 const SIZE_LABELS: Record<string, string> = {
@@ -141,10 +141,11 @@ export const BoardingCageDetailPage = () => {
   const [reviewComment, setReviewComment] = useState("");
   const [feedingOption, setFeedingOption] = useState<"standard" | "custom">("standard");
   const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [customFeeding, setCustomFeeding] = useState<Record<string, string>>({});
-  const [customExercise, setCustomExercise] = useState<Record<string, string>>({});
+  const [customFeeding, setCustomFeeding] = useState<Record<string, Record<string, string>>>({});
+  const [customExercise, setCustomExercise] = useState<Record<string, Record<string, string>>>({});
   const [scheduleTab, setScheduleTab] = useState<"food" | "exercise">("food");
   const [scheduleSearch, setScheduleSearch] = useState("");
+  const [selectedPetIdInModal, setSelectedPetIdInModal] = useState<string>("");
 
   const { data: availableCages = [] } = useAvailableCages(checkInDate, checkOutDate);
 
@@ -826,7 +827,11 @@ export const BoardingCageDetailPage = () => {
                       {feedingOption === "standard" && (
                         <button
                           type="button"
-                          onClick={() => setShowScheduleModal(true)}
+                          onClick={() => {
+                            const firstValid = (selectedPetIds || []).find(id => !!id);
+                            if (firstValid) setSelectedPetIdInModal(firstValid);
+                            setShowScheduleModal(true);
+                          }}
                           className="text-[11px] font-[800] text-client-primary hover:underline hover:underline-offset-4"
                         >
                           Tùy chỉnh
@@ -891,25 +896,29 @@ export const BoardingCageDetailPage = () => {
                             const isYoung = primaryPet?.age && primaryPet.age < 1;
                             const isSenior = primaryPet?.age && primaryPet.age > 7;
 
+                            const pId = normalizeId(primaryPet?._id || "");
+                            const petFeeding = customFeeding[pId] || {};
+                            const petExercise = customExercise[pId] || {};
+
                             let feeding = [
-                              { time: "07:30", label: "Sáng", content: customFeeding["Sáng"] || (isYoung ? "Hạt ngâm mềm & Canxi" : "Bữa chính dinh dưỡng") },
-                              { time: "12:00", label: "Trưa", content: customFeeding["Trưa"] || "Snack & Bổ sung nước" },
-                              { time: "18:00", label: "Tối", content: customFeeding["Tối"] || (isSenior ? "Cơm trộn nhẹ bụng" : "Hạt trộn thịt/Pate") }
+                              { time: "07:30", label: "Sáng", content: petFeeding["Sáng"] || (isYoung ? "Hạt ngâm mềm & Canxi" : "Bữa chính dinh dưỡng") },
+                              { time: "12:00", label: "Trưa", content: petFeeding["Trưa"] || "Snack & Bổ sung nước" },
+                              { time: "18:00", label: "Tối", content: petFeeding["Tối"] || (isSenior ? "Cơm trộn nhẹ bụng" : "Hạt trộn thịt/Pate") }
                             ];
                             let exercise = [
-                              { time: "09:00 - 10:30", content: customExercise["slot1"] || "Vận động & Vui chơi ngoài trời" },
-                              { time: "16:30 - 17:30", content: customExercise["slot2"] || "Tương tác & Huấn luyện cơ bản" }
+                              { time: "09:00 - 10:30", content: petExercise["Sáng"] || "Vận động & Vui chơi ngoài trời" },
+                              { time: "16:30 - 17:30", content: petExercise["Tối"] || "Tương tác & Huấn luyện cơ bản" }
                             ];
 
                             if (primaryPet?.type === "cat") {
                               feeding = [
-                                { time: "08:00", label: "Sáng", content: customFeeding["Sáng"] || (isYoung ? "Pate con & Sữa" : "Hạt cao cấp & Pate") },
-                                { time: "13:00", label: "Trưa", content: customFeeding["Trưa"] || "Súp thưởng bổ sung nước" },
-                                { time: "19:00", label: "Tối", content: customFeeding["Tối"] || (isSenior ? "Bữa nhẹ dễ tiêu" : "Hạt & Gà xé") }
+                                { time: "08:00", label: "Sáng", content: petFeeding["Sáng"] || (isYoung ? "Pate con & Sữa" : "Hạt cao cấp & Pate") },
+                                { time: "13:00", label: "Trưa", content: petFeeding["Trưa"] || "Súp thưởng bổ sung nước" },
+                                { time: "19:00", label: "Tối", content: petFeeding["Tối"] || (isSenior ? "Bữa nhẹ dễ tiêu" : "Hạt & Gà xé") }
                               ];
                               exercise = [
-                                { time: "10:00 - 11:30", content: customExercise["slot1"] || "Leo trèo khu vực Cat-tree" },
-                                { time: "15:30 - 16:30", content: customExercise["slot2"] || "Tương tác (Laser/Cần câu)" }
+                                { time: "10:00 - 11:30", content: petExercise["Sáng"] || "Leo trèo khu vực Cat-tree" },
+                                { time: "15:30 - 16:30", content: petExercise["Tối"] || "Tương tác (Laser/Cần câu)" }
                               ];
                             }
 
@@ -942,7 +951,7 @@ export const BoardingCageDetailPage = () => {
                                   </ul>
                                   {primaryPet && (
                                     <p className="mt-[12px] text-[10px] italic text-[#9aa3b2] text-center border-t border-[#efe3d8] pt-2">
-                                      * {Object.keys(customFeeding).length > 0 || Object.keys(customExercise).length > 0 ? "Lịch trình đã được tùy chỉnh." : `Lịch trình tự động cho ${primaryPet?.type === "cat" ? "mèo" : "chó"} ${isYoung ? "nhỏ" : isSenior ? "lớn tuổi" : "trưởng thành"}.`}
+                                      * {Object.keys(customFeeding).length > 0 || Object.keys(customExercise).length > 0 ? "Lịch trình đã được tùy chỉnh riêng cho từng bé." : `Lịch trình tự động cho ${primaryPet?.type === "cat" ? "mèo" : "chó"} ${isYoung ? "nhỏ" : isSenior ? "lớn tuổi" : "trưởng thành"}.`}
                                     </p>
                                   )}
                                 </div>
@@ -1019,20 +1028,58 @@ export const BoardingCageDetailPage = () => {
                           </div>
                         </div>
 
-                        <div className="max-h-[60vh] overflow-y-auto p-[24px]">
+                        {/* Pet Selection in Modal */}
+                        {(() => {
+                          const selectedPets = (selectedPetIds || [])
+                            .map(id => (myPets || []).find((p: any) => normalizeId(p._id) === id))
+                            .filter(Boolean);
+
+                          if (selectedPets.length === 0) return null;
+
+                          return (
+                            <div className="border-b border-[#f1e6dc] bg-[#fffaf7]/60 p-3 pt-4">
+                              <p className="px-3 mb-2 text-[10px] uppercase tracking-widest font-[800] text-client-primary/70">Tùy chỉnh cho:</p>
+                              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                                {selectedPets.map(pet => (
+                                  <button
+                                    key={pet._id}
+                                    type="button"
+                                    onClick={() => setSelectedPetIdInModal(String(pet._id))}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-[12px] font-[700] transition-all whitespace-nowrap border ${normalizeId(selectedPetIdInModal) === normalizeId(pet._id)
+                                      ? "bg-client-primary text-white border-client-primary shadow-md scale-105"
+                                      : "bg-white text-client-secondary border-[#f1e6dc] hover:border-client-primary/30 hover:bg-[#fffbf9]"
+                                      }`}
+                                  >
+                                    <div className="w-5 h-5 rounded-full overflow-hidden border border-white/20">
+                                      <img src={pet.avatar || "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=60&w=100"} alt="" className="w-full h-full object-cover" />
+                                    </div>
+                                    {pet.name}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                        <div className="max-h-[50vh] overflow-y-auto p-[24px]">
                           {(() => {
                             const selectedPets = (selectedPetIds || [])
                               .map(id => (myPets || []).find((p: any) => normalizeId(p._id) === id))
                               .filter(Boolean);
-                            const primaryPet = selectedPets[0];
-                            const petType = primaryPet?.type || "dog";
+
+                            const currentPetId = selectedPetIdInModal || normalizeId(selectedPets[0]?._id);
+                            const currentPet = selectedPets.find(p => normalizeId(p._id) === currentPetId) || selectedPets[0];
+                            const petType = currentPet?.type || "dog";
 
                             if (scheduleTab === "food") {
                               return (
                                 <ScheduleFoodCustomizer
                                   petType={petType}
-                                  choices={customFeeding}
-                                  onChange={setCustomFeeding}
+                                  choices={customFeeding[currentPetId] || {}}
+                                  onChange={(newChoices: any) => setCustomFeeding(prev => ({
+                                    ...prev,
+                                    [currentPetId]: newChoices
+                                  }))}
                                   searchQuery={scheduleSearch}
                                 />
                               );
@@ -1040,8 +1087,11 @@ export const BoardingCageDetailPage = () => {
                               return (
                                 <ScheduleExerciseCustomizer
                                   petType={petType}
-                                  choices={customExercise}
-                                  onChange={setCustomExercise}
+                                  choices={customExercise[currentPetId] || {}}
+                                  onChange={(newChoices: any) => setCustomExercise(prev => ({
+                                    ...prev,
+                                    [currentPetId]: newChoices
+                                  }))}
                                   searchQuery={scheduleSearch}
                                 />
                               );
@@ -1122,6 +1172,11 @@ export const BoardingCageDetailPage = () => {
 
 const ScheduleFoodCustomizer = ({ petType, choices, onChange, searchQuery }: { petType: string, choices: Record<string, string>, onChange: any, searchQuery: string }) => {
   const { data: foodTemplates = [], isLoading } = useFoodTemplates(petType);
+  const [expandedSlots, setExpandedSlots] = useState<Record<string, boolean>>({ "Sáng": true });
+
+  const toggleSlot = (id: string) => {
+    setExpandedSlots(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const meals = [
     { id: "Sáng", label: "Bữa Sáng", icon: <Utensils className="h-4 w-4" />, time: "07:30 - 08:30" },
@@ -1137,99 +1192,179 @@ const ScheduleFoodCustomizer = ({ petType, choices, onChange, searchQuery }: { p
   if (isLoading) return <div className="flex py-10 justify-center items-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-client-primary"></div></div>;
 
   return (
-    <div className="space-y-6">
-      {meals.map((meal) => (
-        <div key={meal.id} className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="bg-white p-1.5 rounded-lg border border-[#f1e6dc] shadow-sm">{meal.icon}</div>
-              <span className="text-[14px] font-[800] text-client-secondary uppercase tracking-tight">{meal.label}</span>
-            </div>
-            <span className="text-[11px] font-[700] text-[#9aa3b2] bg-black/5 px-2 py-0.5 rounded-full">{meal.time}</span>
-          </div>
-          <div className="grid grid-cols-1 gap-2">
-            {filteredTemplates.length > 0 ? (
-              filteredTemplates.map((food: any) => (
-                <button
-                  key={food._id}
-                  type="button"
-                  onClick={() => onChange({ ...choices, [meal.id]: food.name })}
-                  className={`flex items-start gap-3 p-3 text-left rounded-[16px] border transition-all ${choices[meal.id] === food.name ? "border-client-primary bg-[#fffbf9] shadow-sm" : "border-[#efe2d8] bg-white hover:border-client-primary/50"}`}
-                >
-                  <div className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${choices[meal.id] === food.name ? "border-client-primary bg-client-primary text-white" : "border-[#cbd5e1]"}`}>
-                    {choices[meal.id] === food.name && <Check className="h-2.5 w-2.5" />}
+    <div className="space-y-4">
+      {meals.map((meal) => {
+        const isExpanded = expandedSlots[meal.id];
+        const currentChoice = choices[meal.id];
+
+        return (
+          <div key={meal.id} className="rounded-[20px] bg-white border border-[#f1e6dc] overflow-hidden shadow-sm">
+            <button
+              type="button"
+              onClick={() => toggleSlot(meal.id)}
+              className="w-full flex items-center justify-between p-4 bg-white hover:bg-[#fffbf9] transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="bg-[#fdf8f4] p-2 rounded-xl border border-[#f1e6dc]">{meal.icon}</div>
+                <div className="text-left">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[15px] font-[800] text-client-secondary uppercase">{meal.label}</span>
+                    <span className="text-[11px] font-[700] text-[#9aa3b2] bg-black/5 px-2 py-0.5 rounded-full">{meal.time}</span>
                   </div>
-                  <div>
-                    <p className={`text-[13px] font-[700] ${choices[meal.id] === food.name ? "text-client-secondary" : "text-[#51606d]"}`}>{food.name}</p>
-                    {food.description && <p className="text-[11px] text-[#8a94a1] leading-relaxed mt-0.5">{food.description}</p>}
-                  </div>
-                </button>
-              ))
-            ) : (
-              <p className="text-center py-4 text-[13px] text-[#9aa3b2]">Không tìm thấy món ăn nào phù hợp.</p>
+                  {currentChoice && !isExpanded && (
+                    <p className="text-[13px] text-client-primary font-bold mt-1 line-clamp-1">Đã chọn: {currentChoice}</p>
+                  )}
+                  {!currentChoice && !isExpanded && (
+                    <p className="text-[12px] text-[#9aa3b2] mt-1 italic">Để lại mặc định</p>
+                  )}
+                </div>
+              </div>
+              <div className={`transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}>
+                <ChevronLeft className="h-5 w-5 text-[#a1a9b4] -rotate-90" />
+              </div>
+            </button>
+
+            {isExpanded && (
+              <div className="p-4 pt-0 border-t border-[#f1e6dc] bg-[#fafafa]">
+                <div className="grid grid-cols-1 gap-2 mt-4">
+                  {filteredTemplates.length > 0 ? (
+                    filteredTemplates.map((food: any) => (
+                      <button
+                        key={food._id}
+                        type="button"
+                        onClick={() => onChange({ ...choices, [meal.id]: food.name })}
+                        className={`flex items-start gap-3 p-4 text-left rounded-[16px] border transition-all ${choices[meal.id] === food.name ? "border-client-primary bg-[#fffbf9] shadow-sm ring-1 ring-client-primary/10" : "border-[#efe2d8] bg-white hover:border-client-primary/50"}`}
+                      >
+                        <div className={`mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${choices[meal.id] === food.name ? "border-client-primary bg-client-primary text-white" : "border-[#cbd5e1]bg-white"}`}>
+                          {choices[meal.id] === food.name && <Check className="h-3 w-3 stroke-[3]" />}
+                        </div>
+                        <div>
+                          <p className={`text-[14px] font-[700] ${choices[meal.id] === food.name ? "text-client-secondary" : "text-[#51606d]"}`}>{food.name}</p>
+                          {food.description && <p className="text-[11px] text-[#8a94a1] leading-relaxed mt-0.5">{food.description}</p>}
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <p className="text-center py-6 text-[14px] text-[#9aa3b2] italic">Không tìm thấy món ăn nào phù hợp.</p>
+                  )}
+                </div>
+              </div>
             )}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
 
-const ScheduleExerciseCustomizer = ({ petType, choices, onChange, searchQuery }: { petType: string, choices: Record<string, string>, onChange: any, searchQuery: string }) => {
-  const { data: exerciseTemplates = [], isLoading } = useExerciseTemplates(petType);
+const EXERCISE_OPTIONS: Record<string, { label: string; value: string }[]> = {
+  dog: [
+    { label: "Dắt bộ & Khám phá sân vườn", value: "Dắt bộ sân vườn" },
+    { label: "Chơi bóng & Vận động mạnh", value: "Chơi bóng/Ném đĩa" },
+    { label: "Huấn luyện cơ bản & Tương tác", value: "Huấn luyện cơ bản" },
+  ],
+  cat: [
+    { label: "Chơi cần câu mèo & Lông vũ", value: "Chơi cần câu mèo" },
+    { label: "Leo trèo & Bắt Laser", value: "Bắt laser/Leo trèo" },
+    { label: "Vờn cỏ mèo & Massage thư giãn", value: "Vờn cỏ mèo (Catnip)" },
+  ],
+};
+
+const ScheduleExerciseCustomizer = ({ petType, choices, onChange }: { petType: string, choices: Record<string, string>, onChange: any, searchQuery: string }) => {
+  const [expandedSlots, setExpandedSlots] = useState<Record<string, boolean>>({ "Sáng": true });
+
+  const toggleSlot = (id: string) => {
+    setExpandedSlots(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const slots = [
-    { id: "slot1", label: "Ca Sáng", icon: <Dumbbell className="h-4 w-4" />, time: "09:00 - 10:30" },
-    { id: "slot2", label: "Ca Chiều", icon: <Dumbbell className="h-4 w-4 text-indigo-500" />, time: "16:30 - 17:30" },
+    { id: "Sáng", label: "Buổi Sáng", icon: <Dumbbell className="h-4 w-4" />, time: "08:30 - 09:30" },
+    { id: "Trưa", label: "Buổi Trưa", icon: <Dumbbell className="h-4 w-4 text-amber-500" />, time: "11:30 - 12:30" },
+    { id: "Tối", label: "Buổi Tối", icon: <Dumbbell className="h-4 w-4 text-indigo-500" />, time: "17:00 - 18:30" },
   ];
 
-  const filteredTemplates = exerciseTemplates.filter((ex: any) =>
-    ex.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (ex.description && ex.description.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
-  if (isLoading) return <div className="flex py-10 justify-center items-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-client-primary"></div></div>;
+  const options = EXERCISE_OPTIONS[petType === "cat" ? "cat" : "dog"];
 
   return (
-    <div className="space-y-6">
-      {slots.map((slot) => (
-        <div key={slot.id} className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="bg-white p-1.5 rounded-lg border border-[#f1e6dc] shadow-sm">{slot.icon}</div>
-              <span className="text-[14px] font-[800] text-client-secondary uppercase tracking-tight">{slot.label}</span>
-            </div>
-            <span className="text-[11px] font-[700] text-[#9aa3b2] bg-black/5 px-2 py-0.5 rounded-full">{slot.time}</span>
-          </div>
-          <div className="grid grid-cols-1 gap-2">
-            {filteredTemplates.length > 0 ? (
-              filteredTemplates.map((ex: any) => (
-                <button
-                  key={ex._id}
-                  type="button"
-                  onClick={() => onChange({ ...choices, [slot.id]: ex.name })}
-                  className={`flex items-start gap-3 p-3 text-left rounded-[16px] border transition-all ${choices[slot.id] === ex.name ? "border-client-primary bg-[#fffbf9] shadow-sm" : "border-[#efe2d8] bg-white hover:border-client-primary/50"}`}
-                >
-                  <div className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${choices[slot.id] === ex.name ? "border-client-primary bg-client-primary text-white" : "border-[#cbd5e1]"}`}>
-                    {choices[slot.id] === ex.name && <Check className="h-2.5 w-2.5" />}
+    <div className="space-y-4 py-2">
+      <div className="rounded-[18px] bg-blue-50/50 p-4 border border-blue-100/50 mb-4">
+        <p className="text-[13px] text-blue-700 font-medium leading-relaxed">
+          <Sparkles className="h-4 w-4 inline mr-2 opacity-70" />
+          TeddyPet đã thiết kế sẵn các hoạt động phù hợp nhất cho {petType === "cat" ? "mèo" : "chó"}.
+        </p>
+      </div>
+
+      {slots.map((slot) => {
+        const isExpanded = expandedSlots[slot.id];
+        const currentChoice = choices[slot.id];
+
+        return (
+          <div key={slot.id} className="rounded-[20px] bg-white border border-[#f1e6dc] overflow-hidden shadow-sm">
+            <button
+              type="button"
+              onClick={() => toggleSlot(slot.id)}
+              className="w-full flex items-center justify-between p-4 bg-white hover:bg-[#fffbf9] transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="bg-[#f0f7ff] p-2 rounded-xl border border-blue-100">{slot.icon}</div>
+                <div className="text-left">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[15px] font-[800] text-client-secondary uppercase leading-none">{slot.label}</span>
+                    <span className="text-[11px] font-[700] text-[#9aa3b2] bg-black/5 px-2 py-0.5 rounded-full">{slot.time}</span>
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className={`text-[13px] font-[700] ${choices[slot.id] === ex.name ? "text-client-secondary" : "text-[#51606d]"}`}>{ex.name}</p>
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${ex.intensity === 'high' ? 'bg-rose-100 text-rose-600' : ex.intensity === 'medium' ? 'bg-amber-100 text-amber-600' : 'bg-green-100 text-green-600'}`}>
-                        {ex.intensity === 'high' ? 'Mạnh' : ex.intensity === 'medium' ? 'Vừa' : 'Nhẹ'}
-                      </span>
-                    </div>
-                    {ex.description && <p className="text-[11px] text-[#8a94a1] leading-relaxed mt-0.5">{ex.description}</p>}
-                  </div>
-                </button>
-              ))
-            ) : (
-              <p className="text-center py-4 text-[13px] text-[#9aa3b2]">Không tìm thấy hoạt động nào phù hợp.</p>
+                  {currentChoice && !isExpanded && (
+                    <p className="text-[13px] text-client-primary font-bold mt-1 line-clamp-1">Đã chọn: {currentChoice}</p>
+                  )}
+                  {!currentChoice && !isExpanded && (
+                    <p className="text-[12px] text-[#9aa3b2] mt-1 italic">Tạm nghỉ / Không vận động</p>
+                  )}
+                </div>
+              </div>
+              <div className={`transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}>
+                <ChevronLeft className="h-5 w-5 text-[#a1a9b4] -rotate-90" />
+              </div>
+            </button>
+
+            {isExpanded && (
+              <div className="p-4 pt-0 border-t border-[#f1e6dc] bg-[#fafafa]">
+                <div className="grid grid-cols-1 gap-2.5 mt-4">
+                  {[...options, { label: "Tạm nghỉ / Không vận động", value: "skip" }].map((opt) => {
+                    const isSelected = (currentChoice === opt.value) || (opt.value === 'skip' && !currentChoice);
+                    return (
+                      <button
+                        key={`${slot.id}-${opt.value}`}
+                        type="button"
+                        onClick={() => onChange({ ...choices, [slot.id]: opt.value === 'skip' ? '' : opt.value })}
+                        className={`flex items-center justify-between gap-3 p-4 text-left rounded-[20px] border transition-all ${isSelected
+                          ? "border-client-primary bg-[#fffbf9] shadow-md ring-1 ring-client-primary/10"
+                          : "border-[#efe2d8] bg-white hover:border-client-primary/40 hover:bg-[#fffcfb]"
+                          }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${isSelected
+                            ? "border-client-primary bg-client-primary text-white"
+                            : "border-[#cbd5e1] bg-white"
+                            }`}>
+                            {isSelected && <Check className="h-3 w-3 stroke-[3]" />}
+                          </div>
+                          <span className={`text-[14px] font-[700] ${isSelected ? "text-client-secondary" : "text-[#51606d]"}`}>
+                            {opt.label}
+                          </span>
+                        </div>
+                        {opt.value !== 'skip' && (
+                          <span className="text-[10px] font-bold text-client-primary/60 bg-client-primary/5 px-2 py-1 rounded-md border border-client-primary/10">
+                            Gợi ý
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             )}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
