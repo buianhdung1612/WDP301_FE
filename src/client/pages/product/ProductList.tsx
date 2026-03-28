@@ -4,7 +4,7 @@ import { ProductBanner } from "./sections/ProductBanner"
 import { ProductCard } from "../../components/ui/ProductCard"
 import { ProductListSearch } from "./sections/ProductListSearch"
 import { useSearchParams } from "react-router-dom"
-import { useProducts } from "../../hooks/useProduct"
+import { useProducts, useCategories } from "../../hooks/useProduct"
 import { Skeleton, Pagination } from "@mui/material"
 import { useMemo } from "react"
 
@@ -30,7 +30,14 @@ export const ProductListPage = () => {
     }), [searchParams]);
 
     const { data: productsData, isLoading } = useProducts(params);
+    const { data: categoriesData } = useCategories();
 
+    const selectedCategory = useMemo(() => {
+        if (!categoriesData || !params.categorySlug) return null;
+        return categoriesData.find((cat: any) => cat.slug === params.categorySlug);
+    }, [categoriesData, params.categorySlug]);
+
+    const pageTitle = selectedCategory ? selectedCategory.name : "Cửa hàng";
 
     const handlePageChange = (_: any, value: number) => {
         searchParams.set("page", value.toString());
@@ -40,7 +47,12 @@ export const ProductListPage = () => {
 
     return (
         <>
-            <ProductBanner pageTitle="Cửa hàng" breadcrumbs={breadcrumbs} url="https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/06/bc-blog-listing.jpg" className="bg-top" />
+            <ProductBanner
+                pageTitle={pageTitle}
+                breadcrumbs={[...breadcrumbs, ...(selectedCategory ? [{ label: selectedCategory.name, to: '#' }] : [])]}
+                url="https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/06/bc-blog-listing.jpg"
+                className="bg-top"
+            />
 
             <div className="app-container flex gap-[80px] 2xl:gap-[30px] relative">
                 <ProductAside />

@@ -4,12 +4,10 @@ import {
 } from '@mui/x-data-grid';
 import Card from '@mui/material/Card';
 import { SortAscendingIcon, SortDescendingIcon, UnsortedIcon } from '../../../assets/icons';
-import { columnsInitialState } from '../configs/column.config';
 import { IGridSettings } from '../configs/types';
 import { ProductToolbar } from './ProductToolbar';
 import { useDataGridLocale } from '../../../hooks/useDataGridLocale';
 import { useSettings } from '../hooks/useSettings';
-import { useProducts } from '../hooks/useProducts';
 import { useProductColumns } from '../hooks/useProductColumns';
 import {
     dataGridCardStyles,
@@ -100,20 +98,23 @@ export const ProductList = ({
                         } as any,
                     }}
                     localeText={localeText}
-                    // Pagination
                     pagination
                     paginationMode="server"
-                    rowCount={pagination.totalRecords}
+                    loading={isLoading}
+                    rowCount={pagination?.totalRecords || 0}
                     paginationModel={{
-                        page: pagination.currentPage - 1,
-                        pageSize: pagination.limit,
+                        page: filters.page - 1,
+                        pageSize: filters.limit,
                     }}
                     onPaginationModelChange={(model) => {
-                        setPage(model.page + 1);
-                        setLimit(model.pageSize);
+                        if (model.page + 1 !== filters.page) {
+                            setPage(model.page + 1);
+                        }
+                        if (model.pageSize !== filters.limit) {
+                            setLimit(model.pageSize);
+                        }
                     }}
                     pageSizeOptions={[5, 10, 20, 50]}
-                    initialState={columnsInitialState}
                     getRowHeight={() => 'auto'}
                     checkboxSelection
                     disableRowSelectionOnClick

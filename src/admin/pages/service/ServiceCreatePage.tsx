@@ -188,6 +188,7 @@ export const ServiceCreatePage = () => {
                                             <TextField
                                                 {...field}
                                                 type="number"
+                                                inputProps={{ step: "0.1" }}
                                                 label="Tổng thời gian (xong hết cả dọn dẹp)"
                                                 error={!!fieldState.error}
                                                 helperText={fieldState.error?.message || "Bao gồm thời gian làm và chuẩn bị/dọn dẹp (phút)"}
@@ -203,6 +204,7 @@ export const ServiceCreatePage = () => {
                                             <TextField
                                                 {...field}
                                                 type="number"
+                                                inputProps={{ step: "0.1" }}
                                                 label="Thời lượng tối thiểu (phút)"
                                                 placeholder="Ngăn hoàn thành sớm"
                                                 error={!!fieldState.error}

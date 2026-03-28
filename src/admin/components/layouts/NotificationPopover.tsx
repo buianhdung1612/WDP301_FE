@@ -81,7 +81,11 @@ export const NotificationPopover = () => {
         if (item.status === 'unread') {
             markAsRead(item._id);
         }
-        if (item.link) {
+        // Ưu tiên navigate theo bookingId trong metadata
+        if (item.metadata?.bookingId) {
+            navigate(`/${prefixAdmin}/booking/edit/${item.metadata.bookingId}`);
+            handleClose();
+        } else if (item.link) {
             navigate(item.link);
             handleClose();
         }

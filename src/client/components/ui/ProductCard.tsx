@@ -43,7 +43,7 @@ export const ProductCard = ({ product, rawData }: { product: Product, rawData?: 
     };
 
     return (
-        <div className="bg-[#fff0f0] rounded-[20px] overflow-hidden product-item transition-all duration-300 ease-linear hover:bg-client-primary group relative">
+        <div className="bg-[#fff0f0] rounded-[20px] overflow-hidden product-item transition-all duration-300 ease-linear hover:bg-client-primary group relative flex flex-col h-full">
             {/* Wishlist Toggle Button */}
             <div
                 onClick={handleToggleWishlist}
@@ -78,8 +78,8 @@ export const ProductCard = ({ product, rawData }: { product: Product, rawData?: 
                 </Link>
             </div>
 
-            <div className="grid grid-cols-[1fr_auto] gap-[20px]">
-                <div className="pl-[30px]">
+            <div className="grid grid-cols-[1fr_auto] gap-[20px] mt-auto">
+                <div className="pl-[30px] pr-[30px] pb-[20px] overflow-hidden">
                     {/* Rating */}
                     <div className="flex items-center">
                         {[...Array(5)].map((_, i) => (
@@ -96,27 +96,25 @@ export const ProductCard = ({ product, rawData }: { product: Product, rawData?: 
                     {/* Title */}
                     <Link
                         to={product.url}
-                        className="block text-client-secondary text-[22px] 2xl:text-[20px] truncate !whitespace-nowrap font-secondary leading-[1.3] transition-all duration-[350ms] ease-in-out my-[10px] group-hover:text-white hover:opacity-70"
+                        className="block text-client-secondary text-[22px] 2xl:text-[20px] truncate font-secondary leading-[1.3] transition-all duration-[350ms] ease-in-out my-[10px] group-hover:text-white hover:opacity-70"
                     >
                         {product.title}
                     </Link>
 
                     {/* Price */}
-                    <p className="text-client-secondary group-hover:text-white transition-default">
+                    <p className="text-client-secondary group-hover:text-white transition-default font-bold">
                         {product.price}
                     </p>
                 </div>
 
                 {/* Cart Button */}
-                <div className="mt-[15px]">
-                    <div className="mt-[53px]">
-                        <div className="w-[61px] h-[61px] pt-[10px] pr-[1px] pb-[1px] pl-[10px] relative rounded-tl-[30px] bg-white cart-button">
-                            <div className="w-[50px] h-[50px] rounded-full bg-client-primary flex items-center justify-center duration-[375ms] ease-[cubic-bezier(0.7,0,0.3,1)] group-hover:bg-client-secondary cursor-pointer">
-                                <ShoppingCartOutlinedIcon
-                                    className="text-white"
-                                    sx={{ fontSize: "40px" }}
-                                />
-                            </div>
+                <div className="flex flex-col justify-end">
+                    <div className="w-[61px] h-[61px] pt-[10px] pr-[1px] pb-[1px] pl-[10px] relative rounded-tl-[30px] bg-white cart-button">
+                        <div className="w-[50px] h-[50px] rounded-full bg-client-primary flex items-center justify-center duration-[375ms] ease-[cubic-bezier(0.7,0,0.3,1)] group-hover:bg-client-secondary cursor-pointer">
+                            <ShoppingCartOutlinedIcon
+                                className="text-white"
+                                sx={{ fontSize: "40px" }}
+                            />
                         </div>
                     </div>
                 </div>

@@ -80,7 +80,7 @@ export const ProductDesc = ({ description, content }: ProductDescProps) => {
                     })}
                 </ul>
 
-                <div className="pt-[40px] text-[10px] text-[#505050] min-h-[200px] leading-relaxed">
+                <div className="pt-[40px] text-[16px] text-[#505050] min-h-[200px] leading-relaxed">
                     <AnimatePresence mode="wait">
                         {activeTab && (
                             <motion.div

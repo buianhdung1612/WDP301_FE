@@ -254,6 +254,26 @@ export const ProductDetailPage = () => {
                                     </span>
                                 </div>
                             )}
+                            {product.isFood && product.minAge !== undefined && (
+                                <div className="flex items-center text-[16px] mt-[5px]">
+                                    <strong className="text-client-secondary mr-[8px]">Độ tuổi:</strong>
+                                    <span className="text-[#505050]">
+                                        {(() => {
+                                            const months = product.minAge || 0;
+                                            if (months === 0) return "Tất cả mọi lứa tuổi";
+                                            if (months >= 24) {
+                                                const years = Math.floor(months / 12);
+                                                const remMonths = months % 12;
+                                                return `Từ ${years} năm ${remMonths > 0 ? `${remMonths} tháng` : ''} tuổi trở lên`;
+                                            }
+                                            if (months >= 12) {
+                                                return `Từ 1 năm ${months % 12 > 0 ? `${months % 12} tháng` : ''} tuổi trở lên`;
+                                            }
+                                            return `Từ ${months} tháng tuổi trở lên`;
+                                        })()}
+                                    </span>
+                                </div>
+                            )}
                             <div className="mt-[20px] text-client-secondary text-[28px] font-secondary">
                                 <p>{currentVariant ? `${parseInt(currentVariant.priceNew).toLocaleString("vi-VN")}đ` : priceRange}</p>
                             </div>

@@ -251,17 +251,18 @@ export const BookingHistoryPage = () => {
                                                     <div className="text-client-primary font-[700]">
                                                         {formatCurrency(booking.total || 0)}
                                                     </div>
-                                                    {booking.paymentStatus !== 'paid' && booking.depositAmount > 0 && (
+                                                    {booking.paymentStatus === 'partially_paid' && booking.depositAmount > 0 && booking.depositAmount < booking.total && (
                                                         <div className="mt-1 text-[11px] leading-tight space-y-0.5">
                                                             <div className="text-emerald-600 font-[600]">
                                                                 Đã cọc: {formatCurrency(booking.depositAmount)}
                                                             </div>
-                                                            {booking.paymentStatus === 'partially_paid' && (
-                                                                <div className="text-[#FF5630] font-[600]">
-                                                                    Còn lại: {formatCurrency((booking.total || 0) - (booking.depositAmount || 0))}
-                                                                </div>
-                                                            )}
+                                                            <div className="text-[#FF5630] font-[600]">
+                                                                Còn lại: {formatCurrency((booking.total || 0) - (booking.depositAmount || 0))}
+                                                            </div>
                                                         </div>
+                                                    )}
+                                                    {booking.paymentStatus === 'paid' && (
+                                                        <div className="mt-1 text-[11px] text-emerald-600 font-[600]">✓ Đã thanh toán</div>
                                                     )}
                                                 </td>
                                                 <td className="p-[20px]">

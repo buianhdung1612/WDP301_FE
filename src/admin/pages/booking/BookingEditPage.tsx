@@ -24,7 +24,7 @@ import { useServices } from "../service/hooks/useService";
 import { useUsers } from "../account-user/hooks/useAccountUser";
 import { usePets } from "../account-user/hooks/usePet";
 import { useStaffByService } from "../account-admin/hooks/useAccountAdmin";
-import { useBookingDetail, useUpdateBooking, useBookings, useSuggestAssignment, useUpdateBookingStatus } from "./hooks/useBookingManagement";
+import { useBookingDetail, useUpdateBooking, useBookings, useSuggestAssignment, useUpdateBookingStatus, useReassignPetStaff } from "./hooks/useBookingManagement";
 import { useSchedules } from "../hr/hooks/useSchedules";
 import { Icon } from "@iconify/react";
 import { toast } from "react-toastify";
@@ -145,8 +145,9 @@ export const BookingEditPage = () => {
         return [];
     }, [usersResBody]);
     const { mutateAsync: updateBookingAsync, isPending: isUpdating } = useUpdateBooking();
-    const { mutate: updateStatus, isPending: isUpdatingStatus } = useUpdateBookingStatus();
+    const { mutate: updateStatus } = useUpdateBookingStatus();
     const { mutateAsync: suggestAssignment, isPending: isSuggesting } = useSuggestAssignment();
+    const { mutateAsync: reassignPetStaff } = useReassignPetStaff();
     const [quickCustomerDialogOpen, setQuickCustomerDialogOpen] = useState(false);
     const [rescheduleOpen, setRescheduleOpen] = useState(false);
 
@@ -172,8 +173,12 @@ export const BookingEditPage = () => {
                 userId: booking.userId?._id || "",
                 petIds: booking.petIds?.map((p: any) => p._id) || [],
                 serviceId: booking.serviceId?._id || "",
-                staffIds: booking.staffIds?.map((s: any) => s._id) || [],
-                petStaffMap: booking.petStaffMap || [],
+                staffIds: booking.staffIds?.map((s: any) => s._id || s) || [],
+                petStaffMap: booking.petStaffMap?.map((m: any) => ({
+                    ...m,
+                    petId: m.petId?._id || m.petId,
+                    staffId: m.staffId?._id || m.staffId
+                })) || [],
                 date: dayjs(booking.start),
                 startTime: dayjs(booking.start),
                 endTime: dayjs(booking.end),
@@ -293,15 +298,20 @@ export const BookingEditPage = () => {
                 return startH < bEndH && endH > bStartH;
             });
 
+            const isWorkingHere = formData.petStaffMap.some(m =>
+                (m.staffId === staff._id) && m.status === 'in-progress'
+            );
+
             acc[staff._id] = {
                 available: hasShift && !hasOverlap,
                 hasShift,
                 hasOverlap,
+                isWorkingHere,
                 reason: !hasShift ? "Không có ca" : (hasOverlap ? "Trùng lịch" : "")
             };
             return acc;
         }, {});
-    }, [staffList, schedules, bookings, formData.startTime, formData.endTime, id, formData.serviceId]);
+    }, [staffList, schedules, bookings, formData.startTime, formData.endTime, id, formData.serviceId, formData.petStaffMap]);
 
     const eligibleStaffList = useMemo(() => {
         if (!formData.serviceId) return [];
@@ -393,9 +403,15 @@ export const BookingEditPage = () => {
     const staffOptions = useMemo(() =>
         eligibleStaffList.map((staff: any) => {
             const availability = staffAvailability[staff._id];
+            let statusLabel = "";
+            if (!availability?.hasShift) statusLabel = ` (${availability?.reason})`;
+            else if (availability?.hasOverlap) statusLabel = ` (${availability?.reason})`;
+            else if (availability?.isWorkingHere) statusLabel = " [Đang làm]";
+            else statusLabel = " [Rảnh]";
+
             return {
                 value: staff._id,
-                label: staff.fullName + (availability?.available ? "" : ` (${availability?.reason})`),
+                label: staff.fullName + statusLabel,
                 disabled: !availability?.available
             };
         }), [eligibleStaffList, staffAvailability]);
@@ -516,18 +532,20 @@ export const BookingEditPage = () => {
         }
         */
 
+        const currentStaffIds = Array.from(new Set(formData.petStaffMap.map(m => m.staffId).filter(id => id)));
         const data = {
             ...formData,
+            staffIds: currentStaffIds,
+            petStaffMap: formData.petStaffMap.map(m => ({
+                ...m,
+                petId: typeof m.petId === 'object' ? (m.petId as any)._id : m.petId,
+                staffId: typeof m.staffId === 'object' ? (m.staffId as any)._id : m.staffId
+            })),
             start: startDateTime.toISOString(),
             end: endDateTime.toISOString(),
             subTotal: pricing.subTotal,
             total: pricing.total
         };
-
-        // Auto-fix mapping if needed
-        if (formData.petIds.length === 1 && formData.staffIds.length >= 1) {
-            data.petStaffMap = [{ petId: formData.petIds[0], staffId: formData.staffIds[0] }];
-        }
 
         updateBookingAsync({ id: id!, data }).then(() => {
             toast.success("Cập nhật đơn hàng thành công!");
@@ -752,8 +770,14 @@ export const BookingEditPage = () => {
                                                             <Box>
                                                                 <Stack direction="row" spacing={1} alignItems="center">
                                                                     <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{pet?.name || "Thú cưng"}</Typography>
+                                                                    {currentMapping?.status === 'completed' && (
+                                                                        <Chip label="✓ Đã xong" size="small" sx={{ height: 18, fontSize: '0.6rem', fontWeight: 900, bgcolor: '#22C55E', color: 'white' }} />
+                                                                    )}
                                                                     {currentMapping?.status === 'in-progress' && (
-                                                                        <Chip label="Đang làm" size="small" sx={{ height: 16, fontSize: '0.6rem', fontWeight: 900, bgcolor: COLORS.primary, color: 'white' }} />
+                                                                        <Chip label="Đang làm" size="small" sx={{ height: 18, fontSize: '0.6rem', fontWeight: 900, bgcolor: COLORS.primary, color: 'white' }} />
+                                                                    )}
+                                                                    {(!currentMapping?.status || currentMapping?.status === 'pending') && (
+                                                                        <Chip label="Chờ" size="small" sx={{ height: 18, fontSize: '0.6rem', fontWeight: 700, bgcolor: 'rgba(145,158,171,0.16)', color: 'text.secondary' }} />
                                                                     )}
                                                                 </Stack>
                                                                 <Typography variant="caption" sx={{ color: 'var(--palette-text-secondary)' }}>{pet?.breed || (pet?.type === 'dog' ? 'Chó' : 'Mèo')}</Typography>
@@ -764,20 +788,40 @@ export const BookingEditPage = () => {
 
                                                         <SelectSingle
                                                             label="Chọn người làm"
-                                                            options={formData.staffIds.length > 0 ? formData.staffIds.map(sid => ({
-                                                                value: sid,
-                                                                label: staffList.find(s => s._id === sid)?.fullName || "Nhân viên"
-                                                            })) : staffOptions}
+                                                            options={formData.staffIds.length > 0 ? formData.staffIds.map(sid => {
+                                                                const s = staffList.find(st => st._id === sid);
+                                                                const availability = staffAvailability[sid];
+                                                                let statusLabel = "";
+                                                                if (!availability?.hasShift) statusLabel = ` (${availability?.reason || 'Không ca'})`;
+                                                                else if (availability?.hasOverlap) statusLabel = ` (${availability?.reason || 'Trùng lịch'})`;
+                                                                else if (availability?.isWorkingHere) statusLabel = " [Đang làm]";
+                                                                else statusLabel = " [Rảnh]";
+
+                                                                return {
+                                                                    value: sid,
+                                                                    label: (s?.fullName || "Nhân viên") + statusLabel
+                                                                };
+                                                            }) : staffOptions}
                                                             value={currentMapping?.staffId || ""}
-                                                            onChange={(val) => {
-                                                                const newMap = [...formData.petStaffMap];
-                                                                const idx = newMap.findIndex(m => m.petId === petId);
-                                                                if (idx > -1) newMap[idx].staffId = val;
-                                                                else newMap.push({ petId, staffId: val });
-                                                                setFormData({ ...formData, petStaffMap: newMap });
+                                                            onChange={async (val) => {
+                                                                // Optimistic UI update
+                                                                const newMap = formData.petStaffMap.map(m =>
+                                                                    m.petId === petId ? { ...m, staffId: val } : m
+                                                                );
+                                                                setFormData(prev => ({ ...prev, petStaffMap: newMap }));
+
+                                                                // Call dedicated API
+                                                                try {
+                                                                    await reassignPetStaff({ id: id!, data: { petId, staffId: val } });
+                                                                    toast.success("Đã đổi nhân viên thành công!");
+                                                                } catch (err: any) {
+                                                                    toast.error(err?.response?.data?.message || "Lỗi khi đổi nhân viên!");
+                                                                    // Revert on error
+                                                                    setFormData(prev => ({ ...prev, petStaffMap: formData.petStaffMap }));
+                                                                }
                                                             }}
                                                             sx={{ width: 220, '& .MuiOutlinedInput-root': { height: 40 } }}
-                                                            disabled={isReadOnly}
+                                                            disabled={isReadOnly || (currentMapping?.status !== undefined && currentMapping.status !== 'pending')}
                                                         />
                                                     </Stack>
                                                 );
@@ -806,6 +850,7 @@ export const BookingEditPage = () => {
                                                             d.hour(t.hour()).minute(t.minute()).second(0).format('YYYY-MM-DDTHH:mm:ss');
 
                                                         const res = await suggestAssignment({
+                                                            bookingId: id,
                                                             date: formData.date.format('YYYY-MM-DD'),
                                                             startTime: merge(formData.date, formData.startTime),
                                                             endTime: merge(formData.date, formData.endTime),

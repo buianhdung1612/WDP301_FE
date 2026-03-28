@@ -17,11 +17,12 @@ import {
 import { Icon } from "@iconify/react";
 import { useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
-import { useBookingDetail, useUpdateBookingStatus, useUpdateBooking, useBookings, useExtendBooking } from "./hooks/useBookingManagement";
+import { useBookingDetail, useUpdateBookingStatus, useUpdateBooking, useBookings, useExtendBooking, useApplyOptimization } from "./hooks/useBookingManagement";
+import { useNotifications } from "../../hooks/useNotification";
 import { toast } from "react-toastify";
 import { prefixAdmin } from "../../constants/routes";
 import { confirmAction, confirmInput } from "../../utils/swal";
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert, AlertTitle } from "@mui/material";
 
 const STATUS_OPTIONS: { [key: string]: { label: string; color: string; bg: string } } = {
     pending: { label: "Chờ xác nhận", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)" },
@@ -223,7 +224,17 @@ export const BookingDetailPage = () => {
     const { mutate: updateStatus } = useUpdateBookingStatus();
     const { mutate: updateBooking } = useUpdateBooking();
     const { mutate: extendTime } = useExtendBooking();
+    const { mutate: applyOpt, isPending: isApplyingOpt } = useApplyOptimization();
+    const { data: notificationsRes } = useNotifications();
+    const notifications = notificationsRes?.data || [];
     const [rescheduleOpen, setRescheduleOpen] = useState(false);
+
+    // Tìm các gợi ý tối ưu cho đơn hàng này
+    const suggestions = notifications.filter((n: any) =>
+        n.metadata?.bookingId === id &&
+        n.metadata?.type === "optimization_suggestion" &&
+        n.status === "unread"
+    );
 
     const handleExtend = () => {
         confirmInput("Gia hạn dịch vụ", "Số phút cần thêm (Ước lượng)", (minutes) => {
@@ -423,6 +434,53 @@ export const BookingDetailPage = () => {
                         </Stack>
                     </Stack>
                 </Card>
+            )}
+
+            {/* Optimization Suggestion Banner */}
+            {suggestions.length > 0 && (
+                <Alert
+                    severity="info"
+                    icon={<Icon icon="solar:magic-stick-bold-duotone" width={24} />}
+                    sx={{
+                        mb: 3,
+                        borderRadius: '12px',
+                        border: '1px solid var(--palette-info-light)',
+                        bgcolor: 'var(--palette-info-lighter)',
+                        '& .MuiAlert-message': { width: '100%' }
+                    }}
+                >
+                    <AlertTitle sx={{ fontWeight: 800 }}>Gợi ý tối ưu điều phối nhân sự</AlertTitle>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography variant="body2">
+                            {suggestions[0].content}
+                        </Typography>
+                        <Button
+                            variant="contained"
+                            color="info"
+                            size="small"
+                            loading={isApplyingOpt}
+                            onClick={() => {
+                                const { targetPetId, offeringStaffId } = suggestions[0].metadata;
+                                confirmAction(
+                                    "Áp dụng tối ưu?",
+                                    "Nhân viên mới sẽ được phân công cho thú cưng này để đẩy nhanh tiến độ.",
+                                    () => applyOpt({
+                                        id: id || "",
+                                        data: {
+                                            targetPetId,
+                                            newStaffId: offeringStaffId,
+                                            notificationId: suggestions[0]._id
+                                        }
+                                    }),
+                                    'info'
+                                );
+                            }}
+                            sx={{ fontWeight: 700, borderRadius: '8px', ml: 2, whiteSpace: 'nowrap' }}
+                        >
+                            Áp dụng ngay
+                        </Button>
+                    </Stack>
+                </Alert>
             )}
 
             {/* Header section */}
@@ -732,6 +790,45 @@ export const BookingDetailPage = () => {
                                             <Typography variant="subtitle2" sx={{ fontWeight: 600, minWidth: 100, textAlign: 'right', color: 'var(--palette-text-primary)' }}>
                                                 Dịch vụ chính
                                             </Typography>
+
+                                            {/* Quick Swap Button for suggestions */}
+                                            {(() => {
+                                                const petIdStr = (pet._id || pet).toString();
+                                                const hasSuggestion = suggestions.find((s: any) => s.metadata?.targetPetId === petIdStr);
+                                                if (!hasSuggestion || mapping?.status !== 'pending') return null;
+
+                                                return (
+                                                    <Button
+                                                        size="small"
+                                                        variant="contained"
+                                                        color="info"
+                                                        startIcon={<Icon icon="solar:user-rounded-bold" />}
+                                                        onClick={() => {
+                                                            applyOpt({
+                                                                id: id || "",
+                                                                data: {
+                                                                    targetPetId: petIdStr,
+                                                                    newStaffId: hasSuggestion.metadata.offeringStaffId,
+                                                                    notificationId: hasSuggestion._id
+                                                                }
+                                                            });
+                                                        }}
+                                                        sx={{
+                                                            ml: 1,
+                                                            fontWeight: 700,
+                                                            fontSize: '0.75rem',
+                                                            bgcolor: (theme) => alpha(theme.palette.info.main, 0.1),
+                                                            color: 'info.main',
+                                                            '&:hover': {
+                                                                bgcolor: (theme) => alpha(theme.palette.info.main, 0.2),
+                                                            },
+                                                            boxShadow: 'none'
+                                                        }}
+                                                    >
+                                                        Đổi sang NV rảnh
+                                                    </Button>
+                                                );
+                                            })()}
                                         </Stack>
                                     );
                                 })}

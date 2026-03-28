@@ -147,6 +147,18 @@ export const CategoryTreeSelectGeneric = ({
         return undefined;
     };
 
+    const findAncestorIds = (nodes: CategoryNode[], targetId: string, currentPath: string[] = []): string[] | undefined => {
+        for (const node of nodes) {
+            const nodeId = (node.id || node._id || "").toString();
+            if (nodeId === targetId) return currentPath;
+            if (node.children?.length) {
+                const found = findAncestorIds(node.children, targetId, [...currentPath, nodeId]);
+                if (found) return found;
+            }
+        }
+        return undefined;
+    };
+
     return (
         <Controller
             name={name}
@@ -184,12 +196,23 @@ export const CategoryTreeSelectGeneric = ({
                                     const addedId = added[0];
                                     const node = findCategoryNode(categories, addedId);
                                     if (node) {
+                                        // Auto-select descendants
                                         const descendants = getDescendantIds(node);
                                         descendants.forEach(dId => {
                                             if (!finalValue.includes(dId)) {
                                                 finalValue.push(dId);
                                             }
                                         });
+
+                                        // Auto-select ancestors
+                                        const ancestors = findAncestorIds(categories, addedId);
+                                        if (ancestors) {
+                                            ancestors.forEach(aId => {
+                                                if (!finalValue.includes(aId)) {
+                                                    finalValue.push(aId);
+                                                }
+                                            });
+                                        }
                                     }
                                 }
 

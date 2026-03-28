@@ -115,3 +115,13 @@ export const suggestSmartAssignment = async (data: { date: string, startTime: st
     const response = await apiApp.post(`${BASE_URL}/suggest-assignment`, data, withAuth());
     return response.data;
 };
+
+export const applyOptimization = async (id: string, data: { targetPetId: string, newStaffId: string, notificationId?: string }) => {
+    const response = await apiApp.patch(`${BASE_URL}/${id}/apply-optimization`, data, withAuth());
+    return response.data;
+};
+
+export const reassignPetStaff = async (id: string, data: { petId: string, staffId: string }) => {
+    const response = await apiApp.patch(`${BASE_URL}/${id}/reassign-pet-staff`, data, withAuth());
+    return response.data;
+};

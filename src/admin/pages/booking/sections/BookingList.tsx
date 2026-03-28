@@ -107,7 +107,7 @@ export const BookingList = () => {
             );
         } else if (status === 'completed') {
             confirmAction(
-                "Xác nhận Checkout & Hoàn tất?",
+                "Xác nhận Hoàn thành?",
                 "Đảm bảo khách đã thanh toán đủ trước khi thực hiện Checkout.",
                 update,
                 'warning'
@@ -422,7 +422,7 @@ export const BookingList = () => {
                                                                     height: '24px'
                                                                 }}
                                                             />
-                                                            {row.isOverrun && (
+                                                            {row.isOverrun && !['completed', 'cancelled', 'returned'].includes(row.bookingStatus) && (
                                                                 <Chip
                                                                     icon={<Icon icon="eva:alert-triangle-fill" />}
                                                                     label="Quá giờ"
@@ -526,7 +526,7 @@ export const BookingList = () => {
                                                             sx={{ color: 'var(--palette-warning-main)' }}
                                                         >
                                                             <Icon icon="solar:card-send-bold" width={18} style={{ marginRight: 8 }} />
-                                                            Checkout / Xong
+                                                            Hoàn thành
                                                         </MenuItem>
                                                     )}
 

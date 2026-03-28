@@ -14,6 +14,8 @@ import {
     getStaffBookingDetail,
     updateBooking,
     autoAssignBookings,
+    reassignPetStaff,
+    applyOptimization as apiApplyOptimization,
     suggestSmartAssignment as apiSuggestSmartAssignment
 } from "../../../api/booking.api";
 
@@ -159,8 +161,31 @@ export const useAutoAssignBookings = () => {
 
 export const useSuggestAssignment = () => {
     return useMutation({
-        mutationFn: (data: { date: string, startTime: string, endTime: string, serviceId: string, petIds: string[], staffIds?: string[] }) =>
+        mutationFn: (data: { date: string, startTime: string, endTime: string, serviceId: string, petIds: string[], staffIds?: string[], bookingId?: string }) =>
             apiSuggestSmartAssignment(data),
+    });
+};
+
+export const useApplyOptimization = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: any }) => apiApplyOptimization(id, data),
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ["booking", variables.id] });
+            queryClient.invalidateQueries({ queryKey: ["bookings"] });
+            queryClient.invalidateQueries({ queryKey: ["notifications"] });
+        },
+    });
+};
+
+export const useReassignPetStaff = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: { petId: string, staffId: string } }) => reassignPetStaff(id, data),
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ["booking", variables.id] });
+            queryClient.invalidateQueries({ queryKey: ["bookings"] });
+        },
     });
 };
 
