@@ -1014,7 +1014,7 @@ export const BoardingCageDetailPage = () => {
                               value={scheduleSearch}
                               onChange={(e) => setScheduleSearch(e.target.value)}
                               placeholder={`Tìm kiếm ${scheduleTab === "food" ? "món ăn" : "hoạt động"}...`}
-                              className="h-[42px] w-full rounded-[14px] border border-[#efe2d8] bg-[#fbfaf8] pl-[38px] pr-[12px] text-[13px] font-[700] text-client-secondary outline-none transition-all focus:border-client-primary focus:bg-white"
+                                className="h-[42px] w-full rounded-[14px] border border-[#efe2d8] bg-[#fbfaf8] pl-[38px] pr-[12px] text-[13px] font-[700] text-client-secondary outline-none transition-all focus:border-client-primary focus:bg-white"
                             />
                             {scheduleSearch && (
                               <button
