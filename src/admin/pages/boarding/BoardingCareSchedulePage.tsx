@@ -1,5 +1,5 @@
 ﻿import dayjs from "dayjs";
-import React, { Fragment, useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { Fragment, useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
     Avatar,
@@ -67,7 +67,6 @@ const trangThaiChamSocOptions: Array<{ value: "pending" | "done" | "skipped"; la
     { value: "skipped", label: "Bỏ qua" },
 ];
 
-const MAX_PROOF_MEDIA_PER_ROW = 5;
 const MAX_IMAGE_PROOF_SIZE_MB = 5;
 
 const calculateRecommendedPortion = (pets: any[]) => {
@@ -104,7 +103,7 @@ const normalizeProofMedia = (p: any): BoardingProofMediaItem[] => (Array.isArray
 })).filter(i => !!i.url);
 
 // Memoized Sub-components for better performance
-const FeedingRow = React.memo(({
+const FeedingRow = ({
     item,
     foodOptions,
     staffOptions,
@@ -113,7 +112,8 @@ const FeedingRow = React.memo(({
     onDelete,
     onAddMedia,
     onRemoveMedia,
-    onViewMedia
+    onViewMedia,
+    isReadOnly = false
 }: {
     item: BoardingFeedingItem;
     idx: number;
@@ -125,11 +125,13 @@ const FeedingRow = React.memo(({
     onAddMedia: (files: FileList) => void;
     onRemoveMedia: (mIdx: number) => void;
     onViewMedia: (mIdx: number) => void;
+    isReadOnly?: boolean;
 }) => {
+    const sVal = item.staffId ? (typeof item.staffId === "string" ? item.staffId : (item.staffId as any)?._id || "") : "";
     return (
         <Paper variant="outlined" sx={{ p: 2.5, borderRadius: "var(--shape-borderRadius-md)", position: 'relative', bgcolor: '#fcfcfc', borderStyle: 'solid', borderColor: 'var(--palette-divider)' }}>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
-                <TextField size="small" type="time" label="Giờ" value={item.time} onChange={e => onUpdate({ time: e.target.value })} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} slotProps={{ inputLabel: { shrink: true } }} />
+                <TextField size="small" type="time" label="Giờ" value={item.time || ""} onChange={e => !isReadOnly && onUpdate({ time: e.target.value })} disabled={isReadOnly} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} slotProps={{ inputLabel: { shrink: true } }} />
                 {item._autoSplit && (
                     <Box sx={{ px: 1, py: 0.25, bgcolor: "var(--palette-success-lighter)", color: "var(--palette-success-dark)", borderRadius: 1, fontSize: '0.7rem', fontWeight: 700 }}>
                         Đã tách riêng
@@ -146,36 +148,41 @@ const FeedingRow = React.memo(({
                     fullWidth
                     size="small"
                     freeSolo
+                    disabled={isReadOnly}
                     options={foodOptions}
                     value={item.food || ""}
-                    onChange={(_, newValue) => onUpdate({ food: newValue || "" })}
-                    onInputChange={(_, newInputValue) => onUpdate({ food: newInputValue })}
+                    onChange={(_, newValue) => !isReadOnly && onUpdate({ food: newValue || "" })}
+                    onInputChange={(_, newInputValue) => !isReadOnly && onUpdate({ food: newInputValue })}
                     renderInput={(params) => <TextField {...params} label="Loại thức ăn" sx={{ '& .MuiInputBase-root': { fontWeight: 700 } }} />}
                     sx={{ flexGrow: 1 }}
                 />
-                <TextField size="small" label="Khẩu phần" value={item.amount} onChange={e => onUpdate({ amount: e.target.value })} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} />
-                <TextField size="small" select label="Nhân viên" value={item.staffId} onChange={e => onUpdate({ staffId: e.target.value })} sx={{ width: 180, flexShrink: 0 }}>
-                    {staffOptions.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+                <TextField size="small" label="Khẩu phần" value={item.amount || ""} onChange={e => !isReadOnly && onUpdate({ amount: e.target.value })} disabled={isReadOnly} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} />
+                <TextField size="small" select label="Nhân viên" value={sVal} onChange={e => !isReadOnly && onUpdate({ staffId: e.target.value })} disabled={isReadOnly} sx={{ width: 180, flexShrink: 0 }}>
+                    {staffOptions.length > 0 ? staffOptions.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>) : <MenuItem disabled value="">(Chưa có NV ca này)</MenuItem>}
                 </TextField>
-                <TextField size="small" select label="Trạng thái" value={item.status} onChange={e => onUpdate({ status: e.target.value as any })} sx={{ width: 150, flexShrink: 0 }}>
+                <TextField size="small" select label="Trạng thái" value={item.status || "pending"} onChange={e => !isReadOnly && onUpdate({ status: e.target.value as any })} disabled={isReadOnly} sx={{ width: 150, flexShrink: 0 }}>
                     {statusOptions.map(o => <MenuItem key={o.value} value={o.value} sx={{ fontWeight: 600 }}>{o.label}</MenuItem>)}
                 </TextField>
-                <IconButton color="error" size="small" onClick={onDelete} sx={{ mt: 0.5 }}><Icon icon="solar:trash-bin-trash-bold" width={20} /></IconButton>
+                {!isReadOnly && (
+                    <IconButton color="error" size="small" onClick={onDelete} sx={{ mt: 0.5 }}><Icon icon="solar:trash-bin-trash-bold" width={20} /></IconButton>
+                )}
             </Box>
-            <TextField fullWidth size="small" label="Ghi chú cho bữa ăn" value={item.note} onChange={e => onUpdate({ note: e.target.value })} sx={{ mt: 2 }} />
+            <TextField fullWidth size="small" label="Ghi chú cho bữa ăn" value={item.note || ""} onChange={e => !isReadOnly && onUpdate({ note: e.target.value })} disabled={isReadOnly} sx={{ mt: 2 }} />
 
             <Box sx={{ mt: 2 }}>
                 <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ gap: 1 }}>
-                    <Button
-                        component="label"
-                        variant="outlined"
-                        startIcon={<CloudUploadOutlinedIcon />}
-                        sx={{ height: 80, width: 140, borderStyle: 'dashed', borderRadius: 1.5, textTransform: 'none', fontWeight: 700, flexDirection: 'column', gap: 0.5 }}
-                    >
-                        Tải minh chứng
-                        <Typography variant="caption" sx={{ fontSize: '0.65rem', opacity: 0.7 }}>Tối đa 5 file, dưới 5MB/file</Typography>
-                        <input type="file" hidden multiple accept="image/*,video/*" onChange={e => e.target.files && onAddMedia(e.target.files)} />
-                    </Button>
+                    {!isReadOnly && (
+                        <Button
+                            component="label"
+                            variant="outlined"
+                            startIcon={<CloudUploadOutlinedIcon />}
+                            sx={{ height: 80, width: 140, borderStyle: 'dashed', borderRadius: 1.5, textTransform: 'none', fontWeight: 700, flexDirection: 'column', gap: 0.5 }}
+                        >
+                            Tải minh chứng
+                            <Typography variant="caption" sx={{ fontSize: '0.65rem', opacity: 0.7 }}>Tối đa 5 file, dưới 5MB/file</Typography>
+                            <input type="file" hidden multiple accept="image/*,video/*" onChange={e => e.target.files && onAddMedia(e.target.files)} />
+                        </Button>
+                    )}
 
                     {(item.proofMedia || []).map((m: any, mIdx: number) => (
                         <Box key={mIdx} sx={{ position: 'relative', width: 80, height: 80, borderRadius: 1.5, overflow: 'hidden', border: '1px solid var(--palette-divider)' }}>
@@ -186,22 +193,24 @@ const FeedingRow = React.memo(({
                             ) : (
                                 <img src={m.url} style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }} onClick={() => onViewMedia(mIdx)} alt="Proof" />
                             )}
-                            <IconButton
-                                size="small"
-                                onClick={() => onRemoveMedia(mIdx)}
-                                sx={{ position: 'absolute', top: 2, right: 2, bgcolor: 'rgba(255,255,255,0.8)', padding: 0.25, '&:hover': { bgcolor: '#fff' } }}
-                            >
-                                <DeleteOutlineIcon sx={{ fontSize: 14, color: 'error.main' }} />
-                            </IconButton>
+                            {!isReadOnly && (
+                                <IconButton
+                                    size="small"
+                                    onClick={() => onRemoveMedia(mIdx)}
+                                    sx={{ position: 'absolute', top: 2, right: 2, bgcolor: 'rgba(255,255,255,0.8)', padding: 0.25, '&:hover': { bgcolor: '#fff' } }}
+                                >
+                                    <DeleteOutlineIcon sx={{ fontSize: 14, color: 'error.main' }} />
+                                </IconButton>
+                            )}
                         </Box>
                     ))}
                 </Stack>
             </Box>
         </Paper>
     );
-});
+};
 
-const ExerciseRow = React.memo(({
+const ExerciseRow = ({
     item,
     exerciseOptions,
     staffOptions,
@@ -210,7 +219,8 @@ const ExerciseRow = React.memo(({
     onDelete,
     onAddMedia,
     onRemoveMedia,
-    onViewMedia
+    onViewMedia,
+    isReadOnly = false
 }: {
     item: BoardingExerciseItem;
     idx: number;
@@ -222,11 +232,13 @@ const ExerciseRow = React.memo(({
     onAddMedia: (files: FileList) => void;
     onRemoveMedia: (mIdx: number) => void;
     onViewMedia: (mIdx: number) => void;
+    isReadOnly?: boolean;
 }) => {
+    const sVal = item.staffId ? (typeof item.staffId === "string" ? item.staffId : (item.staffId as any)?._id || "") : "";
     return (
         <Paper variant="outlined" sx={{ p: 2.5, borderRadius: "var(--shape-borderRadius-md)", position: 'relative', bgcolor: '#fcfcfc', borderStyle: 'solid', borderColor: 'var(--palette-divider)' }}>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
-                <TextField size="small" type="time" label="Giờ" value={item.time} onChange={e => onUpdate({ time: e.target.value })} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} slotProps={{ inputLabel: { shrink: true } }} />
+                <TextField size="small" type="time" label="Giờ" value={item.time || ""} onChange={e => !isReadOnly && onUpdate({ time: e.target.value })} disabled={isReadOnly} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} slotProps={{ inputLabel: { shrink: true } }} />
                 {item._autoSplit && (
                     <Box sx={{ px: 1, py: 0.25, bgcolor: "var(--palette-success-lighter)", color: "var(--palette-success-dark)", borderRadius: 1, fontSize: '0.7rem', fontWeight: 700 }}>
                         Đã tách riêng
@@ -243,35 +255,40 @@ const ExerciseRow = React.memo(({
                     fullWidth
                     size="small"
                     freeSolo
+                    disabled={isReadOnly}
                     options={exerciseOptions}
                     value={item.activity || ""}
-                    onChange={(_, newValue) => onUpdate({ activity: newValue || "" })}
-                    onInputChange={(_, newInputValue) => onUpdate({ activity: newInputValue })}
+                    onChange={(_, newValue) => !isReadOnly && onUpdate({ activity: newValue || "" })}
+                    onInputChange={(_, newInputValue) => !isReadOnly && onUpdate({ activity: newInputValue })}
                     renderInput={(params) => <TextField {...params} label="Hoạt động" sx={{ '& .MuiInputBase-root': { fontWeight: 700 } }} />}
                     sx={{ flexGrow: 1 }}
                 />
-                <TextField size="small" label="Thời lượng (p)" type="number" value={item.durationMinutes} onChange={e => onUpdate({ durationMinutes: Number(e.target.value) })} sx={{ width: 100, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} />
-                <TextField size="small" select label="Nhân viên" value={item.staffId} onChange={e => onUpdate({ staffId: e.target.value })} sx={{ width: 180, flexShrink: 0 }}>
-                    {staffOptions.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+                <TextField size="small" label="Thời lượng (p)" type="number" value={item.durationMinutes || 0} onChange={e => !isReadOnly && onUpdate({ durationMinutes: Number(e.target.value) })} disabled={isReadOnly} sx={{ width: 100, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} />
+                <TextField size="small" select label="Nhân viên" value={sVal} onChange={e => !isReadOnly && onUpdate({ staffId: e.target.value })} disabled={isReadOnly} sx={{ width: 180, flexShrink: 0 }}>
+                    {staffOptions.length > 0 ? staffOptions.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>) : <MenuItem disabled value="">(Chưa có NV ca này)</MenuItem>}
                 </TextField>
-                <TextField size="small" select label="Trạng thái" value={item.status} onChange={e => onUpdate({ status: e.target.value as any })} sx={{ width: 150, flexShrink: 0 }}>
+                <TextField size="small" select label="Trạng thái" value={item.status || "pending"} onChange={e => !isReadOnly && onUpdate({ status: e.target.value as any })} disabled={isReadOnly} sx={{ width: 150, flexShrink: 0 }}>
                     {statusOptions.map(o => <MenuItem key={o.value} value={o.value} sx={{ fontWeight: 600 }}>{o.label}</MenuItem>)}
                 </TextField>
-                <IconButton color="error" size="small" onClick={onDelete} sx={{ mt: 0.5 }}><Icon icon="solar:trash-bin-trash-bold" width={20} /></IconButton>
+                {!isReadOnly && (
+                    <IconButton color="error" size="small" onClick={onDelete} sx={{ mt: 0.5 }}><Icon icon="solar:trash-bin-trash-bold" width={20} /></IconButton>
+                )}
             </Box>
-            <TextField fullWidth size="small" label="Ghi chú vận động" value={item.note} onChange={e => onUpdate({ note: e.target.value })} sx={{ mt: 2 }} />
+            <TextField fullWidth size="small" label="Ghi chú vận động" value={item.note || ""} onChange={e => !isReadOnly && onUpdate({ note: e.target.value })} disabled={isReadOnly} sx={{ mt: 2 }} />
 
             <Box sx={{ mt: 2 }}>
                 <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ gap: 1 }}>
-                    <Button
-                        component="label"
-                        variant="outlined"
-                        startIcon={<CloudUploadOutlinedIcon />}
-                        sx={{ height: 80, width: 140, borderStyle: 'dashed', borderRadius: 1.5, textTransform: 'none', fontWeight: 700, flexDirection: 'column', gap: 0.5 }}
-                    >
-                        Tải minh chứng
-                        <input type="file" hidden multiple accept="image/*,video/*" onChange={e => e.target.files && onAddMedia(e.target.files)} />
-                    </Button>
+                    {!isReadOnly && (
+                        <Button
+                            component="label"
+                            variant="outlined"
+                            startIcon={<CloudUploadOutlinedIcon />}
+                            sx={{ height: 80, width: 140, borderStyle: 'dashed', borderRadius: 1.5, textTransform: 'none', fontWeight: 700, flexDirection: 'column', gap: 0.5 }}
+                        >
+                            Tải minh chứng
+                            <input type="file" hidden multiple accept="image/*,video/*" onChange={e => e.target.files && onAddMedia(e.target.files)} />
+                        </Button>
+                    )}
 
                     {(item.proofMedia || []).map((m: any, mIdx: number) => (
                         <Box key={mIdx} sx={{ position: 'relative', width: 80, height: 80, borderRadius: 1.5, overflow: 'hidden', border: '1px solid var(--palette-divider)' }}>
@@ -282,20 +299,22 @@ const ExerciseRow = React.memo(({
                             ) : (
                                 <img src={m.url} style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }} onClick={() => onViewMedia(mIdx)} alt="Proof" />
                             )}
-                            <IconButton
-                                size="small"
-                                onClick={() => onRemoveMedia(mIdx)}
-                                sx={{ position: 'absolute', top: 2, right: 2, bgcolor: 'rgba(255,255,255,0.8)', padding: 0.25, '&:hover': { bgcolor: '#fff' } }}
-                            >
-                                <DeleteOutlineIcon sx={{ fontSize: 14, color: 'error.main' }} />
-                            </IconButton>
+                            {!isReadOnly && (
+                                <IconButton
+                                    size="small"
+                                    onClick={() => onRemoveMedia(mIdx)}
+                                    sx={{ position: 'absolute', top: 2, right: 2, bgcolor: 'rgba(255,255,255,0.8)', padding: 0.25, '&:hover': { bgcolor: '#fff' } }}
+                                >
+                                    <DeleteOutlineIcon sx={{ fontSize: 14, color: 'error.main' }} />
+                                </IconButton>
+                            )}
                         </Box>
                     ))}
                 </Stack>
             </Box>
         </Paper>
     );
-});
+};
 
 export const BoardingCareSchedulePage = () => {
     const [searchParams] = useSearchParams();
@@ -317,6 +336,7 @@ export const BoardingCareSchedulePage = () => {
     const [openRows, setOpenRows] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<"room" | "task">("room");
     const [selectedPetId, setSelectedPetId] = useState<string>("");
+    const [isReadOnly, setIsReadOnly] = useState(false);
 
     const selectedPetObj = useMemo(() => {
         const sid = String(selectedPetId || "");
@@ -519,7 +539,24 @@ export const BoardingCareSchedulePage = () => {
     }, [eligibleRows, searchQuery, speciesFilter, onlyMyAssign, user]);
 
     const moDialog = async (row: any, startPetId?: string) => {
-        try { setCareLoading(true); setEditingBooking(row); setCareDialogOpen(true); const res = await getBoardingBookingDetail(row._id); if (res?.data) apDungDuLieu(res.data, { startPetId }); } catch { toast.error("Lỗi tải dữ liệu"); setCareDialogOpen(false); } finally { setCareLoading(false); }
+        try {
+            setCareLoading(true);
+            setEditingBooking(row);
+            setCareDialogOpen(true);
+
+            // Calculate read-only status
+            const isExpired = row.checkOutDate && dayjs().diff(dayjs(row.checkOutDate), 'day') > 2;
+            const isStatusAllowed = ["confirmed", "checked-in", "checked-out"].includes(row.boardingStatus);
+            setIsReadOnly(!isStatusAllowed || !!isExpired);
+
+            const res = await getBoardingBookingDetail(row._id);
+            if (res?.data) apDungDuLieu(res.data, { startPetId });
+        } catch {
+            toast.error("Lỗi tải dữ liệu");
+            setCareDialogOpen(false);
+        } finally {
+            setCareLoading(false);
+        }
     };
 
     const hasOpened = useRef(false);
@@ -684,6 +721,8 @@ export const BoardingCareSchedulePage = () => {
                                 ) : (
                                     filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((r: any) => {
                                         const isExpired = r.checkOutDate && dayjs().diff(dayjs(r.checkOutDate), 'day') > 2;
+                                        const isStatusAllowed = ["confirmed", "checked-in", "checked-out"].includes(r.boardingStatus);
+                                        const isLocked = !isStatusAllowed || (!!isExpired);
                                         return (
                                             <Fragment key={r._id}>
                                                 <TableRow
@@ -746,18 +785,17 @@ export const BoardingCareSchedulePage = () => {
                                                         <Button
                                                             variant="contained"
                                                             size="small"
-                                                            disabled={!!isExpired}
                                                             onClick={() => moDialog(r)}
                                                             sx={{
-                                                                bgcolor: isExpired ? "var(--palette-grey-400)" : "var(--palette-text-primary)",
+                                                                bgcolor: "var(--palette-text-primary)",
                                                                 color: "var(--palette-common-white)",
                                                                 fontWeight: 700,
                                                                 minHeight: "2rem",
                                                                 textTransform: "none",
-                                                                "&:hover": { bgcolor: isExpired ? "var(--palette-grey-400)" : "var(--palette-grey-700)" }
+                                                                "&:hover": { bgcolor: "var(--palette-grey-700)" }
                                                             }}
                                                         >
-                                                            {isExpired ? "Đã khóa" : "Quản lý"}
+                                                            {isExpired ? "Đã khóa" : (!isStatusAllowed ? "Chờ xác nhận" : "Quản lý")}
                                                         </Button>
                                                     </TableCell>
                                                 </TableRow>
@@ -780,7 +818,7 @@ export const BoardingCareSchedulePage = () => {
                                                                         const eTotal = eList.length;
 
                                                                         return (
-                                                                            <Grid item xs={12} sm={6} key={pet._id}>
+                                                                            <Grid size={{ xs: 12, sm: 6 }} key={pet._id}>
                                                                                 <Paper
                                                                                     sx={{
                                                                                         p: 2.5,
@@ -848,19 +886,18 @@ export const BoardingCareSchedulePage = () => {
                                                                                                 fullWidth
                                                                                                 variant="contained"
                                                                                                 size="small"
-                                                                                                disabled={!!isExpired}
                                                                                                 onClick={() => moDialog(r, pet._id)}
-                                                                                                startIcon={<Icon icon={isExpired ? "solar:lock-bold" : "solar:clipboard-check-bold"} />}
+                                                                                                startIcon={<Icon icon={isLocked ? "solar:eye-bold" : "solar:clipboard-check-bold"} />}
                                                                                                 sx={{
                                                                                                     mt: 2.5,
                                                                                                     fontWeight: 800,
                                                                                                     borderRadius: 1.5,
                                                                                                     textTransform: 'none',
-                                                                                                    bgcolor: isExpired ? 'var(--palette-action-disabledBackground)' : 'var(--palette-text-primary)',
-                                                                                                    '&:hover': { bgcolor: isExpired ? 'var(--palette-action-disabledBackground)' : 'var(--palette-grey-800)' }
+                                                                                                    bgcolor: 'var(--palette-text-primary)',
+                                                                                                    '&:hover': { bgcolor: 'var(--palette-grey-800)' }
                                                                                                 }}
                                                                                             >
-                                                                                                {isExpired ? "Đã khóa" : `Chăm sóc ${pet.name}`}
+                                                                                                {isExpired ? "Xem chi tiết" : (!isStatusAllowed ? "Chờ xác nhận" : `Chăm sóc ${pet.name}`)}
                                                                                             </Button>
                                                                                         </Box>
                                                                                     </Stack>
@@ -928,7 +965,8 @@ export const BoardingCareSchedulePage = () => {
                                     label="Ngày chăm sóc"
                                     type="date"
                                     value={careDate}
-                                    onChange={e => setCareDate(e.target.value)}
+                                    onChange={e => !isReadOnly && setCareDate(e.target.value)}
+                                    disabled={isReadOnly}
                                     size="small"
                                     sx={{ width: 180, bgcolor: 'white' }}
                                     slotProps={{ inputLabel: { shrink: true } }}
@@ -942,20 +980,27 @@ export const BoardingCareSchedulePage = () => {
                                     </Box>
                                 )}
                                 <Box flexGrow={1} />
-                                <Button
-                                    variant="outlined"
-                                    size="small"
-                                    color="warning"
-                                    startIcon={<Icon icon="solar:refresh-bold" />}
-                                    sx={{ borderRadius: "var(--shape-borderRadius)", textTransform: 'none', fontWeight: 700 }}
-                                    onClick={() => {
-                                        if (window.confirm("Thông tin lịch ăn và vận động hiện tại sẽ bị xóa và tạo lại từ mẫu chuẩn. Bạn có chắc không?")) {
-                                            updateCareMut.mutate({ id: editingBooking._id, payload: { resetTemplate: true, careDate } });
-                                        }
-                                    }}
-                                >
-                                    Tạo lại từ mẫu
-                                </Button>
+                                {!isReadOnly && (
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        color="warning"
+                                        startIcon={<Icon icon="solar:refresh-bold" />}
+                                        sx={{ borderRadius: "var(--shape-borderRadius)", textTransform: 'none', fontWeight: 700 }}
+                                        onClick={() => {
+                                            if (window.confirm("Thông tin lịch ăn và vận động hiện tại sẽ bị xóa và tạo lại từ mẫu chuẩn. Bạn có chắc không?")) {
+                                                updateCareMut.mutate({ id: editingBooking._id, payload: { resetTemplate: true, careDate } });
+                                            }
+                                        }}
+                                    >
+                                        Tạo lại từ mẫu
+                                    </Button>
+                                )}
+                                {isReadOnly && (
+                                    <Box sx={{ px: 2, py: 0.5, bgcolor: "var(--palette-info-lighter)", color: "var(--palette-info-dark)", borderRadius: 1, fontWeight: 700, fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <Icon icon="solar:lock-bold" width={14} /> Chế độ chỉ xem
+                                    </Box>
+                                )}
                             </Stack>
 
                             <Tabs value={careTab} onChange={(_, v) => setCareTab(v)} sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}>
@@ -992,26 +1037,28 @@ export const BoardingCareSchedulePage = () => {
                                         ))}
                                     </Stack>
 
-                                    <Button
-                                        variant="outlined"
-                                        size="small"
-                                        startIcon={<AddIcon />}
-                                        onClick={() => {
-                                            const type = (selectedPetObj?.type || selectedPetObj?.petType || "all").toLowerCase() as any;
-                                            setFeedingDraft(p => [...p, taoDongLichAn(type, selectedPetId, selectedPetObj?.name)]);
-                                        }}
-                                        sx={{
-                                            mb: 2,
-                                            fontWeight: 700,
-                                            borderRadius: "var(--shape-borderRadius)",
-                                            bgcolor: "var(--palette-primary-lighter)",
-                                            borderColor: "transparent",
-                                            color: "var(--palette-primary-dark)",
-                                            "&:hover": { bgcolor: "var(--palette-primary-light)", borderColor: "transparent" }
-                                        }}
-                                    >
-                                        Thêm bữa ăn cho {selectedPetObj?.name || "thú cưng"}
-                                    </Button>
+                                    {!isReadOnly && (
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            startIcon={<AddIcon />}
+                                            onClick={() => {
+                                                const type = (selectedPetObj?.type || selectedPetObj?.petType || "all").toLowerCase() as any;
+                                                setFeedingDraft(p => [...p, taoDongLichAn(type, selectedPetId, selectedPetObj?.name)]);
+                                            }}
+                                            sx={{
+                                                mb: 2,
+                                                fontWeight: 700,
+                                                borderRadius: "var(--shape-borderRadius)",
+                                                bgcolor: "var(--palette-primary-lighter)",
+                                                borderColor: "transparent",
+                                                color: "var(--palette-primary-dark)",
+                                                "&:hover": { bgcolor: "var(--palette-primary-light)", borderColor: "transparent" }
+                                            }}
+                                        >
+                                            Thêm bữa ăn cho {selectedPetObj?.name || "thú cưng"}
+                                        </Button>
+                                    )}
                                     <Stack spacing={2}>
                                         {feedingDraft
                                             .map((item, originalIdx) => ({ item, originalIdx }))
@@ -1029,6 +1076,7 @@ export const BoardingCareSchedulePage = () => {
                                                     onAddMedia={(files) => handleUploadMedia("f", originalIdx, files)}
                                                     onRemoveMedia={(mIdx) => handleRemoveMedia("f", originalIdx, mIdx)}
                                                     onViewMedia={(mIdx) => handleViewMedia("f", originalIdx, mIdx)}
+                                                    isReadOnly={isReadOnly}
                                                 />
                                             ))}
                                     </Stack>
@@ -1063,26 +1111,28 @@ export const BoardingCareSchedulePage = () => {
                                         ))}
                                     </Stack>
 
-                                    <Button
-                                        variant="outlined"
-                                        size="small"
-                                        startIcon={<AddIcon />}
-                                        onClick={() => {
-                                            const type = (selectedPetObj?.type || selectedPetObj?.petType || "all").toLowerCase() as any;
-                                            setExerciseDraft(p => [...p, taoDongVanDong(type, selectedPetId, selectedPetObj?.name)]);
-                                        }}
-                                        sx={{
-                                            mb: 2,
-                                            fontWeight: 700,
-                                            borderRadius: "var(--shape-borderRadius)",
-                                            bgcolor: "var(--palette-primary-lighter)",
-                                            borderColor: "transparent",
-                                            color: "var(--palette-primary-dark)",
-                                            "&:hover": { bgcolor: "var(--palette-primary-light)", borderColor: "transparent" }
-                                        }}
-                                    >
-                                        Thêm hoạt động cho {selectedPetObj?.name || "thú cưng"}
-                                    </Button>
+                                    {!isReadOnly && (
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            startIcon={<AddIcon />}
+                                            onClick={() => {
+                                                const type = (selectedPetObj?.type || selectedPetObj?.petType || "all").toLowerCase() as any;
+                                                setExerciseDraft(p => [...p, taoDongVanDong(type, selectedPetId, selectedPetObj?.name)]);
+                                            }}
+                                            sx={{
+                                                mb: 2,
+                                                fontWeight: 700,
+                                                borderRadius: "var(--shape-borderRadius)",
+                                                bgcolor: "var(--palette-primary-lighter)",
+                                                borderColor: "transparent",
+                                                color: "var(--palette-primary-dark)",
+                                                "&:hover": { bgcolor: "var(--palette-primary-light)", borderColor: "transparent" }
+                                            }}
+                                        >
+                                            Thêm hoạt động cho {selectedPetObj?.name || "thú cưng"}
+                                        </Button>
+                                    )}
                                     <Stack spacing={2}>
                                         {exerciseDraft
                                             .map((item, originalIdx) => ({ item, originalIdx }))
@@ -1100,12 +1150,13 @@ export const BoardingCareSchedulePage = () => {
                                                     onAddMedia={(files) => handleUploadMedia("e", originalIdx, files)}
                                                     onRemoveMedia={(mIdx) => handleRemoveMedia("e", originalIdx, mIdx)}
                                                     onViewMedia={(mIdx) => handleViewMedia("e", originalIdx, mIdx)}
+                                                    isReadOnly={isReadOnly}
                                                 />
                                             ))}
                                     </Stack>
                                 </Box>
                             )}
-                            {careTab === 2 && <BoardingPetDiaryManager bookingId={editingBooking?._id} pets={editingBooking?.petIds || []} date={careDate} />}
+                            {careTab === 2 && <BoardingPetDiaryManager bookingId={editingBooking?._id} pets={editingBooking?.petIds || []} date={careDate} isReadOnly={isReadOnly} />}
                         </Stack>
                     )}
                 </DialogContent>
@@ -1116,22 +1167,24 @@ export const BoardingCareSchedulePage = () => {
                     >
                         Đóng
                     </Button>
-                    <Button
-                        variant="contained"
-                        onClick={luuCare}
-                        disabled={updateCareMut.isPending}
-                        sx={{
-                            bgcolor: "var(--palette-text-primary)",
-                            color: "var(--palette-common-white)",
-                            fontWeight: 700,
-                            minHeight: "2.5rem",
-                            px: 3,
-                            textTransform: "none",
-                            "&:hover": { bgcolor: "var(--palette-grey-700)" }
-                        }}
-                    >
-                        {updateCareMut.isPending ? "Đang lưu..." : "Lưu thay đổi"}
-                    </Button>
+                    {!isReadOnly && (
+                        <Button
+                            variant="contained"
+                            onClick={luuCare}
+                            disabled={updateCareMut.isPending}
+                            sx={{
+                                bgcolor: "var(--palette-text-primary)",
+                                color: "var(--palette-common-white)",
+                                fontWeight: 700,
+                                minHeight: "2.5rem",
+                                px: 3,
+                                textTransform: "none",
+                                "&:hover": { bgcolor: "var(--palette-grey-700)" }
+                            }}
+                        >
+                            {updateCareMut.isPending ? "Đang lưu..." : "Lưu thay đổi"}
+                        </Button>
+                    )}
                 </DialogActions>
             </Dialog>
 
