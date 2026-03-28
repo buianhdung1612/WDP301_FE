@@ -118,21 +118,33 @@ export const ReviewPage = () => {
                                 </div>
                                 <div className="space-y-[5px]">
                                     <p className="text-[18px] font-[600] text-client-secondary tracking-tight">Chưa có đánh giá nào</p>
-                                    <p className="text-[15px] text-[#7d7b7b]">Bạn chưa thực hiện đánh giá cho sản phẩm nào.</p>
+                                    <p className="text-[15px] text-[#7d7b7b]">Bạn chưa thực hiện đánh giá nào.</p>
                                 </div>
                             </div>
                         ) : (
                             reviews.map((review: any) => (
                                 <div key={review._id} className="border border-[#eee] p-[20px] mb-[20px] rounded-[10px] flex">
                                     <img
-                                        className="w-[70px] h-[70px] rounded-full overflow-hidden border-[3px] shadow-[0px_7px_29px_0px_#64646f33] border-white object-cover"
-                                        src={review.productId?.images?.[0] || "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-11c-1000x1048.jpg"}
+                                        className="w-[70px] h-[70px] rounded-[12px] overflow-hidden border-[3px] shadow-[0px_7px_29px_0px_#64646f33] border-white object-cover"
+                                        src={review.targetImage || "https://wdtsweetheart.wpengine.com/wp-content/uploads/2025/05/product-img-11c-1000x1048.jpg"}
                                         alt=""
                                     />
                                     <div className="pl-[25px] flex-1">
-                                        <h5 className="text-[17px] font-[600] text-client-secondary hover:text-client-primary transition-default">
-                                            <Link to={`/product/detail/${review.productId?.slug}`}>{review.productId?.name}</Link>
-                                        </h5>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${review.reviewType === 'product' ? 'bg-blue-100 text-blue-600' :
+                                                    review.reviewType === 'service' ? 'bg-purple-100 text-purple-600' :
+                                                        'bg-orange-100 text-orange-600'
+                                                }`}>
+                                                {review.reviewType === 'product' ? 'Đơn hàng' : review.reviewType === 'service' ? 'Dịch vụ' : 'Khách sạn'}
+                                            </span>
+                                            <h5 className="text-[17px] font-[600] text-client-secondary hover:text-client-primary transition-default">
+                                                {review.targetLink && review.targetLink !== '#' ? (
+                                                    <Link to={review.targetLink}>{review.targetName || 'Sản phẩm'}</Link>
+                                                ) : (
+                                                    <span>{review.targetName || 'Dịch vụ'}</span>
+                                                )}
+                                            </h5>
+                                        </div>
                                         <div className="flex items-center gap-2 mt-[2px] mb-[13px]">
                                             <p className="text-[13px] text-client-secondary">
                                                 {format(new Date(review.createdAt), 'dd MMMM yyyy')}
@@ -165,12 +177,14 @@ export const ReviewPage = () => {
                                                 />
                                             ))}
                                         </span>
-                                        <button
-                                            onClick={() => handleOpenEdit(review)}
-                                            className="px-4 py-1.5 border border-client-primary text-client-primary text-[13px] font-medium rounded-full hover:bg-client-primary hover:text-white transition-all cursor-pointer whitespace-nowrap"
-                                        >
-                                            Sửa đánh giá
-                                        </button>
+                                        {review.reviewType === 'product' && (
+                                            <button
+                                                onClick={() => handleOpenEdit(review)}
+                                                className="px-4 py-1.5 border border-client-primary text-client-primary text-[13px] font-medium rounded-full hover:bg-client-primary hover:text-white transition-all cursor-pointer whitespace-nowrap"
+                                            >
+                                                Sửa đánh giá
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))

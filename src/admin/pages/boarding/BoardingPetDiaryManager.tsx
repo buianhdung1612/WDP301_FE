@@ -19,13 +19,13 @@ import { getBoardingPetDiaries, upsertBoardingPetDiary } from "../../api/boardin
 
 // --- Custom Components ---
 
-const StatusCard = ({ label, value, icon, bgColor, textColor, options, onChange }: any) => {
+const StatusCard = ({ label, value, icon, bgColor, textColor, options, onChange, isReadOnly = false }: any) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
     return (
         <Box sx={{ flex: 1, minWidth: 100 }}>
             <Paper
-                onClick={(e) => setAnchorEl(e.currentTarget)}
+                onClick={(e) => !isReadOnly && setAnchorEl(e.currentTarget)}
                 elevation={0}
                 sx={{
                     p: 2,
@@ -36,12 +36,14 @@ const StatusCard = ({ label, value, icon, bgColor, textColor, options, onChange 
                     flexDirection: 'column',
                     alignItems: 'center',
                     gap: 1,
-                    cursor: 'pointer',
+                    cursor: isReadOnly ? 'default' : 'pointer',
                     transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: `0 4px 12px ${alpha(textColor, 0.1)}`
-                    }
+                    ...(!isReadOnly && {
+                        '&:hover': {
+                            transform: 'translateY(-2px)',
+                            boxShadow: `0 4px 12px ${alpha(textColor, 0.1)}`
+                        }
+                    })
                 }}
             >
                 <Typography variant="caption" sx={{ fontWeight: 800, textTransform: 'uppercase', opacity: 0.8 }}>
@@ -55,33 +57,35 @@ const StatusCard = ({ label, value, icon, bgColor, textColor, options, onChange 
                 </Typography>
             </Paper>
 
-            <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={() => setAnchorEl(null)}
-                PaperProps={{
-                    sx: { borderRadius: '12px', mt: 1, minWidth: 120, boxShadow: 'var(--customShadows-z20)' }
-                }}
-            >
-                {options.map((opt: string) => (
-                    <MenuItem
-                        key={opt}
-                        selected={opt === value}
-                        onClick={() => {
-                            onChange(opt);
-                            setAnchorEl(null);
-                        }}
-                        sx={{ fontWeight: opt === value ? 800 : 500, borderRadius: '8px', mx: 0.5 }}
-                    >
-                        {opt}
-                    </MenuItem>
-                ))}
-            </Menu>
+            {!isReadOnly && (
+                <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={() => setAnchorEl(null)}
+                    PaperProps={{
+                        sx: { borderRadius: '12px', mt: 1, minWidth: 120, boxShadow: 'var(--customShadows-z20)' }
+                    }}
+                >
+                    {options.map((opt: string) => (
+                        <MenuItem
+                            key={opt}
+                            selected={opt === value}
+                            onClick={() => {
+                                onChange(opt);
+                                setAnchorEl(null);
+                            }}
+                            sx={{ fontWeight: opt === value ? 800 : 500, borderRadius: '8px', mx: 0.5 }}
+                        >
+                            {opt}
+                        </MenuItem>
+                    ))}
+                </Menu>
+            )}
         </Box>
     );
 };
 
-export const BoardingPetDiaryManager = ({ bookingId, pets, date }: { bookingId: string, pets: any[], date: string }) => {
+export const BoardingPetDiaryManager = ({ bookingId, pets, date, isReadOnly = false }: { bookingId: string, pets: any[], date: string, isReadOnly?: boolean }) => {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [selectedPet, setSelectedPet] = useState<string>(pets?.[0]?._id);
@@ -130,6 +134,7 @@ export const BoardingPetDiaryManager = ({ bookingId, pets, date }: { bookingId: 
     }, [bookingId, selectedPet, date]);
 
     const handleSave = async (meal: string) => {
+        if (isReadOnly) return;
         setSaving(true);
         try {
             const payload = {
@@ -201,14 +206,16 @@ export const BoardingPetDiaryManager = ({ bookingId, pets, date }: { bookingId: 
                                     {meal.label}
                                 </Typography>
                                 <Box flexGrow={1} />
-                                <Button
-                                    size="small"
-                                    onClick={() => handleSave(meal.name)}
-                                    disabled={saving}
-                                    sx={{ fontWeight: 700, borderRadius: '8px' }}
-                                >
-                                    Lưu ngay
-                                </Button>
+                                {!isReadOnly && (
+                                    <Button
+                                        size="small"
+                                        onClick={() => handleSave(meal.name)}
+                                        disabled={saving}
+                                        sx={{ fontWeight: 700, borderRadius: '8px' }}
+                                    >
+                                        Lưu ngay
+                                    </Button>
+                                )}
                             </Stack>
 
                             {/* Diary Card */}
@@ -236,17 +243,20 @@ export const BoardingPetDiaryManager = ({ bookingId, pets, date }: { bookingId: 
                                         <StatusCard
                                             {...STATUS_CONFIGS.eating}
                                             value={formState[meal.name]?.eatingStatus}
-                                            onChange={(v: string) => setFormState(p => ({ ...p, [meal.name]: { ...p[meal.name], eatingStatus: v } }))}
+                                            onChange={(v: string) => !isReadOnly && setFormState(p => ({ ...p, [meal.name]: { ...p[meal.name], eatingStatus: v } }))}
+                                            isReadOnly={isReadOnly}
                                         />
                                         <StatusCard
                                             {...STATUS_CONFIGS.digestion}
                                             value={formState[meal.name]?.digestionStatus}
-                                            onChange={(v: string) => setFormState(p => ({ ...p, [meal.name]: { ...p[meal.name], digestionStatus: v } }))}
+                                            onChange={(v: string) => !isReadOnly && setFormState(p => ({ ...p, [meal.name]: { ...p[meal.name], digestionStatus: v } }))}
+                                            isReadOnly={isReadOnly}
                                         />
                                         <StatusCard
                                             {...STATUS_CONFIGS.mood}
                                             value={formState[meal.name]?.moodStatus}
-                                            onChange={(v: string) => setFormState(p => ({ ...p, [meal.name]: { ...p[meal.name], moodStatus: v } }))}
+                                            onChange={(v: string) => !isReadOnly && setFormState(p => ({ ...p, [meal.name]: { ...p[meal.name], moodStatus: v } }))}
+                                            isReadOnly={isReadOnly}
                                         />
                                     </Stack>
 
@@ -258,10 +268,11 @@ export const BoardingPetDiaryManager = ({ bookingId, pets, date }: { bookingId: 
                                         rows={1}
                                         label="Ghi chú nhanh"
                                         value={formState[meal.name]?.note || ""}
-                                        onChange={(e) => setFormState(prev => ({ ...prev, [meal.name]: { ...prev[meal.name], note: e.target.value } }))}
+                                        onChange={(e) => !isReadOnly && setFormState(prev => ({ ...prev, [meal.name]: { ...prev[meal.name], note: e.target.value } }))}
                                         placeholder="Trạng thái thú cưng hôm nay thế nào?"
+                                        disabled={isReadOnly}
                                         sx={{
-                                            '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#fff' }
+                                            '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: isReadOnly ? 'transparent' : '#fff' }
                                         }}
                                     />
                                 </Stack>
