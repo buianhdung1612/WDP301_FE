@@ -9,7 +9,7 @@ import { createMyPet } from "../../api/pet.api";
 import { ProductBanner } from "../product/sections/ProductBanner";
 import { ArrowRight, Camera } from "lucide-react";
 import { uploadImagesToCloudinary } from "../../../admin/api/uploadCloudinary.api";
-import CreatableSelect from 'react-select/creatable';
+import CreatableSelect from "react-select/creatable";
 import { useClientBreeds, useClientCreateBreed } from "../../hooks/useBreed";
 
 interface BreedOption {
@@ -19,9 +19,7 @@ interface BreedOption {
 }
 
 const schema = z.object({
-    name: z.string()
-        .min(2, "Tên thú cưng phải có ít nhất 2 ký tự!")
-        .nonempty("Vui lòng nhập tên thú cưng!"),
+    name: z.string().min(2, "Tên thú cưng phải có ít nhất 2 ký tự!").nonempty("Vui lòng nhập tên thú cưng!"),
     type: z.enum(["dog", "cat"]),
     breed: z.string().optional(),
     weight: z.number().min(0.1, "Cân nặng phải lớn hơn 0!"),
@@ -46,7 +44,7 @@ export const PetCreatePage = () => {
             avatar: "",
             gender: "male",
             age: 0,
-            notes: ""
+            notes: "",
         }
     });
 
@@ -55,41 +53,42 @@ export const PetCreatePage = () => {
     const { data: breeds = [] } = useClientBreeds(petType);
     const { mutate: createBreedMutate } = useClientCreateBreed();
 
-    const breedOptions: BreedOption[] = breeds.map((b: any) => ({
-        label: b.name,
-        value: b.name
+    const breedOptions: BreedOption[] = breeds.map((breed: any) => ({
+        label: breed.name,
+        value: breed.name,
     }));
 
     const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
-        if (files && files.length > 0) {
-            setUploading(true);
-            try {
-                const urls = await uploadImagesToCloudinary(Array.from(files));
-                if (urls && urls.length > 0) {
-                    setValue("avatar", urls[0]);
-                    setPreview(urls[0]);
-                    toast.success("Tải ảnh lên thành công!");
-                }
-            } catch (err) {
-                toast.error("Lỗi tải ảnh!");
-            } finally {
-                setUploading(false);
+        if (!files || files.length === 0) return;
+
+        setUploading(true);
+        try {
+            const urls = await uploadImagesToCloudinary(Array.from(files));
+            if (urls && urls.length > 0) {
+                setValue("avatar", urls[0]);
+                setPreview(urls[0]);
+                toast.success("Tai anh len thanh cong!");
             }
+        } catch {
+            toast.error("Loi tai anh!");
+        } finally {
+            setUploading(false);
         }
     };
 
     const onSubmit = async (data: FormData) => {
         try {
             const response = await createMyPet(data);
-            if (response.code === 200) {
+            if (response.code === 200 || response.code === 201) {
                 toast.success(response.message || "Đã thêm thú cưng thành công!");
                 navigate("/dashboard/pet");
-            } else {
-                toast.error(response.message);
+                return;
             }
-        } catch (error) {
-            toast.error("Đã có lỗi xảy ra!");
+
+            toast.error(response.message || "Thêm thú cưng thất bại!");
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra!");
         }
     };
 
@@ -97,7 +96,7 @@ export const PetCreatePage = () => {
         { label: "Trang chủ", to: "/" },
         { label: "Tài khoản", to: "/dashboard/overview" },
         { label: "Danh sách thú cưng", to: "/dashboard/pet" },
-        { label: "Thêm bé mới", to: `/dashboard/pet/create` },
+        { label: "Them be moi", to: "/dashboard/pet/create" },
     ];
 
     return (
@@ -116,9 +115,9 @@ export const PetCreatePage = () => {
                 <div className="w-[75%] px-[12px]">
                     <div className="mt-[100px] p-[35px] bg-white shadow-[0px_8px_24px_#959da533] rounded-[12px]">
                         <h3 className="text-[24px] font-[600] text-client-secondary mb-[25px] flex items-center justify-between">
-                            Thông tin thú cưng
-                            <Link className="relative overflow-hidden group bg-[#ffa500] rounded-[8px] px-[25px] py-[12px] font-[500] text-[14px] text-white" to={"/dashboard/pet"}>
-                                <span className="relative z-10">Quay lại</span>
+                            Thong tin thu cung
+                            <Link className="relative overflow-hidden group bg-[#ffa500] rounded-[8px] px-[25px] py-[12px] font-[500] text-[14px] text-white" to="/dashboard/pet">
+                                <span className="relative z-10">Quay lai</span>
                                 <div className="absolute top-0 left-0 w-full h-full bg-[#cc8400] transition-transform duration-500 ease-in-out transform scale-x-0 origin-left group-hover:scale-x-100"></div>
                             </Link>
                         </h3>
@@ -156,7 +155,7 @@ export const PetCreatePage = () => {
                                             type="text"
                                             {...register("name")}
                                             className={`border rounded-[10px] px-[20px] py-[15px] text-[15px] focus:outline-none focus:border-client-primary transition-all bg-[#fcfcfc] hover:bg-white ${errors.name ? "border-red-500" : "border-[#eee]"}`}
-                                            placeholder="Ví dụ: Lucky, Mimi..."
+                                            placeholder="Vi du: Lucky, Mimi..."
                                         />
                                         {errors.name && <span className="text-red-500 text-[13px]">{errors.name.message}</span>}
                                     </div>
@@ -181,10 +180,10 @@ export const PetCreatePage = () => {
                                             options={breedOptions}
                                             value={petBreed ? { label: petBreed, value: petBreed } : null}
                                             onChange={(newValue) => {
-                                                const val = (newValue as BreedOption)?.value || "";
-                                                setValue("breed", val);
-                                                if ((newValue as any)?.__isNew__) {
-                                                    createBreedMutate({ name: val, type: petType });
+                                                const value = (newValue as BreedOption)?.value || "";
+                                                setValue("breed", value);
+                                                if ((newValue as BreedOption)?.__isNew__) {
+                                                    createBreedMutate({ name: value, type: petType });
                                                 }
                                             }}
                                             placeholder="Chọn hoặc nhập giống mới..."
@@ -192,21 +191,21 @@ export const PetCreatePage = () => {
                                             styles={{
                                                 control: (base) => ({
                                                     ...base,
-                                                    borderRadius: '10px',
-                                                    padding: '8px 10px',
-                                                    fontSize: '15px',
-                                                    backgroundColor: '#fcfcfc',
-                                                    borderColor: '#eee',
-                                                    boxShadow: 'none',
-                                                    '&:hover': {
-                                                        borderColor: '#F8721F',
-                                                        backgroundColor: 'white'
+                                                    borderRadius: "10px",
+                                                    padding: "8px 10px",
+                                                    fontSize: "15px",
+                                                    backgroundColor: "#fcfcfc",
+                                                    borderColor: "#eee",
+                                                    boxShadow: "none",
+                                                    "&:hover": {
+                                                        borderColor: "#F8721F",
+                                                        backgroundColor: "white"
                                                     }
                                                 }),
                                                 menu: (base) => ({
                                                     ...base,
-                                                    borderRadius: '10px',
-                                                    fontSize: '15px',
+                                                    borderRadius: "10px",
+                                                    fontSize: "15px",
                                                     zIndex: 100
                                                 })
                                             }}
@@ -239,16 +238,16 @@ export const PetCreatePage = () => {
                                     <div className="flex flex-col gap-[10px]">
                                         <label className="text-[15px] font-[600] text-client-secondary">Giới tính</label>
                                         <div className="flex gap-6 h-[54px] items-center">
-                                            {["male", "female"].map((g) => (
-                                                <label key={g} className="flex items-center gap-2 cursor-pointer group">
+                                            {["male", "female"].map((gender) => (
+                                                <label key={gender} className="flex items-center gap-2 cursor-pointer group">
                                                     <input
                                                         type="radio"
-                                                        value={g}
+                                                        value={gender}
                                                         {...register("gender")}
                                                         className="appearance-none w-[20px] h-[20px] border-2 border-[#ddd] rounded-full checked:border-client-primary checked:border-[5px] transition-all cursor-pointer"
                                                     />
                                                     <span className="text-[14px] font-[500] text-[#555] group-hover:text-client-primary transition-colors">
-                                                        {g === "male" ? "Đực" : "Cái"}
+                                                        {gender === "male" ? "Đực" : "Cái"}
                                                     </span>
                                                 </label>
                                             ))}
