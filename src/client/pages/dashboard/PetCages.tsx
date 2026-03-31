@@ -95,11 +95,49 @@ const getBoardingPaymentLabel = (booking: any) => {
 };
 
 const getBoardingDisplaySlots = (detail: any) => {
-  if (!detail?.cage || !detail?.booking) return [];
+  if (!detail?.booking) return [];
 
-  const cage = detail.cage;
   const booking = detail.booking;
   const pets = Array.isArray(detail?.pets) ? detail.pets : [];
+
+  if (Array.isArray(booking.items) && booking.items.length > 0) {
+    return booking.items.flatMap((item: any, index: number) => {
+      const itemCage = (typeof item.cageId === 'object' && item.cageId !== null) ? item.cageId : detail.cage;
+      if (!itemCage) return [];
+      
+      const petIdStr = item.petIds?.[0] ? 
+        (typeof item.petIds[0] === 'object' ? item.petIds[0]._id : item.petIds[0]) 
+        : item.petId;
+        
+      const pet = pets.find((p: any) => String(p._id) === String(petIdStr)) || pets[index] || null;
+      
+      const slotLabel = booking.items.length > 1 ? `Phòng ${index + 1}` : "";
+      const displayCode = [itemCage?.cageCode || "CHUỒNG", slotLabel].filter(Boolean).join(" • ");
+      
+      const images: any[] = [];
+      if (itemCage?.avatar) images.push(itemCage.avatar);
+      if (Array.isArray(itemCage?.gallery)) images.push(...itemCage.gallery);
+      
+      return {
+        ...itemCage,
+        images: images.length > 0 ? images : itemCage?.images || [],
+        _id: `${booking?._id || "cage"}-item-${index}-${pet?._id || "nopet"}`,
+        sourceCageId: itemCage?._id,
+        bookingId: booking?._id,
+        slotIndex: index + 1,
+        slotCount: booking.items.length,
+        slotLabel,
+        displayCode,
+        lastBooking: booking,
+        pet,
+        pets: pet ? [pet] : [],
+      };
+    });
+  }
+
+  // Pre-batch booking fallback
+  if (!detail.cage) return [];
+  const cage = detail.cage;
   const requestedQuantity = Math.max(1, Number(booking?.quantity || 0) || pets.length || 1);
   const slotCount = Math.max(requestedQuantity, pets.length || 0, 1);
 
@@ -108,8 +146,13 @@ const getBoardingDisplaySlots = (detail: any) => {
     const slotLabel = slotCount > 1 ? `Phòng ${index + 1}` : "";
     const displayCode = [cage?.cageCode || "CHUỒNG", slotLabel].filter(Boolean).join(" • ");
 
+    const images: any[] = [];
+    if (cage?.avatar) images.push(cage.avatar);
+    if (Array.isArray(cage?.gallery)) images.push(...cage.gallery);
+
     return {
       ...cage,
+      images: images.length > 0 ? images : cage?.images || [],
       _id: `${booking?._id || cage?._id || "cage"}-${pet?._id || `slot-${index + 1}`}`,
       sourceCageId: cage?._id,
       bookingId: booking?._id,
