@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     Alert,
     Box,
@@ -22,7 +22,7 @@ import { toast } from "react-toastify";
 import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { Title } from "../../components/ui/Title";
 import { prefixAdmin } from "../../constants/routes";
-import { batchCreateBoardingBooking, createBoardingBooking } from "../../api/boarding-booking.api";
+import { createBoardingBooking, batchCreateBoardingBooking, checkBoardingAvailability } from "../../api/boarding-booking.api";
 import { getBoardingCages } from "../../api/boarding-cage.api";
 import { useUsers } from "../account-user/hooks/useAccountUser";
 import { usePets } from "../account-user/hooks/usePet";
@@ -88,25 +88,73 @@ export const BoardingBookingCreatePage = () => {
     }, [usersRes]);
 
     const { data: petsRes } = usePets({ userId: formData.userId, limit: 1000 });
+    
+    // Fetch busy pets/cages and real-time availability for selected dates
+    const { data: busyPetsRes } = useQuery({
+        queryKey: ["admin", "boarding-booking-availability", formData.checkInDate, formData.checkOutDate],
+        queryFn: () => checkBoardingAvailability(formData.checkInDate, formData.checkOutDate),
+        enabled: !!formData.checkInDate && !!formData.checkOutDate,
+    });
+
+    const busyPetIds = useMemo(() => {
+        if (!busyPetsRes || busyPetsRes.code !== 200) return [];
+        return Array.isArray(busyPetsRes.data?.busyPetIds) ? busyPetsRes.data.busyPetIds.map((id: any) => String(id)) : [];
+    }, [busyPetsRes]);
+
+    const busyCageIds = useMemo(() => {
+        if (!busyPetsRes || busyPetsRes.code !== 200) return [];
+        return Array.isArray(busyPetsRes.data?.busyCageIds) ? busyPetsRes.data.busyCageIds.map((id: any) => String(id)) : [];
+    }, [busyPetsRes]);
+
     const pets = useMemo(() => {
         if (!petsRes) return [];
         const res = petsRes as any;
-        if (Array.isArray(res.data?.recordList)) return res.data.recordList;
-        if (Array.isArray(res.recordList)) return res.recordList;
-        if (Array.isArray(res.data)) return res.data;
-        if (Array.isArray(res)) return res;
-        return [];
-    }, [petsRes]);
+        let list: any[] = [];
+        if (Array.isArray(res.data?.recordList)) list = res.data.recordList;
+        else if (Array.isArray(res.recordList)) list = res.recordList;
+        else if (Array.isArray(res.data)) list = res.data;
+        else if (Array.isArray(res)) list = res;
+        
+        return list.map((pet: any) => ({
+            ...pet,
+            isBusy: busyPetIds.includes(String(pet._id || pet.id))
+        }));
+    }, [petsRes, busyPetIds]);
 
     const { data: cageRes } = useQuery({
         queryKey: ["admin-boarding-cages"],
         queryFn: () => getBoardingCages(),
     });
 
+    useEffect(() => {
+        if (busyPetIds.length > 0 || busyCageIds.length > 0) {
+            setItems(prev => prev.map(item => {
+                const update: any = {};
+                if (item.petId && busyPetIds.includes(String(item.petId))) update.petId = "";
+                if (item.cageId && busyCageIds.includes(String(item.cageId))) update.cageId = "";
+                
+                if (Object.keys(update).length > 0) return { ...item, ...update };
+                return item;
+            }));
+        }
+    }, [busyPetIds, busyCageIds]);
+
     const cages = useMemo(() => {
-        const list = Array.isArray(cageRes?.data?.recordList) ? cageRes.data.recordList : (Array.isArray(cageRes?.recordList) ? cageRes.recordList : (Array.isArray(cageRes?.data) ? cageRes.data : []));
-        return list.filter((item: any) => item.status !== "maintenance");
-    }, [cageRes]);
+        const busyCageIds = busyPetsRes?.data?.busyCageIds || [];
+        const cageAvailability = busyPetsRes?.data?.cageAvailability || {};
+
+        return (cageRes?.data?.recordList || []).map((cage: any) => {
+            const isBusy = busyCageIds.includes(String(cage._id));
+            const remainingRooms = cageAvailability[String(cage._id)] !== undefined 
+                ? cageAvailability[String(cage._id)] 
+                : Number(cage.totalRooms || 4);
+            return {
+                ...cage,
+                isBusy,
+                remainingRooms
+            };
+        });
+    }, [cageRes, busyPetsRes]);
 
 
     const totalDays = useMemo(() => {
@@ -133,8 +181,11 @@ export const BoardingBookingCreatePage = () => {
 
     const createMut = useMutation({
         mutationFn: items.length > 1 ? batchCreateBoardingBooking : createBoardingBooking,
-        onSuccess: () => {
-            toast.success("Tạo đơn khách sạn thành công");
+        onSuccess: (data: any) => {
+            toast.success(data?.message || "Tạo đơn khách sạn thành công");
+            if (data?.warning === "staff_limit_exceeded") {
+                toast.warning("LƯU Ý: Đã hết nhân viên rảnh, đơn chưa được gán người phụ trách!");
+            }
             navigate(`/${prefixAdmin}/boarding/booking-list`);
         },
         onError: (error: any) => {
@@ -175,6 +226,26 @@ export const BoardingBookingCreatePage = () => {
     const handleSubmit = () => {
         if (!formData.userId) return toast.error("Vui lòng chọn khách hàng");
         if (items.some(i => !i.petId || !i.cageId)) return toast.error("Vui lòng chọn thú cưng và chuồng cho tất cả các mục");
+        
+        const petIds = items.map(i => String(i.petId));
+        if (new Set(petIds).size !== petIds.length) {
+            return toast.error("Một thú cưng không thể xuất hiện 2 lần trong cùng một đơn");
+        }
+
+        // Check cage capacity
+        const cageUsageMap: Record<string, number> = {};
+        items.forEach(it => {
+            const cid = String(it.cageId);
+            cageUsageMap[cid] = (cageUsageMap[cid] || 0) + 1;
+        });
+
+        for (const [cid, usedCount] of Object.entries(cageUsageMap)) {
+            const cage = cages.find(c => String(c._id) === cid);
+            if (cage && usedCount > Number(cage.remainingRooms || 0)) {
+                return toast.error(`Chuồng ${cage.cageCode} không đủ chỗ (Còn ${cage.remainingRooms}, chọn ${usedCount})`);
+            }
+        }
+
         if (totalDays <= 0) return toast.error("Ngày trả chuồng phải sau ngày nhận chuồng");
 
         const commonPayload = {
@@ -318,11 +389,17 @@ export const BoardingBookingCreatePage = () => {
                                                     onChange={(e) => handleUpdateItem(index, "petId", e.target.value)}
                                                     disabled={!formData.userId}
                                                 >
-                                                    {pets.map((pet: any) => (
-                                                        <MenuItem key={pet._id} value={pet._id}>
-                                                            {pet.name} ({pet.breed || pet.type || "Không rõ"}) - {pet.weight || 0}kg
-                                                        </MenuItem>
-                                                    ))}
+                                                    {pets.map((pet: any) => {
+                                                        const isSelectedElsewhere = !!pet._id && items.some((it, itIndex) => it.petId && String(it.petId) === String(pet._id) && itIndex !== index);
+                                                        const isActuallyBusy = pet.isBusy || isSelectedElsewhere;
+                                                        return (
+                                                            <MenuItem key={pet._id} value={pet._id} disabled={isActuallyBusy}>
+                                                                {pet.name} ({pet.breed || pet.type || "Không rõ"}) - {pet.weight || 0}kg 
+                                                                {pet.isBusy && " - (Đã có lịch)"}
+                                                                {isSelectedElsewhere && " - (Đã được chọn)"}
+                                                            </MenuItem>
+                                                        );
+                                                    })}
                                                 </TextField>
                                             </Grid>
                                             <Grid size={{ xs: 12, md: 6 }}>
@@ -333,11 +410,18 @@ export const BoardingBookingCreatePage = () => {
                                                     value={item.cageId}
                                                     onChange={(e) => handleUpdateItem(index, "cageId", e.target.value)}
                                                 >
-                                                    {cages.map((cage: any) => (
-                                                        <MenuItem key={cage._id} value={cage._id}>
-                                                            {cage.cageCode} - {String(cage.type || "").toUpperCase()} - {normalizeCageSizeLabel(cage.size)}
-                                                        </MenuItem>
-                                                    ))}
+                                                    {cages.map((cage: any) => {
+                                                        const usedInForm = items.filter((it, itIndex) => itIndex !== index && it.cageId && String(it.cageId) === String(cage._id)).length;
+                                                        const currentRemaining = Math.max(0, Number(cage.remainingRooms || 0) - usedInForm);
+                                                        const isActuallyFull = currentRemaining <= 0;
+                                                        return (
+                                                            <MenuItem key={cage._id} value={cage._id} disabled={isActuallyFull}>
+                                                                {cage.cageCode} - {String(cage.type || "").toUpperCase()} - {normalizeCageSizeLabel(cage.size)} 
+                                                                {` (Còn ${currentRemaining} chỗ)`}
+                                                                {isActuallyFull && " - (Hết chỗ)"}
+                                                            </MenuItem>
+                                                        );
+                                                    })}
                                                 </TextField>
                                             </Grid>
                                             <Grid size={{ xs: 12, md: 4 }}>
@@ -455,27 +539,59 @@ export const BoardingBookingCreatePage = () => {
                                 <Typography sx={{ fontWeight: 800, fontSize: 18, color: "#b91c1c", mb: 1.5 }}>
                                     Tóm tắt chi phí
                                 </Typography>
-                                <Stack spacing={1}>
-                                    <Stack direction="row" justifyContent="space-between">
-                                        <Typography color="text.secondary">Số lượng thú cưng</Typography>
-                                        <Typography fontWeight={700}>{items.length}</Typography>
-                                    </Stack>
-                                    <Stack direction="row" justifyContent="space-between">
-                                        <Typography color="text.secondary">Số đêm</Typography>
-                                        <Typography fontWeight={700}>{totalDays}</Typography>
-                                    </Stack>
-                                    <Divider />
-                                    <Stack direction="row" justifyContent="space-between">
-                                        <Typography color="text.secondary">Tổng tạm tính</Typography>
-                                        <Typography fontWeight={700}>{pricing.subTotal.toLocaleString("vi-VN")} VNĐ</Typography>
-                                    </Stack>
-                                    <Stack direction="row" justifyContent="space-between">
-                                        <Typography color="text.secondary">Tổng giảm giá</Typography>
-                                        <Typography fontWeight={700} color="error.main">-{pricing.totalDiscount.toLocaleString("vi-VN")} VNĐ</Typography>
-                                    </Stack>
-                                    <Stack direction="row" justifyContent="space-between">
-                                        <Typography fontWeight={800} fontSize={18}>Tổng cộng</Typography>
-                                        <Typography fontWeight={800} fontSize={18} color="primary.main">{pricing.total.toLocaleString("vi-VN")} VNĐ</Typography>
+                                <Stack spacing={1.5}>
+                                    <Box sx={{ bgcolor: "rgba(185, 28, 28, 0.05)", p: 1.5, borderRadius: 2, border: "1px dashed #fecaca" }}>
+                                        <Typography sx={{ fontWeight: 800, fontSize: 13, color: "#991b1b", mb: 1, textTransform: "uppercase", letterSpacing: 1 }}>
+                                            Chi tiết từng chuồng
+                                        </Typography>
+                                        <Stack spacing={1}>
+                                            {items.map((it, idx) => {
+                                                const pet = pets.find((p: any) => String(p._id) === String(it.petId));
+                                                const cage = cages.find((c: any) => String(c._id) === String(it.cageId));
+                                                const dailyPrice = Number(cage?.dailyPrice || 0);
+                                                const itemSubtotal = dailyPrice * totalDays;
+
+                                                return (
+                                                    <Box key={idx} sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                                                        <Box>
+                                                            <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#7c2d12" }}>
+                                                                #{idx + 1}. {pet?.name || "Thú cưng chưa chọn"}
+                                                            </Typography>
+                                                            <Typography sx={{ fontSize: 11, color: "text.secondary" }}>
+                                                                {cage?.cageCode || "Chuồng chưa chọn"} • {dailyPrice.toLocaleString("vi-VN")}đ/đêm
+                                                            </Typography>
+                                                        </Box>
+                                                        <Typography sx={{ fontSize: 13, fontWeight: 700 }}>
+                                                            {itemSubtotal.toLocaleString("vi-VN")}đ
+                                                        </Typography>
+                                                    </Box>
+                                                );
+                                            })}
+                                        </Stack>
+                                    </Box>
+
+                                    <Stack spacing={1}>
+                                        <Stack direction="row" justifyContent="space-between">
+                                            <Typography color="text.secondary">Số lượng thú cưng</Typography>
+                                            <Typography fontWeight={700}>{items.length}</Typography>
+                                        </Stack>
+                                        <Stack direction="row" justifyContent="space-between">
+                                            <Typography color="text.secondary">Số đêm</Typography>
+                                            <Typography fontWeight={700}>{totalDays}</Typography>
+                                        </Stack>
+                                        <Divider sx={{ my: 1 }} />
+                                        <Stack direction="row" justifyContent="space-between">
+                                            <Typography color="text.secondary" sx={{ fontWeight: 600 }}>Tổng tạm tính</Typography>
+                                            <Typography fontWeight={700}>{pricing.subTotal.toLocaleString("vi-VN")} VNĐ</Typography>
+                                        </Stack>
+                                        <Stack direction="row" justifyContent="space-between">
+                                            <Typography color="text.secondary">Tổng giảm giá</Typography>
+                                            <Typography fontWeight={700} color="error.main">-{pricing.totalDiscount.toLocaleString("vi-VN")} VNĐ</Typography>
+                                        </Stack>
+                                        <Stack direction="row" justifyContent="space-between" sx={{ pt: 1 }}>
+                                            <Typography fontWeight={900} fontSize={20} color="#b91c1c">TỔNG CỘNG</Typography>
+                                            <Typography fontWeight={900} fontSize={20} color="#b91c1c">{pricing.total.toLocaleString("vi-VN")} VNĐ</Typography>
+                                        </Stack>
                                     </Stack>
                                 </Stack>
                             </CardContent>
