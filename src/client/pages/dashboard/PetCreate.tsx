@@ -227,12 +227,12 @@ export const PetCreatePage = () => {
 
                                 <div className="grid grid-cols-2 gap-[25px]">
                                     <div className="flex flex-col gap-[10px]">
-                                        <label className="text-[15px] font-[600] text-client-secondary">Tuổi (Năm)</label>
+                                        <label className="text-[15px] font-[600] text-client-secondary">Tuổi (Tháng)</label>
                                         <input
                                             type="number"
                                             {...register("age", { valueAsNumber: true })}
                                             className="border rounded-[10px] px-[20px] py-[15px] text-[15px] focus:outline-none focus:border-client-primary transition-all bg-[#fcfcfc] hover:bg-white border-[#eee]"
-                                            placeholder="Ví dụ: 2"
+                                            placeholder="Ví dụ: 3, 12, 24..."
                                         />
                                     </div>
                                     <div className="flex flex-col gap-[10px]">

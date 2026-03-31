@@ -243,6 +243,15 @@ export const ServiceDetailPage = () => {
         if (!user) { toast.info("Vui lòng đăng nhập để đặt lịch ạ!"); navigate("/auth/login"); return; }
         if (!service) return;
         if (selectedPetIds.length === 0) { toast.warning("Bé cưng nào sẽ đi Spa vậy ạ? Vui lòng chọn bé nha!"); return; }
+
+        // Kiểm tra độ tuổi tối thiểu
+        const underagePets = pets.filter(p => selectedPetIds.includes(p._id) && (p.age || 0) < (service.minAgeMonths || 0));
+        if (underagePets.length > 0) {
+            const names = underagePets.map(p => p.name).join(", ");
+            toast.error(`Rất tiếc, bé ${names} chưa đủ tuổi (${service.minAgeMonths} tháng) để tham gia dịch vụ này ạ!`);
+            return;
+        }
+
         if (!selectedTimeSlot) { toast.warning("Bạn chưa chọn giờ hẹn kìa!"); return; }
 
         if (!bookingPreview) {
@@ -351,9 +360,17 @@ export const ServiceDetailPage = () => {
                                         />
                                     ))}
                                 </div>
-                                <span className="text-[20px] mx-[20px] text-[#ccc]">|</span>
                                 <p className="text-[16px] text-[#505050]">(2 đánh giá từ khách hàng)</p>
                             </div>
+
+                            {service.minAgeMonths > 0 && (
+                                <div className="flex items-center gap-2 mb-[15px] bg-blue-50/50 w-fit px-4 py-2 rounded-full border border-blue-100">
+                                    <Icon icon="solar:calendar-bold-duotone" width={20} className="text-blue-500" />
+                                    <span className="text-[14px] font-bold text-blue-600">
+                                        Yêu cầu độ tuổi: Từ {service.minAgeMonths} tháng tuổi
+                                    </span>
+                                </div>
+                            )}
 
 
                             {service.pricingType === 'by-weight' && service.priceList && service.priceList.length > 0 && (

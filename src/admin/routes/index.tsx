@@ -57,6 +57,12 @@ import { BookingConfigPage } from "../pages/booking/BookingConfigPage";
 import { CalendarPage } from "../pages/calendar/CalendarPage";
 import { SettingsPage } from "../pages/settings/SettingsPage";
 import { BreedListPage } from "../pages/settings/BreedListPage";
+// Statistics Pages
+import { GeneralStatisticsPage } from "../pages/dashboard/statistics/GeneralStatisticsPage";
+import { OrderStatisticsPage } from "../pages/dashboard/statistics/OrderStatisticsPage";
+import { ServiceStatisticsPage } from "../pages/dashboard/statistics/ServiceStatisticsPage";
+import { BoardingStatisticsPage } from "../pages/dashboard/statistics/BoardingStatisticsPage";
+import { StaffStatisticsPage } from "../pages/dashboard/statistics/StaffStatisticsPage";
 // HR Management Pages
 import { ScheduleCalendarPage } from "../pages/hr/ScheduleCalendarPage";
 import { ShiftListPage } from "../pages/hr/ShiftListPage";
@@ -88,6 +94,11 @@ export const AdminRoutes = [
     { path: "dashboard/system", element: <PermissionGuard permission="dashboard_view"><SystemPage /></PermissionGuard> },
     { path: "dashboard/ecommerce", element: <PermissionGuard permission="dashboard_view"><EcommercePage /></PermissionGuard> },
     { path: "dashboard/analytics", element: <PermissionGuard permission="dashboard_view"><AnalyticsPage /></PermissionGuard> },
+    { path: "dashboard/statistics/general", element: <PermissionGuard permission="dashboard_view"><GeneralStatisticsPage /></PermissionGuard> },
+    { path: "dashboard/statistics/orders", element: <PermissionGuard permission="dashboard_view"><OrderStatisticsPage /></PermissionGuard> },
+    { path: "dashboard/statistics/services", element: <PermissionGuard permission="dashboard_view"><ServiceStatisticsPage /></PermissionGuard> },
+    { path: "dashboard/statistics/boarding", element: <PermissionGuard permission="dashboard_view"><BoardingStatisticsPage /></PermissionGuard> },
+    { path: "dashboard/statistics/staff", element: <PermissionGuard permission="dashboard_view"><StaffStatisticsPage /></PermissionGuard> },
     { path: "product/list", element: <PermissionGuard permission="product_view"><ProductListPage /></PermissionGuard> },
     { path: "product/create", element: <PermissionGuard permission="product_create"><ProductCreatePage /></PermissionGuard> },
     { path: "product/edit/:id", element: <PermissionGuard permission="product_edit"><ProductEditPage /></PermissionGuard> },

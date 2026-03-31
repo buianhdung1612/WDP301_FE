@@ -68,3 +68,28 @@ export const confirmInput = (title: string, label: string, onConfirm: (value: st
         }
     });
 };
+
+export const confirmInputText = (title: string, label: string, placeholder: string = "", onConfirm: (value: string) => void, icon: 'info' | 'warning' | 'success' | 'error' = 'info') => {
+    Swal.fire({
+        title: title,
+        input: 'text',
+        inputLabel: label,
+        inputPlaceholder: placeholder,
+        icon: icon,
+        showCancelButton: true,
+        confirmButtonColor: '#ffa500',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Xác nhận',
+        cancelButtonText: 'Hủy',
+        inputValidator: (value) => {
+            if (!value) {
+                return 'Vui lòng không để trống!';
+            }
+            return null;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            onConfirm(result.value);
+        }
+    });
+};

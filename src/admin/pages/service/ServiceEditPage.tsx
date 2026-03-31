@@ -263,6 +263,22 @@ export const ServiceEditPage = () => {
                                     />
 
                                     <Controller
+                                        name="minAgeMonths"
+                                        control={control}
+                                        render={({ field, fieldState }) => (
+                                            <TextField
+                                                {...field}
+                                                type="number"
+                                                label="Độ tuổi tối thiểu (Tháng)"
+                                                placeholder="Ví dụ: 3"
+                                                error={!!fieldState.error}
+                                                helperText={fieldState.error?.message || "Số tháng tuổi tối thiểu để bé tham gia dịch vụ"}
+                                                onChange={(e) => field.onChange(Number(e.target.value))}
+                                            />
+                                        )}
+                                    />
+
+                                    <Controller
                                         name="petTypes"
                                         control={control}
                                         render={({ field, fieldState }) => (

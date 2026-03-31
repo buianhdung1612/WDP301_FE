@@ -279,7 +279,7 @@ export const ProductDetailPage = () => {
                             </div>
                             <div className="w-full flex items-center mt-[20px] mb-[30px] px-[40px] py-[20px] rounded-[48px] bg-[#FFF0F0]">
                                 <span className="inline-block mr-[20px] text-[#FF6262] w-[35px] aspect-square"><svg className="w-full h-full" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 66"><path d="M33,0l6.1,9.5l10.4-5.1L50,15.7l11.6,0.8l-5.2,10L66,33l-9.5,6.1l5.1,10.4L50.3,50l-0.8,11.6l-10-5.2L33,66l-6.1-9.5 l-10.4,5.1L16,50.3L4.4,49.5l5.2-10L0,33l9.5-6.1L4.4,16.5L15.7,16l0.8-11.6l10,5.2L33,0z M41.7,18c-0.5-0.3-1.2-0.1-1.5,0.4 L24,46.5c-0.3,0.5-0.1,1.2,0.4,1.5c0.5,0.3,1.2,0.1,1.5-0.4L42,19.5C42.4,19,42.2,18.3,41.7,18z M43.6,38c-1.1-1.1-2.6-1.8-4.2-1.8 c-1.6,0-3.1,0.7-4.2,1.8s-1.8,2.6-1.8,4.2c0,1.7,0.7,3.1,1.8,4.2c1.1,1.1,2.6,1.7,4.2,1.7c1.7,0,3.1-0.7,4.2-1.7 c1.1-1.1,1.8-2.6,1.8-4.2C45.3,40.5,44.7,39,43.6,38z M42,44.9c-0.7,0.7-1.6,1.1-2.7,1.1c-1,0-2-0.4-2.7-1.1s-1.1-1.7-1.1-2.7 c0-1,0.4-2,1.1-2.7c0.7-0.7,1.6-1.1,2.7-1.1c1.1,0,2,0.4,2.7,1.1c0.7,0.7,1.1,1.6,1.1,2.7S42.7,44.2,42,44.9z M30.9,19.6 c-1.1-1.1-2.6-1.8-4.2-1.8c-1.6,0-3.1,0.7-4.2,1.8c-1.1,1.1-1.7,2.6-1.7,4.2c0,1.6,0.7,3.1,1.7,4.2c1.1,1.1,2.6,1.7,4.2,1.7 c1.7,0,3.1-0.7,4.2-1.7c1.1-1.1,1.8-2.6,1.8-4.2C32.6,22.2,31.9,20.7,30.9,19.6z M29.3,26.5c-0.7,0.7-1.7,1.1-2.7,1.1 c-1,0-2-0.4-2.7-1.1c-0.7-0.7-1.1-1.6-1.1-2.7c0-1.1,0.4-2,1.1-2.7s1.6-1.1,2.7-1.1c1.1,0,2,0.4,2.7,1.1s1.1,1.7,1.1,2.7 C30.5,24.9,30,25.8,29.3,26.5z"></path></svg></span>
-                                <p className="text-[15px] text-[#505050]">Giảm 200.000₫ cho đơn hàng từ 999.000₫, miễn phí giao hàng</p>
+                                <p className="text-[15px] text-[#505050]">Đảm bảo sản phẩm chất lượng cao, an toàn và thân thiện cho thú cưng của bạn.</p>
                             </div>
 
                             {/* Options động */}
@@ -381,18 +381,18 @@ export const ProductDetailPage = () => {
                             <ul className="mt-[60px] border-t border-[#eee] pt-[30px]">
                                 <li className="flex items-center text-[16px] text-[#505050] my-[15px]">
                                     <UserCart className="text-client-primary mr-[15px] w-[24px] h-[24px]" />
-                                    <span>Chỉ còn <span className="text-client-primary font-bold">23 giờ 23 phút!</span> Đặt ngay để nhận hàng sớm.</span>
+                                    <span>Hỗ trợ <span className="text-client-primary font-bold">giao hàng tận nơi</span>, đóng gói chuyên nghiệp và nhanh chóng.</span>
                                 </li>
                                 <li className="flex items-center text-[16px] text-[#505050] my-[15px]">
                                     <EyeSolid className="text-client-primary mr-[15px] w-[24px] h-[24px]" />
-                                    <span>Có <span className="text-client-secondary font-bold">24</span> người khác cũng đang xem sản phẩm này.</span>
+                                    <span>Cam kết <span className="text-client-secondary font-bold">đồng hành</span> cùng bạn trong hành trình chăm sóc thú cưng.</span>
                                 </li>
                             </ul>
                         </div>
                     </div>
                 </div>
             </section>
-            <ProductDesc description={product.description || ""} content={product.content || ""} />
+            <ProductDesc description={product.description || ""} />
             <ProductComment productId={product._id} />
             <ProductRelated productId={product._id} categoryIds={product.category || []} />
             <FooterSub />

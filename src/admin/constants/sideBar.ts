@@ -12,6 +12,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import BadgeIcon from "@mui/icons-material/Badge";
 import ChatIcon from "@mui/icons-material/Chat";
 import HomeWorkIcon from "@mui/icons-material/HomeWork";
+import AssessmentIcon from "@mui/icons-material/Assessment";
 
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import RateReviewIcon from "@mui/icons-material/RateReview";
@@ -19,10 +20,10 @@ import AssignmentIcon from "@mui/icons-material/Assignment";
 
 export const menuOverviewData = [
     {
-        id: "ecommerce",
-        Icon: ShoppingCartIcon,
-        label: "Bán hàng",
-        path: `/${prefixAdmin}/dashboard/ecommerce`,
+        id: "system",
+        Icon: SettingsIcon,
+        label: "Hệ thống",
+        path: `/${prefixAdmin}/dashboard/system`,
         permission: "dashboard_view"
     },
     {
@@ -34,12 +35,31 @@ export const menuOverviewData = [
         permission: "dashboard_view"
     },
     {
-        id: "system",
-        Icon: SettingsIcon,
-        label: "Hệ thống",
-        path: `/${prefixAdmin}/dashboard/system`,
+        id: "ecommerce",
+        Icon: ShoppingCartIcon,
+        label: "Bán hàng",
+        path: `/${prefixAdmin}/dashboard/ecommerce`,
         permission: "dashboard_view"
     },
+    {
+        id: "statistics",
+        Icon: AssessmentIcon,
+        label: "Thống kê chi tiết",
+        permission: "dashboard_view",
+        children: [
+            { id: "gen-stats", label: "Doanh thu thuần", path: `/${prefixAdmin}/dashboard/statistics/general`, permission: "dashboard_view" },
+            { id: "order-stats", label: "Đơn hàng", path: `/${prefixAdmin}/dashboard/statistics/orders`, permission: "dashboard_view" },
+            { id: "service-stats", label: "Dịch vụ", path: `/${prefixAdmin}/dashboard/statistics/services`, permission: "dashboard_view" },
+            { id: "boarding-stats", label: "Khách sạn", path: `/${prefixAdmin}/dashboard/statistics/boarding`, permission: "dashboard_view" },
+        ]
+    },
+    {
+        id: "staff-stats",
+        Icon: BadgeIcon,
+        label: "Thống kê Nhân sự",
+        path: `/${prefixAdmin}/dashboard/statistics/staff`,
+        permission: "dashboard_view"
+    }
 ];
 
 export const menuStaffData = [
@@ -171,7 +191,7 @@ export const menuManagementData = [
         permission: "boarding_booking_view",
         children: [
             { id: "booking-list", label: "Danh sách đơn khách sạn", path: `/${prefixAdmin}/boarding/booking-list`, permission: "boarding_booking_view" },
-            { id: "booking-create", label: "Tạo đơn khách sạn", path: `/${prefixAdmin}/boarding/create`, permission: "boarding_booking_create" },
+            { id: "boarding-create", label: "Tạo đơn khách sạn", path: `/${prefixAdmin}/boarding/create`, permission: "boarding_booking_create" },
             { id: "care-schedule", label: "Lịch chăm sóc", path: `/${prefixAdmin}/boarding/care-schedule`, permission: "boarding_booking_edit" },
             { id: "cages", label: "Quản lý chuồng", path: `/${prefixAdmin}/boarding/cages`, permission: "boarding_cage_view" },
             { id: "care-templates", label: " Danh mục Thức ăn & Vận động", path: `/${prefixAdmin}/boarding/care-templates`, permission: "boarding_cage_edit" },

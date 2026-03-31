@@ -19,6 +19,7 @@ const baseServiceSchema = z.object({
     })),
     status: z.enum(["active", "inactive"]),
     images: z.array(z.string()).optional(),
+    minAgeMonths: z.number().min(0, "Tuổi tối thiểu không được âm").default(0),
 });
 
 export type ServiceFormValues = z.infer<typeof baseServiceSchema>;

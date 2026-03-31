@@ -1,8 +1,5 @@
+import { Navigate } from "react-router-dom"
+
 export const DashboardPage = () => {
-    return (
-        <>Dashboard</>
-    )
+    return <Navigate to="/admin/dashboard/system" replace />
 }
-
-
-

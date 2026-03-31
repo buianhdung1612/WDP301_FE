@@ -233,9 +233,9 @@ export const TransactionHistoryPage = () => {
                                 <button
                                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                                     disabled={currentPage === 1}
-                                    className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#eee] text-[#7d7b7b] hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-transparent transition-all"
+                                    className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#eee] text-[#7d7b7b] hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-transparent transition-all"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-4 h-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3 h-3">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                                     </svg>
                                 </button>
@@ -244,7 +244,7 @@ export const TransactionHistoryPage = () => {
                                     <button
                                         key={i}
                                         onClick={() => setCurrentPage(i + 1)}
-                                        className={`w-10 h-10 flex items-center justify-center rounded-lg border font-bold transition-all ${currentPage === i + 1 ? "bg-client-primary border-client-primary text-white" : "border-[#eee] text-[#7d7b7b] hover:bg-gray-50"}`}
+                                        className={`w-7 h-7 flex items-center justify-center rounded-lg border font-bold text-xs transition-all ${currentPage === i + 1 ? "bg-client-primary border-client-primary text-white" : "border-[#eee] text-[#7d7b7b] hover:bg-gray-50"}`}
                                     >
                                         {i + 1}
                                     </button>
@@ -253,9 +253,9 @@ export const TransactionHistoryPage = () => {
                                 <button
                                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                     disabled={currentPage === totalPages}
-                                    className="w-10 h-10 flex items-center justify-center rounded-lg border border-[#eee] text-[#7d7b7b] hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-transparent transition-all"
+                                    className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#eee] text-[#7d7b7b] hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-transparent transition-all"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-4 h-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3 h-3">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                                     </svg>
                                 </button>

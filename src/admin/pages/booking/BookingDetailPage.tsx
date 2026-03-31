@@ -21,7 +21,7 @@ import { useBookingDetail, useUpdateBookingStatus, useUpdateBooking, useBookings
 import { useNotifications } from "../../hooks/useNotification";
 import { toast } from "react-toastify";
 import { prefixAdmin } from "../../constants/routes";
-import { confirmAction, confirmInput } from "../../utils/swal";
+import { confirmAction, confirmInput, confirmInputText } from "../../utils/swal";
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert, AlertTitle } from "@mui/material";
 
 const STATUS_OPTIONS: { [key: string]: { label: string; color: string; bg: string } } = {
@@ -297,6 +297,22 @@ export const BookingDetailPage = () => {
                 "Bạn có chắc chắn muốn xác nhận hoàn thành đơn dịch vụ này?",
                 update,
                 'success'
+            );
+        } else if (newStatus === 'cancelled') {
+            confirmInputText(
+                "Xác nhận hủy đơn",
+                "Nhập lý do hủy đơn",
+                "Ví dụ: Thú cưng không đủ tuổi",
+                (reason) => {
+                    updateStatus({ id: booking._id, status: newStatus, reason: reason || "Hủy bởi Admin" }, {
+                        onSuccess: () => {
+                            toast.success("Hủy đơn thành công");
+                            refetch();
+                        },
+                        onError: (err: any) => toast.error(err.response?.data?.message || "Lỗi khi hủy đơn")
+                    });
+                },
+                'warning'
             );
         } else {
             update();

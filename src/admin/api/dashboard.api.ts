@@ -34,3 +34,32 @@ export const getStaffingStatus = async (date?: string) => {
     });
     return response.data;
 };
+
+export const getDetailedServiceStats = async (startDate?: string, endDate?: string) => {
+    const response = await apiApp.get(`${BASE_URL}/detailed-service-stats`, {
+        ...withAuth(),
+        params: { startDate, endDate }
+    });
+    return response.data;
+};
+
+export const getDetailedOrderStats = async (startDate?: string, endDate?: string) => {
+    const response = await apiApp.get(`${BASE_URL}/detailed-order-stats`, {
+        ...withAuth(),
+        params: { startDate, endDate }
+    });
+    return response.data;
+};
+
+export const getDetailedBoardingStats = async () => {
+    const response = await apiApp.get(`${BASE_URL}/detailed-boarding-stats`, withAuth());
+    return response.data;
+};
+
+export const getDetailedStaffStats = async (startDate?: string, endDate?: string) => {
+    const response = await apiApp.get(`${BASE_URL}/detailed-staff-stats`, {
+        ...withAuth(),
+        params: { startDate, endDate }
+    });
+    return response.data;
+};

@@ -198,7 +198,7 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
                             <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-secondary)', borderBottom: 'none' }}>Loại</TableCell>
                             <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-secondary)', borderBottom: 'none' }}>Giống</TableCell>
                             <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-secondary)', borderBottom: 'none' }}>Cân nặng</TableCell>
-                            <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-secondary)', borderBottom: 'none' }}>Tuổi</TableCell>
+                            <TableCell sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-secondary)', borderBottom: 'none' }}>Tuổi (tháng)</TableCell>
                             <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--palette-text-secondary)', borderBottom: 'none' }}>Hành động</TableCell>
                         </TableRow>
                     </TableHead>
@@ -243,7 +243,7 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
                                 </TableCell>
                                 <TableCell sx={{ borderBottom: '1px dashed var(--palette-text-disabled)33', fontSize: '0.875rem' }}>{pet.breed || '-'}</TableCell>
                                 <TableCell sx={{ borderBottom: '1px dashed var(--palette-text-disabled)33', fontSize: '0.875rem' }}>{pet.weight ? `${pet.weight} kg` : '-'}</TableCell>
-                                <TableCell sx={{ borderBottom: '1px dashed var(--palette-text-disabled)33', fontSize: '0.875rem' }}>{pet.age ? `${pet.age} tuổi` : '-'}</TableCell>
+                                <TableCell sx={{ borderBottom: '1px dashed var(--palette-text-disabled)33', fontSize: '0.875rem' }}>{pet.age ? `${pet.age} tháng` : '-'}</TableCell>
                                 <TableCell align="right" sx={{ borderBottom: '1px dashed var(--palette-text-disabled)33' }}>
                                     <Stack direction="row" justifyContent="flex-end" spacing={1}>
                                         <IconButton onClick={() => handleOpenDialog(pet)} sx={{ color: 'var(--palette-text-secondary)', '&:hover': { bgcolor: 'rgba(145, 158, 171, 0.08)' } }}>
@@ -437,8 +437,9 @@ export const UserPetList = ({ userId }: UserPetListProps) => {
                             />
                             <TextField
                                 fullWidth
-                                label="Tuổi"
+                                label="Tuổi (tháng)"
                                 type="number"
+                                placeholder="Ví dụ: 3, 12, 24..."
                                 value={formData.age}
                                 onChange={(e) => setFormData({ ...formData, age: e.target.value })}
                                 InputLabelProps={{ shrink: true }}

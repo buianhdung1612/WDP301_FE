@@ -31,7 +31,7 @@ export const useLogin = () => {
                     if (isStaff) {
                         navigate("/admin/staff/tasks");
                     } else {
-                        navigate("/admin/dashboard");
+                        navigate("/admin/dashboard/system");
                     }
                 }, 1000);
             } else {

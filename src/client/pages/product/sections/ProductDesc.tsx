@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProductDescProps {
     description: string;
-    content: string;
 }
 
 const contentVariants = {
@@ -12,7 +11,7 @@ const contentVariants = {
     exit: { opacity: 0, y: -20, transition: { duration: 0.2 } },
 };
 
-export const ProductDesc = ({ description, content }: ProductDescProps) => {
+export const ProductDesc = ({ description }: ProductDescProps) => {
     const [activeTabKey, setActiveTabKey] = useState("description");
 
     const productTabsData = [
@@ -22,17 +21,12 @@ export const ProductDesc = ({ description, content }: ProductDescProps) => {
             content: description || "Chưa có văn bản mô tả cho sản phẩm này."
         },
         {
-            label: "Nội dung chi tiết",
-            key: "content",
-            content: content || "Chưa có nội dung chi tiết cho sản phẩm này."
-        },
-        {
             label: "Giao hàng & Trả hàng",
             key: "delivery_returns",
             content: `
                 <div class="space-y-4">
-                    <p><strong>Chính Sách Giao Hàng:</strong> Chúng tôi cung cấp dịch vụ giao hàng tiêu chuẩn và giao hàng nhanh toàn quốc. Thời gian giao hàng dự kiến là 1-2 ngày làm việc cho khu vực nội thành (TP. HCM, Hà Nội) và 3-5 ngày làm việc cho các tỉnh thành khác. Miễn phí giao hàng cho đơn từ 999.000₫.</p>
-                    <p><strong>Quy Định Đổi Trả:</strong> Khách hàng có quyền yêu cầu đổi trả trong vòng 7 ngày kể từ ngày nhận hàng nếu có lỗi từ nhà sản xuất hoặc sản phẩm không đúng mô tả.</p>
+                    <p><strong>Chính Sách Giao Hàng:</strong> Chúng tôi hỗ trợ giao hàng tận nơi trên toàn quốc. <strong>Phí vận chuyển sẽ do quý khách chi trả</strong> và được tính toán dựa trên địa chỉ nhận hàng cụ thể, hệ thống sẽ hiển thị phí ship chính xác tại bước thanh toán.</p>
+                    <p><strong>Quy Định Đổi Trả:</strong> Quý khách vui lòng <strong>kiểm tra sản phẩm ngay khi nhận hàng (Đồng kiểm)</strong>. Chúng tôi hỗ trợ đổi trả hoặc hoàn tiền ngay tại thời điểm giao nếu sản phẩm bị hư hỏng, không đúng mẫu mã hoặc có lỗi từ nhà sản xuất. Sau khi đã ký nhận hàng, cửa hàng không hỗ trợ đổi trả đối với các khiếu nại phát sinh sau đó.</p>
                 </div>
             `
         },

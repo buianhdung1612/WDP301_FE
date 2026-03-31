@@ -19,6 +19,8 @@ export const BookingHistoryPage = () => {
     const [loading, setLoading] = useState(true);
     const [isCanceling, setIsCanceling] = useState(false);
     const [cancelModal, setCancelModal] = useState<{ isOpen: boolean; booking: any }>({ isOpen: false, booking: null });
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 10;
 
     const breadcrumbs = [
         { label: "Trang chủ", to: "/" },
@@ -62,6 +64,9 @@ export const BookingHistoryPage = () => {
             b.petIds?.some((p: any) => (p._id || p.id) === selectedPet)
         );
     }, [bookings, selectedPet]);
+
+    const totalPages = Math.ceil(filteredBookings.length / pageSize);
+    const paginatedBookings = filteredBookings.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
     const petOptions = useMemo(() => [
         { value: "", label: "Tất cả các bé" },
@@ -221,10 +226,10 @@ export const BookingHistoryPage = () => {
                                 <tbody className="divide-y divide-[#eee]">
                                     {loading ? (
                                         <tr><td colSpan={7} className="p-[20px] text-center text-[16px]">Đang tải...</td></tr>
-                                    ) : filteredBookings.length === 0 ? (
+                                    ) : paginatedBookings.length === 0 ? (
                                         <tr><td colSpan={7} className="p-[20px] text-center text-[16px]">Chưa có lịch đặt nào</td></tr>
                                     ) : (
-                                        filteredBookings.map((booking, idx) => (
+                                        paginatedBookings.map((booking, idx) => (
                                             <tr key={idx} className="hover:bg-gray-50 transition-colors">
                                                 <td className="p-[20px] text-[15px] text-[#7d7b7b]">#{booking.code}</td>
                                                 <td className="p-[20px] text-[15px] font-[500] text-client-secondary">
@@ -290,6 +295,41 @@ export const BookingHistoryPage = () => {
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="mt-8 flex justify-center items-center gap-2">
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#eee] text-[#7d7b7b] hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-transparent transition-all"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3 h-3">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                                    </svg>
+                                </button>
+
+                                {[...Array(totalPages)].map((_, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setCurrentPage(i + 1)}
+                                        className={`w-7 h-7 flex items-center justify-center rounded-lg border font-bold text-xs transition-all ${currentPage === i + 1 ? "bg-client-primary border-client-primary text-white" : "border-[#eee] text-[#7d7b7b] hover:bg-gray-50"}`}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                ))}
+
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#eee] text-[#7d7b7b] hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-transparent transition-all"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3 h-3">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                    </svg>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

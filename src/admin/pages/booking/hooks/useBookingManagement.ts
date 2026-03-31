@@ -56,7 +56,8 @@ export const useCreateBooking = () => {
 export const useUpdateBookingStatus = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, status, petId }: { id: string; status: string; petId?: string }) => updateBookingStatus(id, status, petId),
+        mutationFn: ({ id, status, petId, reason }: { id: string; status: string; petId?: string; reason?: string }) =>
+            updateBookingStatus(id, status, petId, reason),
         onSuccess: (_data, variables) => {
             queryClient.invalidateQueries({ queryKey: ["bookings"] });
             queryClient.invalidateQueries({ queryKey: ["booking", variables.id] });
