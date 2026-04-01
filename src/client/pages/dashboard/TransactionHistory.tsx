@@ -118,6 +118,9 @@ export const TransactionHistoryPage = () => {
                 return "bg-red-100 text-red-700";
             case "refunded":
                 return "bg-purple-100 text-purple-700";
+            case "partial":
+            case "partially_paid":
+                return "bg-blue-100 text-blue-700";
             default:
                 return "bg-gray-100 text-gray-700";
         }
@@ -131,7 +134,9 @@ export const TransactionHistoryPage = () => {
             "unpaid": "Chưa thanh toán",
             "refunded": "Đã hoàn tiền",
             "cancelled": "Đã hủy",
-            "confirmed": "Đã xác nhận"
+            "confirmed": "Đã xác nhận",
+            "partial": "Đã đặt cọc",
+            "partially_paid": "Đã đặt cọc"
         };
         return map[status] || status;
     };

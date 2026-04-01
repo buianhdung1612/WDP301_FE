@@ -24,6 +24,7 @@ import { Title } from "../../components/ui/Title";
 import { prefixAdmin } from "../../constants/routes";
 import { createBoardingBooking, batchCreateBoardingBooking, checkBoardingAvailability } from "../../api/boarding-booking.api";
 import { getBoardingCages } from "../../api/boarding-cage.api";
+import { getBoardingConfig } from "../../api/boarding-config.api";
 import { useUsers } from "../account-user/hooks/useAccountUser";
 import { usePets } from "../account-user/hooks/usePet";
 
@@ -126,6 +127,22 @@ export const BoardingBookingCreatePage = () => {
         queryFn: () => getBoardingCages(),
     });
 
+    const { data: configRes } = useQuery({ 
+        queryKey: ["boarding-config"], 
+        queryFn: getBoardingConfig 
+    });
+    const config = configRes?.data;
+
+    useEffect(() => {
+        if (config) {
+            setFormData(prev => ({
+                ...prev,
+                checkInDate: dayjs(prev.checkInDate).format("YYYY-MM-DD"),
+                checkOutDate: dayjs(prev.checkOutDate).format("YYYY-MM-DD"),
+            }));
+        }
+    }, [config]);
+
     useEffect(() => {
         if (busyPetIds.length > 0 || busyCageIds.length > 0) {
             setItems(prev => prev.map(item => {
@@ -158,11 +175,17 @@ export const BoardingBookingCreatePage = () => {
 
 
     const totalDays = useMemo(() => {
-        const start = dayjs(formData.checkInDate);
-        const end = dayjs(formData.checkOutDate);
-        const diff = end.diff(start, "day");
-        return diff > 0 ? diff : 0;
-    }, [formData.checkInDate, formData.checkOutDate]);
+        if (!formData.checkInDate || !formData.checkOutDate || !config) return 0;
+        
+        const [inH, inM] = (config.checkInTime || "14:00").split(":").map(Number);
+        const [outH, outM] = (config.checkOutTime || "12:00").split(":").map(Number);
+
+        const start = dayjs(formData.checkInDate).startOf("day").set("hour", inH).set("minute", inM);
+        const end = dayjs(formData.checkOutDate).startOf("day").set("hour", outH).set("minute", outM);
+        
+        const days = Math.ceil(end.diff(start, "hour") / 24);
+        return days > 0 ? days : 0;
+    }, [formData.checkInDate, formData.checkOutDate, config]);
 
     const pricing = useMemo(() => {
         let subTotal = 0;
@@ -248,10 +271,13 @@ export const BoardingBookingCreatePage = () => {
 
         if (totalDays <= 0) return toast.error("Ngày trả chuồng phải sau ngày nhận chuồng");
 
+        const [inH, inM] = (config?.checkInTime || "09:00").split(":").map(Number);
+        const [outH, outM] = (config?.checkOutTime || "09:00").split(":").map(Number);
+
         const commonPayload = {
             ...formData,
-            checkInDate: dayjs(formData.checkInDate).startOf("day").toISOString(),
-            checkOutDate: dayjs(formData.checkOutDate).startOf("day").toISOString(),
+            checkInDate: dayjs(formData.checkInDate).startOf("day").set("hour", inH).set("minute", inM).toISOString(),
+            checkOutDate: dayjs(formData.checkOutDate).startOf("day").set("hour", outH).set("minute", outM).toISOString(),
         };
 
         if (items.length > 1) {

@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { getBoardingBookingList } from "../../api/dashboard.api";
 import { FooterSub } from "../../components/layouts/FooterSub";
-import { useAvailableCages, useBoardingCageDetail, useBoardingCageReviews, useCreateBoardingCageReview, useFoodTemplates } from "../../hooks/useBoarding";
+import { useAvailableCages, useBoardingCageDetail, useBoardingCageReviews, useBoardingConfig, useCreateBoardingCageReview, useFoodTemplates } from "../../hooks/useBoarding";
 import { useMyPets } from "../../hooks/usePet";
 
 const SIZE_LABELS: Record<string, string> = {
@@ -41,12 +41,7 @@ const PLACEHOLDER_IMAGE =
 const WEEK_DAYS = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 const ROOM_CAPACITY_DEFAULT = 4;
 const WEEKEND_SURCHARGE = 20000;
-const HOTEL_RULES = [
-  "Check-in từ 09:00 và check-out trước 09:00 sáng hôm sau để nhân viên có thời gian vệ sinh chuồng.",
-  "Vui lòng cập nhật tình trạng ăn uống, dị ứng và thuốc đang dùng trước ngày lưu trú.",
-  "Thú cưng cần có lịch tiêm phòng cơ bản và không có dấu hiệu bệnh truyền nhiễm.",
-  "Nhân viên sẽ liên hệ nếu cần điều chỉnh khẩu phần hoặc lịch vận động theo tình trạng thực tế.",
-];
+
 
 const normalizeId = (value: any) => String(value || "").trim();
 
@@ -108,7 +103,18 @@ export const BoardingCageDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const { data: config } = useBoardingConfig();
   const { data: cage, isLoading } = useBoardingCageDetail(id);
+
+  const checkInDisplay = config?.checkInTime || "14:00";
+  const checkOutDisplay = config?.checkOutTime || "12:00";
+
+  const FINAL_HOTEL_RULES = useMemo(() => [
+    `Check-in từ ${checkInDisplay} và check-out trước ${checkOutDisplay} để nhân viên có thời gian vệ sinh chuồng.`,
+    "Vui lòng cập nhật tình trạng ăn uống, dị ứng và thuốc đang dùng trước ngày lưu trú.",
+    "Thú cưng cần có lịch tiêm phòng cơ bản và không có dấu hiệu bệnh truyền nhiễm.",
+    "Nhân viên sẽ liên hệ nếu cần điều chỉnh khẩu phần hoặc lịch vận động theo tình trạng thực tế.",
+  ], [checkInDisplay, checkOutDisplay]);
   const { data: reviewData } = useBoardingCageReviews(id);
   const createReviewMutation = useCreateBoardingCageReview(id);
   const { data: myPets = [] } = useMyPets(!!user);
@@ -180,8 +186,9 @@ export const BoardingCageDetailPage = () => {
 
   const monthDate = useMemo(() => calendarMonth.startOf("month"), [calendarMonth]);
   const calendarCells = useMemo(() => {
-    const start = monthDate.startOf("week");
-    return Array.from({ length: 35 }, (_, idx) => start.add(idx, "day"));
+    // Force Sunday start (day 0) regardless of locale to match WEEK_DAYS header
+    const start = monthDate.startOf("month").day(0);
+    return Array.from({ length: 42 }, (_, idx) => start.add(idx, "day"));
   }, [monthDate]);
 
   const estimatedTotal = useMemo(() => Number((cage as any)?.dailyPrice || 0) * Math.max(totalDays, 1) * Math.max(quantity, 1), [cage, totalDays, quantity]);
@@ -358,6 +365,14 @@ export const BoardingCageDetailPage = () => {
     if (!(cage as any)?._id) return void toast.error("Không tìm thấy thông tin chuồng.");
     if (totalDays <= 0) return void toast.error("Ngày trả phải sau ngày nhận.");
 
+    const underagePets = chosenPetIds
+      .map((petId) => (Array.isArray(myPets) ? myPets : []).find((pet: any) => normalizeId(pet?._id) === petId))
+      .filter((pet: any) => pet && (Number(pet.age) || 0) < 6);
+    if (underagePets.length > 0) {
+      const names = underagePets.map((p: any) => p.name).join(", ");
+      return void toast.error(`${names} chưa đủ 6 tháng tuổi. Khách sạn chỉ nhận thú cưng từ 6 tháng tuổi trở lên để đảm bảo an toàn.`);
+    }
+
     navigate("/hotels/checkout", {
       state: {
         draft: {
@@ -487,7 +502,7 @@ export const BoardingCageDetailPage = () => {
                 <div className="mt-[24px] rounded-[22px] border border-[#f0e4dc] bg-[#fff8f5] px-[18px] py-[18px]">
                   <div className="flex items-center gap-[10px]"><ShieldCheck className="h-[18px] w-[18px] text-client-primary" /><h3 className="text-[24px] font-[800] text-client-secondary">Quy định khách sạn</h3></div>
                   <div className="mt-[14px] grid grid-cols-2 gap-x-[24px] gap-y-[10px] md:grid-cols-1">
-                    {HOTEL_RULES.map((rule) => <div key={rule} className="flex items-start gap-[10px] text-[14px] leading-[1.75] text-[#5d6874]"><Check className="mt-[2px] h-[16px] w-[16px] shrink-0 text-[#38a169]" /><span>{rule}</span></div>)}
+                    {FINAL_HOTEL_RULES.map((rule) => <div key={rule} className="flex items-start gap-[10px] text-[14px] leading-[1.75] text-[#5d6874]"><Check className="mt-[2px] h-[16px] w-[16px] shrink-0 text-[#38a169]" /><span>{rule}</span></div>)}
                   </div>
                 </div>
               </section>
@@ -744,7 +759,7 @@ export const BoardingCageDetailPage = () => {
               <div className="overflow-hidden rounded-[28px] border border-[#eadfd4] bg-white shadow-[0_24px_48px_rgba(36,24,14,0.07)]">
                 <div className="border-b border-[#efe2d8] px-[20px] py-[18px]"><div className="flex items-center gap-[10px]"><CalendarDays className="h-[18px] w-[18px] text-client-primary" /><p className="text-[30px] font-secondary leading-[1] text-client-secondary">Đặt phòng ngay</p></div></div>
                 <div className="space-y-[14px] p-[18px]">
-                  <div className="grid grid-cols-2 gap-[10px]"><div><p className="mb-[6px] text-[11px] font-[800] uppercase tracking-[0.12em] text-[#a1a9b4]">Nhận từ 09:00</p><input type="date" min={dayjs().format("YYYY-MM-DD")} value={checkInDate} onChange={(e) => { setCheckInDate(e.target.value); setCalendarPickMode("checkOut"); }} className="h-[48px] w-full rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] font-[700] text-client-secondary outline-none focus:border-client-primary" /></div><div><p className="mb-[6px] text-[11px] font-[800] uppercase tracking-[0.12em] text-[#a1a9b4]">Trả trước 09:00</p><input type="date" min={dayjs(checkInDate).add(1, "day").format("YYYY-MM-DD")} value={checkOutDate} onChange={(e) => { setCheckOutDate(e.target.value); setCalendarPickMode("checkIn"); }} className="h-[48px] w-full rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] font-[700] text-client-secondary outline-none focus:border-client-primary" /></div></div>
+                  <div className="grid grid-cols-2 gap-[10px]"><div><p className="mb-[6px] text-[11px] font-[800] uppercase tracking-[0.12em] text-[#a1a9b4]">Nhận từ {checkInDisplay}</p><input type="date" min={dayjs().format("YYYY-MM-DD")} value={checkInDate} onChange={(e) => { setCheckInDate(e.target.value); setCalendarPickMode("checkOut"); }} className="h-[48px] w-full rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] font-[700] text-client-secondary outline-none focus:border-client-primary" /></div><div><p className="mb-[6px] text-[11px] font-[800] uppercase tracking-[0.12em] text-[#a1a9b4]">Trả trước {checkOutDisplay}</p><input type="date" min={dayjs(checkInDate).add(1, "day").format("YYYY-MM-DD")} value={checkOutDate} onChange={(e) => { setCheckOutDate(e.target.value); setCalendarPickMode("checkIn"); }} className="h-[48px] w-full rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8] px-[12px] text-[13px] font-[700] text-client-secondary outline-none focus:border-client-primary" /></div></div>
                   <div>
                     <p className="mb-[6px] text-[11px] font-[800] uppercase tracking-[0.12em] text-[#a1a9b4]">Số lượng thú cưng</p>
                     <div className="inline-flex h-[48px] w-full items-center overflow-hidden rounded-[14px] border border-[#e7ddd3] bg-[#fbfaf8]"><button type="button" onClick={() => setQuantityWithinRange(quantity - 1)} disabled={isSoldOut || quantity <= 1} className="h-full w-[46px] border-r border-[#e7ddd3] text-[18px] font-[800] text-[#596273] transition-default hover:bg-white disabled:cursor-not-allowed disabled:opacity-40">-</button><input type="number" min={1} max={Math.max(1, maxSelectableRooms || ROOM_CAPACITY_DEFAULT)} value={quantity} onChange={(e) => setQuantityWithinRange(Number(e.target.value || 1))} disabled={isSoldOut} className="h-full w-full bg-transparent px-[10px] text-center text-[14px] font-[700] text-client-secondary outline-none" /><button type="button" onClick={() => setQuantityWithinRange(quantity + 1)} disabled={isSoldOut || quantity >= Math.max(1, maxSelectableRooms)} className="h-full w-[46px] border-l border-[#e7ddd3] text-[18px] font-[800] text-[#596273] transition-default hover:bg-white disabled:cursor-not-allowed disabled:opacity-40">+</button></div>

@@ -897,11 +897,11 @@ export const PetCagesPage = () => {
             </div>
           </div>
 
-          {waitingPaymentCount > 0 && (
+          {/* {waitingPaymentCount > 0 && (
             <div className="mt-[20px] rounded-[12px] border border-[#ffecb2] bg-[#fff9db] px-[20px] py-[12px] text-[14px] text-[#a67c00] font-medium shadow-sm">
               Có {waitingPaymentCount} lịch khách sạn chưa đủ điều kiện hiển thị (thường do chưa thanh toán hoặc chưa xác nhận).
             </div>
-          )}
+          )} */}
 
           <div className="mt-[25px] rounded-[24px] bg-white p-[25px] shadow-[0px_8px_24px_#959da51a] border border-[#eee]">
             <div className="grid grid-cols-[1fr_1fr_auto] gap-[20px] items-end xl:grid-cols-2 lg:grid-cols-1">

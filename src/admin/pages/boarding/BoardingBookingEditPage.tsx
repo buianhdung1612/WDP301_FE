@@ -30,8 +30,14 @@ import { Breadcrumb } from "../../components/ui/Breadcrumb";
 import { Title } from "../../components/ui/Title";
 import { prefixAdmin } from "../../constants/routes";
 import { getBoardingCages } from "../../api/boarding-cage.api";
+import { getBoardingConfig } from "../../api/boarding-config.api";
 
 // Helper to normalize cage sizes
+const CANCELLATION_REASONS = [
+    "Thú cưng có khả năng mắc bệnh nguy hiểm",
+    "Thú cưng không đúng số tuổi quy định",
+];
+
 const normalizeCageSizeLabel = (size: string) => {
     switch (size) {
         case "S": return "S (≤5kg)";
@@ -67,6 +73,7 @@ export const BoardingBookingEditPage = () => {
         boardingStatus: "",
         paymentStatus: "",
         discount: 0,
+        cancelledReason: "",
     });
 
     const { data: res, isLoading } = useQuery({
@@ -74,6 +81,12 @@ export const BoardingBookingEditPage = () => {
         queryFn: () => getBoardingBookingDetail(id || ""),
         enabled: !!id,
     });
+
+    const { data: configRes } = useQuery({ 
+        queryKey: ["boarding-config"], 
+        queryFn: getBoardingConfig 
+    });
+    const config = configRes?.data;
 
     const { data: cagesRes } = useQuery({
         queryKey: ["admin-boarding-cages"],
@@ -91,7 +104,7 @@ export const BoardingBookingEditPage = () => {
     const cageAvailability = busyPetsRes?.data?.cageAvailability || {};
 
     useEffect(() => {
-        if (res?.data) {
+        if (res?.data && config) {
             const b = res.data;
             let items: any[] = [];
             if (Array.isArray(b.items) && b.items.length > 0) {
@@ -106,26 +119,39 @@ export const BoardingBookingEditPage = () => {
                 }];
             }
 
+            // Recalculate days based on our new logic to ensure consistency
+            const checkInStart = dayjs(b.checkInDate).startOf("day");
+            const checkOutStart = dayjs(b.checkOutDate).startOf("day");
+            const diffDays = checkOutStart.isValid() && checkInStart.isValid() ? checkOutStart.diff(checkInStart, 'day') : (b.numberOfDays || 1);
+            const correctedDays = Math.max(1, diffDays);
+
             setFormData({
                 checkInDate: b.checkInDate ? dayjs(b.checkInDate).format("YYYY-MM-DD") : "",
                 checkOutDate: b.checkOutDate ? dayjs(b.checkOutDate).format("YYYY-MM-DD") : "",
-                numberOfDays: b.numberOfDays || 1,
+                numberOfDays: correctedDays,
                 specialCare: b.specialCare || b.notes || "",
                 items,
                 boardingStatus: b.boardingStatus,
                 paymentStatus: b.paymentStatus,
                 discount: b.discount || 0,
+                cancelledReason: b.cancelledReason || "",
             });
         }
-    }, [res]);
+    }, [res, config]);
 
     const handleDateChange = (field: 'checkInDate' | 'checkOutDate', value: string) => {
         const newData = { ...formData, [field]: value };
-        if (newData.checkInDate && newData.checkOutDate) {
-            const checkIn = dayjs(newData.checkInDate);
-            const checkOut = dayjs(newData.checkOutDate);
+        if (newData.checkInDate && newData.checkOutDate && config) {
+            const [inH, inM] = (config.checkInTime || "14:00").split(":").map(Number);
+            const [outH, outM] = (config.checkOutTime || "12:00").split(":").map(Number);
+            
+            const checkIn = dayjs(newData.checkInDate).startOf("day").set("hour", inH).set("minute", inM);
+            const checkOut = dayjs(newData.checkOutDate).startOf("day").set("hour", outH).set("minute", outM);
+            
             if (checkOut.isValid() && checkIn.isValid()) {
-                newData.numberOfDays = Math.max(1, checkOut.diff(checkIn, 'day') + 1);
+                // Match backend's Math.ceil logic for number of stay nights
+                const days = checkOut.startOf('day').diff(checkIn.startOf('day'), 'day');
+                newData.numberOfDays = Math.max(1, days);
             }
         }
         setFormData(newData);
@@ -187,8 +213,16 @@ export const BoardingBookingEditPage = () => {
             }
         }
 
+        const [inH, inM] = (config?.checkInTime || "14:00").split(":").map(Number);
+        const [outH, outM] = (config?.checkOutTime || "12:00").split(":").map(Number);
+        
+        const checkInIso = dayjs(formData.checkInDate).startOf("day").set("hour", inH).set("minute", inM).toISOString();
+        const checkOutIso = dayjs(formData.checkOutDate).startOf("day").set("hour", outH).set("minute", outM).toISOString();
+
         const payload = {
             ...formData,
+            checkInDate: checkInIso,
+            checkOutDate: checkOutIso,
             ...calculatedPrices, // Send the newly calculated total and subTotal
             cageId: formData.items?.[0]?.cageId || null, 
             petIds: formData.items?.flatMap((i: any) => i.petIds) || []
@@ -393,6 +427,35 @@ export const BoardingBookingEditPage = () => {
                                                 <MenuItem value="cancelled">Đã hủy</MenuItem>
                                             </Select>
                                         </FormControl>
+
+                                        {formData.boardingStatus === "cancelled" && (
+                                            <FormControl fullWidth>
+                                                <InputLabel>Lý do hủy đơn</InputLabel>
+                                                <Select
+                                                    value={CANCELLATION_REASONS.includes(formData.cancelledReason) ? formData.cancelledReason : (formData.cancelledReason ? "other" : "")}
+                                                    label="Lý do hủy đơn"
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        setFormData({ ...formData, cancelledReason: val === "other" ? "" : val });
+                                                    }}
+                                                    disabled={isReadOnly}
+                                                >
+                                                    {CANCELLATION_REASONS.map(r => <MenuItem key={r} value={r}>{r}</MenuItem>)}
+                                                    <MenuItem value="other">Khác...</MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                        )}
+
+                                        {formData.boardingStatus === "cancelled" && (CANCELLATION_REASONS.includes(formData.cancelledReason) === false || formData.cancelledReason === "") && (
+                                            <TextField
+                                                fullWidth
+                                                label="Nhập lý do chi tiết"
+                                                value={formData.cancelledReason === "other" ? "" : formData.cancelledReason}
+                                                onChange={(e) => setFormData({ ...formData, cancelledReason: e.target.value })}
+                                                placeholder="Lý do chi tiết..."
+                                                disabled={isReadOnly}
+                                            />
+                                        )}
                                         <FormControl fullWidth>
                                             <InputLabel>Trạng thái thanh toán</InputLabel>
                                             <Select

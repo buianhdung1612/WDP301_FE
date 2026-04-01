@@ -462,6 +462,16 @@ export const BoardingBookingListPage = () => {
                                                         <Typography sx={{ fontWeight: 500, fontSize: "0.875rem", color: "var(--palette-text-primary)" }}>
                                                             {dayjs(row.checkInDate).format("DD/MM/YYYY")} - {dayjs(row.checkOutDate).format("DD/MM/YYYY")}
                                                         </Typography>
+                                                        {row.boardingStatus === "checked-in" && row.actualCheckInDate && (
+                                                            <Typography sx={{ color: "var(--palette-success-main)", fontSize: "11px", fontWeight: 700 }}>
+                                                                Nhận lúc: {dayjs(row.actualCheckInDate).format("hh:mm A")}
+                                                            </Typography>
+                                                        )}
+                                                        {row.boardingStatus === "checked-out" && row.actualCheckOutDate && (
+                                                            <Typography sx={{ color: "var(--palette-info-main)", fontSize: "11px", fontWeight: 700 }}>
+                                                                Trả lúc: {dayjs(row.actualCheckOutDate).format("hh:mm A")}
+                                                            </Typography>
+                                                        )}
                                                         {row.surcharge > 0 && (
                                                             <Typography sx={{ color: "var(--palette-warning-main)", fontSize: "10px", fontWeight: 800, textTransform: "uppercase" }}>
                                                                 + Phụ thu trễ
@@ -479,9 +489,16 @@ export const BoardingBookingListPage = () => {
                                                 <TableCell align="right" sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
                                                     {(() => {
                                                         const status = boardingStatusOptions.find(opt => opt.value === row.boardingStatus) || { label: row.boardingStatus, color: 'inherit', bg: 'transparent' };
+                                                        let displayLabel = status.label;
+                                                        if (row.boardingStatus === "checked-in" && row.actualCheckInDate) {
+                                                            displayLabel += ` (${dayjs(row.actualCheckInDate).format("hh:mm A")})`;
+                                                        } else if (row.boardingStatus === "checked-out" && row.actualCheckOutDate) {
+                                                            displayLabel += ` (${dayjs(row.actualCheckOutDate).format("hh:mm A")})`;
+                                                        }
+                                                        
                                                         return (
                                                             <Chip
-                                                                label={status.label}
+                                                                label={displayLabel}
                                                                 size="small"
                                                                 sx={{
                                                                     borderRadius: "var(--shape-borderRadius-sm)",

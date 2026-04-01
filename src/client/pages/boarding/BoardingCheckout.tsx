@@ -150,12 +150,17 @@ export const BoardingCheckoutPage = () => {
   const safeQuantity = Math.max(1, Math.min(MAX_ROOMS_PER_CAGE, Number(draft?.quantity || 1)));
 
   const stayNights = useMemo(() => {
-    if (!draft) return 0;
-    const start = dayjs(draft.checkInDate);
-    const end = dayjs(draft.checkOutDate);
-    const diff = end.diff(start, "day");
+    if (!draft || !config) return 0;
+    const [inH, inM] = (config.checkInTime || "14:00").split(":").map(Number);
+    const [outH, outM] = (config.checkOutTime || "12:00").split(":").map(Number);
+
+    const start = dayjs(draft.checkInDate).startOf("day").set("hour", inH).set("minute", inM);
+    const end = dayjs(draft.checkOutDate).startOf("day").set("hour", outH).set("minute", outM);
+    
+    // Match backend logic: Math.ceil of fractional days
+    const diff = Math.ceil(end.diff(start, "hour") / 24);
     return diff > 0 ? diff : 0;
-  }, [draft]);
+  }, [draft, config]);
 
   const displayNights = Math.max(stayNights, 1);
 
