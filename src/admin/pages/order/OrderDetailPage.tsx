@@ -64,6 +64,11 @@ export const OrderDetailPage = () => {
     const currentStatus = STATUS_OPTIONS[order.orderStatus] || STATUS_OPTIONS.pending;
 
     const handleStatusChange = (newStatus: string) => {
+        if (newStatus === "completed" && order.paymentStatus !== "paid") {
+            toast.error("Đơn hàng chưa thanh toán, không thể chuyển sang Hoàn thành!");
+            return;
+        }
+
         updateStatus({ id: order._id, status: newStatus }, {
             onSuccess: () => toast.success("Cập nhật trạng thái thành công"),
             onError: (err: any) => toast.error(err?.response?.data?.message || err?.message || "Cập nhật trạng thái thất bại")
@@ -329,64 +334,75 @@ export const OrderDetailPage = () => {
                             </Box>
                         </Card>
 
-                        {/* History Card */}
+                        {/* History Card - Modern Timeline */}
                         <Card sx={{ p: 3, borderRadius: 'var(--shape-borderRadius-lg)', boxShadow: 'var(--customShadows-card)' }}>
-                            <Typography sx={{ fontSize: '1.125rem', fontWeight: 600, mb: 3, color: 'var(--palette-text-primary)' }}>Lịch sử</Typography>
+                            <Typography sx={{ fontSize: '1.125rem', fontWeight: 600, mb: 3, color: 'var(--palette-text-primary)' }}>Lịch sử đơn hàng</Typography>
 
-                            <Grid container spacing={3}>
-                                <Grid size={{ xs: 12, sm: 7 }}>
-                                    <Stack spacing={3}>
-                                        <Stack direction="row" spacing={2}>
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'success.main', mt: 1 }} />
-                                                <Box sx={{ flexGrow: 1, width: 2, bgcolor: 'background.neutral', my: 1 }} />
-                                            </Box>
-                                            <Box>
-                                                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'var(--palette-text-primary)' }}>Giao hàng thành công</Typography>
-                                                <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)' }}>
-                                                    {dayjs(order.updatedAt).format("DD MMM YYYY h:mm a")}
-                                                </Typography>
-                                            </Box>
-                                        </Stack>
-                                        <Stack direction="row" spacing={2}>
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'text.disabled', mt: 1 }} />
-                                                <Box sx={{ flexGrow: 1, width: 2, bgcolor: 'background.neutral', my: 1 }} />
-                                            </Box>
-                                            <Box>
-                                                <Typography variant="subtitle2" sx={{ color: 'var(--palette-text-disabled)' }}>Đơn hàng đã được tạo</Typography>
-                                                <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)' }}>
-                                                    {dayjs(order.createdAt).format("DD MMM YYYY h:mm a")}
-                                                </Typography>
-                                            </Box>
-                                        </Stack>
+                            <Stack spacing={0}>
+                                {[
+                                    { label: "Tạo đơn hàng", date: order.createdAt, active: true, icon: "solar:cart-large-minimalistic-bold", color: "#1877F2" },
+                                    { label: "Xác nhận", date: order.confirmedAt, active: !!order.confirmedAt, icon: "solar:check-read-bold", color: "#1877F2" },
+                                    { label: "Đang giao hàng", date: order.shippingAt, active: !!order.shippingAt, icon: "solar:delivery-bold", color: "#1877F2" },
+                                    { label: "Đã giao đến nơi", date: order.shippedAt, active: !!order.shippedAt, icon: "solar:map-point-wave-bold", color: "#1877F2" },
+                                    { label: "Hoàn thành", date: order.completedAt, active: !!order.completedAt, color: "#22C55E", icon: "solar:verified-check-bold" },
+                                    order.cancelledAt && { label: "Đã hủy", date: order.cancelledAt, active: true, color: "#FF5630", icon: "solar:close-circle-bold" },
+                                    order.returnedAt && { label: "Trả hàng", date: order.returnedAt, active: true, color: "#FFAB00", icon: "solar:back-bold" }
+                                ].filter(Boolean).map((step: any, index: number, array: any[]) => (
+                                    <Stack key={index} direction="row" spacing={2}>
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 20 }}>
+                                            <Box
+                                                sx={{
+                                                    width: 12,
+                                                    height: 12,
+                                                    borderRadius: '50%',
+                                                    bgcolor: step.active ? step.color : 'var(--palette-grey-400)',
+                                                    zIndex: 1,
+                                                    mt: 0.75,
+                                                    boxShadow: step.active ? `0 0 0 4px ${alpha(step.color || '#F4F6F8', 0.12)}` : 'none'
+                                                }}
+                                            />
+                                            {index !== array.length - 1 && (
+                                                <Box sx={{
+                                                    width: 2,
+                                                    flexGrow: 1,
+                                                    bgcolor: step.active && array[index + 1]?.active ? 'primary.main' : 'var(--palette-background-neutral)',
+                                                    my: 0.5
+                                                }} />
+                                            )}
+                                        </Box>
+
+                                        <Box sx={{ pb: index === array.length - 1 ? 0 : 3, flexGrow: 1 }}>
+                                            <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                                                <Box>
+                                                    <Typography
+                                                        variant="subtitle2"
+                                                        sx={{
+                                                            fontWeight: 600,
+                                                            color: step.active ? 'var(--palette-text-primary)' : 'var(--palette-text-disabled)',
+                                                            fontSize: '0.875rem'
+                                                        }}
+                                                    >
+                                                        {step.label}
+                                                    </Typography>
+                                                    {step.date && (
+                                                        <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', display: 'block', mt: 0.25 }}>
+                                                            {dayjs(step.date).format("DD/MM/YYYY - hh:mm A")}
+                                                        </Typography>
+                                                    )}
+                                                </Box>
+                                                {step.active && (
+                                                    <Icon
+                                                        icon={step.icon}
+                                                        width={20}
+                                                        color={step.active ? (step.color === 'error.main' ? '#FF5630' : '#1877F2') : '#919EAB'}
+                                                        style={{ opacity: step.active ? 1 : 0.3 }}
+                                                    />
+                                                )}
+                                            </Stack>
+                                        </Box>
                                     </Stack>
-                                </Grid>
-                                <Grid size={{ xs: 12, sm: 5 }}>
-                                    <Box sx={{ p: 2, bgcolor: 'background.neutral', borderRadius: 'var(--shape-borderRadius-md)' }}>
-                                        <Stack spacing={2}>
-                                            <Box>
-                                                <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', display: 'block' }}>Ngày đặt hàng</Typography>
-                                                <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--palette-text-primary)' }}>
-                                                    {dayjs(order.createdAt).format("DD MMM YYYY h:mm a")}
-                                                </Typography>
-                                            </Box>
-                                            <Box>
-                                                <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', display: 'block' }}>Thời gian thanh toán</Typography>
-                                                <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--palette-text-primary)' }}>
-                                                    {order.paymentStatus === 'paid' ? dayjs(order.updatedAt).format("DD MMM YYYY h:mm a") : "---"}
-                                                </Typography>
-                                            </Box>
-                                            <Box>
-                                                <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', display: 'block' }}>Thời gian nhận hàng</Typography>
-                                                <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--palette-text-primary)' }}>
-                                                    {order.orderStatus === 'completed' ? dayjs(order.updatedAt).format("DD MMM YYYY h:mm a") : "---"}
-                                                </Typography>
-                                            </Box>
-                                        </Stack>
-                                    </Box>
-                                </Grid>
-                            </Grid>
+                                ))}
+                            </Stack>
                         </Card>
                     </Stack>
                 </Grid>
