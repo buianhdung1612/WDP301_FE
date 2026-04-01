@@ -38,12 +38,7 @@ export const BoardingBookingDetailPage = () => {
 
     const handleCancel = () => {
         if (!booking) return;
-        const minutes = dayjs().diff(dayjs(booking.createdAt), 'minute');
-        const isFree = minutes <= 30;
-
-        const msg = isFree
-            ? "Bạn có chắc chắn muốn hủy đơn hàng này không? (Hủy trước 30p sẽ được hoàn tiền)"
-            : "Đã quá 30 phút kể từ khi đặt. Hủy đơn lúc này bạn sẽ bị MẤT TIỀN CỌC. Bạn vẫn muốn tiếp tục?";
+        const msg = "Khi hủy đơn đặt khách sạn, bạn sẽ mất hoàn toàn số tiền đặt cọc (tương đương 20% tổng giá trị đơn hàng). Bạn vẫn muốn tiếp tục?";
 
         if (window.confirm(msg)) {
             cancelMutation.mutate("Khách hàng tự hủy qua dashboard");
@@ -230,8 +225,20 @@ export const BoardingBookingDetailPage = () => {
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-[#7d7b7b] text-[15px] font-medium">Thanh toán:</span>
-                                            <span className={`px-[12px] py-[4px] rounded-full text-[13px] font-bold border ${booking.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-red-50 text-red-600 border-red-100'}`}>
-                                                {booking.paymentStatus === 'paid' ? 'Đã hoàn tất' : 'Chưa thanh toán'}
+                                            <span className={`px-[12px] py-[4px] rounded-full text-[13px] font-bold border ${booking.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : booking.paymentStatus === 'partial' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-red-50 text-red-600 border-red-100'}`}>
+                                                {booking.paymentStatus === 'paid' ? 'Đã hoàn tất' : booking.paymentStatus === 'partial' ? 'Đã cọc' : 'Chưa thanh toán'}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[#7d7b7b] text-[15px] font-medium">Tiền cọc ({booking.depositPercent || 20}%):</span>
+                                            <span className="text-[15px] font-bold text-client-secondary">
+                                                {formatCurrency(booking.depositAmount || 0)}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[#7d7b7b] text-[15px] font-medium">Tổng tiền:</span>
+                                            <span className="text-[15px] font-bold text-client-primary">
+                                                {formatCurrency(booking.total || 0)}
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center">
@@ -240,6 +247,20 @@ export const BoardingBookingDetailPage = () => {
                                                 {booking.paymentMethod === 'pay_at_site' ? 'Tại quầy' : booking.paymentMethod || "ZaloPay"}
                                             </span>
                                         </div>
+
+                                        {(booking.boardingStatus === "cancelled" || booking.status === "cancelled") && (
+                                            <div className="mt-[15px] pt-[15px] border-t border-red-100 bg-red-50/30 -mx-[25px] px-[25px] pb-[10px]">
+                                                <span className="text-[#ef4444] text-[14px] font-bold block mb-[5px] uppercase tracking-wider">Lý do hủy:</span>
+                                                <p className="text-[#ef4444] text-[14px] font-medium leading-relaxed italic border-l-4 border-red-500 pl-3">
+                                                    {booking.cancelledReason || "Admin cập nhật hoặc Khách hàng tự hủy."}
+                                                </p>
+                                                {booking.cancelledAt && (
+                                                    <span className="block text-[11px] text-red-400 mt-2 font-bold italic text-right">
+                                                        Thời gian: {dayjs(booking.cancelledAt).format("DD/MM/YYYY HH:mm")}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { BedDouble, CalendarDays, MapPin, Search } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -6,6 +6,7 @@ import { FooterSub } from "../../components/layouts/FooterSub";
 import { ProductBanner } from "../product/sections/ProductBanner";
 import {
   useAvailableCages,
+  useBoardingConfig,
 } from "../../hooks/useBoarding";
 
 const ROOM_CAPACITY_DEFAULT = 4;
@@ -35,9 +36,13 @@ const breadcrumbs = [
 ];
 
 export const BoardingBookingPage = () => {
+  const { data: config } = useBoardingConfig();
   const [checkInDate, setCheckInDate] = useState(dayjs().format("YYYY-MM-DD"));
   const [checkOutDate, setCheckOutDate] = useState(dayjs().add(1, "day").format("YYYY-MM-DD"));
   const [size, setSize] = useState<string>("");
+
+  const checkInDisplay = config?.checkInTime || "09:00";
+  const checkOutDisplay = config?.checkOutTime || "09:00";
 
   const { data: cages = [], isLoading: isLoadingCages } = useAvailableCages(
     checkInDate,
@@ -66,7 +71,7 @@ export const BoardingBookingPage = () => {
         <div className="app-container -mt-[86px] relative z-[4]">
           <div className="rounded-[14px] bg-gradient-to-r from-[#fff1f7] to-[#ffeaf3] text-client-secondary border border-[#f3c8da] shadow-[0_20px_40px_-20px_rgba(214,104,154,.45)] px-[16px] py-[16px] grid grid-cols-4 xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 gap-[10px]">
             <div className="border border-[#efc0d4] bg-white/80 rounded-[10px] px-[10px] py-[8px]">
-              <p className="text-[11px] text-[#9d6d83] mb-[4px]">Check-in (Từ 09:00)</p>
+              <p className="text-[11px] text-[#9d6d83] mb-[4px]">Check-in (Từ {checkInDisplay})</p>
               <input
                 type="date"
                 value={checkInDate}
@@ -76,7 +81,7 @@ export const BoardingBookingPage = () => {
               />
             </div>
             <div className="border border-[#efc0d4] bg-white/80 rounded-[10px] px-[10px] py-[8px]">
-              <p className="text-[11px] text-[#9d6d83] mb-[4px]">Check-out (Trước 09:00)</p>
+              <p className="text-[11px] text-[#9d6d83] mb-[4px]">Check-out (Trước {checkOutDisplay})</p>
               <input
                 type="date"
                 value={checkOutDate}
