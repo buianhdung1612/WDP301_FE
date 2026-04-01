@@ -1,7 +1,8 @@
-﻿import dayjs from "dayjs";
+import dayjs from "dayjs";
 import { Fragment, useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
+    Alert,
     Avatar,
     Box,
     Button,
@@ -158,7 +159,7 @@ const FeedingRow = ({
                 />
                 <TextField size="small" label="Khẩu phần" value={item.amount || ""} onChange={e => !isReadOnly && onUpdate({ amount: e.target.value })} disabled={isReadOnly} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} />
                 <TextField size="small" select label="Nhân viên" value={sVal} onChange={e => !isReadOnly && onUpdate({ staffId: e.target.value })} disabled={isReadOnly} sx={{ width: 180, flexShrink: 0 }}>
-                    {staffOptions.length > 0 ? staffOptions.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>) : <MenuItem disabled value="">(Chưa có NV ca này)</MenuItem>}
+                    {staffOptions.length > 0 ? staffOptions.map(o => <MenuItem key={o.value} value={o.value} disabled={o.disabled}>{o.label}</MenuItem>) : <MenuItem disabled value="">(Chưa có NV ca này)</MenuItem>}
                 </TextField>
                 <TextField size="small" select label="Trạng thái" value={item.status || "pending"} onChange={e => !isReadOnly && onUpdate({ status: e.target.value as any })} disabled={isReadOnly} sx={{ width: 150, flexShrink: 0 }}>
                     {statusOptions.map(o => <MenuItem key={o.value} value={o.value} sx={{ fontWeight: 600 }}>{o.label}</MenuItem>)}
@@ -265,7 +266,7 @@ const ExerciseRow = ({
                 />
                 <TextField size="small" label="Thời lượng (p)" type="number" value={item.durationMinutes || 0} onChange={e => !isReadOnly && onUpdate({ durationMinutes: Number(e.target.value) })} disabled={isReadOnly} sx={{ width: 100, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} />
                 <TextField size="small" select label="Nhân viên" value={sVal} onChange={e => !isReadOnly && onUpdate({ staffId: e.target.value })} disabled={isReadOnly} sx={{ width: 180, flexShrink: 0 }}>
-                    {staffOptions.length > 0 ? staffOptions.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>) : <MenuItem disabled value="">(Chưa có NV ca này)</MenuItem>}
+                    {staffOptions.length > 0 ? staffOptions.map(o => <MenuItem key={o.value} value={o.value} disabled={o.disabled}>{o.label}</MenuItem>) : <MenuItem disabled value="">(Chưa có NV ca này)</MenuItem>}
                 </TextField>
                 <TextField size="small" select label="Trạng thái" value={item.status || "pending"} onChange={e => !isReadOnly && onUpdate({ status: e.target.value as any })} disabled={isReadOnly} sx={{ width: 150, flexShrink: 0 }}>
                     {statusOptions.map(o => <MenuItem key={o.value} value={o.value} sx={{ fontWeight: 600 }}>{o.label}</MenuItem>)}
@@ -400,7 +401,11 @@ export const BoardingCareSchedulePage = () => {
     const hotelStaffOptions = useMemo(() => {
         const res = hotelStaffRes as any;
         const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
-        return list.map((s: any) => ({ value: s._id, label: s.fullName || "NV" }));
+        return list.map((s: any) => ({ 
+            value: s._id, 
+            label: `${s.fullName} (${s.workload}/${s.maxLimit || 10} pet)${s.isFull ? ' - Đầy' : ''}`,
+            disabled: !!s.isFull
+        }));
     }, [hotelStaffRes]);
 
     const capNhatDongLichAn = useCallback((idx: number, p: Partial<BoardingFeedingItem>) => {
@@ -519,6 +524,12 @@ export const BoardingCareSchedulePage = () => {
         })));
         if (!opts?.kDate) setCareDate(dayjs(b.checkInDate).isValid() ? dayjs(b.checkInDate).format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD"));
     }, []);
+
+    const hasMissingStaff = useMemo(() => {
+        const fMissing = feedingDraft.some(i => !i.staffId || (typeof i.staffId === 'string' && !i.staffId.trim()));
+        const eMissing = exerciseDraft.some(i => !i.staffId || (typeof i.staffId === 'string' && !i.staffId.trim()));
+        return fMissing || eMissing;
+    }, [feedingDraft, exerciseDraft]);
 
     const updateCareMut = useMutation({
         mutationFn: ({ id, payload }: any) => updateBoardingCareSchedule(id, payload),
@@ -960,6 +971,11 @@ export const BoardingCareSchedulePage = () => {
                         </Box>
                     ) : (
                         <Stack spacing={3}>
+                            {hasMissingStaff && !isReadOnly && (
+                                <Alert severity="warning" variant="filled" sx={{ borderRadius: "var(--shape-borderRadius-md)", fontWeight: 700 }}>
+                                    LƯU Ý: Một số công việc chưa được gán nhân viên phụ trách. Vui lòng kiểm tra và gán nhân viên để đảm bảo quy trình chăm sóc.
+                                </Alert>
+                            )}
                             <Stack direction="row" spacing={2} alignItems="center" sx={{ bgcolor: "var(--palette-background-neutral)", p: 2, borderRadius: "var(--shape-borderRadius-md)" }}>
                                 <TextField
                                     label="Ngày chăm sóc"

@@ -12,6 +12,11 @@ const withAuth = () => {
     };
 };
 
+export const getBusyPetIdsForRange = async (params: { userId: string; checkInDate: string; checkOutDate: string }) => {
+    const response = await apiApp.get(`${BASE_URL}/busy-pets`, { ...withAuth(), params });
+    return response.data;
+};
+
 export const getBoardingBookings = async (params?: any) => {
     const response = await apiApp.get(BASE_URL, { ...withAuth(), params });
     return response.data;
@@ -114,5 +119,13 @@ export const updateBoardingCareSchedule = async (
     }
 ) => {
     const response = await apiApp.patch(`${BASE_URL}/${id}/care-schedule`, payload, withAuth());
+    return response.data;
+};
+
+export const checkBoardingAvailability = async (checkInDate: string, checkOutDate: string) => {
+    const response = await apiApp.get(`${BASE_URL}/availability`, {
+        params: { checkInDate, checkOutDate },
+        ...withAuth()
+    });
     return response.data;
 };

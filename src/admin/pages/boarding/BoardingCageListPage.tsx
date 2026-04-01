@@ -38,9 +38,7 @@ import { confirmDelete } from "../../utils/swal";
 
 const trangThaiChuongOptions = [
     { value: "available", label: "Sẵn sàng" },
-    { value: "occupied", label: "Đang sử dụng" },
     { value: "maintenance", label: "Bảo trì" },
-    { value: "under-cleaning", label: "Đang dọn dẹp" },
 ];
 
 const TabBadge = styled("span")(() => ({
@@ -188,7 +186,7 @@ export const BoardingCageListPage = () => {
     const createMut = useMutation({
         mutationFn: createBoardingCage,
         onSuccess: () => {
-            toast.success("T?o chu?ng th�nh c�ng");
+            toast.success("Tạo chuồng thành công");
             queryClient.invalidateQueries({ queryKey: ["admin-boarding-cages"] });
             setOpen(false);
             setForm(initForm);
@@ -198,7 +196,7 @@ export const BoardingCageListPage = () => {
     const updateMut = useMutation({
         mutationFn: ({ id, payload }: { id: string; payload: any }) => updateBoardingCage(id, payload),
         onSuccess: () => {
-            toast.success("C?p nh?t chu?ng th�nh c�ng");
+            toast.success("Cập nhật chuồng thành công");
             queryClient.invalidateQueries({ queryKey: ["admin-boarding-cages"] });
             setOpen(false);
             setEditing(null);
@@ -209,7 +207,7 @@ export const BoardingCageListPage = () => {
     const deleteMut = useMutation({
         mutationFn: deleteBoardingCage,
         onSuccess: () => {
-            toast.success("X�a chu?ng th�nh c�ng");
+            toast.success("Xóa chuồng thành công");
             queryClient.invalidateQueries({ queryKey: ["admin-boarding-cages"] });
         },
     });
@@ -238,7 +236,7 @@ export const BoardingCageListPage = () => {
     };
 
     const handleSave = () => {
-        if (!form.cageCode) return toast.error("Vui l�ng nh?p m� chu?ng");
+        if (!form.cageCode) return toast.error("Vui lòng nhập mã chuồng");
         const payload = {
             ...form,
             size: normalizeCageSize(form.size),
@@ -365,9 +363,7 @@ export const BoardingCageListPage = () => {
                     {[
                         { value: "all", label: "Tất cả", color: "var(--palette-common-white)", bg: "var(--palette-grey-800)", activeColor: "var(--palette-common-white)", activeBg: "var(--palette-grey-800)" },
                         { value: "available", label: "Sẵn sàng", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)", activeColor: "var(--palette-success-contrastText)", activeBg: "var(--palette-success-main)" },
-                        { value: "occupied", label: "Đang sử dụng", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)", activeColor: "var(--palette-warning-contrastText)", activeBg: "var(--palette-warning-main)" },
                         { value: "maintenance", label: "Bảo trì", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)", activeColor: "var(--palette-error-contrastText)", activeBg: "var(--palette-error-main)" },
-                        { value: "under-cleaning", label: "Đang dọn dẹp", color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)", activeColor: "var(--palette-info-contrastText)", activeBg: "var(--palette-info-main)" },
                     ].map((tab) => (
                         <Tab
                             key={tab.value}

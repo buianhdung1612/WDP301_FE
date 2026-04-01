@@ -1,4 +1,4 @@
-﻿import { useState, useMemo, Fragment, SyntheticEvent, ChangeEvent, MouseEvent } from "react";
+import { useState, useMemo, Fragment, SyntheticEvent, ChangeEvent, MouseEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Icon } from "@iconify/react";
 import {
@@ -61,14 +61,46 @@ const boardingStatusOptions = [
 const formatCurrency = (value: number) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value || 0);
 
 const getPetSlotItems = (row: any) => {
+    // New logic: Use row.items if it exists (consolidated order)
+    if (Array.isArray(row?.items) && row.items.length > 0) {
+        return row.items.flatMap((item: any, itemIndex: number) => {
+            const itemPets = Array.isArray(item.petIds) ? item.petIds.filter(Boolean) : [];
+            const cageCode = item.cageId?.cageCode || row.cageId?.cageCode || "-";
+            const price = Number(item.cageId?.dailyPrice || item.pricePerDay || row.pricePerDay || (row.total / Math.max(typeof row.numberOfDays === 'number' ? row.numberOfDays : 1, 1)));
+            
+            // If no pets in item (shouldn't happen with new logic but for safety)
+            if (itemPets.length === 0) {
+                return [{
+                    key: `item-${itemIndex}`,
+                    petName: "Thú cưng",
+                    cageLabel: cageCode,
+                    petAvatar: null,
+                    price
+                }];
+            }
+
+            return itemPets.map((pet: any, petIndex: number) => ({
+                key: String(pet._id || pet.id || `item-${itemIndex}-pet-${petIndex}`),
+                petName: String(pet.name || `Thú cưng`),
+                cageLabel: cageCode,
+                petAvatar: pet.avatar,
+                price
+            }));
+        });
+    }
+
+    // Old logic: Backward compatibility
     const pets = Array.isArray(row?.petIds) ? row.petIds.filter(Boolean) : [];
     const quantity = Math.max(1, Number(row?.quantity || 0) || pets.length || 1);
     const slotCount = Math.max(quantity, pets.length || 0, 1);
+    const price = Number(row?.pricePerDay || row?.total / Math.max(typeof row.numberOfDays === 'number' ? row.numberOfDays : 1, 1));
 
     return Array.from({ length: slotCount }).map((_, index) => ({
         key: String(pets[index]?._id || pets[index]?.id || `${row?._id || "booking"}-${index}`),
         petName: String(pets[index]?.name || `Thú cưng ${index + 1}`),
         cageLabel: [row?.cageId?.cageCode || "-", slotCount > 1 ? `Phòng ${index + 1}` : ""].filter(Boolean).join(" - "),
+        petAvatar: pets[index]?.avatar,
+        price
     }));
 };
 
@@ -112,6 +144,9 @@ export const BoardingBookingListPage = () => {
             updateStatusMutation.mutate({ id, boardingStatus: status });
         }
     };
+
+
+
 
     const bookings = useMemo(() => {
         if (!res) return [];
@@ -376,6 +411,34 @@ export const BoardingBookingListPage = () => {
                                                     >
                                                         #{row.code?.slice(-6).toUpperCase() || "N/A"}
                                                     </Typography>
+                                                    <Stack spacing={1} sx={{ mt: 1 }}>
+                                                        {row.items?.length > 0
+                                                            ? row.items.slice(0, 3).map((item: any, idx: number) => {
+                                                                const pet = Array.isArray(item.petIds) && item.petIds.length > 0
+                                                                    ? item.petIds[0]
+                                                                    : (item.petId || row.petIds?.[idx]);
+                                                                if (!pet) return null;
+                                                                return (
+                                                                    <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                        <Avatar src={pet.avatar} sx={{ width: 20, height: 20 }} />
+                                                                        <Typography sx={{ fontSize: "0.75rem", fontWeight: 700 }}>{pet.name}</Typography>
+                                                                        <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>
+                                                                            • {item.cageId?.cageCode || row.cageId?.cageCode || "N/A"}
+                                                                        </Typography>
+                                                                    </Box>
+                                                                );
+                                                            })
+                                                            : row.petIds?.slice(0, 3).map((pet: any, idx: number) => (
+                                                                <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                    <Avatar src={pet.avatar} sx={{ width: 20, height: 20 }} />
+                                                                    <Typography sx={{ fontSize: "0.75rem", fontWeight: 700 }}>{pet.name}</Typography>
+                                                                    <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>
+                                                                        • {row.cageId?.cageCode || "N/A"}
+                                                                    </Typography>
+                                                                </Box>
+                                                            ))
+                                                        }
+                                                    </Stack>
                                                 </TableCell>
 
                                                 <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>
@@ -516,7 +579,7 @@ export const BoardingBookingListPage = () => {
                                                                     sx={{ px: 2, py: 1.5, "&:not(:last-of-type)": { borderBottom: "solid 2px var(--palette-background-neutral)" } }}
                                                                 >
                                                                     <Avatar
-                                                                        src={(row.petIds || []).find((pet: any) => String(pet?._id || pet?.id) === item.key)?.avatar}
+                                                                        src={item.petAvatar}
                                                                         variant="rounded"
                                                                         sx={{ width: 48, height: 48, borderRadius: "var(--shape-borderRadius-sm)" }}
                                                                     >
@@ -528,7 +591,7 @@ export const BoardingBookingListPage = () => {
                                                                     </Box>
                                                                     <Box sx={{ textAlign: "right", minWidth: 120 }}>
                                                                         <Typography sx={{ fontWeight: 700, fontSize: "0.8125rem", color: "var(--palette-text-primary)" }}>
-                                                                            {formatCurrency(Number(row.pricePerDay || row.total / (row.numberOfDays || 1)))}/ngày
+                                                                            {formatCurrency(item.price)}/ngày
                                                                         </Typography>
                                                                     </Box>
                                                                 </Stack>

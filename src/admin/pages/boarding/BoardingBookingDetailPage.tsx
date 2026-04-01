@@ -155,23 +155,50 @@ export const BoardingBookingDetailPage = () => {
                         <Card sx={{ p: 3, borderRadius: 'var(--shape-borderRadius-lg)', boxShadow: 'var(--customShadows-card)' }}>
                             <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>Thông tin lưu trú</Typography>
                             <Stack spacing={2}>
-                                {booking.petIds?.map((pet: any, idx: number) => (
-                                    <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, borderRadius: 2, bgcolor: 'var(--palette-background-neutral)' }}>
-                                        <Avatar src={pet.avatar} variant="rounded" sx={{ width: 64, height: 64 }}>
-                                            <Icon icon="solar:dog-bold" width={32} />
-                                        </Avatar>
-                                        <Box sx={{ flexGrow: 1 }}>
-                                            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{pet.name}</Typography>
-                                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                                {pet.type === 'dog' ? 'Chó' : 'Mèo'} • {pet.breed || "Chưa xác định"} • {pet.weight || "?"}kg
-                                            </Typography>
+                                {booking.items?.length > 0 
+                                    ? booking.items.map((item: any, idx: number) => {
+                                        const pet = Array.isArray(item.petIds) && item.petIds.length > 0 
+                                            ? item.petIds[0] 
+                                            : (item.petId || booking.petIds?.[idx]);
+                                        
+                                        if (!pet) return null;
+
+                                        return (
+                                            <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, borderRadius: 2, bgcolor: 'var(--palette-background-neutral)' }}>
+                                                <Avatar src={pet.avatar} variant="rounded" sx={{ width: 64, height: 64 }}>
+                                                    <Icon icon="solar:dog-bold" width={32} />
+                                                </Avatar>
+                                                <Box sx={{ flexGrow: 1 }}>
+                                                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{pet.name}</Typography>
+                                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                                        {pet.type === 'dog' ? 'Chó' : (pet.type === 'cat' ? 'Mèo' : pet.type)} • {pet.breed || "Chưa xác định"} • {pet.weight || "?"}kg
+                                                    </Typography>
+                                                </Box>
+                                                <Box sx={{ textAlign: 'right' }}>
+                                                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{item.cageId?.cageCode || booking.cageId?.cageCode || "N/A"}</Typography>
+                                                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>Tên chuồng/phòng</Typography>
+                                                </Box>
+                                            </Box>
+                                        );
+                                    })
+                                    : booking.petIds?.map((pet: any, idx: number) => (
+                                        <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, borderRadius: 2, bgcolor: 'var(--palette-background-neutral)' }}>
+                                            <Avatar src={pet.avatar} variant="rounded" sx={{ width: 64, height: 64 }}>
+                                                <Icon icon="solar:dog-bold" width={32} />
+                                            </Avatar>
+                                            <Box sx={{ flexGrow: 1 }}>
+                                                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{pet.name}</Typography>
+                                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                                    {pet.type === 'dog' ? 'Chó' : 'Mèo'} • {pet.breed || "Chưa xác định"} • {pet.weight || "?"}kg
+                                                </Typography>
+                                            </Box>
+                                            <Box sx={{ textAlign: 'right' }}>
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{booking.cageId?.cageCode || "N/A"}</Typography>
+                                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>Tên chuồng/phòng</Typography>
+                                            </Box>
                                         </Box>
-                                        <Box sx={{ textAlign: 'right' }}>
-                                            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{booking.cageId?.cageCode || "N/A"}</Typography>
-                                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>Tên chuồng/phòng</Typography>
-                                        </Box>
-                                    </Box>
-                                ))}
+                                    ))
+                                }
                             </Stack>
 
                             <Box sx={{ mt: 3, p: 2, border: '1px dashed var(--palette-divider)', borderRadius: 2 }}>

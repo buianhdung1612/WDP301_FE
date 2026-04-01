@@ -323,6 +323,11 @@ export const BoardingTaskDashboard = ({ bookings, careDate }: TaskDashboardProps
                                                     <Typography variant="caption" className="text-[#94a3b8] font-[600] flex items-center gap-1">
                                                         <Icon icon="solar:user-bold" width={10} /> {task.customerName}
                                                     </Typography>
+                                                    {!task.staffId && (
+                                                        <Typography variant="caption" className="text-[#ef4444] font-[900] flex items-center gap-1 mt-1 uppercase tracking-tighter">
+                                                            <Icon icon="solar:danger-bold" width={12} /> Chưa gán nhân viên
+                                                        </Typography>
+                                                    )}
                                                 </Box>
                                             </Box>
                                         </Grid>
