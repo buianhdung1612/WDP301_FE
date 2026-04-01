@@ -301,7 +301,7 @@ export const OrderDetailPage = () => {
                                                         {dayjs(step.date).format("HH:mm DD/MM")}
                                                     </span>
                                                 )}
-                                                {isCurrent && !isCancelled && !isReturned && (
+                                                {isCurrent && step.key !== 'completed' && !isCancelled && !isReturned && (
                                                     <span className="text-[10px] text-orange-500 font-[600] animate-pulse mt-1">Đang thực hiện</span>
                                                 )}
                                             </div>

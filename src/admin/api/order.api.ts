@@ -36,3 +36,12 @@ export const updateOrder = async (id: string, data: any) => {
     const response = await apiApp.patch(`${BASE_URL}/edit/${id}`, data, withAuth());
     return response.data;
 };
+
+export const exportInvoicePdf = async (orderCode: string, phone: string) => {
+    const response = await apiApp.get(`/api/v1/client/order/export-pdf`, {
+        ...withAuth(),
+        params: { orderCode, phone },
+        responseType: 'blob'
+    });
+    return response.data;
+};

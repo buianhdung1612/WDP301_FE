@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
     Box,
     Card,
@@ -18,6 +19,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { useOrderDetail, useUpdateOrderStatus, useUpdateOrder } from "./hooks/useOrderManagement";
 import { toast } from "react-toastify";
+import { exportInvoicePdf } from "../../api/order.api";
 
 const STATUS_OPTIONS: { [key: string]: { label: string; color: string; bg: string } } = {
     pending: { label: "Chờ xác nhận", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)" },
@@ -43,6 +45,7 @@ export const OrderDetailPage = () => {
     const order = orderRes?.data;
     const { mutate: updateStatus } = useUpdateOrderStatus();
     const { mutate: updateOrder } = useUpdateOrder();
+    const [isExporting, setIsExporting] = useState(false);
 
     if (isLoading) {
         return (
@@ -84,6 +87,27 @@ export const OrderDetailPage = () => {
             onSuccess: () => toast.success("Cập nhật trạng thái thanh toán thành công"),
             onError: (err: any) => toast.error(err?.response?.data?.message || err?.message || "Cập nhật trạng thái thanh toán thất bại")
         });
+    };
+
+    const handleExport = async () => {
+        if (!order) return;
+        setIsExporting(true);
+        try {
+            const blob = await exportInvoicePdf(order.code, order.phone);
+            const url = window.URL.createObjectURL(new Blob([blob]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `invoice_${order.code}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            if (link.parentNode) link.parentNode.removeChild(link);
+            toast.success("Đã tải xuống hóa đơn!");
+        } catch (error) {
+            console.error("Failed to export invoice:", error);
+            toast.error("Xuất hóa đơn thất bại!");
+        } finally {
+            setIsExporting(false);
+        }
     };
 
     return (
@@ -216,7 +240,9 @@ export const OrderDetailPage = () => {
                     </Select>
                     <Button
                         variant="outlined"
-                        startIcon={<Icon icon="eva:printer-fill" />}
+                        onClick={handleExport}
+                        disabled={isExporting}
+                        startIcon={isExporting ? <CircularProgress size={18} color="inherit" /> : <Icon icon="eva:printer-fill" />}
                         sx={{
                             fontWeight: 700,
                             fontSize: '0.875rem',
@@ -238,7 +264,7 @@ export const OrderDetailPage = () => {
                             },
                         }}
                     >
-                        Export
+                        {isExporting ? "Đang xuất..." : "Export"}
                     </Button>
                 </Stack>
             </Box>
