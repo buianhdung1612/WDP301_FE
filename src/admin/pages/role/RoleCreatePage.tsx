@@ -50,7 +50,7 @@ const DEFAULT_STAFF_PERMISSIONS = [
 export const RoleCreatePage = () => {
     const navigate = useNavigate();
     const { mutate: create, isPending } = useCreateRole();
-    const servicesRes = useServices();
+    const servicesRes = useServices({ limit: 1000 });
     const services = useMemo(() => {
         if (!servicesRes.data) return [];
         const data = servicesRes.data;

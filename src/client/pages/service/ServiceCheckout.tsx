@@ -41,7 +41,7 @@ export const ServiceCheckoutPage = () => {
     const [booking, setBooking] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [paymentMethod, setPaymentMethod] = useState<string>("money");
-    const [depositGateway, setDepositGateway] = useState<string>("zalopay");
+    const [depositGateway, setDepositGateway] = useState<string>("vnpay");
     const [isProcessing, setIsProcessing] = useState(false);
     const [showNotes, setShowNotes] = useState(false);
     const [depositPercentage, setDepositPercentage] = useState(0);
@@ -398,7 +398,6 @@ export const ServiceCheckoutPage = () => {
                                 <div className="space-y-[15px]">
                                     {[
                                         { id: 'money', label: depositPercentage > 0 ? 'Thanh toán cọc online, còn lại tại quầy' : 'Thanh toán tại quầy' },
-                                        { id: 'zalopay', label: 'Ví điện tử ZaloPay' },
                                         { id: 'vnpay', label: 'Cổng thanh toán VNPAY' }
                                     ].map((method) => (
                                         <div key={method.id} className="space-y-3">
@@ -416,14 +415,6 @@ export const ServiceCheckoutPage = () => {
                                                 <div className="ml-8 p-3 bg-gray-50 rounded-xl border border-dashed border-gray-200 space-y-3">
                                                     <div className="text-[12px] font-bold text-gray-400 uppercase tracking-tight">Chọn cổng thanh toán cọc:</div>
                                                     <div className="flex gap-4">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setDepositGateway('zalopay')}
-                                                            className={`flex-1 py-3 px-3 rounded-lg border-2 transition-all flex items-center justify-center gap-2
-                                                                ${depositGateway === 'zalopay' ? 'border-client-primary bg-white shadow-sm ring-1 ring-client-primary/10' : 'border-transparent bg-white/50 grayscale opacity-60'}`}
-                                                        >
-                                                            <span className="text-[13px] font-bold">ZaloPay</span>
-                                                        </button>
                                                         <button
                                                             type="button"
                                                             onClick={() => setDepositGateway('vnpay')}

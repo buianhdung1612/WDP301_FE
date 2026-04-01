@@ -23,6 +23,7 @@ import { toast } from "react-toastify";
 import { prefixAdmin } from "../../constants/routes";
 import { confirmAction, confirmInput, confirmInputText } from "../../utils/swal";
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert, AlertTitle } from "@mui/material";
+import { apiApp } from "../../../api/index";
 
 const STATUS_OPTIONS: { [key: string]: { label: string; color: string; bg: string } } = {
     pending: { label: "Chờ xác nhận", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)" },
@@ -233,7 +234,8 @@ export const BookingDetailPage = () => {
     const suggestions = notifications.filter((n: any) =>
         n.metadata?.bookingId === id &&
         n.metadata?.type === "optimization_suggestion" &&
-        n.status === "unread"
+        n.status === "unread" &&
+        !['completed', 'cancelled', 'returned'].includes(booking?.bookingStatus)
     );
 
     const handleExtend = () => {
@@ -375,6 +377,35 @@ export const BookingDetailPage = () => {
             toast.update(loadToast, { render: "Lỗi khi dời lịch!", type: "error", isLoading: false, autoClose: 3000 });
         }
     };
+
+    const handlePrint = async () => {
+        if (!booking) return;
+        const loadToast = toast.loading("Đang tạo file PDF...");
+        try {
+            // Sử dụng endpoint client vì đã có sẵn logic export và ko cần token nếu có code + phone
+            const response = await apiApp.get(`/api/v1/client/booking/export-pdf`, {
+                params: {
+                    bookingCode: booking.code,
+                    phone: booking.userId?.phone || booking.customerPhone
+                },
+                responseType: 'blob'
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `booking_${booking.code}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            toast.update(loadToast, { render: "Đã tải xuống phiếu dịch vụ!", type: "success", isLoading: false, autoClose: 2000 });
+        } catch (error) {
+            console.error("Failed to export booking pdf:", error);
+            toast.update(loadToast, { render: "Xuất PDF thất bại!", type: "error", isLoading: false, autoClose: 2000 });
+        }
+    };
+
+    const isTerminalStatus = ['completed', 'cancelled', 'returned'].includes(booking.bookingStatus);
 
     return (
         <Box sx={{ maxWidth: '1200px', mx: 'auto' }}>
@@ -544,11 +575,21 @@ export const BookingDetailPage = () => {
                         size="small"
                         value={booking.bookingStatus}
                         onChange={(e) => handleStatusChange(e.target.value)}
+                        disabled={isTerminalStatus}
                         sx={{
                             minWidth: 140,
                             height: 36,
                             borderRadius: '8px',
                             bgcolor: (theme) => alpha(theme.palette.grey[500], 0.08),
+                            '&.Mui-disabled': {
+                                opacity: 1,
+                                '& .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: (theme) => alpha(theme.palette.grey[500], 0.12),
+                                },
+                                '& .MuiSelect-select': {
+                                    WebkitTextFillColor: 'var(--palette-text-primary)',
+                                }
+                            },
                             '& .MuiOutlinedInput-notchedOutline': {
                                 borderColor: (theme) => alpha(theme.palette.grey[500], 0.32),
                                 transition: (theme) => theme.transitions.create('border-color')
@@ -597,32 +638,38 @@ export const BookingDetailPage = () => {
                             }
                         }}
                     >
-                        {Object.entries(STATUS_OPTIONS).map(([value, opt]) => (
-                            <MenuItem
-                                key={value}
-                                value={value}
-                                sx={{
-                                    fontSize: '0.875rem',
-                                    borderRadius: '6px',
-                                    px: 1,
-                                    py: 0.5,
-                                    my: 0.25,
-                                    '&.Mui-selected': {
-                                        fontWeight: '600 !important',
-                                        bgcolor: 'var(--palette-action-selected) !important',
-                                        '&:hover': {
+                        {Object.entries(STATUS_OPTIONS).map(([value, opt]) => {
+                            if (isTerminalStatus && value !== booking.bookingStatus) {
+                                return null;
+                            }
+                            return (
+                                <MenuItem
+                                    key={value}
+                                    value={value}
+                                    sx={{
+                                        fontSize: '0.875rem',
+                                        borderRadius: '6px',
+                                        px: 1,
+                                        py: 0.5,
+                                        my: 0.25,
+                                        '&.Mui-selected': {
+                                            fontWeight: '600 !important',
                                             bgcolor: 'var(--palette-action-selected) !important',
+                                            '&:hover': {
+                                                bgcolor: 'var(--palette-action-selected) !important',
+                                            }
                                         }
-                                    }
-                                }}
-                            >
-                                {opt.label}
-                            </MenuItem>
-                        ))}
+                                    }}
+                                >
+                                    {opt.label}
+                                </MenuItem>
+                            );
+                        })}
                     </Select>
                     <Button
                         variant="outlined"
                         startIcon={<Icon icon="eva:printer-fill" />}
+                        onClick={handlePrint}
                         sx={{
                             fontWeight: 700,
                             fontSize: '0.875rem',
@@ -646,23 +693,25 @@ export const BookingDetailPage = () => {
                     >
                         In đơn
                     </Button>
-                    <Button
-                        variant="contained"
-                        startIcon={<Icon icon="solar:pen-bold" />}
-                        onClick={() => navigate(`/${prefixAdmin}/booking/edit/${id}`)}
-                        sx={{
-                            height: 36,
-                            fontWeight: 700,
-                            fontSize: '0.875rem',
-                            textTransform: 'capitalize',
-                            borderRadius: '8px',
-                            bgcolor: 'var(--palette-grey-800)',
-                            color: 'common.white',
-                            '&:hover': { bgcolor: 'var(--palette-grey-900)' }
-                        }}
-                    >
-                        Chỉnh sửa
-                    </Button>
+                    {!isTerminalStatus && (
+                        <Button
+                            variant="contained"
+                            startIcon={<Icon icon="solar:pen-bold" />}
+                            onClick={() => navigate(`/${prefixAdmin}/booking/edit/${id}`)}
+                            sx={{
+                                height: 36,
+                                fontWeight: 700,
+                                fontSize: '0.875rem',
+                                textTransform: 'capitalize',
+                                borderRadius: '8px',
+                                bgcolor: 'var(--palette-grey-800)',
+                                color: 'common.white',
+                                '&:hover': { bgcolor: 'var(--palette-grey-900)' }
+                            }}
+                        >
+                            Chỉnh sửa
+                        </Button>
+                    )}
                 </Stack>
             </Box>
 
@@ -967,6 +1016,88 @@ export const BookingDetailPage = () => {
                 {/* Right Column */}
                 <Grid size={{ xs: 12, md: 4 }}>
                     <Stack spacing={3}>
+                        {/* Payment Card */}
+                        <Card sx={{ p: 3, borderRadius: 'var(--shape-borderRadius-lg)', boxShadow: 'var(--customShadows-card)' }}>
+                            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+                                <Typography sx={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--palette-text-primary)' }}>Thanh toán</Typography>
+                                <Select
+                                    size="small"
+                                    value={booking.paymentStatus || 'unpaid'}
+                                    onChange={(e) => handlePaymentStatusChange(e.target.value)}
+                                    disabled={isTerminalStatus}
+                                    sx={{
+                                        minWidth: 140,
+                                        height: 32,
+                                        borderRadius: '8px',
+                                        '&.Mui-disabled': {
+                                            opacity: 1,
+                                            '& .MuiSelect-select': {
+                                                WebkitTextFillColor: (PAYMENT_STATUS_OPTIONS[booking.paymentStatus] || PAYMENT_STATUS_OPTIONS.unpaid).color,
+                                            }
+                                        },
+                                        '& .MuiSelect-select': {
+                                            fontSize: '0.75rem',
+                                            fontWeight: 700,
+                                            py: 0.5,
+                                            px: 1,
+                                            color: (PAYMENT_STATUS_OPTIONS[booking.paymentStatus] || PAYMENT_STATUS_OPTIONS.unpaid).color,
+                                            bgcolor: (PAYMENT_STATUS_OPTIONS[booking.paymentStatus] || PAYMENT_STATUS_OPTIONS.unpaid).bg,
+                                        }
+                                    }}
+                                >
+                                    {Object.entries(PAYMENT_STATUS_OPTIONS).map(([value, opt]) => {
+                                        if (isTerminalStatus && value !== (booking.paymentStatus || 'unpaid')) {
+                                            return null;
+                                        }
+                                        if (value === 'partially_paid' && !(booking.depositAmount > 0)) {
+                                            return null;
+                                        }
+                                        if (value === 'refunded' && !['request_cancel', 'cancelled'].includes(booking.bookingStatus)) {
+                                            return null;
+                                        }
+
+                                        return (
+                                            <MenuItem
+                                                key={value}
+                                                value={value}
+                                                sx={{ fontSize: '0.875rem' }}
+                                                disabled={(booking.paymentStatus === 'paid' || booking.paymentStatus === 'partially_paid') && value === 'unpaid'}
+                                            >
+                                                {opt.label}
+                                            </MenuItem>
+                                        );
+                                    })}
+                                </Select>
+                            </Stack>
+                            <Stack direction="row" alignItems="center" spacing={1} justifyContent="space-between" sx={{ mb: 1 }}>
+                                <Typography variant="body2" sx={{ color: 'var(--palette-text-disabled)' }}>Phương thức</Typography>
+                                <Stack direction="row" alignItems="center" spacing={1}>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'var(--palette-text-primary)' }}>
+                                        {booking.paymentMethod === 'money' ? 'Tiền mặt' :
+                                            booking.paymentMethod === 'vnpay' ? 'VNPay' :
+                                                booking.paymentMethod === 'zalopay' ? 'ZaloPay' : 'Chưa giao dịch'}
+                                    </Typography>
+                                    <Icon
+                                        icon={
+                                            booking.paymentMethod === 'money' ? 'solar:hand-money-bold' :
+                                                booking.paymentMethod === 'vnpay' ? 'logos:vnpay' :
+                                                    'logos:zalopay'
+                                        }
+                                        width={booking.paymentMethod === 'money' ? 20 : 28}
+                                        style={{ filter: booking.paymentMethod === 'money' ? 'grayscale(1)' : 'none', opacity: booking.paymentMethod === 'money' ? 0.7 : 1 }}
+                                    />
+                                </Stack>
+                            </Stack>
+                            {booking.depositAmount > 0 && (
+                                <Stack direction="row" alignItems="center" spacing={1} justifyContent="space-between">
+                                    <Typography variant="body2" sx={{ color: 'var(--palette-text-disabled)' }}>Tiền cọc (Đã thu)</Typography>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'var(--palette-success-main)' }}>
+                                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(booking.depositAmount)}
+                                    </Typography>
+                                </Stack>
+                            )}
+                        </Card>
+
                         {/* Customer Card */}
                         <Card sx={{ p: 3, borderRadius: 'var(--shape-borderRadius-lg)', boxShadow: 'var(--customShadows-card)' }}>
                             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
@@ -1006,7 +1137,6 @@ export const BookingDetailPage = () => {
                             </Button>
                         </Card>
 
-
                         {/* Service Location Card (Mapped from Shipping Address) */}
                         <Card sx={{ p: 3, borderRadius: 'var(--shape-borderRadius-lg)', boxShadow: 'var(--customShadows-card)' }}>
                             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
@@ -1025,61 +1155,6 @@ export const BookingDetailPage = () => {
                                         {booking.userId?.phone || "Chưa có số ĐT"}
                                     </Typography>
                                 </Box>
-                            </Stack>
-                        </Card>
-
-                        {/* Payment Card */}
-                        <Card sx={{ p: 3, borderRadius: 'var(--shape-borderRadius-lg)', boxShadow: 'var(--customShadows-card)' }}>
-                            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-                                <Typography sx={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--palette-text-primary)' }}>Thanh toán</Typography>
-                                <Select
-                                    size="small"
-                                    value={booking.paymentStatus || 'unpaid'}
-                                    onChange={(e) => handlePaymentStatusChange(e.target.value)}
-                                    sx={{
-                                        minWidth: 140,
-                                        height: 32,
-                                        borderRadius: '8px',
-                                        '& .MuiSelect-select': {
-                                            fontSize: '0.75rem',
-                                            fontWeight: 700,
-                                            py: 0.5,
-                                            px: 1,
-                                            color: (PAYMENT_STATUS_OPTIONS[booking.paymentStatus] || PAYMENT_STATUS_OPTIONS.unpaid).color,
-                                            bgcolor: (PAYMENT_STATUS_OPTIONS[booking.paymentStatus] || PAYMENT_STATUS_OPTIONS.unpaid).bg,
-                                        }
-                                    }}
-                                >
-                                    {Object.entries(PAYMENT_STATUS_OPTIONS).map(([value, opt]) => (
-                                        <MenuItem
-                                            key={value}
-                                            value={value}
-                                            sx={{ fontSize: '0.875rem' }}
-                                            disabled={(booking.paymentStatus === 'paid' || booking.paymentStatus === 'partially_paid') && value === 'unpaid'}
-                                        >
-                                            {opt.label}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </Stack>
-                            <Stack direction="row" alignItems="center" spacing={1} justifyContent="space-between">
-                                <Typography variant="body2" sx={{ color: 'var(--palette-text-disabled)' }}>Phương thức</Typography>
-                                <Stack direction="row" alignItems="center" spacing={1}>
-                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'var(--palette-text-primary)' }}>
-                                        {booking.paymentMethod === 'money' ? 'Tiền mặt' :
-                                            booking.paymentMethod === 'vnpay' ? 'VNPay' :
-                                                booking.paymentMethod === 'zalopay' ? 'ZaloPay' : 'Chưa giao dịch'}
-                                    </Typography>
-                                    <Icon
-                                        icon={
-                                            booking.paymentMethod === 'money' ? 'solar:hand-money-bold' :
-                                                booking.paymentMethod === 'vnpay' ? 'logos:vnpay' :
-                                                    'logos:zalopay'
-                                        }
-                                        width={booking.paymentMethod === 'money' ? 20 : 28}
-                                        style={{ filter: booking.paymentMethod === 'money' ? 'grayscale(1)' : 'none', opacity: booking.paymentMethod === 'money' ? 0.7 : 1 }}
-                                    />
-                                </Stack>
                             </Stack>
                         </Card>
                     </Stack>

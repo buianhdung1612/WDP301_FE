@@ -418,7 +418,7 @@ export const OrderDetailPage = () => {
                                     size="small"
                                     value={order.paymentStatus || 'unpaid'}
                                     onChange={(e) => handlePaymentStatusChange(e.target.value)}
-                                    disabled={["paid", "refunded"].includes(order.paymentStatus)}
+                                    disabled={order.paymentStatus === "refunded"}
                                     sx={{
                                         minWidth: 140,
                                         height: 32,

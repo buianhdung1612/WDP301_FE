@@ -457,7 +457,7 @@ export const OrderEditPage = () => {
                                         value={paymentStatus}
                                         label="Trạng thái thanh toán"
                                         onChange={(e) => setPaymentStatus(e.target.value)}
-                                        disabled={order?.paymentStatus === "paid"}
+                                        disabled={order?.paymentStatus === "refunded"}
                                     >
                                         <MenuItem value="unpaid">Chưa thanh toán</MenuItem>
                                         <MenuItem value="paid">Đã thanh toán</MenuItem>

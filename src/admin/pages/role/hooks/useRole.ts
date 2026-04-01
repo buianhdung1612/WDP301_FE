@@ -5,7 +5,7 @@ export const useRoles = (params?: any) => {
     return useQuery({
         queryKey: ["roles", params],
         queryFn: () => getRoles(params),
-        select: (res: any) => res.data || [],
+        select: (res: any) => res.data?.recordList || (Array.isArray(res.data) ? res.data : []),
     });
 };
 

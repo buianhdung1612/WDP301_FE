@@ -372,6 +372,15 @@ export const ServiceDetailPage = () => {
                                 </div>
                             )}
 
+                            {service.duration > 0 && (
+                                <div className="flex items-center gap-2 mb-[15px] bg-green-50/50 w-fit px-4 py-2 rounded-full border border-green-100">
+                                    <Clock size={18} className="text-green-500" />
+                                    <span className="text-[14px] font-bold text-green-600">
+                                        Thời gian dự tính: ~{service.duration} phút / bé
+                                    </span>
+                                </div>
+                            )}
+
 
                             {service.pricingType === 'by-weight' && service.priceList && service.priceList.length > 0 && (
                                 <div className="mt-[15px]">
@@ -416,17 +425,28 @@ export const ServiceDetailPage = () => {
                                     <div className="flex flex-wrap gap-2">
                                         {pets.map((pet) => {
                                             const isSelected = selectedPetIds.includes(pet._id);
+                                            const isUnderage = (pet.age || 0) < (service.minAgeMonths || 0);
+
                                             return (
                                                 <button
                                                     key={pet._id}
-                                                    onClick={() => handlePetToggle(pet._id)}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (isUnderage) {
+                                                            toast.warning(`Bé ${pet.name} (${pet.age || 0} tháng) chưa đủ ${service.minAgeMonths} tháng tuổi để tham gia dịch vụ này!`);
+                                                            return;
+                                                        }
+                                                        handlePetToggle(pet._id);
+                                                    }}
                                                     className={`p-1.5 pr-4 rounded-[20px] border transition-all flex items-center gap-2 shrink-0 group relative
-                                                        ${isSelected
-                                                            ? 'border-client-primary bg-client-primary/[0.03]'
-                                                            : 'border-gray-100 bg-white hover:border-gray-300'}`}
+                                                        ${isUnderage
+                                                            ? 'opacity-60 grayscale bg-gray-50 border-gray-200 cursor-not-allowed hover:border-gray-200'
+                                                            : isSelected
+                                                                ? 'border-client-primary bg-client-primary/[0.03]'
+                                                                : 'border-gray-100 bg-white hover:border-gray-300'}`}
                                                 >
 
-                                                    <div className="w-[48px] h-[48px] rounded-[12px] overflow-hidden border border-gray-50 bg-gray-50">
+                                                    <div className="w-[48px] h-[48px] rounded-[12px] overflow-hidden border border-gray-50 bg-gray-50 shrink-0">
                                                         {pet.avatar ? (
                                                             <img src={pet.avatar} className="w-full h-full object-cover" />
                                                         ) : (
@@ -436,12 +456,17 @@ export const ServiceDetailPage = () => {
                                                         )}
                                                     </div>
                                                     <div className="text-left">
-                                                        <p className={`text-[14px] font-bold leading-none mb-1.5 ${isSelected ? 'text-client-primary' : 'text-client-secondary'}`}>
+                                                        <p className={`text-[14px] font-bold leading-none mb-1.5 ${isSelected && !isUnderage ? 'text-client-primary' : 'text-client-secondary'} ${isUnderage ? 'text-gray-500' : ''}`}>
                                                             {pet.name}
                                                         </p>
                                                         <p className="text-[11px] text-gray-400 font-bold uppercase tracking-tight">
-                                                            {pet.weight}kg • {pet.type === 'dog' ? 'Chó' : 'Mèo'}
+                                                            {pet.weight}kg • {pet.age || 0} tháng
                                                         </p>
+                                                        {isUnderage && (
+                                                            <span className="absolute -top-2 -right-1 bg-red-500 text-white text-[10px] uppercase tracking-tighter whitespace-nowrap font-bold px-1.5 py-0.5 rounded-full border-2 border-white shadow-sm">
+                                                                Chưa đủ tuổi
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 </button>
                                             );

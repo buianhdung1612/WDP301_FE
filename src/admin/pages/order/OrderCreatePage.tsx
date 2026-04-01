@@ -353,8 +353,7 @@ export const OrderCreatePage = () => {
                             <Stack spacing={2}>
                                 {[
                                     { value: 'money', label: 'Tiền mặt', icon: 'solar:hand-money-bold' },
-                                    { value: 'vnpay', label: 'VNPay', icon: 'logos:vnpay' },
-                                    { value: 'zalopay', label: 'ZaloPay', icon: 'logos:zalopay' }
+                                    { value: 'vnpay', label: 'VNPay', icon: 'logos:vnpay' }
                                 ].map((method) => (
                                     <Box
                                         key={method.value}

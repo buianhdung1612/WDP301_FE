@@ -53,7 +53,7 @@ export const RoleEditPage = () => {
     const navigate = useNavigate();
     const { data: role, isLoading } = useRoleDetail(id);
     const { mutate: update, isPending } = useUpdateRole();
-    const servicesRes = useServices();
+    const servicesRes = useServices({ limit: 1000 });
     const services = useMemo(() => {
         if (!servicesRes.data) return [];
         const data = servicesRes.data;

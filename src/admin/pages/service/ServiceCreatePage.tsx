@@ -67,6 +67,7 @@ export const ServiceCreatePage = () => {
             duration: 30,
             minDuration: 30,
             maxExtensionMinutes: 30,
+            minAgeMonths: 0,
             petTypes: ["DOG", "CAT"],
             pricingType: "fixed",
             basePrice: 0,

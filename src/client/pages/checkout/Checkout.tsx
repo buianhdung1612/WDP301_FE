@@ -877,7 +877,6 @@ export const CheckoutPage = () => {
                                     <div className="space-y-[12px]">
                                         {[
                                             { id: 'money', label: 'Thanh toán khi nhận hàng (COD)' },
-                                            { id: 'zalopay', label: 'Ví điện tử ZaloPay' },
                                             { id: 'vnpay', label: 'Cổng thanh toán VNPAY' }
                                         ].map((method) => (
                                             <label key={method.id} className="flex items-center gap-[12px] cursor-pointer group">

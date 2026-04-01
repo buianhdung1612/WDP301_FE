@@ -39,7 +39,7 @@ type BoardingCheckoutDraft = {
   phone: string;
   email?: string;
   notes?: string;
-  paymentGateway: "zalopay" | "vnpay";
+  paymentGateway: "vnpay";
   paymentMode: "full" | "deposit";
   customFeeding?: Record<string, string>;
   customExercise?: Record<string, string>;
@@ -141,7 +141,7 @@ export const BoardingCheckoutPage = () => {
   const { data: config } = useBoardingConfig();
   const [draft] = useState<BoardingCheckoutDraft | null>(initialDraft);
   const [paymentMode, setPaymentMode] = useState<"full" | "deposit">(initialDraft?.paymentMode || "full");
-  const [paymentGateway, setPaymentGateway] = useState<"zalopay" | "vnpay">(initialDraft?.paymentGateway || "zalopay");
+  const [paymentGateway, setPaymentGateway] = useState<"vnpay">(initialDraft?.paymentGateway === "vnpay" ? "vnpay" : "vnpay");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const finalDepositMinDays = config?.minDaysForDeposit ?? 2;
@@ -156,7 +156,7 @@ export const BoardingCheckoutPage = () => {
 
     const start = dayjs(draft.checkInDate).startOf("day").set("hour", inH).set("minute", inM);
     const end = dayjs(draft.checkOutDate).startOf("day").set("hour", outH).set("minute", outM);
-    
+
     // Match backend logic: Math.ceil of fractional days
     const diff = Math.ceil(end.diff(start, "hour") / 24);
     return diff > 0 ? diff : 0;
@@ -397,7 +397,7 @@ export const BoardingCheckoutPage = () => {
                       </h2>
                     </div>
                     <div className="rounded-[18px] border border-[#eceef3] bg-[#f7f8fb] px-[16px] py-[12px] text-[13px] font-[600] leading-[1.6] text-[#6f7a88]">
-                      Nếu thanh toán online hoặc cần cọc 20%, hệ thống sẽ chuyển sang {paymentGateway === "zalopay" ? "ZaloPay" : "VNPay"} ngay sau khi xác nhận.
+                      Nếu thanh toán online hoặc cần cọc 20%, hệ thống sẽ chuyển sang VNPay ngay sau khi xác nhận.
                     </div>
                   </div>
 
@@ -439,7 +439,6 @@ export const BoardingCheckoutPage = () => {
                       </div>
                       <div className="mt-[16px] flex flex-wrap gap-[12px]">
                         {[
-                          { value: "zalopay" as const, label: "ZaloPay" },
                           { value: "vnpay" as const, label: "VNPay" },
                         ].map((gateway) => {
                           const active = paymentGateway === gateway.value;

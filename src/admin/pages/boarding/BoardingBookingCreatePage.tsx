@@ -38,7 +38,6 @@ const boardingStatusOptions = [
 const paymentMethodOptions = [
     { value: "pay_at_site", label: "Thanh toán tại quầy" },
     { value: "money", label: "Tiền mặt" },
-    { value: "zalopay", label: "ZaloPay" },
     { value: "vnpay", label: "VNPay" },
     { value: "prepaid", label: "Trả trước" },
 ];
@@ -89,7 +88,7 @@ export const BoardingBookingCreatePage = () => {
     }, [usersRes]);
 
     const { data: petsRes } = usePets({ userId: formData.userId, limit: 1000 });
-    
+
     // Fetch busy pets/cages and real-time availability for selected dates
     const { data: busyPetsRes } = useQuery({
         queryKey: ["admin", "boarding-booking-availability", formData.checkInDate, formData.checkOutDate],
@@ -115,7 +114,7 @@ export const BoardingBookingCreatePage = () => {
         else if (Array.isArray(res.recordList)) list = res.recordList;
         else if (Array.isArray(res.data)) list = res.data;
         else if (Array.isArray(res)) list = res;
-        
+
         return list.map((pet: any) => ({
             ...pet,
             isBusy: busyPetIds.includes(String(pet._id || pet.id))
@@ -127,9 +126,9 @@ export const BoardingBookingCreatePage = () => {
         queryFn: () => getBoardingCages(),
     });
 
-    const { data: configRes } = useQuery({ 
-        queryKey: ["boarding-config"], 
-        queryFn: getBoardingConfig 
+    const { data: configRes } = useQuery({
+        queryKey: ["boarding-config"],
+        queryFn: getBoardingConfig
     });
     const config = configRes?.data;
 
@@ -149,7 +148,7 @@ export const BoardingBookingCreatePage = () => {
                 const update: any = {};
                 if (item.petId && busyPetIds.includes(String(item.petId))) update.petId = "";
                 if (item.cageId && busyCageIds.includes(String(item.cageId))) update.cageId = "";
-                
+
                 if (Object.keys(update).length > 0) return { ...item, ...update };
                 return item;
             }));
@@ -162,8 +161,8 @@ export const BoardingBookingCreatePage = () => {
 
         return (cageRes?.data?.recordList || []).map((cage: any) => {
             const isBusy = busyCageIds.includes(String(cage._id));
-            const remainingRooms = cageAvailability[String(cage._id)] !== undefined 
-                ? cageAvailability[String(cage._id)] 
+            const remainingRooms = cageAvailability[String(cage._id)] !== undefined
+                ? cageAvailability[String(cage._id)]
                 : Number(cage.totalRooms || 4);
             return {
                 ...cage,
@@ -176,13 +175,13 @@ export const BoardingBookingCreatePage = () => {
 
     const totalDays = useMemo(() => {
         if (!formData.checkInDate || !formData.checkOutDate || !config) return 0;
-        
+
         const [inH, inM] = (config.checkInTime || "14:00").split(":").map(Number);
         const [outH, outM] = (config.checkOutTime || "12:00").split(":").map(Number);
 
         const start = dayjs(formData.checkInDate).startOf("day").set("hour", inH).set("minute", inM);
         const end = dayjs(formData.checkOutDate).startOf("day").set("hour", outH).set("minute", outM);
-        
+
         const days = Math.ceil(end.diff(start, "hour") / 24);
         return days > 0 ? days : 0;
     }, [formData.checkInDate, formData.checkOutDate, config]);
@@ -249,7 +248,7 @@ export const BoardingBookingCreatePage = () => {
     const handleSubmit = () => {
         if (!formData.userId) return toast.error("Vui lòng chọn khách hàng");
         if (items.some(i => !i.petId || !i.cageId)) return toast.error("Vui lòng chọn thú cưng và chuồng cho tất cả các mục");
-        
+
         const petIds = items.map(i => String(i.petId));
         if (new Set(petIds).size !== petIds.length) {
             return toast.error("Một thú cưng không thể xuất hiện 2 lần trong cùng một đơn");
@@ -420,7 +419,7 @@ export const BoardingBookingCreatePage = () => {
                                                         const isActuallyBusy = pet.isBusy || isSelectedElsewhere;
                                                         return (
                                                             <MenuItem key={pet._id} value={pet._id} disabled={isActuallyBusy}>
-                                                                {pet.name} ({pet.breed || pet.type || "Không rõ"}) - {pet.weight || 0}kg 
+                                                                {pet.name} ({pet.breed || pet.type || "Không rõ"}) - {pet.weight || 0}kg
                                                                 {pet.isBusy && " - (Đã có lịch)"}
                                                                 {isSelectedElsewhere && " - (Đã được chọn)"}
                                                             </MenuItem>
@@ -442,7 +441,7 @@ export const BoardingBookingCreatePage = () => {
                                                         const isActuallyFull = currentRemaining <= 0;
                                                         return (
                                                             <MenuItem key={cage._id} value={cage._id} disabled={isActuallyFull}>
-                                                                {cage.cageCode} - {String(cage.type || "").toUpperCase()} - {normalizeCageSizeLabel(cage.size)} 
+                                                                {cage.cageCode} - {String(cage.type || "").toUpperCase()} - {normalizeCageSizeLabel(cage.size)}
                                                                 {` (Còn ${currentRemaining} chỗ)`}
                                                                 {isActuallyFull && " - (Hết chỗ)"}
                                                             </MenuItem>

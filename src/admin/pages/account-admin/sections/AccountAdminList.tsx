@@ -70,10 +70,10 @@ export const AccountAdminList = () => {
     const accounts = res?.data?.recordList || [];
     const pagination = res?.data?.pagination || { totalRecords: 0 };
 
-    const roleOptions = roles.map((role: any) => ({
+    const roleOptions = Array.isArray(roles) ? roles.map((role: any) => ({
         value: role._id,
         label: role.name
-    }));
+    })) : [];
 
     const handleDelete = (id: string) => {
         confirmDelete("Bạn có chắc chắn muốn xóa tài khoản này?", () => {

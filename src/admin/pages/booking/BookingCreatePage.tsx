@@ -894,8 +894,7 @@ export const BookingCreatePage = () => {
                                         label="Phương thức thanh toán"
                                         options={[
                                             { value: "money", label: "Tiền mặt (COD)" },
-                                            { value: "vnpay", label: "VNPAY" },
-                                            { value: "zalopay", label: "ZaloPay" }
+                                            { value: "vnpay", label: "VNPAY" }
                                         ]}
                                         value={formData.paymentMethod}
                                         onChange={(val) => setFormData({ ...formData, paymentMethod: val })}
