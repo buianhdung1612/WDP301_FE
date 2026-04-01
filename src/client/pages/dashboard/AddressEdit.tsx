@@ -11,6 +11,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getAddressDetail, updateAddress } from "../../api/dashboard.api";
 import { ProductBanner } from "../product/sections/ProductBanner";
+import { useSettingGeneral } from "../../hooks/useSettings";
 
 // Fix for leaflet default marker icon
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -119,32 +120,40 @@ export const AddressEditPage = () => {
         fetchDetail();
     }, [id, reset, navigate]);
 
+    const { data: settings } = useSettingGeneral();
+    const GOONG_API_KEY = settings?.goongApiKey?.trim() || "";
+    const GOONG_MAP_KEY = settings?.goongMapKey?.trim() || "";
+
     const fetchAddressFromCoords = async (lat: number, lon: number) => {
         setValue("latitude", lat);
         setValue("longitude", lon);
+        if (!GOONG_API_KEY) return;
         try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+            console.log("Goong Reverse Geocode input:", { lat, lon });
+            const res = await fetch(`https://rsapi.goong.io/Geocode?latlng=${lat},${lon}&api_key=${GOONG_API_KEY}`);
             const data = await res.json();
-            if (data && data.display_name) {
+            console.log("Goong Reverse result:", data);
+            if (data && data.results && data.results.length > 0) {
                 isManualChange.current = false;
-                setValue("address", data.display_name);
+                setValue("address", data.results[0].formatted_address);
                 setIsNotFound(false);
             }
         } catch (error) {
-            console.error("Lỗi reverse geocoding:", error);
+            console.error("Lỗi reverse geocoding Goong:", error);
         }
     };
 
     const geocodeFromAddress = async (query: string, isFromSearch: boolean = false) => {
-        if (!query.trim() || query.length < 3) return;
+        if (!query.trim() || query.length < 3 || !GOONG_API_KEY) return;
 
         try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=vn&limit=1`);
+            const res = await fetch(`https://rsapi.goong.io/Geocode?address=${encodeURIComponent(query)}&api_key=${GOONG_API_KEY}`);
             const data = await res.json();
 
-            if (data && data.length > 0) {
-                const lat = parseFloat(data[0].lat);
-                const lon = parseFloat(data[0].lon);
+            if (data && data.results && data.results.length > 0) {
+                const loc = data.results[0].geometry.location;
+                const lat = loc.lat;
+                const lon = loc.lng;
                 const newPos = new L.LatLng(lat, lon);
                 setPosition(newPos);
                 setValue("latitude", lat);
@@ -152,7 +161,7 @@ export const AddressEditPage = () => {
 
                 if (isFromSearch) {
                     setMapCenter([lat, lon]);
-                    setValue("address", data[0].display_name);
+                    setValue("address", data.results[0].formatted_address);
                     setSearchKeyword("");
                     setShowSuggestions(false);
                 }
@@ -161,7 +170,7 @@ export const AddressEditPage = () => {
                 setIsNotFound(true);
             }
         } catch (error) {
-            console.error("Lỗi Geocoding:", error);
+            console.error("Lỗi Geocoding Goong:", error);
         }
     };
 
@@ -178,14 +187,16 @@ export const AddressEditPage = () => {
 
     useEffect(() => {
         const timer = setTimeout(async () => {
-            if (searchKeyword.length > 2) {
+            if (searchKeyword.length > 2 && GOONG_API_KEY) {
                 try {
-                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchKeyword)}&countrycodes=vn&limit=5`);
+                    console.log("Goong AutoComplete input:", searchKeyword);
+                    const res = await fetch(`https://restapi.goong.io/Place/AutoComplete?api_key=${GOONG_API_KEY}&input=${encodeURIComponent(searchKeyword)}`);
                     const data = await res.json();
-                    setSuggestions(data);
+                    console.log("Goong AutoComplete result:", data);
+                    setSuggestions(data.predictions || []);
                     setShowSuggestions(true);
                 } catch (error) {
-                    console.log("Lỗi gợi ý tìm kiếm");
+                    console.log("Lỗi gợi ý tìm kiếm Goong");
                 }
             } else {
                 setSuggestions([]);
@@ -193,20 +204,31 @@ export const AddressEditPage = () => {
             }
         }, 500);
         return () => clearTimeout(timer);
-    }, [searchKeyword]);
+    }, [searchKeyword, GOONG_API_KEY]);
 
-    const handleSelectSuggestion = (suggestion: any) => {
-        const lat = parseFloat(suggestion.lat);
-        const lon = parseFloat(suggestion.lon);
-        const newPos = new L.LatLng(lat, lon);
-        setPosition(newPos);
-        setMapCenter([lat, lon]);
-        setValue("latitude", lat);
-        setValue("longitude", lon);
-        setValue("address", suggestion.display_name);
-        setSearchKeyword("");
-        setShowSuggestions(false);
-        setIsNotFound(false);
+    const handleSelectSuggestion = async (suggestion: any) => {
+        if (!GOONG_API_KEY) return;
+        try {
+            const res = await fetch(`https://restapi.goong.io/Place/Detail?place_id=${suggestion.place_id}&api_key=${GOONG_API_KEY}`);
+            const data = await res.json();
+
+            if (data && data.result) {
+                const loc = data.result.geometry.location;
+                const lat = loc.lat;
+                const lon = loc.lng;
+                const newPos = new L.LatLng(lat, lon);
+                setPosition(newPos);
+                setMapCenter([lat, lon]);
+                setValue("latitude", lat);
+                setValue("longitude", lon);
+                setValue("address", suggestion.description);
+                setSearchKeyword("");
+                setShowSuggestions(false);
+                setIsNotFound(false);
+            }
+        } catch (error) {
+            console.error("Lỗi lấy chi tiết địa điểm Goong:", error);
+        }
     };
 
     const onSubmit = async (data: FormData) => {
@@ -343,8 +365,8 @@ export const AddressEditPage = () => {
                                                     >
                                                         <MapPin className="w-[16px] h-[16px] text-client-secondary shrink-0 mt-[2px]" />
                                                         <div className="flex flex-col gap-[2px]">
-                                                            <span className="text-[14px] font-[500] text-[#333] line-clamp-1">{item.display_name.split(',')[0]}</span>
-                                                            <span className="text-[12px] text-gray-500 line-clamp-1">{item.display_name}</span>
+                                                            <span className="text-[14px] font-[500] text-[#333] line-clamp-1">{item.description.split(',')[0]}</span>
+                                                            <span className="text-[12px] text-gray-500 line-clamp-1">{item.description}</span>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -359,8 +381,10 @@ export const AddressEditPage = () => {
                                         style={{ height: '100%', width: '100%' }}
                                     >
                                         <TileLayer
-                                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                            attribution='&copy; <a href="https://goong.io">Goong Maps</a>'
+                                            url={GOONG_MAP_KEY
+                                                ? `https://tiles.goong.io/assets/goong_map_web/{z}/{x}/{y}.png?api_key=${GOONG_MAP_KEY}`
+                                                : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
                                         />
                                         <LocationMarker position={position} setPosition={setPosition} onLocationSelect={fetchAddressFromCoords} />
                                         <MapController center={mapCenter} />

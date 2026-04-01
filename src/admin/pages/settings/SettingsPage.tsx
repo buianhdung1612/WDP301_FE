@@ -9,6 +9,7 @@ import { AppPasswordTab } from "./components/AppPasswordTab";
 import { GeneralSettingTab } from "./components/GeneralSettingTab";
 import { PointSettingTab } from "./components/PointSettingTab";
 import { StaticPageTab } from "./components/StaticPageTab";
+import { MapSettingTab } from "./components/MapSettingTab";
 import { prefixAdmin } from "../../constants/routes";
 
 
@@ -18,6 +19,7 @@ export const SettingsPage = () => {
 
     const tabs = [
         { label: "Cài đặt chung", path: "general", component: <GeneralSettingTab /> },
+        { label: "Bản đồ (Goong)", path: "map", component: <MapSettingTab /> },
         { label: "Tích điểm", path: "point", component: <PointSettingTab /> },
         { label: "Vận chuyển", path: "shipping", component: <ShippingTab /> },
         { label: "Thanh toán", path: "payment", component: <PaymentTab /> },

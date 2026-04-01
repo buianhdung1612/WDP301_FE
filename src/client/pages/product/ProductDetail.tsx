@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import React, { useEffect, useState, useMemo } from "react";
 import StarIcon from "@mui/icons-material/Star";
 import { Heart, UserCart, EyeSolid } from "iconoir-react";
@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 
 export const ProductDetailPage = () => {
     const { slug } = useParams();
+    const navigate = useNavigate();
     const { data: productData, isLoading, error } = useProductDetail(slug || "");
     const { avgRating, totalReviews } = useProductReviews(productData?.productDetail?._id || "");
 
@@ -120,6 +121,19 @@ export const ProductDetailPage = () => {
         const success = addToCart(cartItem);
         if (success) {
             setShowToast(true);
+        }
+        return success;
+    };
+
+    const handleBuyNow = () => {
+        if (!product || !canAddToCart || maxStock === 0) return;
+
+        // Thêm vào giỏ hàng trước
+        const success = handleAddToCart();
+
+        // Nếu thêm thành công mới chuyển hướng
+        if (success) {
+            navigate("/checkout");
         }
     };
 
@@ -377,7 +391,13 @@ export const ProductDetailPage = () => {
                                     <Heart className="w-[28px] h-[28px]" fill={isInWishlist(product?._id, currentVariant?.attributeValue) ? "currentColor" : "none"} />
                                 </div>
                             </div>
-                            <Link to={"/cart"} className="text-center font-secondary h-[60px] rounded-[40px] flex items-center justify-center text-[20px] text-white bg-client-primary hover:bg-client-secondary transition-all">Mua ngay</Link>
+                            <button
+                                onClick={handleBuyNow}
+                                disabled={!canAddToCart || maxStock === 0}
+                                className={`text-center font-secondary w-full h-[60px] rounded-[40px] flex items-center justify-center text-[20px] text-white transition-all ${maxStock === 0 ? 'bg-gray-400 cursor-not-allowed' : (canAddToCart ? 'bg-client-primary cursor-pointer hover:bg-client-secondary' : 'bg-client-primary opacity-[0.6] cursor-not-allowed')}`}
+                            >
+                                Mua ngay
+                            </button>
                             <ul className="mt-[60px] border-t border-[#eee] pt-[30px]">
                                 <li className="flex items-center text-[16px] text-[#505050] my-[15px]">
                                     <UserCart className="text-client-primary mr-[15px] w-[24px] h-[24px]" />

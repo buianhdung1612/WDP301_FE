@@ -33,7 +33,7 @@ const STATUS_OPTIONS: { [key: string]: { label: string; color: string; bg: strin
 
 const PAYMENT_STATUS_OPTIONS: { [key: string]: { label: string; color: string; bg: string } } = {
     unpaid: { label: "Chưa thanh toán", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
-    paid: { label: "Đã thanh toán", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
+    paid: { label: "Đã thanh toán", color: "var(--palette-success-main)", bg: "rgba(34, 197, 94, 0.16)" },
     refunded: { label: "Đã hoàn tiền", color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)" },
 };
 
@@ -65,7 +65,8 @@ export const OrderDetailPage = () => {
 
     const handleStatusChange = (newStatus: string) => {
         updateStatus({ id: order._id, status: newStatus }, {
-            onSuccess: () => toast.success("Cập nhật trạng thái thành công")
+            onSuccess: () => toast.success("Cập nhật trạng thái thành công"),
+            onError: (err: any) => toast.error(err?.response?.data?.message || err?.message || "Cập nhật trạng thái thất bại")
         });
     };
 
@@ -76,7 +77,8 @@ export const OrderDetailPage = () => {
         }
 
         updateOrder({ id: order._id, data: { paymentStatus: newStatus } }, {
-            onSuccess: () => toast.success("Cập nhật trạng thái thanh toán thành công")
+            onSuccess: () => toast.success("Cập nhật trạng thái thanh toán thành công"),
+            onError: (err: any) => toast.error(err?.response?.data?.message || err?.message || "Cập nhật trạng thái thanh toán thất bại")
         });
     };
 
@@ -392,6 +394,66 @@ export const OrderDetailPage = () => {
                 {/* Right Column */}
                 <Grid size={{ xs: 12, md: 4 }}>
                     <Stack spacing={3}>
+                        {/* Payment Card */}
+                        <Card sx={{ p: 3, borderRadius: 'var(--shape-borderRadius-lg)', boxShadow: 'var(--customShadows-card)' }}>
+                            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+                                <Typography sx={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--palette-text-primary)' }}>Thanh toán</Typography>
+                                <Select
+                                    size="small"
+                                    value={order.paymentStatus || 'unpaid'}
+                                    onChange={(e) => handlePaymentStatusChange(e.target.value)}
+                                    disabled={["paid", "refunded"].includes(order.paymentStatus)}
+                                    sx={{
+                                        minWidth: 140,
+                                        height: 32,
+                                        borderRadius: '8px',
+                                        '&.Mui-disabled': {
+                                            opacity: 0.8,
+                                            '-webkit-text-fill-color': 'inherit'
+                                        },
+                                        '& .MuiSelect-select': {
+                                            fontSize: '0.75rem',
+                                            fontWeight: 700,
+                                            py: 0.5,
+                                            px: 1,
+                                            color: (PAYMENT_STATUS_OPTIONS[order.paymentStatus] || PAYMENT_STATUS_OPTIONS.unpaid).color,
+                                            bgcolor: (PAYMENT_STATUS_OPTIONS[order.paymentStatus] || PAYMENT_STATUS_OPTIONS.unpaid).bg,
+                                        }
+                                    }}
+                                >
+                                    {Object.entries(PAYMENT_STATUS_OPTIONS).map(([value, opt]) => (
+                                        <MenuItem
+                                            key={value}
+                                            value={value}
+                                            sx={{ fontSize: '0.875rem' }}
+                                            disabled={order.paymentStatus === 'paid' && value === 'unpaid'}
+                                        >
+                                            {opt.label}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </Stack>
+                            <Stack direction="row" alignItems="center" spacing={1} justifyContent="space-between">
+                                <Typography variant="body2" sx={{ color: 'var(--palette-text-disabled)' }}>Phương thức</Typography>
+                                <Stack direction="row" alignItems="center" spacing={1}>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'var(--palette-text-primary)' }}>
+                                        {order.paymentMethod === 'money' ? 'Tiền mặt' :
+                                            order.paymentMethod === 'vnpay' ? 'VNPay' :
+                                                order.paymentMethod === 'zalopay' ? 'ZaloPay' : 'Chưa giao dịch'}
+                                    </Typography>
+                                    <Icon
+                                        icon={
+                                            order.paymentMethod === 'money' ? 'solar:hand-money-bold' :
+                                                order.paymentMethod === 'vnpay' ? 'logos:vnpay' :
+                                                    'logos:zalopay'
+                                        }
+                                        width={order.paymentMethod === 'money' ? 20 : 28}
+                                        style={{ filter: order.paymentMethod === 'money' ? 'grayscale(1)' : 'none', opacity: order.paymentMethod === 'money' ? 0.7 : 1 }}
+                                    />
+                                </Stack>
+                            </Stack>
+                        </Card>
+
                         {/* Customer Card */}
                         <Card sx={{ p: 3, borderRadius: 'var(--shape-borderRadius-lg)', boxShadow: 'var(--customShadows-card)' }}>
                             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
@@ -472,61 +534,6 @@ export const OrderDetailPage = () => {
                                         {order.phone || order.userId?.phone || "Chưa có số ĐT"}
                                     </Typography>
                                 </Box>
-                            </Stack>
-                        </Card>
-
-                        {/* Payment Card */}
-                        <Card sx={{ p: 3, borderRadius: 'var(--shape-borderRadius-lg)', boxShadow: 'var(--customShadows-card)' }}>
-                            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-                                <Typography sx={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--palette-text-primary)' }}>Thanh toán</Typography>
-                                <Select
-                                    size="small"
-                                    value={order.paymentStatus || 'unpaid'}
-                                    onChange={(e) => handlePaymentStatusChange(e.target.value)}
-                                    sx={{
-                                        minWidth: 140,
-                                        height: 32,
-                                        borderRadius: '8px',
-                                        '& .MuiSelect-select': {
-                                            fontSize: '0.75rem',
-                                            fontWeight: 700,
-                                            py: 0.5,
-                                            px: 1,
-                                            color: (PAYMENT_STATUS_OPTIONS[order.paymentStatus] || PAYMENT_STATUS_OPTIONS.unpaid).color,
-                                            bgcolor: (PAYMENT_STATUS_OPTIONS[order.paymentStatus] || PAYMENT_STATUS_OPTIONS.unpaid).bg,
-                                        }
-                                    }}
-                                >
-                                    {Object.entries(PAYMENT_STATUS_OPTIONS).map(([value, opt]) => (
-                                        <MenuItem
-                                            key={value}
-                                            value={value}
-                                            sx={{ fontSize: '0.875rem' }}
-                                            disabled={order.paymentStatus === 'paid' && value === 'unpaid'}
-                                        >
-                                            {opt.label}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </Stack>
-                            <Stack direction="row" alignItems="center" spacing={1} justifyContent="space-between">
-                                <Typography variant="body2" sx={{ color: 'var(--palette-text-disabled)' }}>Phương thức</Typography>
-                                <Stack direction="row" alignItems="center" spacing={1}>
-                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'var(--palette-text-primary)' }}>
-                                        {order.paymentMethod === 'money' ? 'Tiền mặt' :
-                                            order.paymentMethod === 'vnpay' ? 'VNPay' :
-                                                order.paymentMethod === 'zalopay' ? 'ZaloPay' : 'Chưa giao dịch'}
-                                    </Typography>
-                                    <Icon
-                                        icon={
-                                            order.paymentMethod === 'money' ? 'solar:hand-money-bold' :
-                                                order.paymentMethod === 'vnpay' ? 'logos:vnpay' :
-                                                    'logos:zalopay'
-                                        }
-                                        width={order.paymentMethod === 'money' ? 20 : 28}
-                                        style={{ filter: order.paymentMethod === 'money' ? 'grayscale(1)' : 'none', opacity: order.paymentMethod === 'money' ? 0.7 : 1 }}
-                                    />
-                                </Stack>
                             </Stack>
                         </Card>
                     </Stack>

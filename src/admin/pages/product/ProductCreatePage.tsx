@@ -244,20 +244,20 @@ export const ProductCreatePage = () => {
         const payload = {
             ...data,
             category: JSON.stringify(data.category),
-            variants: JSON.stringify(data.variants.map(v => ({
+            variants: JSON.stringify(data.variants.map((v: any) => ({
                 status: v.status,
                 attributeValue: v.attributeValue,
-                priceOld: v.priceOld,
-                priceNew: v.priceNew,
-                stock: v.stock
+                priceOld: Number(v.priceOld) || 0,
+                priceNew: Number(v.priceNew) || 0,
+                stock: Number(v.stock) || 0
             }))),
             attributes: JSON.stringify(data.attributes),
             images: JSON.stringify(data.images.map((f: any) => f.name || f)),
             suitableBreeds: JSON.stringify(data.suitableBreeds),
-            priceOld: String(data.priceOld),
-            priceNew: String(data.priceNew),
-            stock: String(data.stock),
-            position: String(data.position)
+            priceOld: Number(data.priceOld) || 0,
+            priceNew: Number(data.priceNew) || 0,
+            stock: Number(data.stock) || 0,
+            position: Number(data.position) || 0
         };
 
         console.log(">>> Product Data to Create:", payload);

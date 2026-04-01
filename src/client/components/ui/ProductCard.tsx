@@ -2,28 +2,35 @@ import StarIcon from "@mui/icons-material/Star";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import type { Product } from "../../../types/products.type";
 import { useWishlistStore } from "../../../stores/useWishlistStore";
+import { useCartStore, CartItem } from "../../../stores/useCartStore";
 import { toast } from "react-toastify";
+import { useState } from "react";
+import { QuickViewModal } from "./QuickViewModal";
 
 export const ProductCard = ({ product, rawData }: { product: Product, rawData?: any }) => {
-    const navigate = useNavigate();
     const { toggleWishlist, isInWishlist } = useWishlistStore();
+    const addToCart = useCartStore((state) => state.addToCart);
     const isFavorite = isInWishlist(product.id.toString());
+
+    const [modalState, setModalState] = useState<{ isOpen: boolean; mode: "cart" | "wishlist" }>({
+        isOpen: false,
+        mode: "cart"
+    });
 
     const handleToggleWishlist = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
 
-        // If product has variants, require detail page selection
+        // If product has variants, show quick view modal
         if (rawData?.variants?.length > 0) {
-            toast.info("Sản phẩm này có nhiều lựa chọn, vui lòng chọn thuộc tính trong trang chi tiết!");
-            navigate(product.url);
+            setModalState({ isOpen: true, mode: "wishlist" });
             return;
         }
 
-        // Prepare the detail object from available data
+        // Prepare the detail object from available data for non-variant products
         const itemToSave = {
             productId: product.id.toString(),
             quantity: 1,
@@ -40,10 +47,59 @@ export const ProductCard = ({ product, rawData }: { product: Product, rawData?: 
         };
 
         toggleWishlist(itemToSave);
+        if (!isFavorite) {
+            toast.success(`Đã thêm ${product.title} vào yêu thích!`);
+        }
+    };
+
+    const handleAddToCart = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // If product has variants, show quick view modal
+        if (rawData?.variants?.length > 0) {
+            setModalState({ isOpen: true, mode: "cart" });
+            return;
+        }
+
+        // Check stock
+        if (rawData?.stock <= 0) {
+            toast.error("Sản phẩm đã hết hàng!");
+            return;
+        }
+
+        // Prepare the cart item
+        const cartItem: CartItem = {
+            productId: product.id.toString(),
+            quantity: 1,
+            checked: true,
+            detail: {
+                images: rawData?.images || [product.primaryImage],
+                slug: product.url.split("/").pop() || "",
+                name: product.title,
+                priceNew: parseInt(product.price.replace(/\D/g, "")),
+                priceOld: rawData?.priceOld || parseInt(product.price.replace(/\D/g, "")),
+                stock: rawData?.stock || 99,
+                attributeList: rawData?.attributes || [],
+                variants: rawData?.variants || [],
+            },
+        };
+
+        const success = addToCart(cartItem);
+        if (success) {
+            toast.success(`Đã thêm ${product.title} vào giỏ hàng!`);
+        }
     };
 
     return (
         <div className="bg-[#fff0f0] rounded-[20px] overflow-hidden product-item transition-all duration-300 ease-linear hover:bg-client-primary group relative flex flex-col h-full">
+            <QuickViewModal
+                isOpen={modalState.isOpen}
+                onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))}
+                productSlug={product.url.split("/").pop() || ""}
+                mode={modalState.mode}
+            />
+
             {/* Wishlist Toggle Button */}
             <div
                 onClick={handleToggleWishlist}
@@ -110,7 +166,10 @@ export const ProductCard = ({ product, rawData }: { product: Product, rawData?: 
                 {/* Cart Button */}
                 <div className="flex flex-col justify-end">
                     <div className="w-[61px] h-[61px] pt-[10px] pr-[1px] pb-[1px] pl-[10px] relative rounded-tl-[30px] bg-white cart-button">
-                        <div className="w-[50px] h-[50px] rounded-full bg-client-primary flex items-center justify-center duration-[375ms] ease-[cubic-bezier(0.7,0,0.3,1)] group-hover:bg-client-secondary cursor-pointer">
+                        <div
+                            onClick={handleAddToCart}
+                            className="w-[50px] h-[50px] rounded-full bg-client-primary flex items-center justify-center duration-[375ms] ease-[cubic-bezier(0.7,0,0.3,1)] group-hover:bg-client-secondary cursor-pointer"
+                        >
                             <ShoppingCartOutlinedIcon
                                 className="text-white"
                                 sx={{ fontSize: "40px" }}

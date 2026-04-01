@@ -38,7 +38,7 @@ const STATUS_OPTIONS: { [key: string]: { label: string; color: string; bg: strin
 const PAYMENT_STATUS_OPTIONS: { [key: string]: { label: string; color: string; bg: string } } = {
     unpaid: { label: "Chưa thanh toán", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
     partially_paid: { label: "Thanh toán một phần", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)" },
-    paid: { label: "Đã thanh toán", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
+    paid: { label: "Đã thanh toán", color: "var(--palette-success-main)", bg: "rgba(34, 197, 94, 0.16)" },
     refunded: { label: "Đã hoàn tiền", color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)" },
 };
 

@@ -23,6 +23,8 @@ export const settingGeneralSchema = z.object({
     privacyPolicy: z.string().optional().or(z.literal("")),
     termsOfUse: z.string().optional().or(z.literal("")),
     conditions: z.string().optional().or(z.literal("")),
+    goongApiKey: z.string().optional().or(z.literal("")),
+    goongMapKey: z.string().optional().or(z.literal("")),
 });
 
 export type SettingGeneralFormValues = z.infer<typeof settingGeneralSchema>;

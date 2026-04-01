@@ -6,7 +6,7 @@ import { ServiceDesc } from "./sections/ServiceDesc";
 import { ServiceComment } from "./sections/ServiceComment";
 import { ServiceRelated } from "./sections/ServiceRelated";
 import { FooterSub } from "../../components/layouts/FooterSub";
-import { Skeleton, Typography, Box } from "@mui/material";
+import { Skeleton, Typography, Box, Tooltip } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Clock,
@@ -766,23 +766,31 @@ export const ServiceDetailPage = () => {
                                                             const isSelected = selectedTimeSlot?.time === fullTime;
 
                                                             return (
-                                                                <button
+                                                                <Tooltip
                                                                     key={m}
-                                                                    disabled={!isAvailable}
-                                                                    onClick={() => {
-                                                                        if (slot) setSelectedTimeSlot(slot);
-                                                                        else setSelectedTimeSlot({ time: fullTime, status: "available" });
-                                                                        setBookingPreview(null); // Reset preview when time changes
-                                                                    }}
-                                                                    className={`py-2 rounded-[8px] font-bold text-[13px] transition-all border-2
-                                                                    ${isSelected
-                                                                            ? 'bg-client-primary border-client-primary text-white scale-105 shadow-md'
-                                                                            : isAvailable
-                                                                                ? 'bg-white border-gray-100 text-client-secondary hover:border-client-primary/40 hover:shadow-sm'
-                                                                                : 'bg-gray-50 border-transparent text-gray-300 cursor-not-allowed'}`}
+                                                                    title={!isAvailable && !isPastTime ? "Tất cả nhân viên đã bận hoặc không đủ nhân sự vào khung giờ này rồi ạ!" : ""}
+                                                                    arrow
+                                                                    placement="top"
                                                                 >
-                                                                    {m}
-                                                                </button>
+                                                                    <span className={!isAvailable ? "cursor-not-allowed" : ""}>
+                                                                        <button
+                                                                            disabled={!isAvailable}
+                                                                            onClick={() => {
+                                                                                if (slot) setSelectedTimeSlot(slot);
+                                                                                else setSelectedTimeSlot({ time: fullTime, status: "available" });
+                                                                                setBookingPreview(null); // Reset preview when time changes
+                                                                            }}
+                                                                            className={`w-full py-2 rounded-[8px] font-bold text-[13px] transition-all border-2
+                                                                            ${isSelected
+                                                                                    ? 'bg-client-primary border-client-primary text-white scale-105 shadow-md'
+                                                                                    : isAvailable
+                                                                                        ? 'bg-white border-gray-100 text-client-secondary hover:border-client-primary/40 hover:shadow-sm'
+                                                                                        : 'bg-gray-50 border-transparent text-gray-300 pointer-events-none'}`}
+                                                                        >
+                                                                            {m}
+                                                                        </button>
+                                                                    </span>
+                                                                </Tooltip>
                                                             );
                                                         })}
                                                     </div>
