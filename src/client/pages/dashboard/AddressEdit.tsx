@@ -80,6 +80,8 @@ export const AddressEditPage = () => {
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [isNotFound, setIsNotFound] = useState(false);
+    const [tilesError, setTilesError] = useState(false);
+    const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
 
     const isManualChange = useRef(false);
 
@@ -187,16 +189,57 @@ export const AddressEditPage = () => {
 
     useEffect(() => {
         const timer = setTimeout(async () => {
-            if (searchKeyword.length > 2 && GOONG_API_KEY) {
+            if (searchKeyword.length > 2) {
+                console.log(`[MAP DEBUG] --- START SEARCH: "${searchKeyword}" ---`);
+
+                setIsLoadingSuggestions(true);
+                setShowSuggestions(true);
                 try {
-                    console.log("Goong AutoComplete input:", searchKeyword);
-                    const res = await fetch(`https://restapi.goong.io/Place/AutoComplete?api_key=${GOONG_API_KEY}&input=${encodeURIComponent(searchKeyword)}`);
-                    const data = await res.json();
-                    console.log("Goong AutoComplete result:", data);
-                    setSuggestions(data.predictions || []);
-                    setShowSuggestions(true);
+                    // Try to fetch from both concurrently
+                    const [goongRes, osmRes] = await Promise.allSettled([
+                        GOONG_API_KEY ? fetch(`https://restapi.goong.io/place/autocomplete?api_key=${GOONG_API_KEY}&input=${encodeURIComponent(searchKeyword)}&more_compound=true&limit=10`).then(r => r.json()) : Promise.reject("No Goong Key"),
+                        fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchKeyword)}&format=json&addressdetails=1&countrycodes=vn&accept-language=vi&limit=10`).then(r => r.json())
+                    ]);
+
+                    let combinedResults: any[] = [];
+
+                    // 1. Process Goong
+                    if (goongRes.status === 'fulfilled' && goongRes.value.predictions) {
+                        console.log(`[MAP DEBUG] Goong OK: Found ${goongRes.value.predictions.length}`);
+                        combinedResults = [...goongRes.value.predictions];
+                    } else {
+                        const reason = goongRes.status === 'rejected' ? goongRes.reason : 'Empty result';
+                        console.error(`[MAP DEBUG] Goong Failed:`, reason);
+                    }
+
+                    // 2. Process OSM
+                    if (osmRes.status === 'fulfilled' && Array.isArray(osmRes.value)) {
+                        console.log(`[MAP DEBUG] OSM OK: Found ${osmRes.value.length}`);
+                        const osmMapped = osmRes.value.map((item: any) => ({
+                            description: item.display_name,
+                            place_id: `osm-${item.place_id}`,
+                            is_osm: true,
+                            lat: item.lat,
+                            lon: item.lon
+                        }));
+
+                        osmMapped.forEach(osmItem => {
+                            const itemName = osmItem.description.split(',')[0].toLowerCase();
+                            const isDuplicate = combinedResults.some(gItem =>
+                                gItem.description.toLowerCase().includes(itemName)
+                            );
+                            if (!isDuplicate) combinedResults.push(osmItem);
+                        });
+                    } else {
+                        const reason = osmRes.status === 'rejected' ? osmRes.reason : 'Empty result';
+                        console.error(`[MAP DEBUG] OSM Failed:`, reason);
+                    }
+
+                    setSuggestions(combinedResults);
                 } catch (error) {
-                    console.log("Lỗi gợi ý tìm kiếm Goong");
+                    console.error("[MAP DEBUG] System Error:", error);
+                } finally {
+                    setIsLoadingSuggestions(false);
                 }
             } else {
                 setSuggestions([]);
@@ -207,9 +250,24 @@ export const AddressEditPage = () => {
     }, [searchKeyword, GOONG_API_KEY]);
 
     const handleSelectSuggestion = async (suggestion: any) => {
+        if (suggestion.is_osm) {
+            const lat = parseFloat(suggestion.lat);
+            const lon = parseFloat(suggestion.lon);
+            const newPos = new L.LatLng(lat, lon);
+            setPosition(newPos);
+            setMapCenter([lat, lon]);
+            setValue("latitude", lat);
+            setValue("longitude", lon);
+            setValue("address", suggestion.description);
+            setSearchKeyword("");
+            setShowSuggestions(false);
+            setIsNotFound(false);
+            return;
+        }
+
         if (!GOONG_API_KEY) return;
         try {
-            const res = await fetch(`https://restapi.goong.io/Place/Detail?place_id=${suggestion.place_id}&api_key=${GOONG_API_KEY}`);
+            const res = await fetch(`https://restapi.goong.io/place/detail?place_id=${suggestion.place_id}&api_key=${GOONG_API_KEY}`);
             const data = await res.json();
 
             if (data && data.result) {
@@ -330,8 +388,9 @@ export const AddressEditPage = () => {
                                     )}
                                 </div>
 
-                                <div className="relative h-[450px] border border-[#eee] rounded-[16px] overflow-hidden shadow-inner group/map">
-                                    <div className="absolute top-[20px] left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-[500px]">
+                                {/* Ensure search box and suggestions are visible outside the map grid */}
+                                <div className="relative h-[450px] border border-[#eee] rounded-[16px] shadow-inner group/map">
+                                    <div className="absolute top-[20px] left-1/2 -translate-x-1/2 z-[2000] w-[90%] max-w-[500px]">
                                         <div className="relative flex items-center bg-white/90 backdrop-blur-md shadow-[0px_10px_30px_rgba(0,0,0,0.1)] rounded-[8px] border border-white/50 p-[5px]">
                                             <div className="pl-[15px]">
                                                 <Search className="w-[18px] h-[18px] text-gray-400" />
@@ -355,21 +414,32 @@ export const AddressEditPage = () => {
                                             </button>
                                         </div>
 
-                                        {showSuggestions && suggestions.length > 0 && (
-                                            <div className="absolute top-[calc(100%+10px)] left-0 w-full bg-white/95 backdrop-blur-lg border border-[#eee] rounded-[12px] shadow-[0px_15px_35px_rgba(0,0,0,0.15)] overflow-hidden">
-                                                {suggestions.map((item, index) => (
-                                                    <div
-                                                        key={index}
-                                                        onClick={() => handleSelectSuggestion(item)}
-                                                        className="px-[20px] py-[15px] hover:bg-client-primary/5 cursor-pointer border-b border-[#f5f5f5] last:border-none flex items-start gap-[12px] transition-colors"
-                                                    >
-                                                        <MapPin className="w-[16px] h-[16px] text-client-secondary shrink-0 mt-[2px]" />
-                                                        <div className="flex flex-col gap-[2px]">
-                                                            <span className="text-[14px] font-[500] text-[#333] line-clamp-1">{item.description.split(',')[0]}</span>
-                                                            <span className="text-[12px] text-gray-500 line-clamp-1">{item.description}</span>
-                                                        </div>
+                                        {showSuggestions && (
+                                            <div className="absolute top-[calc(100%+10px)] left-0 w-full bg-white/95 backdrop-blur-lg border border-[#eee] rounded-[12px] shadow-[0px_15px_35px_rgba(0,0,0,0.15)] overflow-hidden z-[1001]">
+                                                {isLoadingSuggestions ? (
+                                                    <div className="px-[20px] py-[15px] text-gray-500 text-[14px] flex items-center gap-2">
+                                                        <div className="w-4 h-4 border-2 border-client-primary border-t-transparent rounded-full animate-spin"></div>
+                                                        Đang tìm kiếm...
                                                     </div>
-                                                ))}
+                                                ) : suggestions.length > 0 ? (
+                                                    suggestions.map((item, index) => (
+                                                        <div
+                                                            key={index}
+                                                            onClick={() => handleSelectSuggestion(item)}
+                                                            className="px-[20px] py-[15px] hover:bg-client-primary/5 cursor-pointer border-b border-[#f5f5f5] last:border-none flex items-start gap-[12px] transition-colors"
+                                                        >
+                                                            <MapPin className="w-[16px] h-[16px] text-client-secondary shrink-0 mt-[2px]" />
+                                                            <div className="flex flex-col gap-[2px]">
+                                                                <span className="text-[14px] font-[500] text-[#333] line-clamp-1">{item.description.split(',')[0]}</span>
+                                                                <span className="text-[12px] text-gray-500 line-clamp-1">{item.description}</span>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="px-[20px] py-[15px] text-gray-500 text-[14px]">
+                                                        Không tìm thấy địa điểm này
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -381,10 +451,16 @@ export const AddressEditPage = () => {
                                         style={{ height: '100%', width: '100%' }}
                                     >
                                         <TileLayer
-                                            attribution='&copy; <a href="https://goong.io">Goong Maps</a>'
-                                            url={GOONG_MAP_KEY
+                                            attribution={!tilesError && GOONG_MAP_KEY ? '&copy; <a href="https://goong.io">Goong Maps</a>' : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}
+                                            url={(!tilesError && GOONG_MAP_KEY)
                                                 ? `https://tiles.goong.io/assets/goong_map_web/{z}/{x}/{y}.png?api_key=${GOONG_MAP_KEY}`
                                                 : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
+                                            eventHandlers={{
+                                                tileerror: (error: any) => {
+                                                    console.warn("Goong Tiles error - Falling back to OSM:", error);
+                                                    setTilesError(true);
+                                                }
+                                            }}
                                         />
                                         <LocationMarker position={position} setPosition={setPosition} onLocationSelect={fetchAddressFromCoords} />
                                         <MapController center={mapCenter} />
