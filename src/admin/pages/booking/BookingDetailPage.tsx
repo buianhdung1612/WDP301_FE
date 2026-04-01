@@ -247,18 +247,20 @@ export const BookingDetailPage = () => {
         });
     };
 
-    // Tìm các lịch bị ảnh hưởng
-    const sid = booking?.staffIds?.[0]?._id || booking?.staffIds?.[0];
-    const { data: affectedRes } = useBookings(sid ? {
-        staffId: sid,
+    const staffIdsMap = Array.from(new Set(booking?.petStaffMap?.map((m: any) => m.staffId?._id || m.staffId).filter(Boolean))) as string[];
+
+    const { data: affectedRes } = useBookings(staffIdsMap.length > 0 ? {
+        staffIds: staffIdsMap.join(','),
         status: 'pending,confirmed,in-progress',
-        limit: 10
+        date: dayjs(booking?.start).format('YYYY-MM-DD'),
+        limit: 50
     } : null);
 
     const bookings = affectedRes?.data?.recordList || [];
     const affectedList = bookings.filter((b: any) =>
         b._id !== id &&
-        dayjs(b.start).isBefore(dayjs(booking?.expectedFinish || booking?.end))
+        dayjs(b.start).isBefore(dayjs(booking?.expectedFinish || booking?.end)) &&
+        dayjs(b.end).isAfter(dayjs(booking?.actualStart || booking?.start))
     );
 
     if (isLoading) {

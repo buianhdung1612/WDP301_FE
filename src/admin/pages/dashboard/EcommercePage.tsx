@@ -1,5 +1,4 @@
 ﻿import { Grid, Box, Typography, Button, Divider, Menu, MenuItem, Stack, Table, TableBody, TableCell, TableHead, TableRow, TableContainer, Avatar } from "@mui/material"
-import { StaffingAlertWidget } from "./components/StaffingAlertWidget";
 import WelcomeWidget from "../../components/dashboard/WelcomeWidget";
 import SummaryWidget from "../../components/dashboard/SummaryWidget";
 import DashboardCard from "../../components/dashboard/DashboardCard";
@@ -7,7 +6,6 @@ import { useAuthStore } from "../../../stores/useAuthStore";
 import { Icon } from '@iconify/react';
 import { useState, useEffect } from "react";
 import { getEcommerceStats } from "../../api/dashboard.api";
-import dayjs from "dayjs";
 import Chart from 'react-apexcharts';
 
 const SalesByCategory = ({ data }: { data: any[] }) => {
@@ -38,7 +36,7 @@ const SalesByCategory = ({ data }: { data: any[] }) => {
                         fontWeight: 700,
                         color: 'var(--palette-text-primary)',
                         offsetY: 5,
-                        formatter: (val: number) => `${Math.round(val)}%`,
+                        formatter: (val: number) => `${val.toFixed(2)}%`,
                     },
                     total: {
                         show: true,
@@ -307,11 +305,8 @@ export const EcommercePage = () => {
                 <WelcomeWidget
                     title={`Chào mừng quay trở lại 👋\n` + (user?.fullName || 'Admin')}
                     description="Hôm nay có gì mới? Hãy kiểm tra các chỉ số kinh doanh và lịch đặt gần đây."
-                    img={<img src="/assets/illustrations/characters/character_7.png" alt="Welcome" />}
+                    img="/assets/illustrations/characters/character_7.png"
                 />
-                <Box sx={{ mt: 3 }}>
-                    <StaffingAlertWidget />
-                </Box>
             </Grid>
 
             {/* Featured Product Slide */}

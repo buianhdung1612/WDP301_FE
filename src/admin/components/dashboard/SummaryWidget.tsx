@@ -67,7 +67,7 @@ const SummaryWidget = ({ title, total, percent, color = '#00a76f', chartData }: 
                         />
                     </Box>
                     <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                        {percent > 0 ? `+${percent}` : percent}%
+                        {percent > 0 ? `+${Number(percent).toFixed(2)}` : Number(percent).toFixed(2)}%
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'var(--palette-text-secondary)', fontWeight: 400 }}>
                         7 ngày qua
