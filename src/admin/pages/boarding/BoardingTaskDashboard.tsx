@@ -64,7 +64,7 @@ export const BoardingTaskDashboard = ({ bookings, careDate }: TaskDashboardProps
                     customerName: booking.fullName || booking.userId?.fullName,
                     type: "feeding",
                     scheduleIndex: index,
-                    displayTime: taskTime,
+                    displayTime: dayjs(`2000-01-01 ${taskTime}`).format("hh:mm A"),
                     sortTime: taskTime
                 });
             });

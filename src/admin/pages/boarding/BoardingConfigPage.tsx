@@ -186,32 +186,7 @@ export const BoardingConfigPage = () => {
                         </Grid>
                     </Card>
 
-                    {/* Chính sách Hủy phòng */}
-                    <Card sx={{ p: 4, borderRadius: '24px', boxShadow: "0 8px 32px rgba(0,0,0,0.03)", border: `1px solid ${BRAND_COLORS.border}` }}>
-                        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 4 }}>
-                            <Box sx={{ p: 1, bgcolor: alpha("#ef4444", 0.1), borderRadius: '12px', color: "#ef4444" }}>
-                                <Icon icon="solar:shield-warning-bold-duotone" width={24} />
-                            </Box>
-                            <Typography variant="h6" sx={{ fontWeight: 800 }}>Chính sách Hủy phòng</Typography>
-                        </Stack>
 
-                        <Grid container spacing={4}>
-                            <Grid size={{ xs: 12, md: 6 }}>
-                                <Controller name="bookingCancellationPeriod" control={control} render={({ field }) => (
-                                    <TextField {...field} label="Thời hạn hủy đơn trước khi check-in" fullWidth type="number"
-                                        InputProps={{ endAdornment: <InputAdornment position="end">giờ</InputAdornment> }}
-                                        onChange={(e) => field.onChange(Number(e.target.value))} />
-                                )} />
-                            </Grid>
-                            <Grid size={{ xs: 12, md: 6 }}>
-                                <Controller name="refundPercentage" control={control} render={({ field }) => (
-                                    <TextField {...field} label="Tỷ lệ hoàn tiền khi hủy hợp lệ" fullWidth type="number"
-                                        InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
-                                        onChange={(e) => field.onChange(Number(e.target.value))} />
-                                )} />
-                            </Grid>
-                        </Grid>
-                    </Card>
 
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', pb: 10 }}>
                         <Button

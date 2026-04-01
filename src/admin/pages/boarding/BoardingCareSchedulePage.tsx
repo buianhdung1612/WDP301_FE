@@ -765,7 +765,7 @@ export const BoardingCareSchedulePage = () => {
                                                             #{r.code?.toUpperCase().slice(-6)}
                                                         </Typography>
                                                         <Typography variant="caption" sx={{ color: "var(--palette-text-secondary)", display: "block", fontSize: "0.75rem", fontWeight: 500 }}>
-                                                            {dayjs(r.createdAt).format("DD/MM/YYYY HH:mm")}
+                                                            {dayjs(r.createdAt).format("DD/MM/YYYY hh:mm A")}
                                                         </Typography>
                                                     </TableCell>
                                                     <TableCell sx={{ borderBottom: "1px dashed var(--palette-background-neutral)" }}>

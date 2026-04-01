@@ -303,7 +303,7 @@ export const BoardingBookingDetailPage = () => {
                                     <Box>
                                         <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Check-out thành công</Typography>
                                         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                            {booking.actualCheckOutDate ? dayjs(booking.actualCheckOutDate).format("DD/MM/YYYY HH:mm") : "Chưa trả chuồng"}
+                                            {booking.actualCheckOutDate ? dayjs(booking.actualCheckOutDate).format("DD/MM/YYYY hh:mm A") : "Chưa trả chuồng"}
                                         </Typography>
                                     </Box>
                                 </Stack>
@@ -315,7 +315,7 @@ export const BoardingBookingDetailPage = () => {
                                     <Box>
                                         <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Check-in thành công</Typography>
                                         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                            {booking.actualCheckInDate ? dayjs(booking.actualCheckInDate).format("DD/MM/YYYY HH:mm") : "Chưa nhận chuồng"}
+                                            {booking.actualCheckInDate ? dayjs(booking.actualCheckInDate).format("DD/MM/YYYY hh:mm A") : "Chưa nhận chuồng"}
                                         </Typography>
                                     </Box>
                                 </Stack>
@@ -326,7 +326,7 @@ export const BoardingBookingDetailPage = () => {
                                     <Box>
                                         <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Tạo đơn lưu trú</Typography>
                                         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                            {dayjs(booking.createdAt).format("DD/MM/YYYY HH:mm")}
+                                            {dayjs(booking.createdAt).format("DD/MM/YYYY hh:mm A")}
                                         </Typography>
                                     </Box>
                                 </Stack>
