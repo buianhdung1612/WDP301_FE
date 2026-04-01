@@ -437,11 +437,6 @@ export const OrderList = () => {
                                                         Chi tiết
                                                     </MenuItem>
 
-                                                    <MenuItem onClick={() => { handleCloseMenu(row._id); navigate(`/${prefixAdmin}/order/edit/${row._id}`); }}>
-                                                        <Icon icon="solar:pen-bold" width={18} style={{ marginRight: 8 }} />
-                                                        Chỉnh sửa
-                                                    </MenuItem>
-
                                                     {row.orderStatus === 'pending' && (
                                                         <MenuItem
                                                             onClick={() => { handleCloseMenu(row._id); handleStatusUpdate(row._id, 'confirmed'); }}

@@ -32,7 +32,6 @@ const STATUS_OPTIONS: { [key: string]: { label: string; color: string; bg: strin
     "in-progress": { label: "Đang thực hiện", color: "var(--palette-primary-dark)", bg: "var(--palette-primary-lighter)" },
     completed: { label: "Hoàn thành", color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
     cancelled: { label: "Đã hủy", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
-    returned: { label: "Trả đơn (Hoàn)", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
     request_cancel: { label: "Yêu cầu hủy", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
 };
 
@@ -235,7 +234,7 @@ export const BookingDetailPage = () => {
         n.metadata?.bookingId === id &&
         n.metadata?.type === "optimization_suggestion" &&
         n.status === "unread" &&
-        !['completed', 'cancelled', 'returned'].includes(booking?.bookingStatus)
+        !['completed', 'cancelled'].includes(booking?.bookingStatus)
     );
 
     const handleExtend = () => {
@@ -407,7 +406,7 @@ export const BookingDetailPage = () => {
         }
     };
 
-    const isTerminalStatus = ['completed', 'cancelled', 'returned'].includes(booking.bookingStatus);
+    const isTerminalStatus = ['completed', 'cancelled'].includes(booking.bookingStatus);
 
     return (
         <Box sx={{ maxWidth: '1200px', mx: 'auto' }}>
@@ -953,9 +952,9 @@ export const BookingDetailPage = () => {
                                                 <Box sx={{ flexGrow: 1, width: 2, bgcolor: 'background.neutral', my: 1 }} />
                                             </Box>
                                             <Box>
-                                                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: booking.actualStart ? 'var(--palette-text-primary)' : 'var(--palette-text-disabled)' }}>Bắt đầu thực hiện (Check-in)</Typography>
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: booking.actualStart ? 'var(--palette-text-primary)' : 'var(--palette-text-disabled)' }}>Bắt đầu thực hiện</Typography>
                                                 <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)' }}>
-                                                    {booking.actualStart ? dayjs(booking.actualStart).format("DD MMM YYYY h:mm a") : "Chưa check-in"}
+                                                    {booking.actualStart ? dayjs(booking.actualStart).format("DD MMM YYYY h:mm a") : "Chưa bắt đầu"}
                                                 </Typography>
                                             </Box>
                                         </Stack>

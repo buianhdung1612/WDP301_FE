@@ -461,7 +461,7 @@ export const OrderEditPage = () => {
                                     >
                                         <MenuItem value="unpaid">Chưa thanh toán</MenuItem>
                                         <MenuItem value="paid">Đã thanh toán</MenuItem>
-                                        <MenuItem value="refunded">Đã hoàn lại tiền</MenuItem>
+                                        {paymentMethod !== 'money' && <MenuItem value="refunded">Đã hoàn lại tiền</MenuItem>}
                                     </Select>
                                 </FormControl>
                             </Stack>

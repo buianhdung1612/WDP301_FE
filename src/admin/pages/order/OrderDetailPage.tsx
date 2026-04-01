@@ -18,7 +18,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { useOrderDetail, useUpdateOrderStatus, useUpdateOrder } from "./hooks/useOrderManagement";
 import { toast } from "react-toastify";
-import { prefixAdmin } from "../../constants/routes";
 
 const STATUS_OPTIONS: { [key: string]: { label: string; color: string; bg: string } } = {
     pending: { label: "Chờ xác nhận", color: "var(--palette-warning-dark)", bg: "var(--palette-warning-lighter)" },
@@ -134,6 +133,7 @@ export const OrderDetailPage = () => {
                         size="small"
                         value={order.orderStatus}
                         onChange={(e) => handleStatusChange(e.target.value)}
+                        disabled={order.orderStatus === 'completed' || order.orderStatus === 'cancelled' || order.orderStatus === 'returned'}
                         sx={{
                             minWidth: 140,
                             height: 36,
@@ -168,6 +168,10 @@ export const OrderDetailPage = () => {
                                 top: 'calc(50% - 9px)',
                                 right: 6,
                                 transition: (theme) => theme.transitions.create('transform'),
+                            },
+                            '&.Mui-disabled': {
+                                opacity: 0.8,
+                                '& .MuiSelect-icon': { display: 'none' }
                             }
                         }}
                         IconComponent={(props) => (
@@ -234,24 +238,7 @@ export const OrderDetailPage = () => {
                             },
                         }}
                     >
-                        In đơn
-                    </Button>
-                    <Button
-                        variant="contained"
-                        startIcon={<Icon icon="solar:pen-bold" />}
-                        onClick={() => navigate(`/${prefixAdmin}/order/edit/${id}`)}
-                        sx={{
-                            height: 36,
-                            fontWeight: 700,
-                            fontSize: '0.875rem',
-                            textTransform: 'capitalize',
-                            borderRadius: '8px',
-                            bgcolor: 'var(--palette-grey-800)',
-                            color: 'common.white',
-                            '&:hover': { bgcolor: 'var(--palette-grey-900)' }
-                        }}
-                    >
-                        Chỉnh sửa
+                        Export
                     </Button>
                 </Stack>
             </Box>
@@ -437,16 +424,19 @@ export const OrderDetailPage = () => {
                                         }
                                     }}
                                 >
-                                    {Object.entries(PAYMENT_STATUS_OPTIONS).map(([value, opt]) => (
-                                        <MenuItem
-                                            key={value}
-                                            value={value}
-                                            sx={{ fontSize: '0.875rem' }}
-                                            disabled={order.paymentStatus === 'paid' && value === 'unpaid'}
-                                        >
-                                            {opt.label}
-                                        </MenuItem>
-                                    ))}
+                                    {Object.entries(PAYMENT_STATUS_OPTIONS).map(([value, opt]) => {
+                                        if (order.paymentMethod === 'money' && value === 'refunded') return null;
+                                        return (
+                                            <MenuItem
+                                                key={value}
+                                                value={value}
+                                                sx={{ fontSize: '0.875rem' }}
+                                                disabled={order.paymentStatus === 'paid' && value === 'unpaid'}
+                                            >
+                                                {opt.label}
+                                            </MenuItem>
+                                        );
+                                    })}
                                 </Select>
                             </Stack>
                             <Stack direction="row" alignItems="center" spacing={1} justifyContent="space-between">

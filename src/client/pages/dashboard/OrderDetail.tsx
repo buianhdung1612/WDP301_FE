@@ -7,7 +7,7 @@ import { getOrderDetail } from "../../api/dashboard.api";
 import { formatCurrency } from "../../helpers";
 import dayjs from "dayjs";
 
-import { exportInvoicePdf, cancelOrder, confirmReceipt } from "../../api/order.api";
+import { exportInvoicePdf, cancelOrder } from "../../api/order.api";
 import { toast } from "react-toastify";
 import { createReview } from "../../api/review.api";
 import { useMutation } from "@tanstack/react-query";
@@ -172,20 +172,7 @@ export const OrderDetailPage = () => {
         }
     };
 
-    const handleConfirmReceipt = async () => {
-        if (!id || !order) return;
-        try {
-            const res = await confirmReceipt(id);
-            if (res.code === "success") {
-                toast.success(res.message || "Xác nhận nhận hàng thành công!");
-                fetchOrder();
-            } else {
-                toast.error(res.message || "Xác nhận thất bại!");
-            }
-        } catch (error) {
-            toast.error("Đã có lỗi xảy ra!");
-        }
-    };
+
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -378,17 +365,7 @@ export const OrderDetailPage = () => {
                                                 Xuất hóa đơn
                                             </button>
 
-                                            {order.orderStatus === "shipped" && (
-                                                <button
-                                                    onClick={handleConfirmReceipt}
-                                                    className="bg-[#05A845] hover:bg-[#048a39] transition-default text-white font-[600] text-[14px] py-[15px] px-[20px] rounded-[6px] cursor-pointer flex items-center justify-center gap-2 w-full shadow-lg animate-bounce-subtle"
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-[18px] h-[18px]">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
-                                                    </svg>
-                                                    Đã nhận được hàng
-                                                </button>
-                                            )}
+
 
                                             {(order.orderStatus === "pending" || order.orderStatus === "confirmed") && (
                                                 <button
