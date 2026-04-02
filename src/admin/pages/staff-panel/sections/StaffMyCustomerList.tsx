@@ -414,15 +414,7 @@ export const StaffMyCustomerList = ({ staffId }: { staffId?: string }) => {
                                     )}
                                 </Box>
 
-                                <Button
-                                    fullWidth
-                                    variant="contained"
-                                    size="large"
-                                    onClick={() => navigate(`/${prefixAdmin}/boarding/${selectedBooking._id}`)}
-                                    sx={{ bgcolor: '#111827', py: 2, borderRadius: '20px', fontWeight: 900 }}
-                                >
-                                    Quản lý chi tiết toàn diện
-                                </Button>
+
                             </Stack>
                         </DialogContent>
                     </>

@@ -114,7 +114,8 @@ const FeedingRow = ({
     onAddMedia,
     onRemoveMedia,
     onViewMedia,
-    isReadOnly = false
+    isReadOnly = false,
+    canAssignHotelStaff = false
 }: {
     item: BoardingFeedingItem;
     idx: number;
@@ -127,6 +128,7 @@ const FeedingRow = ({
     onRemoveMedia: (mIdx: number) => void;
     onViewMedia: (mIdx: number) => void;
     isReadOnly?: boolean;
+    canAssignHotelStaff?: boolean;
 }) => {
     const sVal = item.staffId ? (typeof item.staffId === "string" ? item.staffId : (item.staffId as any)?._id || "") : "";
     return (
@@ -158,7 +160,7 @@ const FeedingRow = ({
                     sx={{ flexGrow: 1 }}
                 />
                 <TextField size="small" label="Khẩu phần" value={item.amount || ""} onChange={e => !isReadOnly && onUpdate({ amount: e.target.value })} disabled={isReadOnly} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} />
-                <TextField size="small" select label="Nhân viên" value={sVal} onChange={e => !isReadOnly && onUpdate({ staffId: e.target.value })} disabled={isReadOnly} sx={{ width: 180, flexShrink: 0 }}>
+                <TextField size="small" select label="Nhân viên" value={sVal} onChange={e => !isReadOnly && onUpdate({ staffId: e.target.value })} disabled={isReadOnly || !canAssignHotelStaff} sx={{ width: 180, flexShrink: 0 }}>
                     {staffOptions.length > 0 ? staffOptions.map(o => <MenuItem key={o.value} value={o.value} disabled={o.disabled}>{o.label}</MenuItem>) : <MenuItem disabled value="">(Chưa có NV ca này)</MenuItem>}
                 </TextField>
                 <TextField size="small" select label="Trạng thái" value={item.status || "pending"} onChange={e => !isReadOnly && onUpdate({ status: e.target.value as any })} disabled={isReadOnly} sx={{ width: 150, flexShrink: 0 }}>
@@ -221,7 +223,8 @@ const ExerciseRow = ({
     onAddMedia,
     onRemoveMedia,
     onViewMedia,
-    isReadOnly = false
+    isReadOnly = false,
+    canAssignHotelStaff = false
 }: {
     item: BoardingExerciseItem;
     idx: number;
@@ -234,6 +237,7 @@ const ExerciseRow = ({
     onRemoveMedia: (mIdx: number) => void;
     onViewMedia: (mIdx: number) => void;
     isReadOnly?: boolean;
+    canAssignHotelStaff?: boolean;
 }) => {
     const sVal = item.staffId ? (typeof item.staffId === "string" ? item.staffId : (item.staffId as any)?._id || "") : "";
     return (
@@ -265,7 +269,7 @@ const ExerciseRow = ({
                     sx={{ flexGrow: 1 }}
                 />
                 <TextField size="small" label="Thời lượng (p)" type="number" value={item.durationMinutes || 0} onChange={e => !isReadOnly && onUpdate({ durationMinutes: Number(e.target.value) })} disabled={isReadOnly} sx={{ width: 100, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} />
-                <TextField size="small" select label="Nhân viên" value={sVal} onChange={e => !isReadOnly && onUpdate({ staffId: e.target.value })} disabled={isReadOnly} sx={{ width: 180, flexShrink: 0 }}>
+                <TextField size="small" select label="Nhân viên" value={sVal} onChange={e => !isReadOnly && onUpdate({ staffId: e.target.value })} disabled={isReadOnly || !canAssignHotelStaff} sx={{ width: 180, flexShrink: 0 }}>
                     {staffOptions.length > 0 ? staffOptions.map(o => <MenuItem key={o.value} value={o.value} disabled={o.disabled}>{o.label}</MenuItem>) : <MenuItem disabled value="">(Chưa có NV ca này)</MenuItem>}
                 </TextField>
                 <TextField size="small" select label="Trạng thái" value={item.status || "pending"} onChange={e => !isReadOnly && onUpdate({ status: e.target.value as any })} disabled={isReadOnly} sx={{ width: 150, flexShrink: 0 }}>
@@ -1093,6 +1097,7 @@ export const BoardingCareSchedulePage = () => {
                                                     onRemoveMedia={(mIdx) => handleRemoveMedia("f", originalIdx, mIdx)}
                                                     onViewMedia={(mIdx) => handleViewMedia("f", originalIdx, mIdx)}
                                                     isReadOnly={isReadOnly}
+                                                    canAssignHotelStaff={canAssignHotelStaff}
                                                 />
                                             ))}
                                     </Stack>
@@ -1167,6 +1172,7 @@ export const BoardingCareSchedulePage = () => {
                                                     onRemoveMedia={(mIdx) => handleRemoveMedia("e", originalIdx, mIdx)}
                                                     onViewMedia={(mIdx) => handleViewMedia("e", originalIdx, mIdx)}
                                                     isReadOnly={isReadOnly}
+                                                    canAssignHotelStaff={canAssignHotelStaff}
                                                 />
                                             ))}
                                     </Stack>

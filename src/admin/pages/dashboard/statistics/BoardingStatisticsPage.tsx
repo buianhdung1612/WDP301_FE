@@ -37,7 +37,7 @@ export const BoardingStatisticsPage = () => {
 
     const revenueOptions: any = {
         chart: { toolbar: { show: false }, fontFamily: 'Public Sans, sans-serif' },
-        xaxis: { categories: revenueByCageType.map((r: any) => r._id) },
+        xaxis: { categories: revenueByCageType.map((r: any) => r._id === 'vip' ? 'Phòng VIP' : (r._id === 'standard' ? 'Tiêu chuẩn' : r._id)) },
         colors: ['#FF5630'],
         plotOptions: { bar: { columnWidth: '25%', borderRadius: 4 } },
         grid: { strokeDashArray: 3 }
@@ -82,7 +82,7 @@ export const BoardingStatisticsPage = () => {
 
                             <Box sx={{ p: 3, bgcolor: 'rgba(255, 171, 0, 0.08)', borderRadius: 2 }}>
                                 <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600 }}>Hiệu suất sử dụng phòng</Typography>
-                                <Typography variant="h3" sx={{ fontWeight: 800, color: 'warning.main', my: 1 }}>{((occupancyRes.reduce((a: number, b: number) => a + b, 0) / 10) * 100).toFixed(1)}%</Typography>
+                                <Typography variant="h3" sx={{ fontWeight: 800, color: 'warning.main', my: 1 }}>{((occupancyRes.reduce((a: number, b: any) => a + (b.count || 0), 0) / 10) * 100).toFixed(1)}%</Typography>
                                 <Typography variant="body2" sx={{ fontWeight: 600 }}>Trên tổng công suất</Typography>
                             </Box>
 

@@ -107,20 +107,8 @@ export const BoardingConfigPage = () => {
                                     <TextField {...field} label="Giờ trả phòng tiêu chuẩn" fullWidth type="time" InputLabelProps={{ shrink: true }} />
                                 )} />
                             </Grid>
-                            <Grid size={{ xs: 12, md: 6 }}>
-                                <Controller name="lateCheckOutGracePeriod" control={control} render={({ field }) => (
-                                    <TextField {...field} label="Thời gian gia hạn trễ (Grace Period)" fullWidth type="number"
-                                        InputProps={{ endAdornment: <InputAdornment position="end">phút</InputAdornment> }}
-                                        onChange={(e) => field.onChange(Number(e.target.value))} />
-                                )} />
-                            </Grid>
-                            <Grid size={{ xs: 12, md: 6 }}>
-                                <Controller name="autoCancelHeldHours" control={control} render={({ field }) => (
-                                    <TextField {...field} label="Tự động hủy đơn 'Held' sau" fullWidth type="number"
-                                        InputProps={{ endAdornment: <InputAdornment position="end">giờ</InputAdornment> }}
-                                        onChange={(e) => field.onChange(Number(e.target.value))} />
-                                )} />
-                            </Grid>
+
+
                         </Grid>
                     </Card>
 
