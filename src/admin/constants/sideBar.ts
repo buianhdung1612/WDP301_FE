@@ -10,7 +10,6 @@ import SecurityIcon from "@mui/icons-material/Security";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import SettingsIcon from "@mui/icons-material/Settings";
 import BadgeIcon from "@mui/icons-material/Badge";
-import ChatIcon from "@mui/icons-material/Chat";
 import HomeWorkIcon from "@mui/icons-material/HomeWork";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 
@@ -99,23 +98,6 @@ export const menuManagementData = [
         ]
     },
     {
-        id: "reviews",
-        label: "Đánh giá",
-        Icon: RateReviewIcon,
-        path: `/${prefixAdmin}/review`,
-        permission: "product_view"
-    },
-    {
-        id: "orders",
-        label: "Đơn hàng",
-        Icon: ArticleIcon,
-        permission: "product_view",
-        children: [
-            { id: "list", label: "Danh sách đơn hàng", path: `/${prefixAdmin}/order/list`, permission: "product_view" },
-            { id: "create", label: "Tạo đơn hàng", path: `/${prefixAdmin}/order/create`, permission: "product_create" },
-        ]
-    },
-    {
         id: "services",
         label: "Dịch vụ",
         Icon: PetsIcon,
@@ -136,6 +118,46 @@ export const menuManagementData = [
             { id: "list", label: "Danh sách bài viết", tKey: "admin.sidebar.blog_list", path: `/${prefixAdmin}/blog/list`, permission: "blog_view" },
             { id: "category", label: "Danh mục bài viết", tKey: "admin.sidebar.blog_category", path: `/${prefixAdmin}/blog-category/list`, permission: "blog_category_view" },
         ]
+    },
+    {
+        id: "orders",
+        label: "Đơn hàng",
+        Icon: ArticleIcon,
+        path: `/${prefixAdmin}/order/list`,
+        permission: "product_view",
+    },
+    {
+        id: "bookings",
+        label: "Đơn dịch vụ",
+        tKey: "admin.sidebar.bookings",
+        Icon: ScheduleSendIcon,
+        permission: "booking_view",
+        children: [
+            { id: "list", label: "Danh sách đơn", tKey: "admin.sidebar.booking_list", path: `/${prefixAdmin}/booking/list`, permission: "booking_view" },
+            { id: "create", label: "Tạo đơn dịch vụ", path: `/${prefixAdmin}/booking/create`, permission: "booking_create" },
+            { id: "config", label: "Cấu hình đơn", path: `/${prefixAdmin}/booking/config`, permission: "booking_view" },
+        ]
+    },
+    {
+        id: "boarding",
+        label: "Khách sạn",
+        Icon: HomeWorkIcon,
+        permission: "boarding_booking_view",
+        children: [
+            { id: "booking-list", label: "Danh sách đơn khách sạn", path: `/${prefixAdmin}/boarding/booking-list`, permission: "boarding_booking_view" },
+            { id: "boarding-create", label: "Tạo đơn khách sạn", path: `/${prefixAdmin}/boarding/create`, permission: "boarding_booking_create" },
+            { id: "care-schedule", label: "Lịch chăm sóc", path: `/${prefixAdmin}/boarding/care-schedule`, permission: "boarding_booking_edit" },
+            { id: "cages", label: "Quản lý chuồng", path: `/${prefixAdmin}/boarding/cages`, permission: "boarding_cage_view" },
+            { id: "care-templates", label: " Danh mục Thức ăn & Vận động", path: `/${prefixAdmin}/boarding/care-templates`, permission: "boarding_cage_edit" },
+            { id: "config", label: "Cấu hình khách sạn", path: `/${prefixAdmin}/boarding/config`, permission: "boarding_booking_view" },
+        ]
+    },
+    {
+        id: "reviews",
+        label: "Đánh giá",
+        Icon: RateReviewIcon,
+        path: `/${prefixAdmin}/review`,
+        permission: "product_view"
     },
     {
         id: "roles",
@@ -173,32 +195,6 @@ export const menuManagementData = [
         ]
     },
     {
-        id: "bookings",
-        label: "Đơn dịch vụ",
-        tKey: "admin.sidebar.bookings",
-        Icon: ScheduleSendIcon,
-        permission: "booking_view",
-        children: [
-            { id: "list", label: "Danh sách đơn", tKey: "admin.sidebar.booking_list", path: `/${prefixAdmin}/booking/list`, permission: "booking_view" },
-            { id: "create", label: "Tạo đơn dịch vụ", path: `/${prefixAdmin}/booking/create`, permission: "booking_create" },
-            { id: "config", label: "Cấu hình đơn", path: `/${prefixAdmin}/booking/config`, permission: "booking_view" },
-        ]
-    },
-    {
-        id: "boarding",
-        label: "Khách sạn",
-        Icon: HomeWorkIcon,
-        permission: "boarding_booking_view",
-        children: [
-            { id: "booking-list", label: "Danh sách đơn khách sạn", path: `/${prefixAdmin}/boarding/booking-list`, permission: "boarding_booking_view" },
-            { id: "boarding-create", label: "Tạo đơn khách sạn", path: `/${prefixAdmin}/boarding/create`, permission: "boarding_booking_create" },
-            { id: "care-schedule", label: "Lịch chăm sóc", path: `/${prefixAdmin}/boarding/care-schedule`, permission: "boarding_booking_edit" },
-            { id: "cages", label: "Quản lý chuồng", path: `/${prefixAdmin}/boarding/cages`, permission: "boarding_cage_view" },
-            { id: "care-templates", label: " Danh mục Thức ăn & Vận động", path: `/${prefixAdmin}/boarding/care-templates`, permission: "boarding_cage_edit" },
-            { id: "config", label: "Cấu hình khách sạn", path: `/${prefixAdmin}/boarding/config`, permission: "boarding_booking_view" },
-        ]
-    },
-    {
         id: "coupons",
         label: "Mã giảm giá",
         tKey: "admin.sidebar.coupons",
@@ -227,12 +223,6 @@ export const menuManagementData = [
         Icon: CalendarMonthIcon,
         path: `/${prefixAdmin}/calendar`,
         permission: "calendar_view"
-    },
-    {
-        id: "chat",
-        label: "Chat",
-        Icon: ChatIcon,
-        path: `/${prefixAdmin}/chat`,
     },
     {
         id: "settings",

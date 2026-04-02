@@ -73,7 +73,6 @@ import { StaffWorkSchedulePage } from "../pages/staff-panel/StaffWorkSchedulePag
 import { StaffCustomerListPage } from "../pages/staff-panel/StaffCustomerListPage";
 import { OrderListPage } from "../pages/order/OrderListPage";
 import { OrderDetailPage } from "../pages/order/OrderDetailPage";
-import { OrderCreatePage } from "../pages/order/OrderCreatePage";
 import { ChatPage } from "../pages/chat/ChatPage";
 import { ReviewListPage } from "../pages/review/ReviewListPage";
 import { PermissionGuard } from "../components/auth/PermissionGuard";
@@ -153,7 +152,6 @@ export const AdminRoutes = [
     { path: "booking/detail/:id", element: <PermissionGuard permission="booking_view"><BookingDetailPage /></PermissionGuard> },
     { path: "booking/config", element: <PermissionGuard permission="booking_view"><BookingConfigPage /></PermissionGuard> },
     { path: "order/list", element: <PermissionGuard permission="product_view"><OrderListPage /></PermissionGuard> },
-    { path: "order/create", element: <PermissionGuard permission="product_create"><OrderCreatePage /></PermissionGuard> },
     { path: "order/detail/:id", element: <PermissionGuard permission="product_view"><OrderDetailPage /></PermissionGuard> },
     { path: "calendar", element: <PermissionGuard permission="calendar_view"><CalendarPage /></PermissionGuard> },
     { path: "dashboard/settings/*", element: <PermissionGuard permission="settings_view"><SettingsPage /></PermissionGuard> },

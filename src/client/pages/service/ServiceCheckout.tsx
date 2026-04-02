@@ -45,6 +45,7 @@ export const ServiceCheckoutPage = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [showNotes, setShowNotes] = useState(false);
     const [depositPercentage, setDepositPercentage] = useState(0);
+    const [refundCancellationHours, setRefundCancellationHours] = useState(0);
 
     const [notes, setNotes] = useState("");
     const [totalDuration, setTotalDuration] = useState<number>(0);
@@ -128,6 +129,7 @@ export const ServiceCheckoutPage = () => {
             getBookingConfig().then(res => {
                 if (res.code === 200) {
                     setDepositPercentage(res.data.depositPercentage || 0);
+                    setRefundCancellationHours(res.data.refundCancellationHours || 0);
                 }
             });
         });
@@ -290,6 +292,21 @@ export const ServiceCheckoutPage = () => {
                                         className="text-[14px] text-gray-500 leading-relaxed bg-gray-50/50 p-4 rounded-xl border border-dashed border-gray-200"
                                         dangerouslySetInnerHTML={{ __html: booking.serviceId?.procedure || storeService?.procedure }}
                                     />
+                                </div>
+                            )}
+
+                            {/* Chính sách hủy */}
+                            {refundCancellationHours > 0 && (
+                                <div className="mt-8 p-5 bg-teal-50/50 border border-teal-100/50 rounded-[20px] flex items-start gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center shrink-0">
+                                        <Icon icon="solar:info-circle-bold-duotone" width={22} className="text-teal-600" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <h4 className="text-[15px] font-bold text-teal-800">Chính sách hủy & hoàn tiền</h4>
+                                        <p className="text-[13.5px] text-teal-700/80 leading-relaxed font-medium">
+                                            TeddyPet hỗ trợ hoàn <span className="font-bold text-teal-600">100%</span> tiền cọc hoặc thanh toán nếu bạn thực hiện yêu cầu hủy lịch trước ít nhất <span className="font-bold text-teal-600">{refundCancellationHours} giờ</span> so với giờ hẹn.
+                                        </p>
+                                    </div>
                                 </div>
                             )}
                         </div>

@@ -29,8 +29,6 @@ import { useSchedules } from "../hr/hooks/useSchedules";
 import { Icon } from "@iconify/react";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { COLORS } from "../role/configs/constants";
@@ -42,6 +40,7 @@ import { QuickCustomerDialog } from "./sections/QuickCustomerDialog";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import { useTranslation } from "react-i18next";
 import { LoadingButton } from "../../components/ui/LoadingButton";
+import { confirmAction } from "../../utils/swal";
 
 const BulkRescheduleDialog = ({ open, onClose, affectedBookings, onConfirm }: any) => {
     const [minutes, setMinutes] = useState(15);
@@ -170,9 +169,9 @@ export const BookingEditPage = () => {
     useEffect(() => {
         if (booking) {
             setFormData({
-                userId: booking.userId?._id || "",
-                petIds: booking.petIds?.map((p: any) => p._id) || [],
-                serviceId: booking.serviceId?._id || "",
+                userId: booking.userId?._id || booking.userId || "",
+                petIds: booking.petIds?.map((p: any) => p._id || p) || [],
+                serviceId: booking.serviceId?._id || booking.serviceId || "",
                 staffIds: booking.staffIds?.map((s: any) => s._id || s) || [],
                 petStaffMap: booking.petStaffMap?.map((m: any) => ({
                     ...m,
@@ -260,16 +259,22 @@ export const BookingEditPage = () => {
     };
 
     const handleQuickCheckout = () => {
-        if (booking?.paymentStatus !== 'paid') {
-            toast.error("Vui lòng thanh toán đủ trước khi Checkout (Hoàn tất đơn)");
-            return;
-        }
-        updateStatus({ id: id!, status: 'completed' }, {
-            onSuccess: () => {
-                toast.success("Checkout thành công! Đơn hàng đã hoàn tất.");
-                navigate(`/${prefixAdmin}/booking/detail/${id}`);
-            }
-        });
+        const updateData = {
+            paymentStatus: 'paid',
+            bookingStatus: 'completed'
+        };
+
+        confirmAction(
+            "Xác nhận Thanh toán & Hoàn tất?",
+            "Đơn hàng sẽ được chuyển sang 'Đã thanh toán' và 'Hoàn thành'. Bạn có chắc chắn?",
+            () => {
+                updateBookingAsync({ id: id!, data: updateData }).then(() => {
+                    toast.success("Đã thanh toán và hoàn tất đơn hàng!");
+                    navigate(`/${prefixAdmin}/booking/detail/${id}`);
+                });
+            },
+            'success'
+        );
     };
 
     const staffAvailability = useMemo(() => {
@@ -378,11 +383,21 @@ export const BookingEditPage = () => {
         }
     }, [formData.petIds, formData.staffIds, isReadOnly]);
 
-    const userOptions = useMemo(() =>
-        users.map((u: any) => ({
+    const userOptions = useMemo(() => {
+        const baseOptions = users.map((u: any) => ({
             value: u._id,
             label: `${u.fullName} - ${u.phone}`,
-        })), [users]);
+        }));
+
+        if (booking?.userId && !baseOptions.find(o => o.value === (booking.userId?._id || booking.userId))) {
+            const u = booking.userId;
+            baseOptions.push({
+                value: u._id || u,
+                label: u.fullName ? `${u.fullName} - ${u.phone}` : "Khách hàng hiện tại"
+            });
+        }
+        return baseOptions;
+    }, [users, booking?.userId]);
 
     const userPets = useMemo(() => {
         if (!userPetsResBody) return [];
@@ -394,11 +409,25 @@ export const BookingEditPage = () => {
         return [];
     }, [userPetsResBody]);
 
-    const petOptions = useMemo(() =>
-        userPets.map((pet: any) => ({
+    const petOptions = useMemo(() => {
+        const baseOptions = userPets.map((pet: any) => ({
             value: pet._id,
             label: `${pet.name} (${pet.breed || '?'})`
-        })), [userPets]);
+        }));
+
+        // Ensure all current pets are in options
+        if (booking?.petIds) {
+            booking.petIds.forEach((p: any) => {
+                if (!baseOptions.find(o => o.value === (p._id || p))) {
+                    baseOptions.push({
+                        value: p._id || p,
+                        label: p.name ? `${p.name} (${p.breed || '?'})` : "Thú cưng hiện tại"
+                    });
+                }
+            });
+        }
+        return baseOptions;
+    }, [userPets, booking?.petIds]);
 
     const staffOptions = useMemo(() =>
         eligibleStaffList.map((staff: any) => {
@@ -416,18 +445,64 @@ export const BookingEditPage = () => {
             };
         }), [eligibleStaffList, staffAvailability]);
 
-    const serviceOptions = useMemo(() =>
-        services.map((service: any) => ({
+    const paymentOptions = useMemo(() => {
+        const isCurrentUnpaid = booking?.paymentStatus === 'unpaid';
+        const isCurrentPartial = booking?.paymentStatus === 'partially_paid';
+        const isCurrentPaid = booking?.paymentStatus === 'paid';
+        const hasStarted = ['in-progress', 'completed', 'returned'].includes(booking?.bookingStatus);
+
+        const options = [
+            { value: "unpaid", label: "Chưa thanh toán", disabled: !isCurrentUnpaid },
+            { value: "partially_paid", label: "Đã cọc (Một phần)", disabled: isCurrentPaid },
+            { value: "paid", label: "Đã thanh toán" },
+            { value: "refunded", label: "Đã hoàn tiền", disabled: hasStarted }
+        ];
+
+        // Nếu đã có cọc hoặc đã thanh toán thì ẩn Chưa thanh toán đi cho đỡ chọn nhầm
+        return options.filter(opt => {
+            if ((isCurrentPartial || isCurrentPaid) && opt.value === 'unpaid') return false;
+            return true;
+        });
+    }, [booking]);
+
+    const bookingStatusOptions = useMemo(() => {
+        const base = [
+            { value: "pending", label: "Chờ xác nhận" },
+            { value: "confirmed", label: "Đã xác nhận" },
+            { value: "delayed", label: "Trễ hẹn" },
+            { value: "in-progress", label: "Đang thực hiện" },
+            { value: "cancelled", label: "Hủy đơn" },
+            { value: "returned", label: "Khách đã đến (Check-in)" }
+        ];
+
+        // Chỉ hiện Hoàn thành nếu đơn đã hoàn thành, ko cho chọn từ dropdown
+        if (booking?.bookingStatus === 'completed') {
+            base.push({ value: "completed", label: "Hoàn thành" });
+        }
+        return base;
+    }, [booking]);
+
+    const serviceOptions = useMemo(() => {
+        const baseOptions = services.map((service: any) => ({
             value: service._id,
             label: service.name,
             price: service.basePrice || 0
-        })), [services]);
+        }));
+
+        if (booking?.serviceId && !baseOptions.find(o => o.value === (booking.serviceId?._id || booking.serviceId))) {
+            const s = booking.serviceId;
+            baseOptions.push({
+                value: s._id || s,
+                label: s.name || "Dịch vụ hiện tại",
+                price: s.basePrice || 0
+            });
+        }
+        return baseOptions;
+    }, [services, booking?.serviceId]);
 
 
 
-    const isTimeDisabled = (_time: dayjs.Dayjs, _type: 'start' | 'end') => {
-        return false; // Temporarily disabled for testing
-    };
+    /* isTimeDisabled removed */
 
     const pricing = useMemo(() => {
         const service = selectedService;
@@ -612,23 +687,7 @@ export const BookingEditPage = () => {
                     </Box>
                 )}
 
-                {booking?.isOverrun && (
-                    <Box sx={{
-                        mb: 3, p: 2, borderRadius: "var(--shape-borderRadius-md)",
-                        bgcolor: 'var(--palette-error-lighter)', border: '1px solid var(--palette-error-light)',
-                        display: 'flex', alignItems: 'center', gap: 2
-                    }}>
-                        <Icon icon="solar:danger-bold-duotone" width={24} color="var(--palette-error-main)" />
-                        <Box>
-                            <Typography variant="subtitle2" sx={{ color: 'var(--palette-error-dark)', fontWeight: 800 }}>
-                                CẢNH BÁO: DỊCH VỤ ĐANG QUÁ GIỜ!
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 700 }}>
-                                Thời gian kết thúc dự kiến thực tế: {dayjs(booking.expectedFinish).format("HH:mm")}
-                            </Typography>
-                        </Box>
-                    </Box>
-                )}
+
 
                 <Grid container spacing={3}>
                     <Grid size={{ xs: 12, md: 8 }}>
@@ -639,51 +698,14 @@ export const BookingEditPage = () => {
                                     <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.125rem' }}>1. Dịch vụ & Thời gian</Typography>
                                 </Stack>
                                 <SelectSingle
-                                    label="Dịch vụ"
+                                    label="Dịch vụ sử dụng"
                                     options={serviceOptions}
                                     value={formData.serviceId}
                                     onChange={(val) => setFormData({ ...formData, serviceId: val })}
                                     disabled={isReadOnly || isInProgress}
-                                    sx={{ width: '100%' }}
+                                    sx={{ width: '100%', mb: 2 }}
                                 />
-
-                                <Grid container spacing={2.5}>
-                                    <Grid size={{ xs: 12, sm: 4.5 }}>
-                                        <DatePicker
-                                            label="Ngày thực hiện"
-                                            value={formData.date}
-                                            onChange={(val) => setFormData({ ...formData, date: val || dayjs() })}
-                                            disabled={isReadOnly || isInProgress}
-                                            format="DD/MM/YYYY"
-                                            minDate={dayjs()}
-                                            slotProps={{ textField: { fullWidth: true } }}
-                                        />
-                                    </Grid>
-                                    <Grid size={{ xs: 6, sm: 3.75 }}>
-                                        <TimePicker
-                                            label="Bắt đầu"
-                                            value={formData.startTime}
-                                            onChange={(val) => setFormData({ ...formData, startTime: val || dayjs() })}
-                                            disabled={isReadOnly || isInProgress}
-                                            ampm={false} format="HH:mm"
-                                            minutesStep={1}
-                                            shouldDisableTime={(timeValue) => isTimeDisabled(timeValue, 'start')}
-                                            slotProps={{ textField: { fullWidth: true } }}
-                                        />
-                                    </Grid>
-                                    <Grid size={{ xs: 6, sm: 3.75 }}>
-                                        <TimePicker
-                                            label="Kết thúc"
-                                            value={formData.endTime}
-                                            onChange={(val) => setFormData({ ...formData, endTime: val || dayjs() })}
-                                            disabled={isReadOnly}
-                                            ampm={false} format="HH:mm"
-                                            minutesStep={1}
-                                            shouldDisableTime={(timeValue) => isTimeDisabled(timeValue, 'end')}
-                                            slotProps={{ textField: { fullWidth: true } }}
-                                        />
-                                    </Grid>
-                                </Grid>
+                                {/* Ngày thực hiện, bắt đầu, kết thúc gỡ bỏ theo yêu cầu người dùng */}
 
                                 <Divider sx={{ borderStyle: 'dashed' }} />
 
@@ -912,7 +934,7 @@ export const BookingEditPage = () => {
                             <Card sx={{ p: 3, borderRadius: '20px', boxShadow: COLORS.shadow }}>
                                 <Stack spacing={3}>
                                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'var(--palette-text-secondary)' }}>Khách hàng & Thú cưng</Typography>
+                                        <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.125rem' }}>3. Khách hàng & Thú cưng</Typography>
                                         {!isReadOnly && (
                                             <Button
                                                 size="small"
@@ -928,7 +950,7 @@ export const BookingEditPage = () => {
                                         label="Khách hàng"
                                         options={userOptions}
                                         value={formData.userId}
-                                        onChange={(val) => setFormData({ ...formData, userId: val, petIds: [] })}
+                                        onChange={(val) => setFormData(prev => ({ ...prev, userId: val, petIds: [] }))}
                                         disabled={true} // Always locked in Edit
                                     />
                                     <SelectMulti
@@ -951,15 +973,7 @@ export const BookingEditPage = () => {
                                     <Divider sx={{ borderStyle: 'dashed' }} />
                                     <SelectSingle
                                         label="Trạng thái đơn"
-                                        options={[
-                                            { value: "pending", label: "Chờ xác nhận" },
-                                            { value: "confirmed", label: "Đã xác nhận" },
-                                            { value: "delayed", label: "Trễ hẹn" },
-                                            { value: "in-progress", label: "Đang thực hiện" },
-                                            { value: "completed", label: "Hoàn thành" },
-                                            { value: "cancelled", label: "Hủy đơn" },
-                                            { value: "returned", label: "Khách đã đến" }
-                                        ]}
+                                        options={bookingStatusOptions}
                                         value={formData.bookingStatus}
                                         onChange={(val) => setFormData({ ...formData, bookingStatus: val })}
                                         disabled={isReadOnly}
@@ -978,14 +992,10 @@ export const BookingEditPage = () => {
                                     />
                                     <SelectSingle
                                         label="Trạng thái thanh toán"
-                                        options={[
-                                            { value: "unpaid", label: "Chưa thanh toán" },
-                                            { value: "paid", label: "Đã thanh toán" },
-                                            { value: "refunded", label: "Đã hoàn tiền" }
-                                        ]}
+                                        options={paymentOptions}
                                         value={formData.paymentStatus}
                                         onChange={(val) => setFormData({ ...formData, paymentStatus: val })}
-                                        disabled={isReadOnly || (formData.paymentStatus === 'paid' && !isStaff)} // Only non-staff (admins) can potentially revert payment if really needed, or just lock it for everyone
+                                        disabled={isReadOnly || (formData.paymentStatus === 'paid' && !isStaff)}
                                     />
 
                                     <Divider sx={{ borderStyle: 'dashed' }} />
@@ -1056,12 +1066,12 @@ export const BookingEditPage = () => {
                                         <Button
                                             fullWidth
                                             variant="contained"
-                                            color="warning"
+                                            color="success"
                                             onClick={handleQuickCheckout}
-                                            startIcon={<Icon icon="solar:card-send-bold" />}
+                                            startIcon={<Icon icon="solar:check-read-bold" />}
                                             sx={{ py: 1.5, borderRadius: "var(--shape-borderRadius-md)", fontWeight: 800 }}
                                         >
-                                            Thanh toán & Hoàn tất (Checkout)
+                                            Thanh toán & Hoàn tất
                                         </Button>
                                     )}
                                 </Stack>

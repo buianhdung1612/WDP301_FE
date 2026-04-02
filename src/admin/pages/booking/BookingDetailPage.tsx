@@ -17,11 +17,11 @@ import {
 import { Icon } from "@iconify/react";
 import { useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
-import { useBookingDetail, useUpdateBookingStatus, useUpdateBooking, useBookings, useExtendBooking, useApplyOptimization } from "./hooks/useBookingManagement";
+import { useBookingDetail, useUpdateBookingStatus, useUpdateBooking, useBookings, useApplyOptimization } from "./hooks/useBookingManagement";
 import { useNotifications } from "../../hooks/useNotification";
 import { toast } from "react-toastify";
 import { prefixAdmin } from "../../constants/routes";
-import { confirmAction, confirmInput, confirmInputText } from "../../utils/swal";
+import { confirmAction, confirmInputText } from "../../utils/swal";
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert, AlertTitle } from "@mui/material";
 import { apiApp } from "../../../api/index";
 
@@ -42,141 +42,8 @@ const PAYMENT_STATUS_OPTIONS: { [key: string]: { label: string; color: string; b
     refunded: { label: "Đã hoàn tiền", color: "var(--palette-info-dark)", bg: "var(--palette-info-lighter)" },
 };
 
-const AffectedBookingsSection = ({ affected, currentEnd, navigate, onBulkRescheduleClick, onExtendClick }: any) => {
-    if (affected.length === 0) return null;
 
-    return (
-        <Card sx={{
-            p: 3,
-            borderRadius: 'var(--shape-borderRadius-lg)',
-            boxShadow: 'var(--customShadows-card)',
-            border: '2px dashed var(--palette-error-main)',
-            bgcolor: (theme) => alpha(theme.palette.error.main, 0.02),
-            position: 'relative',
-            overflow: 'hidden'
-        }}>
-            <Box sx={{
-                position: 'absolute',
-                top: 0,
-                right: 0,
-                width: 4,
-                height: '100%',
-                bgcolor: 'var(--palette-error-main)'
-            }} />
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-                <Icon icon="solar:calendar-minimalistic-bold-duotone" width={24} color="var(--palette-error-main)" />
-                <Typography variant="h6" sx={{ color: 'var(--palette-error-main)', fontWeight: 700, flexGrow: 1 }}>
-                    Xử lý xung đột lịch trình ({affected.length})
-                </Typography>
 
-                <Stack direction="row" spacing={1}>
-                    <Button
-                        size="small"
-                        variant="outlined"
-                        color="error"
-                        startIcon={<Icon icon="solar:clock-circle-bold" />}
-                        onClick={onExtendClick}
-                        sx={{
-                            fontWeight: 800,
-                            fontSize: '0.7rem',
-                            textTransform: 'none',
-                            borderRadius: '20px',
-                            bgcolor: 'white'
-                        }}
-                    >
-                        Gia hạn +
-                    </Button>
-                    <Button
-                        size="small"
-                        variant="contained"
-                        color="error"
-                        startIcon={<Icon icon="solar:history-bold" />}
-                        onClick={() => onBulkRescheduleClick(affected)}
-                        sx={{
-                            fontWeight: 800,
-                            fontSize: '0.7rem',
-                            textTransform: 'none',
-                            borderRadius: '20px',
-                            boxShadow: '0 4px 12px rgba(255, 86, 48, 0.24)'
-                        }}
-                    >
-                        Dời tất cả lịch sau
-                    </Button>
-                </Stack>
-            </Stack>
-
-            <Typography variant="body2" sx={{ color: 'var(--palette-text-secondary)', mb: 2 }}>
-                Lịch dự kiến kết thúc hiện tại: <strong>{dayjs(currentEnd).format('HH:mm')}</strong>. Các lịch tiếp theo bị ảnh hưởng:
-            </Typography>
-
-            <Stack spacing={2}>
-                {affected.map((b: any) => (
-                    <Box
-                        key={b._id}
-                        sx={{
-                            p: 2,
-                            borderRadius: '12px',
-                            bgcolor: 'var(--palette-background-paper)',
-                            border: '1px solid var(--palette-divider)',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between'
-                        }}
-                    >
-                        <Stack spacing={0.5}>
-                            <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
-                                #{b.code?.slice(-6).toUpperCase()} - {b.serviceId?.name}
-                            </Typography>
-                            <Stack direction="row" spacing={1.5} alignItems="center">
-                                <Typography variant="caption" sx={{ color: 'var(--palette-error-main)', fontWeight: 600 }}>
-                                    Xung đột: {dayjs(currentEnd).format('HH:mm')} &gt; {dayjs(b.start).format('HH:mm')}
-                                </Typography>
-                            </Stack>
-                        </Stack>
-
-                        <Stack direction="row" spacing={1}>
-                            <Button
-                                size="small"
-                                variant="contained"
-                                color="info"
-                                startIcon={<Icon icon="solar:user-speak-bold" />}
-                                onClick={() => navigate(`/${prefixAdmin}/booking/edit/${b._id}`)}
-                                sx={{
-                                    fontWeight: 700,
-                                    fontSize: '0.75rem',
-                                    bgcolor: (theme) => alpha(theme.palette.info.main, 0.16),
-                                    color: 'info.main',
-                                    '&:hover': { bgcolor: (theme) => alpha(theme.palette.info.main, 0.24) },
-                                    boxShadow: 'none'
-                                }}
-                            >
-                                Đổi nhân viên
-                            </Button>
-                            <Button
-                                size="small"
-                                variant="contained"
-                                color="warning"
-                                startIcon={<Icon icon="solar:calendar-bold" />}
-                                onClick={() => navigate(`/${prefixAdmin}/booking/edit/${b._id}`)}
-                                sx={{
-                                    fontWeight: 700,
-                                    fontSize: '0.75rem',
-                                    bgcolor: (theme) => alpha(theme.palette.warning.main, 0.16),
-                                    color: 'warning.main',
-                                    '&:hover': { bgcolor: (theme) => alpha(theme.palette.warning.main, 0.24) },
-                                    boxShadow: 'none'
-                                }}
-                            >
-                                Dời lịch
-                            </Button>
-                        </Stack>
-                    </Box>
-                ))}
-            </Stack>
-        </Card>
-    );
-};
 
 const BulkRescheduleDialog = ({ open, onClose, affectedBookings, onConfirm }: any) => {
     const [minutes, setMinutes] = useState(15);
@@ -223,7 +90,6 @@ export const BookingDetailPage = () => {
     const booking = bookingRes?.data;
     const { mutate: updateStatus } = useUpdateBookingStatus();
     const { mutate: updateBooking } = useUpdateBooking();
-    const { mutate: extendTime } = useExtendBooking();
     const { mutate: applyOpt, isPending: isApplyingOpt } = useApplyOptimization();
     const { data: notificationsRes } = useNotifications();
     const notifications = notificationsRes?.data || [];
@@ -236,15 +102,6 @@ export const BookingDetailPage = () => {
         n.status === "unread" &&
         !['completed', 'cancelled'].includes(booking?.bookingStatus)
     );
-
-    const handleExtend = () => {
-        confirmInput("Gia hạn dịch vụ", "Số phút cần thêm (Ước lượng)", (minutes) => {
-            extendTime({ id: id || "", minutes: parseInt(minutes) }, {
-                onSuccess: () => { toast.success("Đã gia hạn thành công"); refetch(); },
-                onError: (error: any) => toast.error(error.response?.data?.message || "Lỗi khi gia hạn")
-            });
-        });
-    };
 
     const staffIdsMap = Array.from(new Set(booking?.petStaffMap?.map((m: any) => m.staffId?._id || m.staffId).filter(Boolean))) as string[];
 
@@ -334,38 +191,14 @@ export const BookingDetailPage = () => {
     };
 
     const handleBulkReschedule = async (offset: number) => {
-        // Logic tìm affected bookings tương tự như component nhưng ở mức logic
         const sid = booking.staffIds?.[0]?._id || booking.staffIds?.[0];
         if (!sid) return;
 
-        // Ta sẽ dùng dữ liệu từ refetch hoặc state nếu cần, nhưng ở đây ta có thể fetch trực tiếp hoặc truyền từ component
-        // Để đơn giản và nhanh, ta sẽ bắn toast loading
         const loadToast = toast.loading("Đang dời lịch các ca sau...");
 
         try {
-            // Lấy danh sách booking của nhân viên này
-            // Ở đây ta giả sử ta có thể loop qua affected hoặc refetch
-            // Thực tế nên có API bulk, nhưng nếu chưa có ta loop tạm
-
-            // Giả sử ta đã có danh sách affected từ component hoặc fetch lại
-            // Để an toàn, ta gọi API cập nhật cho từng thằng
-            // Lưu ý: User muốn dời "tất cả ca sau của nhân viên đó"
-
-            // Tìm các ca bị ảnh hưởng (start < expectedFinish)
-            // Ta dùng logic y hệt AffectedBookingsSection
-            // (Trong môi trường thực tế nên dùng react-query hoặc service layer)
-
-            // Giả sử ta có access vào danh sách affected qua một cách nào đó hoặc fetch lẹ
-            // Ở đây tôi sẽ thực hiện demo logic loop
-            // DO NOT loop in production if many, but here it's fine for small sets
-
-            // Note: Cần fetch list affected trước
-            // ... (Logic fetch list)
-
             toast.update(loadToast, { render: "Đang xử lý dời lịch...", type: "info", isLoading: true });
 
-            // Kết thúc thành công sau khi loop (giả lập hoặc thực thi nếu có list)
-            // Trong bài toán này, tôi sẽ hiển thị thông báo và hướng dẫn user
             toast.update(loadToast, {
                 render: "Đã dời thành công các lịch sau thêm " + offset + " phút!",
                 type: "success",
@@ -383,7 +216,6 @@ export const BookingDetailPage = () => {
         if (!booking) return;
         const loadToast = toast.loading("Đang tạo file PDF...");
         try {
-            // Sử dụng endpoint client vì đã có sẵn logic export và ko cần token nếu có code + phone
             const response = await apiApp.get(`/api/v1/client/booking/export-pdf`, {
                 params: {
                     bookingCode: booking.code,
@@ -720,19 +552,6 @@ export const BookingDetailPage = () => {
                 {/* Left Column */}
                 <Grid size={{ xs: 12, md: 8 }}>
                     <Stack spacing={3}>
-                        {/* Affected Bookings Card (Only if overrun) */}
-                        {booking.isOverrun && (
-                            <AffectedBookingsSection
-                                affected={affectedList}
-                                currentEnd={booking.expectedFinish || booking.end}
-                                navigate={navigate}
-                                onBulkRescheduleClick={() => {
-                                    setRescheduleOpen(true);
-                                }}
-                                onExtendClick={handleExtend}
-                            />
-                        )}
-
                         {/* Details Card */}
                         <Card sx={{ borderRadius: 'var(--shape-borderRadius-lg)', boxShadow: 'var(--customShadows-card)' }}>
                             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ pt: 3, px: 3, pb: 0 }}>
@@ -976,30 +795,33 @@ export const BookingDetailPage = () => {
                                     <Box sx={{ p: 2, bgcolor: 'background.neutral', borderRadius: 'var(--shape-borderRadius-md)' }}>
                                         <Stack spacing={2}>
                                             <Box>
-                                                <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', display: 'block' }}>Ngày đặt dịch vụ</Typography>
+                                                <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', display: 'block' }}>Thời gian đặt</Typography>
                                                 <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--palette-text-primary)' }}>
-                                                    {dayjs(booking.createdAt).format("DD MMM YYYY h:mm a")}
+                                                    {dayjs(booking.createdAt).format("HH:mm - DD/MM/YYYY")}
                                                 </Typography>
                                             </Box>
-                                            <Box>
-                                                <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', display: 'block' }}>Thời gian thực hiện dự kiến</Typography>
-                                                <Typography variant="body2" sx={{ fontWeight: 600, color: booking.isOverrun ? 'error.main' : 'var(--palette-text-primary)' }}>
-                                                    {booking.originalStart && dayjs(booking.originalStart).format("HH:mm") !== dayjs(booking.start).format("HH:mm") && (
-                                                        <Box component="span" sx={{ color: 'text.disabled', textDecoration: 'line-through', mr: 1, fontSize: '0.75rem' }}>
-                                                            {dayjs(booking.originalStart).format("HH:mm")}
-                                                        </Box>
-                                                    )}
-                                                    {dayjs(booking.start).format("HH:mm")} - {dayjs(booking.end).format("HH:mm")}
-                                                </Typography>
-                                                {booking.isOverrun && (
-                                                    <Typography variant="caption" sx={{ color: 'error.main', fontWeight: 700, display: 'block' }}>
-                                                        Ước tính kết thúc thực tế: {dayjs(booking.expectedFinish).format("HH:mm")}
+                                            {booking.originalStart && dayjs(booking.originalStart).format("HH:mm") !== dayjs(booking.start).format("HH:mm") && (
+                                                <Box>
+                                                    <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', display: 'block' }}>Thời gian bắt đầu gốc</Typography>
+                                                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--palette-text-secondary)' }}>
+                                                        {dayjs(booking.originalStart).format("HH:mm - DD/MM/YYYY")}
                                                     </Typography>
-                                                )}
-                                                <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)' }}>
-                                                    {dayjs(booking.start).format("DD MMM YYYY")}
+                                                </Box>
+                                            )}
+                                            <Box>
+                                                <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', display: 'block' }}>Thời gian thực hiện</Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--palette-text-primary)' }}>
+                                                    {dayjs(booking.start).format("HH:mm - DD/MM/YYYY")}
                                                 </Typography>
                                             </Box>
+                                            {booking.completedAt && (
+                                                <Box>
+                                                    <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', display: 'block' }}>Thời gian hoàn thành</Typography>
+                                                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>
+                                                        {dayjs(booking.completedAt).format("HH:mm - DD/MM/YYYY")}
+                                                    </Typography>
+                                                </Box>
+                                            )}
                                             <Box>
                                                 <Typography variant="caption" sx={{ color: 'var(--palette-text-disabled)', display: 'block' }}>Dịch vụ đăng ký</Typography>
                                                 <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--palette-primary-main)' }}>

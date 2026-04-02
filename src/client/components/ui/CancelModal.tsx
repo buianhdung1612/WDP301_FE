@@ -10,7 +10,11 @@ interface CancelModalProps {
     confirmText?: string;
     isBooking?: boolean;
     paymentStatus?: string;
+    refundCancellationHours?: number;
+    startTime?: string;
 }
+
+import dayjs from "dayjs";
 
 const CANCEL_REASONS = [
     "Tôi muốn cập nhật địa chỉ/sđt nhận hàng.",
@@ -23,6 +27,17 @@ const CANCEL_REASONS = [
     "Lý do khác",
 ];
 
+const BOOKING_CANCEL_REASONS = [
+    "Tôi bận việc đột xuất không thể đến đúng hẹn.",
+    "Tôi muốn thay đổi dịch vụ hoặc bé cưng.",
+    "Tôi muốn đổi sang khung giờ hoặc ngày khác.",
+    "Tôi tìm thấy nơi khác có dịch vụ tốt hơn/rẻ hơn.",
+    "Thủ tục đặt lịch và cọc rắc rối.",
+    "Tôi không còn nhu cầu sử dụng dịch vụ nữa.",
+    "Tôi không tìm thấy lý do hủy phù hợp",
+    "Lý do khác",
+];
+
 export const CancelModal: React.FC<CancelModalProps> = ({
     isOpen,
     onClose,
@@ -31,9 +46,19 @@ export const CancelModal: React.FC<CancelModalProps> = ({
     confirmText = "HỦY ĐƠN HÀNG",
     isBooking = false,
     paymentStatus = "unpaid",
+    refundCancellationHours = 0,
+    startTime,
 }) => {
     const [selectedReason, setSelectedReason] = useState("");
     const [customReason, setCustomReason] = useState("");
+
+    const reasons = isBooking ? BOOKING_CANCEL_REASONS : CANCEL_REASONS;
+
+    const isRefundable = isBooking &&
+        ["paid", "partially_paid"].includes(paymentStatus || "") &&
+        refundCancellationHours > 0 &&
+        startTime &&
+        dayjs().add(refundCancellationHours, 'hour').isBefore(dayjs(startTime));
 
     React.useEffect(() => {
         if (isOpen) {
@@ -74,14 +99,34 @@ export const CancelModal: React.FC<CancelModalProps> = ({
                                 </p>
                             </div>
 
-                            {paymentStatus === "paid" && (
+                            {isBooking && ["paid", "partially_paid"].includes(paymentStatus || "") && refundCancellationHours > 0 && startTime && (
+                                <div className={`mb-4 p-4 rounded-xl flex gap-3 border shadow-sm ${isRefundable ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-red-50 text-red-700 border-red-100"}`}>
+                                    <Icon
+                                        icon={isRefundable ? "solar:check-circle-bold-duotone" : "solar:info-circle-bold-duotone"}
+                                        className={`text-[24px] shrink-0 ${isRefundable ? "text-emerald-500" : "text-red-500"}`}
+                                    />
+                                    <div className="flex flex-col gap-1">
+                                        <p className="text-[14px] font-bold uppercase tracking-wide">
+                                            {isRefundable ? "Đủ điều kiện hoàn tiền" : "Quá hạn hoàn tiền"}
+                                        </p>
+                                        <p className="text-[13px] leading-relaxed opacity-90">
+                                            {isRefundable
+                                                ? `Bạn có thể nhận lại ${paymentStatus === 'paid' ? '100% số tiền đã thanh toán' : 'tiền cọc'} nếu hủy ngay lúc này (Quy định: hủy trước ít nhất ${refundCancellationHours} giờ).`
+                                                : `Hiện tại đã quá hạn quy định hoàn tiền (ít nhất ${refundCancellationHours} giờ trước hẹn). Bạn vẫn có thể hủy lịch nhưng sẽ không được hoàn trả tiền cọc.`
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {paymentStatus === "paid" && !isBooking && (
                                 <div className="mb-4 text-[13px] text-red-500 font-medium italic">
-                                    * {isBooking ? "Lịch đặt" : "Đơn hàng"} đã thanh toán sẽ được kiểm tra và thực hiện hoàn tiền sau khi bạn gửi yêu cầu.
+                                    * Đơn hàng đã thanh toán sẽ được kiểm tra và thực hiện hoàn tiền sau khi bạn gửi yêu cầu.
                                 </div>
                             )}
 
                             <div className="space-y-4 pr-2">
-                                {CANCEL_REASONS.map((reason, index) => (
+                                {reasons.map((reason, index) => (
                                     <label
                                         key={index}
                                         className="flex items-center gap-3 cursor-pointer group"

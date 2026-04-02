@@ -2,7 +2,7 @@ import { ProductBanner } from "../product/sections/ProductBanner";
 import { Link } from "react-router-dom";
 import { Sidebar } from "./sections/Sidebar";
 import { useEffect, useState, useMemo } from "react";
-import { getMyBookings, cancelBooking } from "../../api/booking.api";
+import { getMyBookings, cancelBooking, getBookingConfig } from "../../api/booking.api";
 import { getMyPets } from "../../api/pet.api";
 import { formatCurrency } from "../../helpers";
 import dayjs from "dayjs";
@@ -20,6 +20,7 @@ export const BookingHistoryPage = () => {
     const [isCanceling, setIsCanceling] = useState(false);
     const [cancelModal, setCancelModal] = useState<{ isOpen: boolean; booking: any }>({ isOpen: false, booking: null });
     const [currentPage, setCurrentPage] = useState(1);
+    const [config, setConfig] = useState<any>(null);
     const pageSize = 10;
 
     const breadcrumbs = [
@@ -27,6 +28,15 @@ export const BookingHistoryPage = () => {
         { label: "Tài khoản", to: "/dashboard/profile" },
         { label: "Lịch sử dịch vụ", to: "/dashboard/bookings" },
     ];
+
+    const fetchConfig = async () => {
+        try {
+            const res = await getBookingConfig();
+            if (res.code === 200) setConfig(res.data);
+        } catch (error) {
+            console.error("Failed to fetch config:", error);
+        }
+    };
 
     const fetchBookings = async () => {
         setLoading(true);
@@ -56,6 +66,7 @@ export const BookingHistoryPage = () => {
     useEffect(() => {
         fetchBookings();
         fetchPets();
+        fetchConfig();
     }, []);
 
     const filteredBookings = useMemo(() => {
@@ -342,6 +353,8 @@ export const BookingHistoryPage = () => {
                 confirmText="HỦY LỊCH ĐẶT"
                 isBooking={true}
                 paymentStatus={cancelModal.booking?.paymentStatus}
+                refundCancellationHours={config?.refundCancellationHours}
+                startTime={cancelModal.booking?.start}
             />
         </>
     );

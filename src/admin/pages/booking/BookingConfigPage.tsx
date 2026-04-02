@@ -1,4 +1,4 @@
-﻿import { Box, Card, Grid, TextField, Typography, Stack, alpha, Switch, FormControlLabel, Button, Divider, InputAdornment } from "@mui/material";
+﻿import { Box, Card, Grid, TextField, Typography, Stack, alpha, Switch, FormControlLabel, InputAdornment } from "@mui/material";
 import { Icon } from "@iconify/react";
 import { useForm, Controller } from "react-hook-form";
 import { Title } from "../../components/ui/Title";
@@ -13,7 +13,7 @@ import { getRoles } from "../../api/role.api";
 import { getDepartments } from "../../api/department.api";
 
 const BRAND_COLORS = {
-    primary: "#00a76f", 
+    primary: "#00a76f",
     border: alpha("#919EAB", 0.16)
 };
 
@@ -26,21 +26,21 @@ export const BookingConfigPage = () => {
 
     useEffect(() => {
         if (deptsRes?.data?.recordList) {
-            const spaDept = deptsRes.data.recordList.find((d: any) => 
+            const spaDept = deptsRes.data.recordList.find((d: any) =>
                 d.name.toLowerCase().includes("spa") || d.name.toLowerCase().includes("chăm sóc")
             );
             if (spaDept) setSpaDepartmentId(spaDept._id);
         }
     }, [deptsRes]);
 
-    const { data: shiftsRes } = useQuery({ 
-        queryKey: ["shifts-spa", spaDepartmentId], 
+    const { data: shiftsRes } = useQuery({
+        queryKey: ["shifts-spa", spaDepartmentId],
         queryFn: () => getShifts({ departmentId: spaDepartmentId, noLimit: true }),
-        enabled: !!spaDepartmentId 
+        enabled: !!spaDepartmentId
     });
 
-    const { data: rolesRes } = useQuery({ 
-        queryKey: ["roles-spa", spaDepartmentId], 
+    const { data: rolesRes } = useQuery({
+        queryKey: ["roles-spa", spaDepartmentId],
         queryFn: () => getRoles({ departmentId: spaDepartmentId, isStaff: true, status: "active", noLimit: true }),
         enabled: !!spaDepartmentId
     });
@@ -48,22 +48,24 @@ export const BookingConfigPage = () => {
     const shifts = useMemo(() => shiftsRes?.data?.recordList || [], [shiftsRes]);
     const roles = useMemo(() => rolesRes?.data?.recordList || [], [rolesRes]);
 
-    const { control, handleSubmit, reset, setValue, watch, formState: { isSubmitting } } = useForm({
+    const { control, handleSubmit, reset, watch, formState: { isSubmitting } } = useForm({
         defaultValues: {
             bookingGracePeriod: 15,
             depositPercentage: 0,
             serviceRoomCount: 1,
             allowEarlyStartMinutes: 0,
-            staffingRules: [], 
+            refundCancellationHours: 0,
+            bookingCancelPeriod: 60,
+            staffingRules: [],
             autoCancelEnabled: false,
             autoConfirmEnabled: false
         },
     });
 
     useEffect(() => {
-        if (shifts.length > 0 && roles.length > 0 && config) {
+        if (config && shifts.length > 0 && roles.length > 0) {
             const existingRules = config.staffingRules || [];
-            const fullRules = shifts.map((shift: any) => {
+            const mappedRules = shifts.map((shift: any) => {
                 const existingShiftRule = existingRules.find((r: any) => r.shiftId === shift._id);
                 const roleRequirements = roles.map((role: any) => {
                     const existingRoleReq = existingShiftRule?.roleRequirements?.find((rr: any) => rr.roleId === role._id);
@@ -73,13 +75,19 @@ export const BookingConfigPage = () => {
                         minStaff: existingRoleReq ? existingRoleReq.minStaff : 0
                     };
                 });
-                return { shiftId: shift._id, shiftName: shift.name, shiftTime: `${shift.startTime} - ${shift.endTime}`, roleRequirements };
+                return {
+                    shiftId: shift._id,
+                    shiftName: shift.name,
+                    shiftTime: `${shift.startTime} - ${shift.endTime}`,
+                    roleRequirements
+                };
             });
-            setValue("staffingRules", fullRules);
+            reset({
+                ...config,
+                staffingRules: mappedRules
+            });
         }
-    }, [shifts, roles, config, setValue]);
-
-    useEffect(() => { if (config) reset(config); }, [config, reset]);
+    }, [config, shifts, roles, reset]);
 
     const onSubmit = (data: any) => {
         const cleanData = {
@@ -115,24 +123,40 @@ export const BookingConfigPage = () => {
                             <Typography variant="h6" sx={{ fontWeight: 700 }}>Quy tắc chung</Typography>
                         </Stack>
                         <Grid container spacing={4}>
-                            <Grid item xs={12} md={6}>
-                                <Controller name="serviceRoomCount" control={control} render={({ field }) => ( 
-                                    <TextField {...field} label="Số phòng dịch vụ" fullWidth type="number" size="small" onChange={(e) => field.onChange(Number(e.target.value))} /> 
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <Controller name="serviceRoomCount" control={control} render={({ field }) => (
+                                    <TextField {...field} label="Số phòng dịch vụ" fullWidth type="number" size="small" onChange={(e) => field.onChange(Number(e.target.value))} />
                                 )} />
                             </Grid>
-                            <Grid item xs={12} md={6}>
-                                <Controller name="depositPercentage" control={control} render={({ field }) => ( 
-                                    <TextField {...field} label="Đặt cọc đơn hàng (%)" fullWidth type="number" size="small" onChange={(e) => field.onChange(Number(e.target.value))} /> 
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <Controller name="depositPercentage" control={control} render={({ field }) => (
+                                    <TextField {...field} label="Đặt cọc đơn hàng (%)" fullWidth type="number" size="small" onChange={(e) => field.onChange(Number(e.target.value))} />
                                 )} />
                             </Grid>
-                            <Grid item xs={12} md={6}>
-                                <Controller name="bookingGracePeriod" control={control} render={({ field }) => ( 
-                                    <TextField {...field} label="Thời gian trễ tối đa (phút)" fullWidth type="number" size="small" placeholder="Khách có thể đến trễ bao nhiêu phút" onChange={(e) => field.onChange(Number(e.target.value))} /> 
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <Controller name="bookingGracePeriod" control={control} render={({ field }) => (
+                                    <TextField {...field} label="Thời gian tối đa để bắt đầu (phút)" fullWidth type="number" size="small" placeholder="Sau bao nhiêu phút khách không đến thì báo trễ" onChange={(e) => field.onChange(Number(e.target.value))} />
                                 )} />
                             </Grid>
-                            <Grid item xs={12} md={6}>
-                                <Controller name="allowEarlyStartMinutes" control={control} render={({ field }) => ( 
-                                    <TextField {...field} label="Thời gian bắt đầu sớm (phút)" fullWidth type="number" size="small" placeholder="Cho phép làm trước bao nhiêu phút" onChange={(e) => field.onChange(Number(e.target.value))} /> 
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <Controller name="allowEarlyStartMinutes" control={control} render={({ field }) => (
+                                    <TextField {...field} label="Thời gian bắt đầu sớm (phút)" fullWidth type="number" size="small" placeholder="Cho phép làm trước bao nhiêu phút" onChange={(e) => field.onChange(Number(e.target.value))} />
+                                )} />
+                            </Grid>
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <Controller name="refundCancellationHours" control={control} render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        label="Hoàn tiền 100% (giờ)"
+                                        fullWidth
+                                        type="number"
+                                        size="small"
+                                        placeholder="Hủy trước bao nhiêu giờ thì được hoàn cọc"
+                                        InputProps={{
+                                            endAdornment: <InputAdornment position="end">giờ</InputAdornment>
+                                        }}
+                                        onChange={(e) => field.onChange(Number(e.target.value))}
+                                    />
                                 )} />
                             </Grid>
                         </Grid>
@@ -144,9 +168,30 @@ export const BookingConfigPage = () => {
                             <Icon icon="solar:bolt-bold-duotone" width={24} color={BRAND_COLORS.primary} />
                             <Typography variant="h6" sx={{ fontWeight: 700 }}>Tự động hóa</Typography>
                         </Stack>
-                        <Stack spacing={1}>
-                            <Controller name="autoConfirmEnabled" control={control} render={({ field }) => ( <FormControlLabel control={<Switch checked={field.value} onChange={field.onChange} color="success" size="small" />} label={<Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Tự động xác nhận đơn mới</Typography>} /> )} />
-                            <Controller name="autoCancelEnabled" control={control} render={({ field }) => ( <FormControlLabel control={<Switch checked={field.value} onChange={field.onChange} color="success" size="small" />} label={<Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Tự động hủy đơn khi trễ hạn</Typography>} /> )} />
+                        <Stack spacing={3}>
+                            <Stack direction="row" spacing={3}>
+                                <Controller name="autoConfirmEnabled" control={control} render={({ field }) => (<FormControlLabel control={<Switch checked={field.value} onChange={field.onChange} color="success" size="small" />} label={<Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Tự động xác nhận đơn mới</Typography>} />)} />
+                                <Controller name="autoCancelEnabled" control={control} render={({ field }) => (<FormControlLabel control={<Switch checked={field.value} onChange={field.onChange} color="success" size="small" />} label={<Typography variant="subtitle2" sx={{ fontWeight: 600 }}>Tự động hủy đơn khi trễ hạn</Typography>} />)} />
+                            </Stack>
+
+                            {watch("autoCancelEnabled") && (
+                                <Box sx={{ maxWidth: 300 }}>
+                                    <Controller name="bookingCancelPeriod" control={control} render={({ field }) => (
+                                        <TextField
+                                            {...field}
+                                            label="Thời gian tự động hủy (phút)"
+                                            fullWidth
+                                            type="number"
+                                            size="small"
+                                            placeholder="Hủy sau bao nhiêu phút khách không đến"
+                                            InputProps={{
+                                                endAdornment: <InputAdornment position="end">phút</InputAdornment>
+                                            }}
+                                            onChange={(e) => field.onChange(Number(e.target.value))}
+                                        />
+                                    )} />
+                                </Box>
+                            )}
                         </Stack>
                     </Card>
 
@@ -156,7 +201,7 @@ export const BookingConfigPage = () => {
                             <Icon icon="solar:users-group-rounded-bold-duotone" width={24} color={BRAND_COLORS.primary} />
                             <Typography variant="h6" sx={{ fontWeight: 700 }}>Định mức nhân sự Spa & Chăm sóc</Typography>
                         </Stack>
-                        
+
                         <Stack spacing={4}>
                             {staffingRules.map((rule: any, sIdx: number) => (
                                 <Box key={rule.shiftId} sx={{ p: 3, border: '1px solid', borderColor: 'divider', borderRadius: '16px' }}>
@@ -168,22 +213,22 @@ export const BookingConfigPage = () => {
 
                                     <Grid container spacing={2}>
                                         {rule.roleRequirements.map((roleReq: any, rIdx: number) => (
-                                            <Grid item xs={12} key={roleReq.roleId}>
+                                            <Grid size={{ xs: 12 }} key={roleReq.roleId}>
                                                 <Stack direction="row" spacing={2} alignItems="center">
-                                                    <Box sx={{ 
-                                                        minWidth: '250px', 
-                                                        p: '8.5px 14px', 
-                                                        border: '1px solid', 
-                                                        borderColor: 'divider', 
-                                                        borderRadius: '8px', 
-                                                        bgcolor: alpha('#919EAB', 0.04) 
+                                                    <Box sx={{
+                                                        minWidth: '250px',
+                                                        p: '8.5px 14px',
+                                                        border: '1px solid',
+                                                        borderColor: 'divider',
+                                                        borderRadius: '8px',
+                                                        bgcolor: alpha('#919EAB', 0.04)
                                                     }}>
                                                         <Typography variant="body2" sx={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                             {roleReq.roleName}
                                                         </Typography>
                                                     </Box>
                                                     <Controller
-                                                        name={`staffingRules.${sIdx}.roleRequirements.${rIdx}.minStaff`}
+                                                        name={`staffingRules.${sIdx}.roleRequirements.${rIdx}.minStaff` as any}
                                                         control={control}
                                                         render={({ field }) => (
                                                             <TextField
@@ -210,11 +255,11 @@ export const BookingConfigPage = () => {
                     </Card>
 
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', pb: 5 }}>
-                        <LoadingButton 
-                            type="submit" 
-                            loading={isPending || isSubmitting} 
-                            label="Lưu cấu hình" 
-                            sx={{ px: 8, py: 1.2, borderRadius: '12px', bgcolor: '#1c252e', '&:hover': { bgcolor: '#000' } }} 
+                        <LoadingButton
+                            type="submit"
+                            loading={isPending || isSubmitting}
+                            label="Lưu cấu hình"
+                            sx={{ px: 8, py: 1.2, borderRadius: '12px', bgcolor: '#1c252e', '&:hover': { bgcolor: '#000' } }}
                         />
                     </Box>
                 </Stack>

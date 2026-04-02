@@ -1,8 +1,6 @@
-import TuneIcon from '@mui/icons-material/Tune';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { useProductSort } from '../../../hooks/useProductSort';
-import StarIcon from "@mui/icons-material/Star";
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 type OptionType = {
@@ -48,16 +46,6 @@ export const ProductListSearch = ({ totalItems = 0, currentLimit = 9, currentPag
         }
     }, [selectedOption]);
 
-    // Hiển thị danh sách lọc
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const toggleFilter = () => setIsFilterOpen(prev => !prev);
-
-    const filterClasses = useMemo(() => {
-        return isFilterOpen
-            ? 'max-h-[500px] opacity-100 py-[20px] mb-[30px]'
-            : 'max-h-0 opacity-0 py-0 mb-0';
-    }, [isFilterOpen]);
-
     const start = (currentPage - 1) * currentLimit + 1;
     const end = Math.min(currentPage * currentLimit, totalItems);
 
@@ -69,17 +57,6 @@ export const ProductListSearch = ({ totalItems = 0, currentLimit = 9, currentPag
                     {totalItems > 0 ? `Hiển thị ${start}–${end} trong số ${totalItems} kết quả` : 'Không có kết quả nào'}
                 </div>
                 <div className="flex items-center">
-                    <div onClick={toggleFilter} className='cursor-pointer flex items-center'>
-                        <div className="text-client-secondary">Bộ lọc</div>
-                        <TuneIcon style={{
-                            width: "16px",
-                            height: "16px",
-                            marginLeft: "10px",
-                            cursor: "pointer",
-                            transform: isFilterOpen ? "rotate(90deg)" : "rotate(0deg)",
-                            transition: "transform 0.3s ease",
-                        }} />
-                    </div>
                     <div
                         className="text-client-secondary relative cursor-pointer px-[15px] h-[55px] bg-white border border-[#aaa] flex items-center rounded-[40px] ml-[20px]"
                         onClick={() => {
@@ -144,86 +121,6 @@ export const ProductListSearch = ({ totalItems = 0, currentLimit = 9, currentPag
                             </div>
                         )}
                     </div>
-                </div>
-            </div>
-
-            {/* Bộ lọc phụ */}
-            <div
-                className={`
-                    border-t border-b border-[#d7d7d7] 
-                    flex justify-center flex-wrap gap-[20px]
-                    overflow-hidden transition-all duration-500 ease-in-out
-                    ${filterClasses}
-                `}
-            >
-                <div className='m-[10px] p-[20px] bg-[#fff0f0] rounded-[20px]'>
-                    <h2 className='mb-[15px] text-[21px] font-secondary'>Đánh giá trung bình</h2>
-                    <div className="flex items-center justify-between text-client-secondary hover:text-[#10293780] cursor-pointer transition-default mb-[15px]">
-                        <div>
-                            {[...Array(5)].map((_, i) => (
-                                <StarIcon
-                                    key={i}
-                                    sx={{
-                                        fontSize: "19px !important",
-                                        color: i < 4 ? "#ffbb00 !important" : "#ccc !important",
-                                    }}
-                                />
-                            ))}
-                        </div>
-                        <span>(13)</span>
-                    </div>
-                    <div className="flex items-center justify-between text-client-secondary hover:text-[#10293780] cursor-pointer transition-default">
-                        <div>
-                            {[...Array(5)].map((_, i) => (
-                                <StarIcon
-                                    key={i}
-                                    sx={{
-                                        fontSize: "19px !important",
-                                        color: i < 3 ? "#ffbb00 !important" : "#ccc !important",
-                                    }}
-                                />
-                            ))}
-                        </div>
-                        <span>(5)</span>
-                    </div>
-                </div>
-                <div className='m-[10px] p-[20px] bg-[#fff0f0] rounded-[20px]'>
-                    <h2 className='mb-[15px] text-[21px] font-secondary'>Lọc theo gram</h2>
-                    <ul className='grid gap-y-[10px]'>
-                        <li className='text-client-secondary pb-[5px] flex justify-between'>
-                            <div className='hover:text-[#10293780] cursor-pointer transition-default'>10 Gói</div>
-                            <span>(5)</span>
-                        </li>
-                        <li className='text-client-secondary pb-[5px] flex justify-between'>
-                            <div className='hover:text-[#10293780] cursor-pointer transition-default'>5 Gói</div>
-                            <span>(6)</span>
-                        </li>
-                        <li className='text-client-secondary pb-[5px] flex justify-between'>
-                            <div className='hover:text-[#10293780] cursor-pointer transition-default'>3 Gói</div>
-                            <span>(6)</span>
-                        </li>
-                        <li className='text-client-secondary pb-[5px] flex justify-between'>
-                            <div className='hover:text-[#10293780] cursor-pointer transition-default'>Đơn</div>
-                            <span>(6)</span>
-                        </li>
-                    </ul>
-                </div>
-                <div className='m-[10px] p-[20px] bg-[#fff0f0] rounded-[20px]'>
-                    <h2 className='mb-[15px] text-[21px] font-secondary'>Lọc theo kích cỡ</h2>
-                    <ul className='grid gap-y-[10px]'>
-                        <li className='text-client-secondary pb-[5px] flex justify-between'>
-                            <div className='hover:text-[#10293780] cursor-pointer transition-default'>Lớn</div>
-                            <span>(8)</span>
-                        </li>
-                        <li className='text-client-secondary pb-[5px] flex justify-between'>
-                            <div className='hover:text-[#10293780] cursor-pointer transition-default'>Trung bình</div>
-                            <span>(8)</span>
-                        </li>
-                        <li className='text-client-secondary pb-[5px] flex justify-between'>
-                            <div className='hover:text-[#10293780] cursor-pointer transition-default'>Nhỏ</div>
-                            <span>(8)</span>
-                        </li>
-                    </ul>
                 </div>
             </div>
         </>
