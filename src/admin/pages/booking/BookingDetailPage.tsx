@@ -942,22 +942,6 @@ export const BookingDetailPage = () => {
                                     </Typography>
                                 </Box>
                             </Stack>
-                            <Button
-                                fullWidth
-                                variant="contained"
-                                color="error"
-                                startIcon={<Icon icon="eva:plus-fill" />}
-                                sx={{
-                                    justifyContent: 'center',
-                                    fontWeight: 700,
-                                    bgcolor: (theme) => alpha(theme.palette.error.main, 0.08),
-                                    color: 'error.main',
-                                    '&:hover': { bgcolor: (theme) => alpha(theme.palette.error.main, 0.16) },
-                                    boxShadow: 'none'
-                                }}
-                            >
-                                Thêm vào danh sách đen
-                            </Button>
                         </Card>
 
                         {/* Service Location Card (Mapped from Shipping Address) */}

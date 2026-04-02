@@ -24,7 +24,7 @@ import { useServices } from "../service/hooks/useService";
 import { useUsers } from "../account-user/hooks/useAccountUser";
 import { usePets } from "../account-user/hooks/usePet";
 import { useStaffByService } from "../account-admin/hooks/useAccountAdmin";
-import { useBookingDetail, useUpdateBooking, useBookings, useSuggestAssignment, useUpdateBookingStatus, useReassignPetStaff } from "./hooks/useBookingManagement";
+import { useBookingDetail, useUpdateBooking, useBookings, useSuggestAssignment, useReassignPetStaff } from "./hooks/useBookingManagement";
 import { useSchedules } from "../hr/hooks/useSchedules";
 import { Icon } from "@iconify/react";
 import { toast } from "react-toastify";
@@ -144,7 +144,6 @@ export const BookingEditPage = () => {
         return [];
     }, [usersResBody]);
     const { mutateAsync: updateBookingAsync, isPending: isUpdating } = useUpdateBooking();
-    const { mutate: updateStatus } = useUpdateBookingStatus();
     const { mutateAsync: suggestAssignment, isPending: isSuggesting } = useSuggestAssignment();
     const { mutateAsync: reassignPetStaff } = useReassignPetStaff();
     const [quickCustomerDialogOpen, setQuickCustomerDialogOpen] = useState(false);
@@ -252,11 +251,6 @@ export const BookingEditPage = () => {
         }
     };
 
-    const handleQuickCheckIn = () => {
-        updateStatus({ id: id!, status: 'returned' }, {
-            onSuccess: () => toast.success("Đã xác nhận khách đến (Check-in)!")
-        });
-    };
 
     const handleQuickCheckout = () => {
         const updateData = {
@@ -449,7 +443,7 @@ export const BookingEditPage = () => {
         const isCurrentUnpaid = booking?.paymentStatus === 'unpaid';
         const isCurrentPartial = booking?.paymentStatus === 'partially_paid';
         const isCurrentPaid = booking?.paymentStatus === 'paid';
-        const hasStarted = ['in-progress', 'completed', 'returned'].includes(booking?.bookingStatus);
+        const hasStarted = ['in-progress', 'completed'].includes(booking?.bookingStatus);
 
         const options = [
             { value: "unpaid", label: "Chưa thanh toán", disabled: !isCurrentUnpaid },
@@ -472,7 +466,6 @@ export const BookingEditPage = () => {
             { value: "delayed", label: "Trễ hẹn" },
             { value: "in-progress", label: "Đang thực hiện" },
             { value: "cancelled", label: "Hủy đơn" },
-            { value: "returned", label: "Khách đã đến (Check-in)" }
         ];
 
         // Chỉ hiện Hoàn thành nếu đơn đã hoàn thành, ko cho chọn từ dropdown
@@ -1049,20 +1042,8 @@ export const BookingEditPage = () => {
                                         </Button>
                                     )}
 
-                                    {['confirmed', 'delayed'].includes(booking?.bookingStatus) && (
-                                        <Button
-                                            fullWidth
-                                            variant="contained"
-                                            color="info"
-                                            onClick={handleQuickCheckIn}
-                                            startIcon={<Icon icon="solar:user-check-bold" />}
-                                            sx={{ py: 1.5, borderRadius: "var(--shape-borderRadius-md)", fontWeight: 800 }}
-                                        >
-                                            Khách đã tới (Check-in)
-                                        </Button>
-                                    )}
 
-                                    {['returned', 'in-progress'].includes(booking?.bookingStatus) && (
+                                    {['in-progress'].includes(booking?.bookingStatus) && (
                                         <Button
                                             fullWidth
                                             variant="contained"

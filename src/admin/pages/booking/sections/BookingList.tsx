@@ -98,13 +98,6 @@ export const BookingList = () => {
                 update,
                 'info'
             );
-        } else if (status === 'returned') {
-            confirmAction(
-                "Xác nhận khách đã đến?",
-                "Hệ thống sẽ ghi nhận khách đã có mặt và đơn này sẽ không bị tự động hủy.",
-                update,
-                'success'
-            );
         } else if (status === 'completed') {
             confirmAction(
                 "Xác nhận Hoàn thành?",
@@ -185,7 +178,6 @@ export const BookingList = () => {
         "in-progress": 0,
         completed: 0,
         cancelled: 0,
-        returned: 0,
         request_cancel: 0,
     };
 
@@ -218,7 +210,6 @@ export const BookingList = () => {
                     { value: 'in-progress', label: t("admin.booking.status.in_progress"), color: 'var(--palette-primary-dark)', bg: 'var(--palette-primary-lighter)', activeColor: 'var(--palette-primary-contrastText)', activeBg: 'var(--palette-primary-main)' },
                     { value: 'completed', label: t("admin.booking.status.completed"), color: 'var(--palette-success-dark)', bg: 'var(--palette-success-lighter)', activeColor: 'var(--palette-success-contrastText)', activeBg: 'var(--palette-success-main)' },
                     { value: 'cancelled', label: t("admin.booking.status.cancelled"), color: 'var(--palette-error-dark)', bg: 'var(--palette-error-lighter)', activeColor: 'var(--palette-error-contrastText)', activeBg: 'var(--palette-error-main)' },
-                    { value: 'returned', label: "Trả đơn (Hoàn)", color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)", activeColor: "var(--palette-error-contrastText)", activeBg: "var(--palette-error-main)" },
                     { value: 'request_cancel', label: t("admin.booking.status.request_cancel"), color: 'var(--palette-error-dark)', bg: 'var(--palette-error-lighter)', activeColor: 'var(--palette-error-contrastText)', activeBg: 'var(--palette-error-main)' },
                 ].map((tab) => (
                     <Tab
@@ -404,7 +395,6 @@ export const BookingList = () => {
                                                         "in-progress": { label: t("admin.booking.status.in_progress"), color: "var(--palette-primary-dark)", bg: "var(--palette-primary-lighter)" },
                                                         completed: { label: t("admin.booking.status.completed"), color: "var(--palette-success-dark)", bg: "var(--palette-success-lighter)" },
                                                         cancelled: { label: t("admin.booking.status.cancelled"), color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" },
-                                                        returned: { label: t("admin.booking.status.returned"), color: "var(--palette-info-dark)", bg: "rgba(0, 184, 217, 0.16)" },
                                                         request_cancel: { label: t("admin.booking.status.request_cancel"), color: "var(--palette-error-dark)", bg: "var(--palette-error-lighter)" }
                                                     };
                                                     const status = statusMap[row.bookingStatus] || { label: row.bookingStatus, color: 'var(--palette-text-disabled)', bg: "var(--palette-background-neutral)" };
@@ -422,7 +412,7 @@ export const BookingList = () => {
                                                                     height: '24px'
                                                                 }}
                                                             />
-                                                            {row.isOverrun && !['completed', 'cancelled', 'returned'].includes(row.bookingStatus) && (
+                                                            {row.isOverrun && !['completed', 'cancelled'].includes(row.bookingStatus) && (
                                                                 <Chip
                                                                     icon={<Icon icon="eva:alert-triangle-fill" />}
                                                                     label="Quá giờ"
@@ -510,17 +500,8 @@ export const BookingList = () => {
                                                         </MenuItem>
                                                     )}
 
-                                                    {['confirmed', 'delayed'].includes(row.bookingStatus) && (
-                                                        <MenuItem
-                                                            onClick={() => { handleCloseMenu(row._id); handleStatusUpdate(row._id, 'returned'); }}
-                                                            sx={{ color: 'var(--palette-info-main)' }}
-                                                        >
-                                                            <Icon icon="solar:user-check-bold" width={18} style={{ marginRight: 8 }} />
-                                                            Khách đã tới
-                                                        </MenuItem>
-                                                    )}
 
-                                                    {['returned', 'in-progress'].includes(row.bookingStatus) && (
+                                                    {['in-progress'].includes(row.bookingStatus) && (
                                                         <MenuItem
                                                             onClick={() => { handleCloseMenu(row._id); handleStatusUpdate(row._id, 'completed'); }}
                                                             sx={{ color: 'var(--palette-warning-main)' }}
