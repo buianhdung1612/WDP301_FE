@@ -48,13 +48,23 @@ export const BoardingTaskDashboard = ({ bookings, careDate }: TaskDashboardProps
             const checkInTimeStr = checkIn.format("HH:mm");
             const checkOutTimeStr = checkOut.format("HH:mm");
 
+            const dayDiff = currentCareDate.startOf('day').diff(dayjs(checkIn).startOf('day'), 'day') + 1;
+            const targetDaySuffix = `Ngày ${dayDiff}`;
+
             // Xử lý lịch ăn
             feeding.forEach((item: any, index: number) => {
                 const taskTime = item.time || "00:00";
+                
+                // Trích xuất prefix "07:30" nếu có chứa "- Ngày N"
+                const baseTimeMatch = taskTime.split(" - ")[0];
+                const baseTime = baseTimeMatch.trim();
+
+                // Lọc nhiệm vụ theo ngày
+                if (taskTime.includes("Ngày") && !taskTime.includes(targetDaySuffix)) return;
 
                 // Lọc nhiệm vụ theo giờ check-in/out
-                if (isFirstDay && taskTime < checkInTimeStr) return;
-                if (isLastDay && taskTime > checkOutTimeStr) return;
+                if (isFirstDay && baseTime < checkInTimeStr) return;
+                if (isLastDay && baseTime > checkOutTimeStr) return;
 
                 tasks.push({
                     ...item,
@@ -64,18 +74,23 @@ export const BoardingTaskDashboard = ({ bookings, careDate }: TaskDashboardProps
                     customerName: booking.fullName || booking.userId?.fullName,
                     type: "feeding",
                     scheduleIndex: index,
-                    displayTime: dayjs(`2000-01-01 ${taskTime}`).format("hh:mm A"),
-                    sortTime: taskTime
+                    displayTime: dayjs(`2000-01-01 ${baseTime}`).format("hh:mm A") + (taskTime.includes("Ngày") ? ` (N${dayDiff})` : ""),
+                    sortTime: baseTime
                 });
             });
 
             // Xử lý lịch vận động
             exercise.forEach((item: any, index: number) => {
                 const taskTime = item.time || "00:00";
+                
+                const baseTimeMatch = taskTime.split(" - ")[0];
+                const baseTime = baseTimeMatch.trim();
+
+                if (taskTime.includes("Ngày") && !taskTime.includes(targetDaySuffix)) return;
 
                 // Lọc nhiệm vụ theo giờ check-in/out
-                if (isFirstDay && taskTime < checkInTimeStr) return;
-                if (isLastDay && taskTime > checkOutTimeStr) return;
+                if (isFirstDay && baseTime < checkInTimeStr) return;
+                if (isLastDay && baseTime > checkOutTimeStr) return;
 
                 tasks.push({
                     ...item,
@@ -85,8 +100,8 @@ export const BoardingTaskDashboard = ({ bookings, careDate }: TaskDashboardProps
                     customerName: booking.fullName || booking.userId?.fullName,
                     type: "exercise",
                     scheduleIndex: index,
-                    displayTime: taskTime,
-                    sortTime: taskTime
+                    displayTime: baseTime + (taskTime.includes("Ngày") ? ` (N${dayDiff})` : ""),
+                    sortTime: baseTime
                 });
             });
         });

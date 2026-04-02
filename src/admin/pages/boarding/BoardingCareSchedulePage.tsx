@@ -134,7 +134,11 @@ const FeedingRow = ({
     return (
         <Paper variant="outlined" sx={{ p: 2.5, borderRadius: "var(--shape-borderRadius-md)", position: 'relative', bgcolor: '#fcfcfc', borderStyle: 'solid', borderColor: 'var(--palette-divider)' }}>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
-                <TextField size="small" type="time" label="Giờ" value={item.time || ""} onChange={e => !isReadOnly && onUpdate({ time: e.target.value })} disabled={isReadOnly} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} slotProps={{ inputLabel: { shrink: true } }} />
+                <TextField size="small" type="time" label="Giờ" value={(item.time || "").split(" - ")[0]} onChange={e => {
+                    if (isReadOnly) return;
+                    const suffix = (item.time || "").includes(" - Ngày") ? " - " + (item.time || "").split(" - ")[1] : "";
+                    onUpdate({ time: e.target.value + suffix });
+                }} disabled={isReadOnly} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} slotProps={{ inputLabel: { shrink: true } }} />
                 {item._autoSplit && (
                     <Box sx={{ px: 1, py: 0.25, bgcolor: "var(--palette-success-lighter)", color: "var(--palette-success-dark)", borderRadius: 1, fontSize: '0.7rem', fontWeight: 700 }}>
                         Đã tách riêng
@@ -243,7 +247,11 @@ const ExerciseRow = ({
     return (
         <Paper variant="outlined" sx={{ p: 2.5, borderRadius: "var(--shape-borderRadius-md)", position: 'relative', bgcolor: '#fcfcfc', borderStyle: 'solid', borderColor: 'var(--palette-divider)' }}>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
-                <TextField size="small" type="time" label="Giờ" value={item.time || ""} onChange={e => !isReadOnly && onUpdate({ time: e.target.value })} disabled={isReadOnly} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} slotProps={{ inputLabel: { shrink: true } }} />
+                <TextField size="small" type="time" label="Giờ" value={(item.time || "").split(" - ")[0]} onChange={e => {
+                    if (isReadOnly) return;
+                    const suffix = (item.time || "").includes(" - Ngày") ? " - " + (item.time || "").split(" - ")[1] : "";
+                    onUpdate({ time: e.target.value + suffix });
+                }} disabled={isReadOnly} sx={{ width: 120, flexShrink: 0, '& .MuiInputBase-root': { fontWeight: 700 } }} slotProps={{ inputLabel: { shrink: true } }} />
                 {item._autoSplit && (
                     <Box sx={{ px: 1, py: 0.25, bgcolor: "var(--palette-success-lighter)", color: "var(--palette-success-dark)", borderRadius: 1, fontSize: '0.7rem', fontWeight: 700 }}>
                         Đã tách riêng
@@ -537,7 +545,11 @@ export const BoardingCareSchedulePage = () => {
 
     const updateCareMut = useMutation({
         mutationFn: ({ id, payload }: any) => updateBoardingCareSchedule(id, payload),
-        onSuccess: () => { toast.success("Đã cập nhật"); queryClient.invalidateQueries({ queryKey: ["admin-boarding-bookings"] }); setCareDialogOpen(false); },
+        onSuccess: (res: any) => {
+            toast.success("Đã cập nhật");
+            queryClient.invalidateQueries({ queryKey: ["admin-boarding-bookings"] });
+            if (res?.data) apDungDuLieu(res.data, { kDate: true });
+        },
         onError: (e: any) => toast.error(e?.response?.data?.message || "Lỗi cập nhật"),
     });
 
@@ -981,16 +993,52 @@ export const BoardingCareSchedulePage = () => {
                                 </Alert>
                             )}
                             <Stack direction="row" spacing={2} alignItems="center" sx={{ bgcolor: "var(--palette-background-neutral)", p: 2, borderRadius: "var(--shape-borderRadius-md)" }}>
-                                <TextField
-                                    label="Ngày chăm sóc"
-                                    type="date"
-                                    value={careDate}
-                                    onChange={e => !isReadOnly && setCareDate(e.target.value)}
-                                    disabled={isReadOnly}
-                                    size="small"
-                                    sx={{ width: 180, bgcolor: 'white' }}
-                                    slotProps={{ inputLabel: { shrink: true } }}
-                                />
+                                {editingBooking?.checkInDate && editingBooking?.checkOutDate ? (
+                                    <Stack direction="row" spacing={1} sx={{ bgcolor: 'white', p: 0.5, borderRadius: 2, border: '1px solid #e5e7eb', overflowX: "auto", minWidth: 0, '&::-webkit-scrollbar': { display: 'none' } }}>
+                                        {Array.from({ length: Math.max(1, dayjs(editingBooking.checkOutDate).startOf('day').diff(dayjs(editingBooking.checkInDate).startOf('day'), 'day') + 1) }).map((_, idx) => {
+                                            const dayNum = idx + 1;
+                                            const dayDate = dayjs(editingBooking.checkInDate).add(idx, 'day').format('YYYY-MM-DD');
+                                            const isActive = careDate === dayDate;
+                                            return (
+                                                <Button
+                                                    key={dayNum}
+                                                    size="small"
+                                                    onClick={() => !isReadOnly && setCareDate(dayDate)}
+                                                    disabled={isReadOnly}
+                                                    sx={{
+                                                        borderRadius: 1.5,
+                                                        px: 2,
+                                                        py: 0.5,
+                                                        minWidth: 'max-content',
+                                                        textTransform: 'none',
+                                                        fontWeight: 700,
+                                                        bgcolor: isActive ? 'var(--palette-primary-main)' : 'transparent',
+                                                        color: isActive ? '#fff' : 'text.secondary',
+                                                        '&:hover': {
+                                                            bgcolor: isActive ? 'var(--palette-primary-dark)' : 'var(--palette-action-hover)'
+                                                        }
+                                                    }}
+                                                >
+                                                    Ngày {dayNum}
+                                                </Button>
+                                            );
+                                        })}
+                                    </Stack>
+                                ) : (
+                                    <TextField
+                                        label="Ngày chăm sóc"
+                                        type="date"
+                                        value={careDate}
+                                        onChange={e => !isReadOnly && setCareDate(e.target.value)}
+                                        disabled={isReadOnly}
+                                        size="small"
+                                        sx={{ width: 180, bgcolor: 'white' }}
+                                        slotProps={{ inputLabel: { shrink: true } }}
+                                    />
+                                )}
+                                <Box sx={{ px: 2, py: 0.5, color: "var(--palette-text-secondary)", fontSize: "0.85rem", fontWeight: 700, whiteSpace: 'nowrap' }}>
+                                    {dayjs(careDate).format("DD/MM/YYYY")}
+                                </Box>
                                 {careTab === 0 && suggestedPortion && (
                                     <Box sx={{ px: 2, py: 1, bgcolor: "var(--palette-primary-lighter)", borderRadius: 1.5, color: "var(--palette-primary-dark)", display: "flex", alignItems: "center", gap: 1 }}>
                                         <Typography variant="caption" sx={{ fontWeight: 700 }}>Khẩu phần mỗi bữa khuyến nghị: {suggestedPortion}</Typography>
@@ -1064,7 +1112,10 @@ export const BoardingCareSchedulePage = () => {
                                             startIcon={<AddIcon />}
                                             onClick={() => {
                                                 const type = (selectedPetObj?.type || selectedPetObj?.petType || "all").toLowerCase() as any;
-                                                setFeedingDraft(p => [...p, taoDongLichAn(type, selectedPetId, selectedPetObj?.name)]);
+                                                const dayDiff = dayjs(careDate).startOf('day').diff(dayjs(editingBooking?.checkInDate).startOf('day'), 'day') + 1;
+                                                const newItem = taoDongLichAn(type, selectedPetId, selectedPetObj?.name);
+                                                newItem.time = newItem.time + ` - Ngày ${dayDiff}`;
+                                                setFeedingDraft(p => [...p, newItem]);
                                             }}
                                             sx={{
                                                 mb: 2,
@@ -1083,6 +1134,11 @@ export const BoardingCareSchedulePage = () => {
                                         {feedingDraft
                                             .map((item, originalIdx) => ({ item, originalIdx }))
                                             .filter(({ item }) => !item.petId || String(item.petId) === String(selectedPetId))
+                                            .filter(({ item }) => {
+                                                if (!item.time || !item.time.includes("Ngày")) return true;
+                                                const dayDiff = dayjs(careDate).startOf('day').diff(dayjs(editingBooking?.checkInDate).startOf('day'), 'day') + 1;
+                                                return item.time.includes(`Ngày ${dayDiff}`);
+                                            })
                                             .map(({ item, originalIdx }) => (
                                                 <FeedingRow
                                                     key={originalIdx}
@@ -1139,7 +1195,10 @@ export const BoardingCareSchedulePage = () => {
                                             startIcon={<AddIcon />}
                                             onClick={() => {
                                                 const type = (selectedPetObj?.type || selectedPetObj?.petType || "all").toLowerCase() as any;
-                                                setExerciseDraft(p => [...p, taoDongVanDong(type, selectedPetId, selectedPetObj?.name)]);
+                                                const dayDiff = dayjs(careDate).startOf('day').diff(dayjs(editingBooking?.checkInDate).startOf('day'), 'day') + 1;
+                                                const newItem = taoDongVanDong(type, selectedPetId, selectedPetObj?.name);
+                                                newItem.time = newItem.time + ` - Ngày ${dayDiff}`;
+                                                setExerciseDraft(p => [...p, newItem]);
                                             }}
                                             sx={{
                                                 mb: 2,
@@ -1158,6 +1217,11 @@ export const BoardingCareSchedulePage = () => {
                                         {exerciseDraft
                                             .map((item, originalIdx) => ({ item, originalIdx }))
                                             .filter(({ item }) => !item.petId || String(item.petId) === String(selectedPetId))
+                                            .filter(({ item }) => {
+                                                if (!item.time || !item.time.includes("Ngày")) return true;
+                                                const dayDiff = dayjs(careDate).startOf('day').diff(dayjs(editingBooking?.checkInDate).startOf('day'), 'day') + 1;
+                                                return item.time.includes(`Ngày ${dayDiff}`);
+                                            })
                                             .map(({ item, originalIdx }) => (
                                                 <ExerciseRow
                                                     key={originalIdx}

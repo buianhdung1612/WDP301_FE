@@ -1096,6 +1096,7 @@ export const BoardingCageDetailPage = () => {
                                     [currentPetId]: newChoices
                                   }))}
                                   searchQuery={scheduleSearch}
+                                  totalDays={Math.max(1, totalDays)}
                                 />
                               );
                             } else {
@@ -1108,6 +1109,7 @@ export const BoardingCageDetailPage = () => {
                                     [currentPetId]: newChoices
                                   }))}
                                   searchQuery={scheduleSearch}
+                                  totalDays={Math.max(1, totalDays)}
                                 />
                               );
                             }
@@ -1185,9 +1187,10 @@ export const BoardingCageDetailPage = () => {
 // HELPER COMPONENTS
 // ══════════════════════════════════════════════════
 
-const ScheduleFoodCustomizer = ({ petType, choices, onChange, searchQuery }: { petType: string, choices: Record<string, string>, onChange: any, searchQuery: string }) => {
+const ScheduleFoodCustomizer = ({ petType, choices, onChange, searchQuery, totalDays = 1 }: { petType: string, choices: Record<string, any>, onChange: any, searchQuery: string, totalDays?: number }) => {
   const { data: foodTemplates = [], isLoading } = useFoodTemplates(petType);
   const [expandedSlots, setExpandedSlots] = useState<Record<string, boolean>>({ "Sáng": true });
+  const [selectedDay, setSelectedDay] = useState<number>(1);
 
   const toggleSlot = (id: string) => {
     setExpandedSlots(prev => ({ ...prev, [id]: !prev[id] }));
@@ -1208,9 +1211,33 @@ const ScheduleFoodCustomizer = ({ petType, choices, onChange, searchQuery }: { p
 
   return (
     <div className="space-y-4">
+      {totalDays > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+          {Array.from({ length: totalDays }).map((_, idx) => {
+            const dayNum = idx + 1;
+            return (
+              <button
+                key={dayNum}
+                type="button"
+                onClick={() => setSelectedDay(dayNum)}
+                className={`px-4 py-2 rounded-full text-[12px] font-[800] whitespace-nowrap transition-all ${
+                  selectedDay === dayNum 
+                    ? "bg-client-primary text-white shadow-md shadow-client-primary/30"
+                    : "bg-white text-[#7b8591] border border-[#efe2d8] hover:border-client-primary/50 hover:bg-[#fffbf9]"
+                }`}
+              >
+                Ngày {dayNum}
+              </button>
+            )
+          })}
+        </div>
+      )}
       {meals.map((meal) => {
         const isExpanded = expandedSlots[meal.id];
-        const currentChoice = choices[meal.id];
+        const currentDayChoices = (choices[selectedDay] && typeof choices[selectedDay] === "object") 
+            ? choices[selectedDay] 
+            : (selectedDay === 1 ? choices : {});
+        const currentChoice = currentDayChoices[meal.id];
 
         return (
           <div key={meal.id} className="rounded-[20px] bg-white border border-[#f1e6dc] overflow-hidden shadow-sm">
@@ -1247,14 +1274,23 @@ const ScheduleFoodCustomizer = ({ petType, choices, onChange, searchQuery }: { p
                       <button
                         key={food._id}
                         type="button"
-                        onClick={() => onChange({ ...choices, [meal.id]: food.name })}
-                        className={`flex items-start gap-3 p-4 text-left rounded-[16px] border transition-all ${choices[meal.id] === food.name ? "border-client-primary bg-[#fffbf9] shadow-sm ring-1 ring-client-primary/10" : "border-[#efe2d8] bg-white hover:border-client-primary/50"}`}
+                        onClick={() => {
+                          const newDayChoices = { ...((choices[selectedDay] && typeof choices[selectedDay] === "object") ? choices[selectedDay] : (selectedDay === 1 ? choices : {})), [meal.id]: food.name };
+                          const baseChoices: Record<number, any> = {};
+                          for (let i = 1; i <= totalDays; i++) {
+                              if (i !== selectedDay) {
+                                  baseChoices[i] = (choices[i] && typeof choices[i] === "object") ? choices[i] : (i === 1 ? choices : {});
+                              }
+                          }
+                          onChange({ ...baseChoices, [selectedDay]: newDayChoices });
+                        }}
+                        className={`flex items-start gap-3 p-4 text-left rounded-[16px] border transition-all ${currentDayChoices[meal.id] === food.name ? "border-client-primary bg-[#fffbf9] shadow-sm ring-1 ring-client-primary/10" : "border-[#efe2d8] bg-white hover:border-client-primary/50"}`}
                       >
-                        <div className={`mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${choices[meal.id] === food.name ? "border-client-primary bg-client-primary text-white" : "border-[#cbd5e1]bg-white"}`}>
-                          {choices[meal.id] === food.name && <Check className="h-3 w-3 stroke-[3]" />}
+                        <div className={`mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${currentDayChoices[meal.id] === food.name ? "border-client-primary bg-client-primary text-white" : "border-[#cbd5e1]bg-white"}`}>
+                          {currentDayChoices[meal.id] === food.name && <Check className="h-3 w-3 stroke-[3]" />}
                         </div>
                         <div>
-                          <p className={`text-[14px] font-[700] ${choices[meal.id] === food.name ? "text-client-secondary" : "text-[#51606d]"}`}>{food.name}</p>
+                          <p className={`text-[14px] font-[700] ${currentDayChoices[meal.id] === food.name ? "text-client-secondary" : "text-[#51606d]"}`}>{food.name}</p>
                           {food.description && <p className="text-[11px] text-[#8a94a1] leading-relaxed mt-0.5">{food.description}</p>}
                         </div>
                       </button>
@@ -1285,8 +1321,9 @@ const EXERCISE_OPTIONS: Record<string, { label: string; value: string }[]> = {
   ],
 };
 
-const ScheduleExerciseCustomizer = ({ petType, choices, onChange }: { petType: string, choices: Record<string, string>, onChange: any, searchQuery: string }) => {
+const ScheduleExerciseCustomizer = ({ petType, choices, onChange, searchQuery, totalDays = 1 }: { petType: string, choices: Record<string, any>, onChange: any, searchQuery: string, totalDays?: number }) => {
   const [expandedSlots, setExpandedSlots] = useState<Record<string, boolean>>({ "Sáng": true });
+  const [selectedDay, setSelectedDay] = useState<number>(1);
 
   const toggleSlot = (id: string) => {
     setExpandedSlots(prev => ({ ...prev, [id]: !prev[id] }));
@@ -1299,6 +1336,9 @@ const ScheduleExerciseCustomizer = ({ petType, choices, onChange }: { petType: s
   ];
 
   const options = EXERCISE_OPTIONS[petType === "cat" ? "cat" : "dog"];
+  const filteredOptions = searchQuery 
+    ? options.filter(o => o.label.toLowerCase().includes(searchQuery.toLowerCase()) || o.value.toLowerCase().includes(searchQuery.toLowerCase()))
+    : options;
 
   return (
     <div className="space-y-4 py-2">
@@ -1309,9 +1349,34 @@ const ScheduleExerciseCustomizer = ({ petType, choices, onChange }: { petType: s
         </p>
       </div>
 
+      {totalDays > 1 && (
+        <div className="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar">
+          {Array.from({ length: totalDays }).map((_, idx) => {
+            const dayNum = idx + 1;
+            return (
+              <button
+                key={dayNum}
+                type="button"
+                onClick={() => setSelectedDay(dayNum)}
+                className={`px-4 py-2 rounded-full text-[12px] font-[800] whitespace-nowrap transition-all ${
+                  selectedDay === dayNum 
+                    ? "bg-client-primary text-white shadow-md shadow-client-primary/30"
+                    : "bg-white text-[#7b8591] border border-[#efe2d8] hover:border-client-primary/50 hover:bg-[#fffbf9]"
+                }`}
+              >
+                Ngày {dayNum}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       {slots.map((slot) => {
         const isExpanded = expandedSlots[slot.id];
-        const currentChoice = choices[slot.id];
+        const currentDayChoices = (choices[selectedDay] && typeof choices[selectedDay] === "object") 
+            ? choices[selectedDay] 
+            : (selectedDay === 1 ? choices : {});
+        const currentChoice = currentDayChoices[slot.id];
 
         return (
           <div key={slot.id} className="rounded-[20px] bg-white border border-[#f1e6dc] overflow-hidden shadow-sm">
@@ -1343,13 +1408,23 @@ const ScheduleExerciseCustomizer = ({ petType, choices, onChange }: { petType: s
             {isExpanded && (
               <div className="p-4 pt-0 border-t border-[#f1e6dc] bg-[#fafafa]">
                 <div className="grid grid-cols-1 gap-2.5 mt-4">
-                  {[...options, { label: "Tạm nghỉ / Không vận động", value: "skip" }].map((opt) => {
+                  {[...filteredOptions, { label: "Tạm nghỉ / Không vận động", value: "skip" }].map((opt) => {
                     const isSelected = (currentChoice === opt.value) || (opt.value === 'skip' && !currentChoice);
                     return (
                       <button
                         key={`${slot.id}-${opt.value}`}
                         type="button"
-                        onClick={() => onChange({ ...choices, [slot.id]: opt.value === 'skip' ? '' : opt.value })}
+                        onClick={() => {
+                          const val = opt.value === 'skip' ? '' : opt.value;
+                          const newDayChoices = { ...((choices[selectedDay] && typeof choices[selectedDay] === "object") ? choices[selectedDay] : (selectedDay === 1 ? choices : {})), [slot.id]: val };
+                          const baseChoices: Record<number, any> = {};
+                          for (let i = 1; i <= totalDays; i++) {
+                              if (i !== selectedDay) {
+                                  baseChoices[i] = (choices[i] && typeof choices[i] === "object") ? choices[i] : (i === 1 ? choices : {});
+                              }
+                          }
+                          onChange({ ...baseChoices, [selectedDay]: newDayChoices });
+                        }}
                         className={`flex items-center justify-between gap-3 p-4 text-left rounded-[20px] border transition-all ${isSelected
                           ? "border-client-primary bg-[#fffbf9] shadow-md ring-1 ring-client-primary/10"
                           : "border-[#efe2d8] bg-white hover:border-client-primary/40 hover:bg-[#fffcfb]"
