@@ -26,14 +26,26 @@ export const useLogin = () => {
                 });
 
                 toast.success(response.message);
-                setTimeout(() => {
-                    const isStaff = userInfo.roles?.some((role: any) => role.isStaff);
-                    if (isStaff) {
-                        navigate("/admin/staff/tasks");
-                    } else {
-                        navigate("/admin/dashboard/system");
-                    }
-                }, 1000);
+                console.log("Login successful, navigating to staff tasks...");
+                const roles = userInfo.roles || [];
+                const isAdmin = roles.some((role: any) => 
+                    role.name?.toLowerCase().includes("admin") || 
+                    role.name?.toLowerCase().includes("quản trị viên") ||
+                    role.name?.toLowerCase().includes("quản trị")
+                );
+                const isStaff = roles.some((role: any) => 
+                    role.isStaff || 
+                    role.name?.toLowerCase().includes("nhân viên") || 
+                    role.name?.toLowerCase().includes("staff")
+                );
+
+                if (isAdmin) {
+                    navigate("/admin/dashboard/system");
+                } else if (isStaff) {
+                    navigate("/admin/staff/tasks");
+                } else {
+                    navigate("/admin/dashboard/system"); // Default fallback
+                }
             } else {
                 toast.error(response.message || "Đăng nhập thất bại!");
             }

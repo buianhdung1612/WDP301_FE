@@ -41,7 +41,25 @@ export const LoginPage = () => {
             if (response.success) {
                 toast.success(response.message || "Đăng nhập thành công!");
                 loginStore(response.user, response.token);
-                navigate("/");
+                const roles = response.user?.roles || [];
+                const isAdminOrAdminRole = roles.some((role: any) => 
+                    role.name?.toLowerCase().includes("admin") || 
+                    role.name?.toLowerCase().includes("quản trị viên") ||
+                    role.name?.toLowerCase().includes("quản trị")
+                );
+                const isStaffRole = roles.some((role: any) => 
+                    role.isStaff || 
+                    role.name?.toLowerCase().includes("nhân viên") || 
+                    role.name?.toLowerCase().includes("staff")
+                );
+
+                if (isAdminOrAdminRole) {
+                    navigate("/admin/dashboard/system");
+                } else if (isStaffRole) {
+                    navigate("/admin/staff/tasks");
+                } else {
+                    navigate("/");
+                }
             } else {
                 toast.error(response.message || "Đăng nhập thất bại!");
             }
