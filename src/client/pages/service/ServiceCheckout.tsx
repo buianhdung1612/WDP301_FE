@@ -318,6 +318,9 @@ export const ServiceCheckoutPage = () => {
                                         <p className="text-[13.5px] text-indigo-700/80 leading-relaxed font-medium">
                                             Vui lòng xác nhận đúng <span className="font-bold">số tuổi</span> của bé pet và đảm bảo bé có <span className="font-bold">tình trạng sức khỏe tốt</span> (đã tiêm phòng, không bệnh truyền nhiễm) trước khi đến TeddyPet nha!
                                         </p>
+                                        <p className="text-[12.5px] text-red-500 font-bold italic mt-1">
+                                            * Lưu ý: Nếu khi đến thực hiện dịch vụ, thông tin bé không đúng hoặc không đủ điều kiện sức khỏe, TeddyPet sẽ buộc phải hủy đơn và <span className="underline">không hoàn trả</span> tiền cọc/thanh toán.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
