@@ -411,9 +411,9 @@ const ServiceUsageChart = ({ data }: { data: any[] }) => {
 
 const SystemStatsGrid = ({ stats }: { stats: any }) => {
     const statsData = [
-        { title: "Tổng người dùng", total: stats?.users.total.toLocaleString() || "0", percent: stats?.users.percent || 0, trend: stats?.users.trend || [], color: "#00a76f" },
-        { title: "Nhân viên quản trị", total: stats?.admins.total.toLocaleString() || "0", percent: stats?.admins.percent || 0, trend: stats?.admins.trend || [], color: "#00b8d9" },
-        { title: "Tổng thú cưng", total: stats?.pets.total.toLocaleString() || "0", percent: stats?.pets.percent || 0, trend: stats?.pets.trend || [], color: "#ff5630" }
+        { title: "Tổng người dùng", total: stats?.users?.total?.toLocaleString() || "0", percent: stats?.users?.percent || 0, trend: stats?.users?.trend || [], color: "#00a76f" },
+        { title: "Nhân viên quản trị", total: stats?.admins?.total?.toLocaleString() || "0", percent: stats?.admins?.percent || 0, trend: stats?.admins?.trend || [], color: "#00b8d9" },
+        { title: "Tổng thú cưng", total: stats?.pets?.total?.toLocaleString() || "0", percent: stats?.pets?.percent || 0, trend: stats?.pets?.trend || [], color: "#ff5630" }
     ];
 
     return (
