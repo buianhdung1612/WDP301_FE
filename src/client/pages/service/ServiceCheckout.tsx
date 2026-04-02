@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { getMyBooking, updateBooking, createBooking } from "../../api/booking.api";
+import { getMyBooking, updateBooking, createBooking, getBookingConfig } from "../../api/booking.api";
 import { ProductBanner } from "../product/sections/ProductBanner";
 import { FooterSub } from "../../components/layouts/FooterSub";
 import { motion, AnimatePresence } from "framer-motion";
@@ -125,13 +125,11 @@ export const ServiceCheckoutPage = () => {
         }
 
         // Lấy cấu hình đặt lịch
-        import("../../api/booking.api").then(({ getBookingConfig }) => {
-            getBookingConfig().then(res => {
-                if (res.code === 200) {
-                    setDepositPercentage(res.data.depositPercentage || 0);
-                    setRefundCancellationHours(res.data.refundCancellationHours || 0);
-                }
-            });
+        getBookingConfig().then(res => {
+            if (res.code === 200) {
+                setDepositPercentage(res.data.depositPercentage || 0);
+                setRefundCancellationHours(res.data.refundCancellationHours || 0);
+            }
         });
     }, [id, navigate, user, storeService, storePets, storeStartTime, storeEndTime, storeDuration, storeNote]);
 
@@ -295,20 +293,34 @@ export const ServiceCheckoutPage = () => {
                                 </div>
                             )}
 
-                            {/* Chính sách hủy */}
-                            {refundCancellationHours > 0 && (
-                                <div className="mt-8 p-5 bg-teal-50/50 border border-teal-100/50 rounded-[20px] flex items-start gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center shrink-0">
-                                        <Icon icon="solar:info-circle-bold-duotone" width={22} className="text-teal-600" />
+                            {/* Lưu ý quan trọng & Chính sách hủy */}
+                            <div className="mt-8 space-y-4">
+                                {refundCancellationHours > 0 && (
+                                    <div className="p-5 bg-teal-50/50 border border-teal-100/30 rounded-[20px] flex items-start gap-4">
+                                        <div className="w-10 h-10 rounded-full bg-teal-100/60 flex items-center justify-center shrink-0">
+                                            <Icon icon="solar:info-circle-bold-duotone" width={22} className="text-teal-600" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <h4 className="text-[15px] font-bold text-teal-800">Chính sách hủy & hoàn tiền</h4>
+                                            <p className="text-[13.5px] text-teal-700/80 leading-relaxed font-medium">
+                                                Hoàn <span className="font-bold text-teal-600">100%</span> nếu hủy trước ít nhất <span className="font-bold text-teal-600">{refundCancellationHours} giờ</span> so với giờ hẹn. Sau thời gian này, TeddyPet xin phép <span className="font-bold text-red-500">không hoàn trả</span> tiền cọc/thanh toán nếu bạn hủy lịch.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="p-5 bg-indigo-50/50 border border-indigo-100/30 rounded-[20px] flex items-start gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-indigo-100/60 flex items-center justify-center shrink-0">
+                                        <Icon icon="solar:shield-check-bold-duotone" width={22} className="text-indigo-600" />
                                     </div>
                                     <div className="space-y-1">
-                                        <h4 className="text-[15px] font-bold text-teal-800">Chính sách hủy & hoàn tiền</h4>
-                                        <p className="text-[13.5px] text-teal-700/80 leading-relaxed font-medium">
-                                            TeddyPet hỗ trợ hoàn <span className="font-bold text-teal-600">100%</span> tiền cọc hoặc thanh toán nếu bạn thực hiện yêu cầu hủy lịch trước ít nhất <span className="font-bold text-teal-600">{refundCancellationHours} giờ</span> so với giờ hẹn.
+                                        <h4 className="text-[15px] font-bold text-indigo-800">Xác nhận tình trạng thú cưng</h4>
+                                        <p className="text-[13.5px] text-indigo-700/80 leading-relaxed font-medium">
+                                            Vui lòng xác nhận đúng <span className="font-bold">số tuổi</span> của bé pet và đảm bảo bé có <span className="font-bold">tình trạng sức khỏe tốt</span> (đã tiêm phòng, không bệnh truyền nhiễm) trước khi đến TeddyPet nha!
                                         </p>
                                     </div>
                                 </div>
-                            )}
+                            </div>
                         </div>
 
                         {/* Phần ghi chú */}

@@ -90,14 +90,14 @@ const WebsiteVisits = ({ data }: { data: number[] }) => {
     };
 
     const series = [
-        { name: 'Khách truy cập', data: data || Array(12).fill(0) }
+        { name: 'Số lượng đơn hàng', data: data || Array(12).fill(0) }
     ];
 
     return (
         <DashboardCard sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>Lượt truy cập hệ thống</Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Thống kê theo từng tháng (dựa trên đơn hàng)</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '18px' }}>Tần suất đặt hàng</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Thống kê số lượng đơn hàng theo từng tháng</Typography>
             </Box>
             <Box sx={{ flexGrow: 1, width: '100%' }}>
                 <Chart options={chartOptions} series={series} type="bar" width="100%" height={364} />
@@ -159,6 +159,7 @@ export const AnalyticsPage = () => {
                 }}
             >
                 {/* Analytics Widgets (Span 3 each) */}
+                {/* Analytics Widgets (Span 3 each) */}
                 <Grid
                     sx={{
                         flexBasis: 'auto', flexGrow: 0, width: '100%',
@@ -167,7 +168,11 @@ export const AnalyticsPage = () => {
                     }}
                 >
                     <AnalyticsWidget
-                        title="Doanh số tuần" total={`${stats?.weeklySales.total.toLocaleString()}đ` || "0đ"} percent={2.6} color="#00a76f" colorType="primary"
+                        title="Doanh số tuần"
+                        total={`${stats?.weeklySales.total.toLocaleString()}đ` || "0đ"}
+                        percent={stats?.weeklySales.percent || 0}
+                        color="#00a76f"
+                        colorType="primary"
                         icon="https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/icons/glass/ic-glass-bag.svg"
                         chartData={stats?.weeklySales.data || [0]}
                     />
@@ -180,9 +185,13 @@ export const AnalyticsPage = () => {
                     }}
                 >
                     <AnalyticsWidget
-                        title="Người dùng mới" total={stats?.newUsers.toString() || "0"} percent={-0.1} color="#8e33ff" colorType="secondary"
+                        title="Người dùng mới"
+                        total={stats?.newUsers.total.toString() || "0"}
+                        percent={stats?.newUsers.percent || 0}
+                        color="#8e33ff"
+                        colorType="secondary"
                         icon="https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/icons/glass/ic-glass-users.svg"
-                        chartData={[15, 32, 45, 32, 56, 30, 44, 32, 20]}
+                        chartData={[15, 32, 45, 32, 56, 30, 44, 32, 20]} // Simulated users trend
                     />
                 </Grid>
                 <Grid
@@ -193,9 +202,13 @@ export const AnalyticsPage = () => {
                     }}
                 >
                     <AnalyticsWidget
-                        title="Tổng đơn hàng" total={stats?.purchaseOrders.toString() || "0"} percent={2.8} color="#ffab00" colorType="warning"
+                        title="Tổng đơn hàng"
+                        total={stats?.purchaseOrders.total.toString() || "0"}
+                        percent={stats?.purchaseOrders.percent || 0}
+                        color="#ffab00"
+                        colorType="warning"
                         icon="https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/icons/glass/ic-glass-buy.svg"
-                        chartData={[10, 25, 40, 20, 45, 35, 50, 40, 60]}
+                        chartData={[10, 25, 40, 20, 45, 35, 50, 40, 60]} // Simulated orders trend
                     />
                 </Grid>
                 <Grid
@@ -206,9 +219,13 @@ export const AnalyticsPage = () => {
                     }}
                 >
                     <AnalyticsWidget
-                        title="Tin nhắn" total={stats?.messages.toString() || "234"} percent={3.6} color="#ff5630" colorType="error"
+                        title="Tổng thú cưng"
+                        total={stats?.pets.total.toString() || "0"}
+                        percent={stats?.pets.percent || 0}
+                        color="#ff5630"
+                        colorType="error"
                         icon="https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/icons/glass/ic-glass-message.svg"
-                        chartData={[5, 18, 12, 51, 68, 11, 39, 37, 27, 20]}
+                        chartData={[5, 18, 12, 51, 68, 11, 39, 37, 27, 20]} // Simulated pets trend
                     />
                 </Grid>
 

@@ -1,4 +1,4 @@
-import { Grid, Box, Typography, Button, Divider, Stack, Avatar, CircularProgress, Table, TableBody, TableCell, TableHead, TableRow, TableContainer } from "@mui/material"
+import { Grid, Box, Typography, Button, Divider, Stack, Avatar, CircularProgress, Table, TableBody, TableCell, TableHead, TableRow, TableContainer, Tooltip } from "@mui/material";
 import { useAuthStore } from "../../../stores/useAuthStore";
 import Chart from 'react-apexcharts';
 import { Icon } from '@iconify/react';
@@ -233,10 +233,12 @@ const SummaryWidget = ({ title, total, percent, color, chartData }: any) => {
             <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'var(--palette-text-secondary)', mb: 1 }}>{title}</Typography>
                 <Typography variant="h4" sx={{ fontWeight: 700 }}>{total}</Typography>
-                <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 1, color: percent > 0 ? 'var(--palette-success-main)' : 'var(--palette-error-main)' }}>
-                    <Icon icon={percent > 0 ? "solar:double-alt-arrow-up-bold-duotone" : "solar:double-alt-arrow-down-bold-duotone"} width={20} />
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{percent > 0 ? '+' : ''}{percent}%</Typography>
-                </Stack>
+                <Tooltip title="So với tuần trước" arrow placement="top">
+                    <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 1, color: percent > 0 ? 'var(--palette-success-main)' : 'var(--palette-error-main)', cursor: 'help', width: 'fit-content' }}>
+                        <Icon icon={percent > 0 ? "solar:double-alt-arrow-up-bold-duotone" : "solar:double-alt-arrow-down-bold-duotone"} width={20} />
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{percent > 0 ? '+' : ''}{percent}%</Typography>
+                    </Stack>
+                </Tooltip>
             </Box>
 
             <Chart type="line" series={[{ data: chartData }]} options={chartOptions} width={120} height={60} />
@@ -409,16 +411,16 @@ const ServiceUsageChart = ({ data }: { data: any[] }) => {
 
 const SystemStatsGrid = ({ stats }: { stats: any }) => {
     const statsData = [
-        { title: "Tổng người dùng", total: stats?.totalUsers.toLocaleString() || "0", color: "#00a76f" },
-        { title: "Nhân viên quản trị", total: stats?.totalAdmins.toLocaleString() || "0", color: "#00b8d9" },
-        { title: "Tổng thú cưng", total: stats?.totalPets.toLocaleString() || "0", color: "#ff5630" }
+        { title: "Tổng người dùng", total: stats?.users.total.toLocaleString() || "0", percent: stats?.users.percent || 0, trend: stats?.users.trend || [], color: "#00a76f" },
+        { title: "Nhân viên quản trị", total: stats?.admins.total.toLocaleString() || "0", percent: stats?.admins.percent || 0, trend: stats?.admins.trend || [], color: "#00b8d9" },
+        { title: "Tổng thú cưng", total: stats?.pets.total.toLocaleString() || "0", percent: stats?.pets.percent || 0, trend: stats?.pets.trend || [], color: "#ff5630" }
     ];
 
     return (
         <>
             {statsData.map((stat, index) => (
                 <Grid key={index} sx={{ flexGrow: 0, flexBasis: 'auto', width: 'calc(100% * 4 / var(--Grid-parent-columns) - (var(--Grid-parent-columns) - 4) * (var(--Grid-parent-columnSpacing) / var(--Grid-parent-columns)))' }}>
-                    <SummaryWidget title={stat.title} total={stat.total} percent={2.6} color={stat.color} chartData={[25, 66, 41, 89, 63, 25, 44, 12]} />
+                    <SummaryWidget title={stat.title} total={stat.total} percent={stat.percent} color={stat.color} chartData={stat.trend} />
                 </Grid>
             ))}
         </>

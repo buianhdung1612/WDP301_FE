@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Tooltip } from "@mui/material";
 import { Icon } from '@iconify/react';
 import Chart from 'react-apexcharts';
 import DashboardCard from "./DashboardCard";
@@ -71,30 +71,33 @@ const AnalyticsWidget = ({ title, total, percent, color, icon, chartData, colorT
             }}
         >
             {/* Percentage Box - Absolute Positioned */}
-            <Box
-                sx={{
-                    top: 16,
-                    right: 16,
-                    display: 'flex',
-                    position: 'absolute',
-                    alignItems: 'center',
-                    gap: 'calc(0.5 * var(--spacing))',
-                    zIndex: 1
-                }}
-            >
-                <Icon icon={isLoss ? "eva:trending-down-fill" : "eva:trending-up-fill"} width={20} height={20} />
+            <Tooltip title="So với tuần trước" arrow placement="top">
                 <Box
-                    component="span"
                     sx={{
-                        fontWeight: 600,
-                        fontSize: '0.875rem',
-                        lineHeight: 1.57143,
-                        fontFamily: commonFont
+                        top: 16,
+                        right: 16,
+                        display: 'flex',
+                        position: 'absolute',
+                        alignItems: 'center',
+                        gap: 'calc(0.5 * var(--spacing))',
+                        zIndex: 1,
+                        cursor: 'help'
                     }}
                 >
-                    {percent > 0 ? `+${percent}` : percent}%
+                    <Icon icon={isLoss ? "eva:trending-down-fill" : "eva:trending-up-fill"} width={20} height={20} />
+                    <Box
+                        component="span"
+                        sx={{
+                            fontWeight: 600,
+                            fontSize: '0.875rem',
+                            lineHeight: 1.57143,
+                            fontFamily: commonFont
+                        }}
+                    >
+                        {percent > 0 ? `+${percent}` : percent}%
+                    </Box>
                 </Box>
-            </Box>
+            </Tooltip>
 
             {/* Icon */}
             <Box
