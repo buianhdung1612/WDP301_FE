@@ -185,6 +185,11 @@ export const BookingDetailPage = () => {
             return;
         }
 
+        if (booking.bookingStatus === 'request_cancel' && newStatus === 'paid') {
+            toast.error("Đơn đang yêu cầu hủy không thể chuyển sang trạng thái đã thanh toán!");
+            return;
+        }
+
         updateBooking({ id: booking._id, data: { paymentStatus: newStatus } }, {
             onSuccess: () => toast.success("Cập nhật trạng thái thanh toán thành công")
         });
@@ -876,6 +881,10 @@ export const BookingDetailPage = () => {
                                             return null;
                                         }
                                         if (value === 'refunded' && !['request_cancel', 'cancelled'].includes(booking.bookingStatus)) {
+                                            return null;
+                                        }
+
+                                        if (booking.bookingStatus === 'request_cancel' && ['paid'].includes(value)) {
                                             return null;
                                         }
 

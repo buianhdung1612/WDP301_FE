@@ -3,6 +3,7 @@ import { Box, Typography, Skeleton } from '@mui/material';
 import Chart from 'react-apexcharts';
 import { getDetailedOrderStats } from '../../../api/dashboard.api';
 import DashboardCard from '../../../components/dashboard/DashboardCard';
+import SummaryWidget from '../../../components/dashboard/SummaryWidget';
 
 export const OrderStatisticsPage = () => {
     const [loading, setLoading] = useState(true);
@@ -37,7 +38,16 @@ export const OrderStatisticsPage = () => {
         return <Box p={3}><Skeleton variant="rectangular" height={500} sx={{ borderRadius: 2 }} /></Box>;
     }
 
-    const { revenueByCategory, topProducts, orderDistribution } = stats;
+    const { topProducts, orderDistribution, totalOrders, pendingOrders, confirmedOrders, thisMonthRevenue, revenueTrend, recentRevenueSources } = stats;
+
+    const trendOptions: any = {
+        chart: { type: 'area', toolbar: { show: false }, fontFamily: 'Public Sans, sans-serif' },
+        xaxis: { categories: (revenueTrend || []).map((t: any) => t.month) },
+        colors: ['#00A76F'],
+        stroke: { curve: 'smooth', width: 3 },
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0, stops: [0, 90, 100] } },
+        grid: { strokeDashArray: 3 }
+    };
 
     const donutOptions: any = {
         labels: orderDistribution.map((o: any) => STATUS_LABELS[o._id] || o._id || 'Khác'),
@@ -67,12 +77,46 @@ export const OrderStatisticsPage = () => {
 
     return (
         <Box p={3}>
-            <Box mb={4}>
-                <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>Phân tích Bán hàng (Orders)</Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Báo cáo chi tiết sản phẩm bán chạy, cơ cấu doanh thu và trạng thái đơn hàng.</Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 3, mb: 4 }}>
+                <SummaryWidget
+                    title="Tổng đơn hàng"
+                    total={totalOrders}
+                    percent={5.2}
+                    color="#00A76F"
+                    chartData={revenueTrend?.map((t: any) => t.total)}
+                />
+                <SummaryWidget
+                    title="Chờ xác nhận"
+                    total={pendingOrders}
+                    percent={-2.1}
+                    color="#FFAB00"
+                    chartData={revenueTrend?.map((t: any) => t.total)}
+                />
+                <SummaryWidget
+                    title="Đã xác nhận"
+                    total={confirmedOrders}
+                    percent={1.4}
+                    color="#00B8D9"
+                    chartData={revenueTrend?.map((t: any) => t.total)}
+                />
+                <SummaryWidget
+                    title="Doanh thu tháng này"
+                    total={(thisMonthRevenue || 0).toLocaleString() + 'đ'}
+                    percent={12.5}
+                    color="#FF5630"
+                    chartData={revenueTrend?.map((t: any) => t.total)}
+                    recentSources={recentRevenueSources}
+                />
             </Box>
 
             <Box sx={gridLayout}>
+                <Box sx={{ gridColumn: 'span 12' }}>
+                    <DashboardCard sx={{ p: 3 }}>
+                        <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Xu hướng doanh thu (6 tháng gần nhất)</Typography>
+                        <Chart options={trendOptions} series={[{ name: 'Doanh thu', data: (revenueTrend || []).map((t: any) => t.total) }]} type="area" height={300} />
+                    </DashboardCard>
+                </Box>
+
                 <Box sx={{ gridColumn: { xs: 'span 12', md: 'span 5' } }}>
                     <DashboardCard sx={{ p: 3, height: '100%' }}>
                         <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Trạng thái Đơn hàng</Typography>
@@ -87,24 +131,6 @@ export const OrderStatisticsPage = () => {
                     </DashboardCard>
                 </Box>
 
-                <Box sx={{ gridColumn: 'span 12' }}>
-                    <DashboardCard sx={{ p: 3 }}>
-                        <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Doanh thu thuần theo Danh mục Sản phẩm</Typography>
-                        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(6, 1fr)' }, gap: 2 }}>
-                            {revenueByCategory.map((cat: any) => (
-                                <Box key={cat._id} sx={{ p: 2, bgcolor: 'rgba(0, 184, 217, 0.08)', borderRadius: 2 }}>
-                                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'uppercase' }}>{cat._id || 'Khác'}</Typography>
-                                    <Typography variant="subtitle1" sx={{ fontWeight: 700, mt: 0.5 }}>{cat.total.toLocaleString()}đ</Typography>
-                                </Box>
-                            ))}
-                            {revenueByCategory.length === 0 && (
-                                <Typography variant="body2" sx={{ color: 'text.secondary', gridColumn: '1/-1', py: 3, textAlign: 'center' }}>
-                                    Chưa có dữ liệu doanh thu theo danh mục trong kỳ này.
-                                </Typography>
-                            )}
-                        </Box>
-                    </DashboardCard>
-                </Box>
             </Box>
         </Box>
     );

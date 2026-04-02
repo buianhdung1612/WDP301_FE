@@ -42,7 +42,7 @@ export const BookingCreatePage = () => {
     const { user } = useAuthStore();
     const isStaff = user?.roles?.some((role: any) => role.isStaff);
 
-    const servicesRes = useServices();
+    const servicesRes = useServices({ limit: 1000 });
     const services = useMemo(() => {
         if (!servicesRes.data) return [];
         const data = servicesRes.data as any;

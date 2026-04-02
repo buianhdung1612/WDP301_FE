@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Box, Typography, Stack, Skeleton, Divider } from '@mui/material';
+import { Box, Typography, Skeleton } from '@mui/material';
 import Chart from 'react-apexcharts';
 import { getDetailedServiceStats } from '../../../api/dashboard.api';
 import DashboardCard from '../../../components/dashboard/DashboardCard';
+import SummaryWidget from '../../../components/dashboard/SummaryWidget';
 
 export const ServiceStatisticsPage = () => {
     const [loading, setLoading] = useState(true);
@@ -26,7 +27,20 @@ export const ServiceStatisticsPage = () => {
         return <Box p={3}><Skeleton variant="rectangular" height={500} sx={{ borderRadius: 2 }} /></Box>;
     }
 
-    const { popularServices, staffPerformance, revenueByCategory } = stats;
+    const {
+        popularServices, staffPerformance, totalBookings,
+        pendingBookings, confirmedBookings, thisMonthRevenue, revenueTrend,
+        recentRevenueSources
+    } = stats;
+
+    const trendOptions: any = {
+        chart: { type: 'area', toolbar: { show: false }, fontFamily: 'Public Sans, sans-serif' },
+        xaxis: { categories: (revenueTrend || []).map((t: any) => t.month) },
+        colors: ['#FFAB00'],
+        stroke: { curve: 'smooth', width: 3 },
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0, stops: [0, 90, 100] } },
+        grid: { strokeDashArray: 3 }
+    };
 
     const barOptions: any = {
         chart: { toolbar: { show: false }, fontFamily: 'Public Sans, sans-serif' },
@@ -52,12 +66,46 @@ export const ServiceStatisticsPage = () => {
 
     return (
         <Box p={3}>
-            <Box mb={4}>
-                <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>Thống kê Dịch vụ Pet Grooming & Spa</Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>Phân tích tần suất đặt lịch và hiệu năng xử lý của đội ngũ nhân sự.</Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 3, mb: 4 }}>
+                <SummaryWidget
+                    title="Tổng lịch đặt"
+                    total={totalBookings}
+                    percent={5.2}
+                    color="#FFAB00"
+                    chartData={revenueTrend?.map((t: any) => t.total)}
+                />
+                <SummaryWidget
+                    title="Chờ xử lý"
+                    total={pendingBookings}
+                    percent={-2.1}
+                    color="#00B8D9"
+                    chartData={revenueTrend?.map((t: any) => t.total)}
+                />
+                <SummaryWidget
+                    title="Đã xác nhận"
+                    total={confirmedBookings}
+                    percent={1.4}
+                    color="#00A76F"
+                    chartData={revenueTrend?.map((t: any) => t.total)}
+                />
+                <SummaryWidget
+                    title="Doanh thu tháng này"
+                    total={(thisMonthRevenue || 0).toLocaleString() + 'đ'}
+                    percent={12.5}
+                    color="#FF5630"
+                    chartData={revenueTrend?.map((t: any) => t.total)}
+                    recentSources={recentRevenueSources}
+                />
             </Box>
 
             <Box sx={gridLayout}>
+                <Box sx={{ gridColumn: 'span 12' }}>
+                    <DashboardCard sx={{ p: 3 }}>
+                        <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Xu hướng doanh thu (6 tháng gần nhất)</Typography>
+                        <Chart options={trendOptions} series={[{ name: 'Doanh thu', data: (revenueTrend || []).map((t: any) => t.total) }]} type="area" height={300} />
+                    </DashboardCard>
+                </Box>
+
                 <Box sx={{ gridColumn: { xs: 'span 12', md: 'span 6' } }}>
                     <DashboardCard sx={{ p: 3 }}>
                         <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Dịch vụ phổ biến nhất</Typography>
@@ -72,23 +120,6 @@ export const ServiceStatisticsPage = () => {
                     </DashboardCard>
                 </Box>
 
-                <Box sx={{ gridColumn: 'span 12' }}>
-                    <DashboardCard sx={{ p: 3 }}>
-                        <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Doanh thu theo Danh mục Dịch vụ</Typography>
-                        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 3 }}>
-                            {revenueByCategory.map((cat: any) => (
-                                <Box key={cat._id} sx={{ p: 3, bgcolor: 'rgba(0, 167, 111, 0.08)', borderRadius: 2, position: 'relative', overflow: 'hidden' }}>
-                                    <Box sx={{ position: 'absolute', right: -10, bottom: -10, opacity: 0.1, color: 'primary.main' }}>
-                                        <svg width="80" height="80" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" /></svg>
-                                    </Box>
-                                    <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'uppercase' }}>{cat._id}</Typography>
-                                    <Typography variant="h4" sx={{ fontWeight: 700, my: 1 }}>{cat.total.toLocaleString()}đ</Typography>
-                                    <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 600 }}>{cat.count} lượt đặt thành công</Typography>
-                                </Box>
-                            ))}
-                        </Box>
-                    </DashboardCard>
-                </Box>
             </Box>
         </Box>
     );

@@ -1,7 +1,16 @@
-import { Box, Typography, Tooltip } from "@mui/material";
+import { Box, Typography, Tooltip, Stack, Divider } from "@mui/material";
 import { Icon } from '@iconify/react';
 import Chart from 'react-apexcharts';
 import DashboardCard from "./DashboardCard";
+import dayjs from 'dayjs';
+
+interface RecentSource {
+    id: string;
+    label: string;
+    amount: number;
+    time: string;
+    type: 'order' | 'booking' | 'boarding';
+}
 
 interface AnalyticsWidgetProps {
     title: string;
@@ -11,9 +20,10 @@ interface AnalyticsWidgetProps {
     icon: string;
     chartData: number[];
     colorType?: 'primary' | 'secondary' | 'info' | 'warning' | 'error';
+    recentSources?: RecentSource[];
 }
 
-const AnalyticsWidget = ({ title, total, percent, color, icon, chartData, colorType = 'primary' }: AnalyticsWidgetProps) => {
+const AnalyticsWidget = ({ title, total, percent, color, icon, chartData, colorType = 'primary', recentSources }: AnalyticsWidgetProps) => {
     const isLoss = percent < 0;
 
     const chartOptions: any = {
@@ -40,8 +50,36 @@ const AnalyticsWidget = ({ title, total, percent, color, icon, chartData, colorT
     };
 
     const commonFont = '"Public Sans Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"';
+    const hasSources = recentSources && recentSources.length > 0;
 
-    return (
+    const TooltipContent = (
+        <Box sx={{ p: 1.5, minWidth: 240 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Icon icon="solar:history-bold-duotone" width={18} />
+                Lịch sử doanh thu
+            </Typography>
+            <Divider sx={{ mb: 1.5, borderStyle: 'dashed' }} />
+            <Stack spacing={1.5}>
+                {recentSources?.map((source) => (
+                    <Box key={source.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <Box>
+                            <Typography variant="caption" sx={{ fontWeight: 700, display: 'block', color: 'var(--palette-common-white)' }}>
+                                {source.label}
+                            </Typography>
+                            <Typography variant="caption" sx={{ opacity: 0.6, fontSize: '0.65rem' }}>
+                                {dayjs(source.time).format('DD/MM HH:mm')} • {source.type === 'order' ? 'Sản phẩm' : source.type === 'booking' ? 'Dịch vụ' : 'Boarding'}
+                            </Typography>
+                        </Box>
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: 'var(--palette-success-light)' }}>
+                            +{source.amount.toLocaleString()}đ
+                        </Typography>
+                    </Box>
+                ))}
+            </Stack>
+        </Box>
+    );
+
+    const mainContent = (
         <DashboardCard
             sx={{
                 p: 'calc(3 * var(--spacing))',
@@ -53,10 +91,17 @@ const AnalyticsWidget = ({ title, total, percent, color, icon, chartData, colorT
                 color: `var(--palette-${colorType}-darker)`,
                 bgcolor: 'var(--palette-common-white)',
                 backgroundImage: `linear-gradient(135deg, rgba(var(--palette-${colorType}-lighterChannel) / 48%), rgba(var(--palette-${colorType}-lightChannel) / 48%))`,
-                transition: 'box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 overflow: 'hidden',
                 borderRadius: 'var(--card-radius, 16px)',
                 minHeight: 180,
+                ...(hasSources && {
+                    '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: 'var(--customShadows-z24)',
+                        cursor: 'help'
+                    }
+                }),
                 '&::before': {
                     content: '""',
                     position: 'absolute',
@@ -153,6 +198,16 @@ const AnalyticsWidget = ({ title, total, percent, color, icon, chartData, colorT
             </Box>
         </DashboardCard>
     );
+
+    if (hasSources) {
+        return (
+            <Tooltip title={TooltipContent} arrow placement="bottom">
+                {mainContent}
+            </Tooltip>
+        );
+    }
+
+    return mainContent;
 };
 
 export default AnalyticsWidget;

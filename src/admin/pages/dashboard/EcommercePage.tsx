@@ -381,10 +381,30 @@ export const EcommercePage = () => {
                 <SummaryWidget title="Tổng sản phẩm" total={stats?.summary?.totalProducts?.toString() || "0"} percent={0} color="#00a76f" chartData={[25, 66, 41, 89, 63, 25, 44, 12]} />
             </Grid>
             <Grid sx={{ flexGrow: 0, flexBasis: 'auto', width: 'calc(100% * 4 / var(--Grid-parent-columns) - (var(--Grid-parent-columns) - 4) * (var(--Grid-parent-columnSpacing) / var(--Grid-parent-columns)))' }}>
-                <SummaryWidget title="Tổng đơn hàng" total={stats?.summary?.totalOrders?.toString() || "0"} percent={0} color="#ffab00" chartData={[15, 32, 45, 32, 56, 32, 44, 55]} />
+                <SummaryWidget
+                    title="Tổng đơn hàng"
+                    total={stats?.summary?.totalOrders?.toString() || "0"}
+                    percent={0}
+                    color="#ffab00"
+                    chartData={[15, 32, 45, 32, 56, 32, 44, 55]}
+                    recentSources={stats?.recentOrders?.map((o: any) => ({
+                        id: o._id,
+                        label: o.userId?.fullName || o.fullName || "Khách hàng",
+                        amount: o.total - (o.shipping?.fee || 0),
+                        time: o.createdAt,
+                        type: 'order'
+                    }))}
+                />
             </Grid>
             <Grid sx={{ flexGrow: 0, flexBasis: 'auto', width: 'calc(100% * 4 / var(--Grid-parent-columns) - (var(--Grid-parent-columns) - 4) * (var(--Grid-parent-columnSpacing) / var(--Grid-parent-columns)))' }}>
-                <SummaryWidget title="Doanh thu tháng" total={(stats?.summary?.monthlyRevenue?.toLocaleString() || "0") + "đ"} percent={stats?.summary?.revenueMonthPercent || 0} color="#00b8d9" chartData={[56, 44, 32, 45, 32, 15, 25, 12]} />
+                <SummaryWidget
+                    title="Doanh thu tháng"
+                    total={(stats?.summary?.monthlyRevenue?.toLocaleString() || "0") + "đ"}
+                    percent={stats?.summary?.revenueMonthPercent || 0}
+                    color="#00b8d9"
+                    chartData={[56, 44, 32, 45, 32, 15, 25, 12]}
+                    recentSources={stats?.summary?.recentRevenueSources}
+                />
             </Grid>
 
             <Grid sx={{ flexGrow: 0, flexBasis: 'auto', width: 'calc(100% * 4 / var(--Grid-parent-columns) - (var(--Grid-parent-columns) - 4) * (var(--Grid-parent-columnSpacing) / var(--Grid-parent-columns)))' }}>

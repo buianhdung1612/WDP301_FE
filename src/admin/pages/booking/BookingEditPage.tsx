@@ -122,7 +122,7 @@ export const BookingEditPage = () => {
     const { data: bookingRes, isLoading: isLoadingBooking } = useBookingDetail(id || "");
     const booking = bookingRes?.data;
 
-    const servicesRes = useServices();
+    const servicesRes = useServices({ limit: 1000 });
     const services = useMemo(() => {
         if (!servicesRes.data) return [];
         const data = servicesRes.data as any;
@@ -453,8 +453,12 @@ export const BookingEditPage = () => {
         ];
 
         // Nếu đã có cọc hoặc đã thanh toán thì ẩn Chưa thanh toán đi cho đỡ chọn nhầm
+        // Nếu đang yêu cầu hủy, không cho đổi sang đã thanh toán
+        const isRequestCancel = booking?.bookingStatus === 'request_cancel';
+
         return options.filter(opt => {
             if ((isCurrentPartial || isCurrentPaid) && opt.value === 'unpaid') return false;
+            if (isRequestCancel && ['paid'].includes(opt.value)) return false;
             return true;
         });
     }, [booking]);

@@ -1,32 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Box, Grid, Typography, Stack, IconButton, Skeleton, Divider } from '@mui/material';
+import { Box, Typography, Stack, IconButton, Skeleton } from '@mui/material';
 import Chart from 'react-apexcharts';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { getEcommerceStats } from '../../../api/dashboard.api';
 import DashboardCard from '../../../components/dashboard/DashboardCard';
+import SummaryWidget from '../../../components/dashboard/SummaryWidget';
 import { Icon } from '@iconify/react';
-
-const SummaryWidget = ({ title, total, percent, color, subtitle }: any) => {
-    return (
-        <DashboardCard sx={{ p: 3, height: '100%' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary', mb: 1 }}>{title}</Typography>
-            <Typography variant="h4" sx={{ fontWeight: 700 }}>{total}</Typography>
-            <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 1 }}>
-                <Box sx={{
-                    width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    bgcolor: percent >= 0 ? 'rgba(34, 197, 94, 0.16)' : 'rgba(255, 86, 48, 0.16)',
-                    color: percent >= 0 ? 'rgb(34, 197, 94)' : 'rgb(255, 86, 48)'
-                }}>
-                    <Icon icon={percent >= 0 ? "solar:double-alt-arrow-up-bold-duotone" : "solar:double-alt-arrow-down-bold-duotone"} width={16} />
-                </Box>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: percent >= 0 ? 'success.main' : 'error.main' }}>
-                    {percent >= 0 ? '+' : ''}{percent.toFixed(1)}%
-                </Typography>
-                <Typography variant="caption" sx={{ color: 'text.disabled' }}>{subtitle}</Typography>
-            </Stack>
-        </DashboardCard>
-    );
-};
 
 export const GeneralStatisticsPage = () => {
     const [loading, setLoading] = useState(true);
@@ -54,28 +33,20 @@ export const GeneralStatisticsPage = () => {
         );
     }
 
-    const { summary, yearlyRevenueChart, topCategories } = data;
+    const { summary, yearlyRevenueChart } = data;
 
     const chartOptions: any = {
         chart: { toolbar: { show: false }, zoom: { enabled: false }, fontFamily: 'Public Sans, sans-serif' },
         stroke: { curve: 'smooth', width: 3 },
-        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0, stops: [0, 90, 100] } },
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.1, opacityTo: 0, stops: [0, 90, 100] } },
         xaxis: {
             categories: ['Thg 1', 'Thg 2', 'Thg 3', 'Thg 4', 'Thg 5', 'Thg 6', 'Thg 7', 'Thg 8', 'Thg 9', 'Thg 10', 'Thg 11', 'Thg 12'],
             axisBorder: { show: false }, axisTicks: { show: false }
         },
-        colors: ['#00A76F'],
+        colors: ['#00A76F', '#FFAB00', '#00B8D9'], // Shop, Service, Boarding
         grid: { strokeDashArray: 3, borderColor: 'rgba(145, 158, 171, 0.2)' },
-        tooltip: { theme: 'light', y: { formatter: (val: number) => val.toLocaleString() + 'đ' } }
-    };
-
-    const categoryOptions: any = {
-        labels: topCategories.map((cat: any) => cat.label),
-        colors: ['#00A76F', '#FFAB00', '#00B8D9', '#FF5630', '#0052CC'],
-        stroke: { colors: ['transparent'] },
-        legend: { position: 'bottom', horizontalAlign: 'center', fontWeight: 600 },
-        plotOptions: { pie: { donut: { size: '85%', labels: { show: true, total: { show: true, label: 'Tổng thu', formatter: (w: any) => w.globals.seriesTotals.reduce((a: any, b: any) => a + b, 0).toLocaleString() + 'đ' } } } } },
-        dataLabels: { enabled: false }
+        tooltip: { theme: 'light', y: { formatter: (val: number) => val.toLocaleString() + 'đ' } },
+        legend: { show: true, position: 'top', horizontalAlign: 'right', fontWeight: 600 }
     };
 
     const gridLayout = {
@@ -89,7 +60,7 @@ export const GeneralStatisticsPage = () => {
             <Stack direction="row" justifyContent="space-between" alignItems="center" mb={4}>
                 <Box>
                     <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>Thống kê Doanh thu thuần</Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>Báo cáo lợi nhuận thực tế sau khi đã loại bỏ phí vận chuyển.</Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>Báo cáo lợi nhuận thực tế từ tất cả nguồn thu (Shop, Dịch vụ, Khách sạn).</Typography>
                 </Box>
                 <IconButton onClick={fetchData} sx={{ bgcolor: 'rgba(0, 167, 111, 0.08)', color: 'primary.main' }}>
                     <RefreshIcon />
@@ -97,46 +68,121 @@ export const GeneralStatisticsPage = () => {
             </Stack>
 
             <Box sx={gridLayout}>
-                {/* 4 thẻ Summary trên cùng 1 hàng (Mỗi thẻ chiếm 3 cột) */}
+                {/* Summary Widgets with History Hover */}
                 <Box sx={{ gridColumn: { xs: 'span 12', sm: 'span 6', md: 'span 3' } }}>
-                    <SummaryWidget title="Doanh thu tháng này" total={summary.monthlyRevenue.toLocaleString() + 'đ'} percent={summary.revenueMonthPercent} subtitle="so với tháng trước" />
+                    <SummaryWidget
+                        title="Doanh thu tháng này"
+                        total={summary.monthlyRevenue.toLocaleString() + 'đ'}
+                        percent={summary.revenueMonthPercent}
+                        chartData={yearlyRevenueChart.total}
+                        recentSources={summary.recentRevenueSources}
+                    />
                 </Box>
                 <Box sx={{ gridColumn: { xs: 'span 12', sm: 'span 6', md: 'span 3' } }}>
-                    <SummaryWidget title="Tổng đơn hàng" total={summary.totalOrders} percent={5.2} subtitle="đơn hàng mới" />
+                    <SummaryWidget
+                        title="Doanh thu Cửa hàng"
+                        total={summary.shopRevenue.toLocaleString() + 'đ'}
+                        percent={5.2}
+                        color="#00A76F"
+                        chartData={yearlyRevenueChart.shop}
+                    />
                 </Box>
                 <Box sx={{ gridColumn: { xs: 'span 12', sm: 'span 6', md: 'span 3' } }}>
-                    <SummaryWidget title="Đơn dịch vụ Spa" total={summary.totalServiceBookings} percent={2.1} subtitle="lịch đặt thành công" />
+                    <SummaryWidget
+                        title="Doanh thu Dịch vụ"
+                        total={summary.serviceRevenue.toLocaleString() + 'đ'}
+                        percent={2.1}
+                        color="#FFAB00"
+                        chartData={yearlyRevenueChart.service}
+                    />
                 </Box>
                 <Box sx={{ gridColumn: { xs: 'span 12', sm: 'span 6', md: 'span 3' } }}>
-                    <SummaryWidget title="Đặt phòng Hotel" total={summary.totalBoardingBookings} percent={-1.4} subtitle="lưu trú hoàn thành" />
+                    <SummaryWidget
+                        title="Doanh thu Nội trú"
+                        total={summary.boardingRevenue.toLocaleString() + 'đ'}
+                        percent={-1.4}
+                        color="#00B8D9"
+                        chartData={yearlyRevenueChart.boarding}
+                    />
                 </Box>
 
-                {/* Hàng 2: Xu hướng doanh thu (8 cột) và Cơ cấu danh mục (4 cột) */}
-                <Box sx={{ gridColumn: { xs: 'span 12', md: 'span 8' } }}>
+                {/* Hàng 2: Xu hướng doanh thu tổng thể (Full width) */}
+                <Box sx={{ gridColumn: 'span 12' }}>
                     <DashboardCard sx={{ p: 3 }}>
                         <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Xu hướng Doanh thu hàng tháng</Typography>
-                        <Chart options={chartOptions} series={[{ name: 'Doanh thu thuần', data: yearlyRevenueChart }]} type="area" height={350} />
+                        <Chart
+                            options={chartOptions}
+                            series={[
+                                { name: 'Cửa hàng', data: yearlyRevenueChart.shop },
+                                { name: 'Dịch vụ Spa', data: yearlyRevenueChart.service },
+                                { name: 'Khách sạn', data: yearlyRevenueChart.boarding }
+                            ]}
+                            type="area"
+                            height={400}
+                        />
                     </DashboardCard>
                 </Box>
+            </Box>
 
-                <Box sx={{ gridColumn: { xs: 'span 12', md: 'span 4' } }}>
-                    <DashboardCard sx={{ p: 3, display: 'flex', flexDirection: 'column' }}>
-                        <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Cơ cấu theo Danh mục</Typography>
-                        <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Chart options={categoryOptions} series={topCategories.map((c: any) => c.total)} type="donut" width="100%" height={320} />
+            <Box sx={{ mt: 3 }}>
+                <DashboardCard sx={{ p: 3 }}>
+                    <Stack direction="row" alignItems="center" spacing={2} mb={4}>
+                        <Box sx={{ width: 44, height: 44, borderRadius: '12px', bgcolor: 'rgba(0, 75, 80, 0.1)', color: '#004b50', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Icon icon="solar:chart-2-bold-duotone" width={24} />
                         </Box>
-                        <Divider sx={{ borderStyle: 'dashed', my: 3 }} />
-                        <Stack spacing={2}>
-                            {topCategories.slice(0, 3).map((item: any, index: number) => (
-                                <Stack key={item.label} direction="row" alignItems="center" spacing={1}>
-                                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: categoryOptions.colors[index] }} />
-                                    <Typography variant="subtitle2" sx={{ flexGrow: 1, fontWeight: 600 }}>{item.label}</Typography>
-                                    <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>{item.total.toLocaleString()}đ</Typography>
-                                </Stack>
-                            ))}
+                        <Box>
+                            <Typography variant="h6" sx={{ fontWeight: 700 }}>Tổng doanh thu tích lũy</Typography>
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>Cơ cấu doanh thu trọn đời từ tất cả các nguồn (Shop, Dịch vụ, Khách sạn).</Typography>
+                        </Box>
+                    </Stack>
+
+                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 400px' }, gap: 4 }}>
+                        <Stack spacing={3}>
+                            <Box sx={{ p: 4, borderRadius: 3, bgcolor: '#004b50', color: 'common.white', position: 'relative', overflow: 'hidden' }}>
+                                <Box sx={{ position: 'absolute', right: -20, top: -20, opacity: 0.1 }}>
+                                    <Icon icon="solar:banknote-bold-duotone" width={160} />
+                                </Box>
+                                <Typography variant="subtitle2" sx={{ opacity: 0.72, mb: 1, fontWeight: 700, textTransform: 'uppercase' }}>Tổng doanh thu (All-time)</Typography>
+                                <Typography variant="h2" sx={{ fontWeight: 800 }}>{summary.allTimeRevenue.total.toLocaleString()}đ</Typography>
+                                <Typography variant="body2" sx={{ mt: 2, opacity: 0.8 }}>Dữ liệu được tổng hợp từ ngày bắt đầu vận hành hệ thống.</Typography>
+                            </Box>
+
+                            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 3 }}>
+                                {[
+                                    { label: 'Cửa hàng', value: summary.allTimeRevenue.shop, color: '#00A76F', icon: 'solar:shop-bold-duotone' },
+                                    { label: 'Dịch vụ Spa', value: summary.allTimeRevenue.service, color: '#FFAB00', icon: 'solar:scissors-bold-duotone' },
+                                    { label: 'Khách sạn', value: summary.allTimeRevenue.boarding, color: '#00B8D9', icon: 'solar:home-smile-bold-duotone' }
+                                ].map((item) => (
+                                    <Box key={item.label} sx={{ p: 2, borderRadius: 2, bgcolor: 'var(--palette-background-neutral)', border: '1px solid var(--palette-divider)' }}>
+                                        <Stack direction="row" spacing={1} alignItems="center" mb={1}>
+                                            <Icon icon={item.icon} width={20} style={{ color: item.color }} />
+                                            <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>{item.label}</Typography>
+                                        </Stack>
+                                        <Typography variant="h6" sx={{ fontWeight: 700 }}>{item.value.toLocaleString()}đ</Typography>
+                                        <Typography variant="caption" sx={{ color: 'text.disabled' }}>({((item.value / (summary.allTimeRevenue.total || 1)) * 100).toFixed(1)}%)</Typography>
+                                    </Box>
+                                ))}
+                            </Box>
                         </Stack>
-                    </DashboardCard>
-                </Box>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Chart
+                                options={{
+                                    labels: ['Cửa hàng', 'Dịch vụ Spa', 'Khách sạn'],
+                                    colors: ['#00A76F', '#FFAB00', '#00B8D9'],
+                                    stroke: { width: 0 },
+                                    legend: { position: 'bottom', fontWeight: 600 },
+                                    plotOptions: { pie: { donut: { size: '80%' } } },
+                                    dataLabels: { enabled: false }
+                                }}
+                                series={[summary.allTimeRevenue.shop, summary.allTimeRevenue.service, summary.allTimeRevenue.boarding]}
+                                type="donut"
+                                width="100%"
+                                height={340}
+                            />
+                        </Box>
+                    </Box>
+                </DashboardCard>
             </Box>
         </Box>
     );

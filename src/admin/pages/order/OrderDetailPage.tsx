@@ -83,6 +83,11 @@ export const OrderDetailPage = () => {
             return;
         }
 
+        if (["cancelled", "request_cancel"].includes(order.orderStatus) && newStatus === "paid") {
+            toast.error("Đơn hàng đã hủy hoặc yêu cầu hủy không thể chuyển sang Đã thanh toán!");
+            return;
+        }
+
         updateOrder({ id: order._id, data: { paymentStatus: newStatus } }, {
             onSuccess: () => toast.success("Cập nhật trạng thái thanh toán thành công"),
             onError: (err: any) => toast.error(err?.response?.data?.message || err?.message || "Cập nhật trạng thái thanh toán thất bại")
@@ -452,6 +457,13 @@ export const OrderDetailPage = () => {
                                 >
                                     {Object.entries(PAYMENT_STATUS_OPTIONS).map(([value, opt]) => {
                                         if (order.paymentMethod === 'money' && value === 'refunded') return null;
+
+                                        // Hide Paid if cancelled or request_cancel
+                                        if (['cancelled', 'request_cancel'].includes(order.orderStatus) && value === 'paid') return null;
+
+                                        // Hide Refunded if not cancelled or request_cancel
+                                        if (value === 'refunded' && !['cancelled', 'request_cancel'].includes(order.orderStatus)) return null;
+
                                         return (
                                             <MenuItem
                                                 key={value}

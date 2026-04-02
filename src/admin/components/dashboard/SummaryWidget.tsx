@@ -1,7 +1,16 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Tooltip, Stack, Divider } from "@mui/material";
 import { Icon } from '@iconify/react';
 import Chart from 'react-apexcharts';
 import DashboardCard from "./DashboardCard";
+import dayjs from 'dayjs';
+
+interface RecentSource {
+    id: string;
+    label: string;
+    amount: number;
+    time: string;
+    type: 'order' | 'booking' | 'boarding';
+}
 
 interface SummaryWidgetProps {
     title: string;
@@ -9,9 +18,10 @@ interface SummaryWidgetProps {
     percent: number;
     color?: string;
     chartData: number[];
+    recentSources?: RecentSource[];
 }
 
-const SummaryWidget = ({ title, total, percent, color = '#00a76f', chartData }: SummaryWidgetProps) => {
+const SummaryWidget = ({ title, total, percent, color = '#00a76f', chartData, recentSources }: SummaryWidgetProps) => {
     const isLoss = percent < 0;
 
     const chartOptions: any = {
@@ -38,8 +48,49 @@ const SummaryWidget = ({ title, total, percent, color = '#00a76f', chartData }: 
         grid: { padding: { top: 2, bottom: 2 } }
     };
 
-    return (
-        <DashboardCard sx={{ display: 'flex', alignItems: 'center', p: 'calc(3 * var(--spacing))' }}>
+    const hasRevenueSources = recentSources && recentSources.length > 0;
+
+    const TooltipContent = (
+        <Box sx={{ p: 1.5, minWidth: 240 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Icon icon="solar:history-bold-duotone" width={18} />
+                Nguồn thu gần đây
+            </Typography>
+            <Divider sx={{ mb: 1.5, borderStyle: 'dashed' }} />
+            <Stack spacing={1.5}>
+                {recentSources?.map((source) => (
+                    <Box key={source.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <Box>
+                            <Typography variant="caption" sx={{ fontWeight: 700, display: 'block', color: 'var(--palette-common-white)' }}>
+                                {source.label}
+                            </Typography>
+                            <Typography variant="caption" sx={{ opacity: 0.6, fontSize: '0.65rem' }}>
+                                {dayjs(source.time).format('DD/MM HH:mm')} • {source.type === 'order' ? 'Sản phẩm' : source.type === 'booking' ? 'Dịch vụ' : 'Boarding'}
+                            </Typography>
+                        </Box>
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: 'var(--palette-success-light)' }}>
+                            +{source.amount.toLocaleString()}đ
+                        </Typography>
+                    </Box>
+                ))}
+            </Stack>
+        </Box>
+    );
+
+    const content = (
+        <DashboardCard sx={{
+            display: 'flex',
+            alignItems: 'center',
+            p: 'calc(3 * var(--spacing))',
+            transition: 'transform 0.2s',
+            ...(hasRevenueSources && {
+                '&:hover': {
+                    cursor: 'help',
+                    transform: 'translateY(-4px)',
+                    boxShadow: 'var(--customShadows-z24)'
+                }
+            })
+        }}>
             <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                     {title}
@@ -70,7 +121,7 @@ const SummaryWidget = ({ title, total, percent, color = '#00a76f', chartData }: 
                         {percent > 0 ? `+${Number(percent).toFixed(2)}` : Number(percent).toFixed(2)}%
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'var(--palette-text-secondary)', fontWeight: 400 }}>
-                        7 ngày qua
+                        từ tuần trước
                     </Typography>
                 </Box>
             </Box>
@@ -80,6 +131,34 @@ const SummaryWidget = ({ title, total, percent, color = '#00a76f', chartData }: 
             </Box>
         </DashboardCard>
     );
+
+    if (hasRevenueSources) {
+        return (
+            <Tooltip
+                title={TooltipContent}
+                arrow
+                placement="right"
+                enterDelay={200}
+                leaveDelay={200}
+                slotProps={{
+                    popper: {
+                        modifiers: [
+                            {
+                                name: 'offset',
+                                options: {
+                                    offset: [0, 12],
+                                },
+                            },
+                        ],
+                    },
+                }}
+            >
+                {content}
+            </Tooltip>
+        );
+    }
+
+    return content;
 };
 
 export default SummaryWidget;

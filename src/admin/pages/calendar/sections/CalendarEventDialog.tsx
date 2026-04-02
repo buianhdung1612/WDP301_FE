@@ -36,23 +36,27 @@ export const CalendarEventDialog: React.FC<CalendarEventDialogProps> = ({
     onSave,
     initialDate,
 }) => {
-    const servicesRes = useServices();
+    const servicesRes = useServices({ limit: 1000 });
     const staffListRes = useAccounts();
 
     const services = useMemo(() => {
-        const data = (servicesRes.data as any);
-        if (!data) return [];
-        return Array.isArray(data.recordList)
-            ? data.recordList
-            : (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
+        if (!servicesRes.data) return [];
+        const data = servicesRes.data as any;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
     }, [servicesRes.data]);
 
     const staffList = useMemo(() => {
-        const data = (staffListRes.data as any);
-        if (!data) return [];
-        return Array.isArray(data.recordList)
-            ? data.recordList
-            : (Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
+        if (!staffListRes.data) return [];
+        const data = staffListRes.data as any;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
     }, [staffListRes.data]);
 
     const [serviceId, setServiceId] = useState('');

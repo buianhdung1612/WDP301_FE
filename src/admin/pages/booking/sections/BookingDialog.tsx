@@ -27,7 +27,16 @@ interface BookingDialogProps {
 
 export const BookingDialog = ({ open, onClose }: BookingDialogProps) => {
     const { t } = useTranslation();
-    const { data: services = [] } = useServices();
+    const { data: servicesBody } = useServices({ limit: 1000 });
+    const services = useMemo(() => {
+        if (!servicesBody) return [];
+        const data = servicesBody as any;
+        if (Array.isArray(data.data?.recordList)) return data.data.recordList;
+        if (Array.isArray(data.recordList)) return data.recordList;
+        if (Array.isArray(data.data)) return data.data;
+        if (Array.isArray(data)) return data;
+        return [];
+    }, [servicesBody]);
     const { data: usersRes } = useUsers({ limit: 100 });
     const users = (usersRes as any)?.recordList || (Array.isArray(usersRes) ? usersRes : []);
 

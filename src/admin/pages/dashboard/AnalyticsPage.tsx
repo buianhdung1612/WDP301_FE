@@ -4,6 +4,7 @@ import DashboardCard from "../../components/dashboard/DashboardCard";
 import AnalyticsWidget from "../../components/dashboard/AnalyticsWidget";
 import { useState, useEffect } from "react";
 import { getAnalyticsStats } from "../../api/dashboard.api";
+import { Icon } from "@iconify/react";
 
 const CurrentVisits = ({ data }: { data: any[] }) => {
     const theme = useTheme();
@@ -136,9 +137,20 @@ export const AnalyticsPage = () => {
 
     return (
         <Box sx={{ p: 1 }}>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 5 }}>
-                Phân tích hệ thống 👋
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 5 }}>
+                <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                    Phân tích hệ thống 👋
+                </Typography>
+                <DashboardCard sx={{ px: 3, py: 2, display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#004b50', color: '#ffffff' }}>
+                    <Box sx={{ width: 44, height: 44, borderRadius: '12px', bgcolor: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Icon icon="solar:wallet-money-bold-duotone" width={26} />
+                    </Box>
+                    <Box>
+                        <Typography variant="caption" sx={{ opacity: 0.64, fontWeight: 700, textTransform: 'uppercase' }}>Tổng doanh thu tích lũy</Typography>
+                        <Typography variant="h4" sx={{ fontWeight: 800 }}>{stats?.weeklySales.allTime.total.toLocaleString()}đ</Typography>
+                    </Box>
+                </DashboardCard>
+            </Box>
 
             <Grid
                 container
@@ -175,6 +187,7 @@ export const AnalyticsPage = () => {
                         colorType="primary"
                         icon="https://pub-c5e31b5cdafb419fb247a8ac2e78df7a.r2.dev/public/assets/icons/glass/ic-glass-bag.svg"
                         chartData={stats?.weeklySales.data || [0]}
+                        recentSources={stats?.weeklySales.recentRevenueSources}
                     />
                 </Grid>
                 <Grid
