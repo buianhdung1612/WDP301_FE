@@ -442,6 +442,23 @@ const CageCareDetailModal = ({
     index: 0,
     title: "",
   });
+  const [activeDay, setActiveDay] = useState<number>(1);
+
+  // Auto-set the current day based on check-in date
+  useEffect(() => {
+    if (cage?.lastBooking?.checkInDate) {
+      const checkInStart = dayjs(cage.lastBooking.checkInDate).startOf('day');
+      const todayStart = dayjs().startOf('day');
+      const diff = todayStart.diff(checkInStart, 'day') + 1;
+      const totalDays = Math.max(1, dayjs(cage.lastBooking.checkOutDate).startOf('day').diff(checkInStart, 'day') + 1);
+      
+      if (diff >= 1 && diff <= totalDays) {
+        setActiveDay(diff);
+      } else if (diff > totalDays) {
+        setActiveDay(totalDays);
+      }
+    }
+  }, [cage?.lastBooking]);
 
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
@@ -453,8 +470,30 @@ const CageCareDetailModal = ({
 
   const primaryPet = cage?.pet || (Array.isArray(cage?.pets) && cage.pets.length > 0 ? cage.pets[0] : null);
   const currentPetId = primaryPet?._id;
-  const feedingSchedule = filterCareSchedule(cage?.lastBooking?.feedingSchedule, currentPetId).sort(sortCareItems);
-  const exerciseSchedule = filterCareSchedule(cage?.lastBooking?.exerciseSchedule, currentPetId).sort(sortCareItems);
+
+  const totalDaysCount = useMemo(() => {
+    if (!cage?.lastBooking?.checkInDate || !cage?.lastBooking?.checkOutDate) return 1;
+    return Math.max(1, dayjs(cage.lastBooking.checkOutDate).startOf('day').diff(dayjs(cage.lastBooking.checkInDate).startOf('day'), 'day') + 1);
+  }, [cage?.lastBooking]);
+
+  const feedingSchedule = useMemo(() => {
+    const raw = filterCareSchedule(cage?.lastBooking?.feedingSchedule, currentPetId);
+    return raw.filter((item: any) => {
+      const timeStr = String(item.time || "");
+      if (!timeStr.includes("Ngày")) return activeDay === 1; // Default to Day 1 if no suffix
+      return timeStr.includes(`Ngày ${activeDay}`);
+    }).sort(sortCareItems);
+  }, [cage?.lastBooking?.feedingSchedule, currentPetId, activeDay]);
+
+  const exerciseSchedule = useMemo(() => {
+    const raw = filterCareSchedule(cage?.lastBooking?.exerciseSchedule, currentPetId);
+    return raw.filter((item: any) => {
+      const timeStr = String(item.time || "");
+      if (!timeStr.includes("Ngày")) return activeDay === 1;
+      return timeStr.includes(`Ngày ${activeDay}`);
+    }).sort(sortCareItems);
+  }, [cage?.lastBooking?.exerciseSchedule, currentPetId, activeDay]);
+
   const careProgress = getCareProgress(feedingSchedule, exerciseSchedule);
   const petMeta = [
     primaryPet?.age ? `${primaryPet.age} tuổi` : null,
@@ -480,9 +519,33 @@ const CageCareDetailModal = ({
             </button>
             <div>
               <h3 className="text-[28px] font-secondary font-bold text-client-secondary leading-tight">Lịch chăm sóc chi tiết</h3>
-              <p className="mt-[5px] text-[14px] text-[#7d7b7b] font-medium uppercase tracking-wide">
-                Chuồng {cage?.displayCode || cage?.cageCode || "CHUỒNG"} • {dayjs().format("DD/MM/YYYY")}
-              </p>
+              <div className="mt-[10px] flex items-center gap-[15px] flex-wrap">
+                <p className="text-[14px] text-[#7d7b7b] font-medium uppercase tracking-wide">
+                  Chuồng {cage?.displayCode || cage?.cageCode || "CHUỒNG"}
+                </p>
+                <div className="flex items-center gap-[6px] overflow-x-auto no-scrollbar py-1">
+                  {Array.from({ length: totalDaysCount }).map((_, idx) => {
+                    const dayNum = idx + 1;
+                    const isActive = activeDay === dayNum;
+                    const dayDate = dayjs(cage?.lastBooking?.checkInDate).add(idx, 'day').format('DD/MM/YYYY');
+                    
+                    return (
+                      <button
+                        key={`day-tab-${dayNum}`}
+                        type="button"
+                        onClick={() => setActiveDay(dayNum)}
+                        className={`shrink-0 rounded-[10px] px-[14px] py-[6px] text-[13px] font-bold transition-all ${
+                          isActive 
+                            ? "bg-client-primary text-white shadow-md shadow-client-primary/20" 
+                            : "bg-white border border-[#eee] text-[#7d7b7b] hover:border-client-primary/30 hover:text-client-primary"
+                        }`}
+                      >
+                        Ngày {dayNum} ({dayDate})
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
           <button
